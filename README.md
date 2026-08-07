@@ -19,15 +19,22 @@ public/assets/audio/ Canciones distribuidas con el juego
 public/assets/beatmaps/ Eventos sincronizados con cada canción
 ```
 
-## Añadir la canción
+## Añadir canciones
 
-Coloca la versión comprimida de la canción en:
+Coloca una versión comprimida de la canción en:
 
 ```text
-public/assets/audio/prototype.mp3
+public/assets/audio/mi-cancion.mp3
 ```
 
-Los archivos de proyecto y WAV sin comprimir deben mantenerse fuera del bundle web. El catálogo está en `src/content/MusicCatalog.ts`; cuando la canción esté lista actualizaremos allí su nombre, BPM y beatmap.
+Los archivos de proyecto y WAV sin comprimir deben mantenerse fuera del bundle web. En cada build, `scripts/generate-music-manifest.mjs` escanea la carpeta y genera el catálogo automáticamente. El beatmap esperado para `mi-cancion.mp3` es `public/assets/beatmaps/mi-cancion.json`.
+
+Para incorporar una canción subida desde el móvil:
+
+1. Sube el archivo a `public/assets/audio/`.
+2. En el ordenador ejecuta `git pull --rebase origin main`.
+3. Crea o ajusta el beatmap con el mismo nombre base.
+4. Verifica con `npm run build`, haz commit y push.
 
 ## Desarrollo local
 

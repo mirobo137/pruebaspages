@@ -1,12 +1,11 @@
 import { Graphics } from 'pixi.js';
 import { GAME_CONFIG } from '../config';
-
-export type TargetKind = 'tap' | 'danger';
+import type { NoteKind } from '../notes/NoteKind';
 
 export class TargetNode extends Graphics {
   private ageSeconds = 0;
 
-  constructor(readonly kind: TargetKind) {
+  constructor(readonly kind: NoteKind) {
     super();
     this.eventMode = 'static';
     this.cursor = 'pointer';
@@ -28,10 +27,17 @@ export class TargetNode extends Graphics {
     return Math.hypot(x - this.x, y - this.y) <= GAME_CONFIG.targetHitRadius;
   }
 
+  setDragProgress(progress: number): void {
+    if (this.kind === 'drag') {
+      this.rotation = Math.max(0, Math.min(1, progress)) * Math.PI * 2;
+    }
+  }
+
   private drawTarget(): void {
     const isDanger = this.kind === 'danger';
-    const color = isDanger ? 0xff5c77 : 0xffd166;
-    const outline = isDanger ? 0xff9bad : 0xfff3b0;
+    const isDrag = this.kind === 'drag';
+    const color = isDanger ? 0xff5c77 : isDrag ? 0x56d8ff : 0xffd166;
+    const outline = isDanger ? 0xff9bad : isDrag ? 0xb3f0ff : 0xfff3b0;
 
     this.circle(0, 0, GAME_CONFIG.targetRadius).fill({ color });
     this.circle(0, 0, GAME_CONFIG.targetRadius + 12).stroke({
@@ -49,6 +55,20 @@ export class TargetNode extends Graphics {
       this.moveTo(10, -10).lineTo(-10, 10).stroke({
         color: 0xffffff,
         alpha: 0.8,
+        width: 4,
+      });
+    }
+
+    if (isDrag) {
+      this.circle(0, 0, 12).stroke({ color: 0xffffff, alpha: 0.85, width: 3 });
+      this.moveTo(12, 0).lineTo(24, 0).stroke({
+        color: 0xffffff,
+        alpha: 0.85,
+        width: 4,
+      });
+      this.moveTo(18, -6).lineTo(24, 0).lineTo(18, 6).stroke({
+        color: 0xffffff,
+        alpha: 0.85,
         width: 4,
       });
     }

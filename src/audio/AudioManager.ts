@@ -14,9 +14,23 @@ export class AudioManager {
   private source: MediaElementAudioSourceNode | null = null;
   private frequencyData = new Uint8Array(0);
 
+  get currentTime(): number {
+    return this.element.currentTime;
+  }
+
+  get isPlaying(): boolean {
+    return !this.element.paused;
+  }
+
+  unlock(): void {
+    this.ensureAudioGraph();
+    void this.context?.resume();
+  }
+
   async play(track: MusicTrack): Promise<void> {
     this.element.src = new URL(track.audioPath, document.baseURI).toString();
     this.element.preload = 'auto';
+    this.element.loop = true;
 
     this.ensureAudioGraph();
     await this.context?.resume();
@@ -80,4 +94,3 @@ export class AudioManager {
     return sum / ((safeEnd - start) * 255);
   }
 }
-

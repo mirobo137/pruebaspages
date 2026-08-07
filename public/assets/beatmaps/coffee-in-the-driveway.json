@@ -1,0 +1,21 @@
+{
+  "trackId": "coffee-in-the-driveway",
+  "duration": 12,
+  "events": [
+    { "time": 0.75, "kind": "tap" },
+    { "time": 1.5, "kind": "tap" },
+    { "time": 2.25, "kind": "drag" },
+    { "time": 3, "kind": "tap" },
+    { "time": 3.75, "kind": "danger" },
+    { "time": 4.5, "kind": "tap" },
+    { "time": 5.25, "kind": "drag" },
+    { "time": 6, "kind": "tap" },
+    { "time": 6.75, "kind": "danger" },
+    { "time": 7.5, "kind": "tap" },
+    { "time": 8.25, "kind": "drag" },
+    { "time": 9, "kind": "tap" },
+    { "time": 9.75, "kind": "danger" },
+    { "time": 10.5, "kind": "tap" },
+    { "time": 11.25, "kind": "drag" }
+  ]
+}
