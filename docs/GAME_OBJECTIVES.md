@@ -4,7 +4,7 @@ Este archivo se puede editar despues de cada sesion de prueba. Representa lo que
 
 ## Vision
 
-Un juego casual de precision ritmica en el que el jugador pasa de escuchar la musica a sentirla con los dedos: anticipa, toca, desliza, evita y encadena aciertos. Una partida debe poder empezar casi de inmediato, durar poco y dejar una razon clara para intentar superar el resultado.
+Un juego casual de precision ritmica en el que el jugador pasa de escuchar la musica a sentirla con los dedos: anticipa, toca, desliza y encadena aciertos. Una partida debe poder empezar casi de inmediato, durar poco y dejar una razon clara para intentar superar el resultado.
 
 ## Bucle principal
 
@@ -19,14 +19,21 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 
 - [x] Toque sobre objetivo amarillo: acierto y puntos.
 - [x] Objetivo de arrastre: mantener el dedo/mouse y alcanzar una distancia minima.
-- [x] Objetivo peligroso: tocarlo resta o rompe el combo.
+- [x] Fallar un objetivo o dejar pasar su ventana resta vida y rompe el combo.
+- [x] Ventanas de timing Perfect, Bien y Miss.
+- [x] Vida limitada y fin de partida.
+- [x] Modo Cancion y modo Supervivencia.
+- [x] Menu inicial y pantalla de resultado.
+- [x] Rastro visual para objetivos de arrastre.
 - [x] Beatmap JSON separado del codigo.
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
-- [ ] Feedback distinto para `Perfect`, `Good` y `Miss`.
+- [x] Feedback visual distinto para Perfect, Bien y Miss.
+- [ ] Feedback sonoro distinto para Perfect, Bien y Miss.
 - [ ] Objetivos que se mueven con la musica.
 - [ ] Cadenas de varios objetivos y patrones reconocibles.
 - [ ] Objetivo hold, en el que hay que mantener presionado durante un intervalo.
-- [ ] Modo entrenamiento, supervivencia o partida con tiempo.
+- [x] Modo Supervivencia como partida sin duracion fija.
+- [ ] Modo entrenamiento separado.
 
 ## Juice prioritario
 
@@ -44,6 +51,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 
 ## Enganche y retorno
 
+- [x] Monedas locales como base para desbloquear futuras canciones.
 - [ ] Mejor puntuacion local por cancion.
 - [ ] Estadisticas de precision, maximo combo y errores.
 - [ ] Reto diario determinista cuando exista una base de niveles estable.
@@ -86,9 +94,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 
 ### Hito 2 — Juego presentable
 
-- [ ] Pantalla inicial y boton de jugar.
-- [ ] Pantalla de resultado y reinicio.
-- [ ] Feedback de aciertos y errores.
+- [x] Pantalla inicial y boton de jugar.
+- [x] Pantalla de resultado y regreso al menu.
+- [x] Feedback visual de aciertos y errores.
 - [ ] Juice de particulas, audio, combo y fondo reactivo.
 - [ ] Pruebas reales en movil y distintos tamanos de pantalla.
 

@@ -4,6 +4,13 @@ import type { MusicTrack } from './MusicCatalog';
 export interface BeatEvent {
   time: number;
   kind: NoteKind;
+  start?: BeatPosition;
+  end?: BeatPosition;
+}
+
+export interface BeatPosition {
+  x: number;
+  y: number;
 }
 
 export interface Beatmap {
@@ -20,4 +27,3 @@ export async function loadBeatmap(track: MusicTrack): Promise<Beatmap | null> {
 
   return response.json() as Promise<Beatmap>;
 }
-

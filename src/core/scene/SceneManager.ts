@@ -7,11 +7,13 @@ export class SceneManager {
   constructor(private readonly host: Container) {}
 
   switchTo(nextScene: Scene): void {
-    this.activeScene?.unmount();
+    const previousScene = this.activeScene;
+    previousScene?.unmount();
 
-    if (this.activeScene?.root.parent === this.host) {
-      this.host.removeChild(this.activeScene.root);
+    if (previousScene?.root.parent === this.host) {
+      this.host.removeChild(previousScene.root);
     }
+    previousScene?.root.destroy({ children: true });
 
     this.activeScene = nextScene;
     this.host.addChild(nextScene.root);
@@ -32,4 +34,3 @@ export class SceneManager {
     this.activeScene = null;
   }
 }
-

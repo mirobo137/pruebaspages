@@ -1,2 +1,1 @@
-export type NoteKind = 'tap' | 'drag' | 'danger';
-
+export type NoteKind = 'tap' | 'drag';

@@ -22,10 +22,10 @@ export class AudioManager {
     return !this.element.paused;
   }
 
-  play(track: MusicTrack): Promise<void> {
+  play(track: MusicTrack, options: { loop?: boolean } = {}): Promise<void> {
     this.element.src = new URL(track.audioPath, document.baseURI).toString();
     this.element.preload = 'auto';
-    this.element.loop = true;
+    this.element.loop = options.loop ?? false;
 
     // Keep this call before any await. Mobile browsers associate it with the
     // original pointer gesture and can reject delayed autoplay requests.

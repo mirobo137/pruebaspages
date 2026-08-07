@@ -1,17 +1,28 @@
-import { Graphics } from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 import { GAME_CONFIG } from '../config';
 import type { NoteKind } from '../notes/NoteKind';
 
-export class TargetNode extends Graphics {
-  private ageSeconds = 0;
+export interface TargetPoint {
+  x: number;
+  y: number;
+}
 
-  constructor(readonly kind: NoteKind) {
+export class TargetNode extends Container {
+  private readonly trail = new Graphics();
+  private readonly marker = new Graphics();
+  private ageSeconds = 0;
+  private readonly dragVector: TargetPoint;
+
+  constructor(
+    readonly kind: NoteKind,
+    dragEnd: TargetPoint | null = null,
+  ) {
     super();
     this.eventMode = 'static';
     this.cursor = 'pointer';
+    this.dragVector = dragEnd ?? { x: 0, y: 0 };
+    this.addChild(this.trail, this.marker);
     this.drawTarget();
-    this.scale.set(0.5);
-    this.alpha = 0;
   }
 
   animate(deltaSeconds: number): void {
@@ -28,49 +39,59 @@ export class TargetNode extends Graphics {
   }
 
   setDragProgress(progress: number): void {
-    if (this.kind === 'drag') {
-      this.rotation = Math.max(0, Math.min(1, progress)) * Math.PI * 2;
-    }
+    if (this.kind !== 'drag') return;
+
+    const safeProgress = Math.max(0, Math.min(1, progress));
+    this.marker.position.set(
+      this.dragVector.x * safeProgress,
+      this.dragVector.y * safeProgress,
+    );
+  }
+
+  get requiredDragDistance(): number {
+    return Math.max(GAME_CONFIG.dragDistance, Math.hypot(
+      this.dragVector.x,
+      this.dragVector.y,
+    ));
   }
 
   private drawTarget(): void {
-    const isDanger = this.kind === 'danger';
     const isDrag = this.kind === 'drag';
-    const color = isDanger ? 0xff5c77 : isDrag ? 0x56d8ff : 0xffd166;
-    const outline = isDanger ? 0xff9bad : isDrag ? 0xb3f0ff : 0xfff3b0;
+    const color = isDrag ? 0x56d8ff : 0xffd166;
+    const outline = isDrag ? 0xb3f0ff : 0xfff3b0;
 
-    this.circle(0, 0, GAME_CONFIG.targetRadius).fill({ color });
-    this.circle(0, 0, GAME_CONFIG.targetRadius + 12).stroke({
+    this.marker.circle(0, 0, GAME_CONFIG.targetRadius).fill({ color });
+    this.marker.circle(0, 0, GAME_CONFIG.targetRadius + 12).stroke({
       color: outline,
       alpha: 0.35,
       width: 3,
     });
 
-    if (isDanger) {
-      this.moveTo(-10, -10).lineTo(10, 10).stroke({
-        color: 0xffffff,
-        alpha: 0.8,
-        width: 4,
-      });
-      this.moveTo(10, -10).lineTo(-10, 10).stroke({
-        color: 0xffffff,
-        alpha: 0.8,
-        width: 4,
-      });
-    }
+    if (!isDrag) return;
 
-    if (isDrag) {
-      this.circle(0, 0, 12).stroke({ color: 0xffffff, alpha: 0.85, width: 3 });
-      this.moveTo(12, 0).lineTo(24, 0).stroke({
-        color: 0xffffff,
-        alpha: 0.85,
-        width: 4,
-      });
-      this.moveTo(18, -6).lineTo(24, 0).lineTo(18, 6).stroke({
-        color: 0xffffff,
-        alpha: 0.85,
-        width: 4,
-      });
-    }
+    const distance = Math.hypot(this.dragVector.x, this.dragVector.y);
+    const angle = Math.atan2(this.dragVector.y, this.dragVector.x);
+    const arrowX = this.dragVector.x * 0.72;
+    const arrowY = this.dragVector.y * 0.72;
+
+    this.trail.moveTo(0, 0).lineTo(this.dragVector.x, this.dragVector.y).stroke({
+      color: 0x8ee9ff,
+      alpha: 0.55,
+      width: 8,
+    });
+    this.trail.circle(this.dragVector.x, this.dragVector.y, 24).stroke({
+      color: 0xd7f8ff,
+      alpha: 0.75,
+      width: 3,
+    });
+    this.trail.moveTo(arrowX, arrowY).lineTo(
+      arrowX - Math.cos(angle - 0.5) * 18,
+      arrowY - Math.sin(angle - 0.5) * 18,
+    ).stroke({ color: 0xffffff, alpha: 0.85, width: 4 });
+    this.trail.moveTo(arrowX, arrowY).lineTo(
+      arrowX - Math.cos(angle + 0.5) * 18,
+      arrowY - Math.sin(angle + 0.5) * 18,
+    ).stroke({ color: 0xffffff, alpha: 0.85, width: 4 });
+    this.trail.alpha = Math.min(1, distance / GAME_CONFIG.dragDistance);
   }
 }

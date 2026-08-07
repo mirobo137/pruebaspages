@@ -21,3 +21,5 @@ public/assets/beatmaps/my-song.json
 ```
 
 A beat map describes the exact timeline of gameplay events and will be separate from the audio analysis used for visual effects.
+
+The current prototype supports tap and drag events. Each event may include normalized start and end positions from 0 to 1. For drag events, start is the initial circle and end is the destination shown by the trail.

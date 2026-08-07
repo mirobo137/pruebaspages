@@ -26,11 +26,12 @@ src/
   app/                       Composicion de la aplicacion Pixi
   core/                      Contratos reutilizables, escenas y utilidades
   scenes/                    Flujo jugable y futuras pantallas
-  game/                      Reglas, score, beatmaps y entidades de juego
+  game/                      Reglas, score, modos, timing y entidades de juego
   ui/                        HUD, menus y resultados
   audio/                     Reproduccion, desbloqueo y analisis de audio
   content/                   Catalogos y carga de JSON
   platform/                  Adaptadores para persistencia y portales
+  progression/               Monedas y desbloqueos locales
 public/assets/
   audio/                     Canciones distribuidas
   beatmaps/                  Eventos sincronizados por cancion
@@ -47,7 +48,7 @@ Reglas de modularidad:
 2. Una escena coordina el flujo, pero las reglas reutilizables viven en `src/game/`.
 3. Las entidades visuales de Pixi solo representan estado y comportamiento visual/input inmediato.
 4. Score, beatmaps, configuracion y persistencia deben poder probarse sin depender de una pantalla completa.
-5. Audio, persistencia y APIs de CrazyGames/Poki se consumen mediante servicios o adaptadores; no se mezclan con las reglas del juego.
+5. Audio, persistencia, progresion y APIs de CrazyGames/Poki se consumen mediante servicios o adaptadores; no se mezclan con las reglas del juego.
 6. Los datos variables de canciones y niveles van en JSON, no escondidos dentro de clases grandes.
 7. Cada cambio debe mantener `npm run build` funcionando antes de hacer push.
 8. Preferir composicion y clases pequenas. Si una clase empieza a gestionar audio, menus, score y entidades a la vez, se debe dividir.
@@ -85,4 +86,5 @@ El workflow de GitHub Pages vuelve a generar el catalogo musical en cada build. 
 - Todos los recursos deben funcionar con rutas relativas bajo el subdirectorio de GitHub Pages.
 - La interaccion debe funcionar con dedo y mouse; el teclado puede servir como apoyo de desarrollo.
 - No introducir anuncios, monedas, backend o ranking online antes de que el bucle basico sea divertido y medible.
+- Las monedas locales solo sirven como experimento de progresion; no se deben convertir en una barrera frustrante antes de tener varias canciones.
 - El juego puede inspirarse en generos conocidos, pero la identidad visual, los nombres, el ritmo y las reglas deben evolucionar hacia una propuesta propia.

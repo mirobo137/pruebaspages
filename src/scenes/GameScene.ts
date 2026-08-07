@@ -1,27 +1,33 @@
 import { Container, Rectangle } from 'pixi.js';
 import type { FederatedPointerEvent } from 'pixi.js';
 import type { AudioManager } from '../audio/AudioManager';
-import type { Beatmap } from '../content/Beatmap';
+import type { BeatEvent, Beatmap } from '../content/Beatmap';
 import type { MusicTrack } from '../content/MusicCatalog';
 import type { Scene } from '../core/scene/Scene';
 import { randomBetween } from '../core/utils/random';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
 import { GAME_CONFIG } from '../game/config';
-import type { NoteKind } from '../game/notes/NoteKind';
+import type { GameMode } from '../game/modes/GameMode';
 import { ScoreModel } from '../game/score/ScoreModel';
+import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { TargetNode } from '../game/targets/TargetNode';
+import type { TargetPoint } from '../game/targets/TargetNode';
+import type { TimingGrade } from '../game/timing/TimingGrade';
 import { GameHud } from '../ui/GameHud';
 
 interface DragState {
   pointerId: number;
   startX: number;
   startY: number;
+  completed: boolean;
 }
 
 export interface GameSceneOptions {
+  mode: GameMode;
   audioManager: AudioManager;
-  track: MusicTrack | null;
-  beatmap: Beatmap | null;
+  track: MusicTrack;
+  beatmap: Beatmap;
+  onFinished: (snapshot: ScoreSnapshot) => void;
 }
 
 export class GameScene implements Scene {
@@ -31,23 +37,31 @@ export class GameScene implements Scene {
   private readonly playfield = new Container();
   private readonly targets = new Container();
   private readonly hud = new GameHud();
-  private readonly score = new ScoreModel();
+  private readonly score = new ScoreModel(GAME_CONFIG.maxLives);
   private readonly audioManager: AudioManager;
-  private readonly track: MusicTrack | null;
-  private readonly beatmapPlayer: BeatmapPlayer | null;
-  private readonly pendingEvents: Array<{ kind: NoteKind }> = [];
+  private readonly track: MusicTrack;
+  private readonly mode: GameMode;
+  private readonly beatmap: Beatmap;
+  private readonly beatmapPlayer: BeatmapPlayer;
+  private readonly pendingEvents: BeatEvent[] = [];
+  private readonly onFinished: GameSceneOptions['onFinished'];
   private activeTarget: TargetNode | null = null;
+  private activeEvent: BeatEvent | null = null;
   private dragState: DragState | null = null;
   private width: number;
   private height: number;
   private musicStarted = false;
+  private gameEnded = false;
 
   constructor(width: number, height: number, options: GameSceneOptions) {
     this.width = width;
     this.height = height;
     this.audioManager = options.audioManager;
     this.track = options.track;
-    this.beatmapPlayer = options.beatmap ? new BeatmapPlayer(options.beatmap) : null;
+    this.mode = options.mode;
+    this.beatmap = options.beatmap;
+    this.beatmapPlayer = new BeatmapPlayer(options.beatmap, options.mode === 'survival');
+    this.onFinished = options.onFinished;
     this.playfield.addChild(this.targets);
     this.root.addChild(this.playfield, this.hud);
   }
@@ -58,16 +72,44 @@ export class GameScene implements Scene {
     this.playfield.on('pointermove', this.handlePointerMove);
     this.playfield.on('pointerup', this.handlePointerUp);
     this.playfield.on('pointerupoutside', this.handlePointerUp);
+    this.hud.setMode(this.mode);
+    this.hud.update(this.score.snapshot());
     this.resize(this.width, this.height);
-    this.spawnTarget('tap');
   }
 
   update(deltaSeconds: number): void {
+    this.hud.animate(deltaSeconds);
     this.activeTarget?.animate(deltaSeconds);
 
-    if (!this.musicStarted || !this.beatmapPlayer || !this.audioManager.isPlaying) return;
+    if (this.gameEnded || !this.musicStarted || !this.audioManager.isPlaying) return;
 
-    this.pendingEvents.push(...this.beatmapPlayer.collectDueEvents(this.audioManager.currentTime));
+    const currentTime = this.audioManager.currentTime;
+    if (this.mode === 'song' && currentTime >= this.beatmap.duration) {
+      this.finishGame();
+      return;
+    }
+
+    this.pendingEvents.push(
+      ...this.beatmapPlayer.collectUpcomingEvents(
+        currentTime,
+        GAME_CONFIG.targetLeadTime,
+      ),
+    );
+
+    if (this.activeEvent && currentTime - this.activeEvent.time > GAME_CONFIG.goodWindow) {
+      this.resolveTarget('miss');
+      return;
+    }
+
+    if (
+      this.dragState?.completed
+      && this.activeEvent
+      && currentTime - this.activeEvent.time >= -GAME_CONFIG.goodWindow
+    ) {
+      this.resolveTarget(this.getTimingGrade(this.activeEvent) ?? 'miss');
+      return;
+    }
+
     if (!this.activeTarget && this.pendingEvents.length > 0) {
       this.spawnNextPendingTarget();
     }
@@ -94,33 +136,51 @@ export class GameScene implements Scene {
     this.startMusic();
 
     const target = this.activeTarget;
-    if (!target || !target.isHitAt(event.global.x, event.global.y)) return;
+    const beatEvent = this.activeEvent;
+    if (!target || !beatEvent || !target.isHitAt(event.global.x, event.global.y)) return;
+
+    const grade = this.getTimingGrade(beatEvent);
+    if (!grade) return;
 
     if (target.kind === 'drag') {
+      if (grade === 'miss') {
+        this.resolveTarget('miss');
+        return;
+      }
+
       this.dragState = {
         pointerId: event.pointerId,
         startX: event.global.x,
         startY: event.global.y,
+        completed: false,
       };
       return;
     }
 
-    this.resolveTarget(target.kind !== 'danger');
+    this.resolveTarget(grade);
   };
 
   private readonly handlePointerMove = (event: FederatedPointerEvent): void => {
     if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
 
+    const target = this.activeTarget;
+    if (!target) return;
+
     const distance = Math.hypot(
       event.global.x - this.dragState.startX,
       event.global.y - this.dragState.startY,
     );
-    const progress = Math.min(1, distance / GAME_CONFIG.dragDistance);
-    this.activeTarget?.setDragProgress(progress);
+    const progress = Math.min(1, distance / target.requiredDragDistance);
+    target.setDragProgress(progress);
 
     if (progress >= 1) {
-      this.dragState = null;
-      this.resolveTarget(true);
+      this.dragState.completed = true;
+      if (
+        this.activeEvent
+        && this.audioManager.currentTime - this.activeEvent.time >= -GAME_CONFIG.goodWindow
+      ) {
+        this.resolveTarget(this.getTimingGrade(this.activeEvent) ?? 'miss');
+      }
     }
   };
 
@@ -128,59 +188,124 @@ export class GameScene implements Scene {
     if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
 
     this.dragState = null;
-    this.resolveTarget(false);
+    this.resolveTarget('miss');
   };
 
   private startMusic(): void {
     if (this.musicStarted) return;
 
     this.musicStarted = true;
-    if (this.track) {
-      void this.audioManager.play(this.track).catch((error: unknown) => {
+    void this.audioManager.play(this.track, { loop: this.mode === 'survival' }).catch(
+      (error: unknown) => {
         this.musicStarted = false;
         console.warn('No se pudo reproducir la cancion.', error);
-      });
-    }
+      },
+    );
   }
 
-  private resolveTarget(success: boolean): void {
+  private getTimingGrade(event: BeatEvent): TimingGrade | null {
+    const delta = this.audioManager.currentTime - event.time;
+    const absoluteDelta = Math.abs(delta);
+
+    if (absoluteDelta <= GAME_CONFIG.perfectWindow) return 'perfect';
+    if (absoluteDelta <= GAME_CONFIG.goodWindow) return 'good';
+    if (delta > GAME_CONFIG.goodWindow) return 'miss';
+    return null;
+  }
+
+  private resolveTarget(grade: TimingGrade): void {
     if (!this.activeTarget) return;
 
-    if (success) {
-      this.score.hit(GAME_CONFIG.scorePerHit, GAME_CONFIG.comboBonus);
-    } else {
-      this.score.miss();
-    }
-
+    this.score.register(grade);
     this.hud.update(this.score.snapshot());
+    this.hud.showTiming(grade);
     this.activeTarget.destroy();
     this.activeTarget = null;
+    this.activeEvent = null;
+    this.dragState = null;
+
+    if (this.score.isGameOver()) {
+      this.finishGame();
+      return;
+    }
 
     if (this.pendingEvents.length > 0) this.spawnNextPendingTarget();
-    else if (!this.beatmapPlayer) this.spawnTarget('tap');
   }
 
   private spawnNextPendingTarget(): void {
     const nextEvent = this.pendingEvents.shift();
-    this.spawnTarget(nextEvent?.kind ?? 'tap');
+    if (nextEvent) this.spawnTarget(nextEvent);
   }
 
-  private spawnTarget(kind: NoteKind): void {
+  private spawnTarget(event: BeatEvent): void {
     this.activeTarget?.destroy();
 
-    const target = new TargetNode(kind);
-    const horizontalMargin = GAME_CONFIG.targetSideMargin;
-    const verticalMargin = GAME_CONFIG.targetSideMargin;
-    const minimumY = GAME_CONFIG.targetSpawnTop;
-    const maximumX = Math.max(horizontalMargin, this.width - horizontalMargin);
-    const maximumY = Math.max(minimumY + verticalMargin, this.height - verticalMargin);
+    const start = event.start
+      ? this.fromNormalizedPoint(event.start)
+      : this.randomStartPoint();
+    const end = event.kind === 'drag'
+      ? event.end
+        ? this.fromNormalizedPoint(event.end)
+        : this.createRandomDragEnd(start)
+      : null;
+    const dragEnd = end
+      ? { x: end.x - start.x, y: end.y - start.y }
+      : null;
 
-    target.position.set(
-      randomBetween(horizontalMargin, maximumX),
-      randomBetween(minimumY, maximumY),
-    );
-
+    const target = new TargetNode(event.kind, dragEnd);
+    target.position.set(start.x, start.y);
     this.activeTarget = target;
+    this.activeEvent = event;
     this.targets.addChild(target);
+  }
+
+  private randomStartPoint(): TargetPoint {
+    return {
+      x: randomBetween(GAME_CONFIG.targetSideMargin, this.width - GAME_CONFIG.targetSideMargin),
+      y: randomBetween(
+        GAME_CONFIG.targetSpawnTop,
+        Math.max(
+          GAME_CONFIG.targetSpawnTop + GAME_CONFIG.targetSideMargin,
+          this.height - GAME_CONFIG.targetSideMargin,
+        ),
+      ),
+    };
+  }
+
+  private createRandomDragEnd(start: TargetPoint): TargetPoint {
+    const angle = randomBetween(0, Math.PI * 2);
+    const distance = GAME_CONFIG.dragDistance + 30;
+    return {
+      x: Math.max(
+        GAME_CONFIG.targetSideMargin,
+        Math.min(this.width - GAME_CONFIG.targetSideMargin, start.x + Math.cos(angle) * distance),
+      ),
+      y: Math.max(
+        GAME_CONFIG.targetSpawnTop,
+        Math.min(this.height - GAME_CONFIG.targetSideMargin, start.y + Math.sin(angle) * distance),
+      ),
+    };
+  }
+
+  private fromNormalizedPoint(point: { x: number; y: number }): TargetPoint {
+    return {
+      x: GAME_CONFIG.targetSideMargin
+        + Math.max(0, Math.min(1, point.x))
+        * Math.max(0, this.width - GAME_CONFIG.targetSideMargin * 2),
+      y: GAME_CONFIG.targetSpawnTop
+        + Math.max(0, Math.min(1, point.y))
+        * Math.max(
+          0,
+          this.height - GAME_CONFIG.targetSpawnTop - GAME_CONFIG.targetSideMargin,
+        ),
+    };
+  }
+
+  private finishGame(): void {
+    if (this.gameEnded) return;
+
+    this.gameEnded = true;
+    this.audioManager.stop();
+    this.onFinished(this.score.snapshot());
   }
 }
