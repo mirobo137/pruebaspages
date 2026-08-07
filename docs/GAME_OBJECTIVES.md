@@ -51,6 +51,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Pulsos o anillos sincronizados con el beat.
 - [x] Primer efecto visual de combo mediante punch del HUD.
 - [x] Transformacion completa del fondo, objetivos e impactos durante FLOW.
+- [x] Fondo procedural, particulas, shake y feedback visual sin assets externos.
 - [ ] Indicadores que no dependan solo del color para accesibilidad.
 
 ## Prioridad tactil
@@ -113,7 +114,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Pantalla de resultado y regreso al menu.
 - [x] Feedback visual de aciertos y errores.
 - [x] Primera mecanica de enganche basada en habilidad: FLOW y multiplicador x2.
-- [ ] Juice de particulas, audio, combo y fondo reactivo.
+- [x] Juice de particulas, combo y fondo reactivo.
+- [ ] Feedback de audio corto para aciertos y combos.
 - [ ] Pruebas reales en movil y distintos tamanos de pantalla.
 
 ### Hito 3 — Preparacion para portal
@@ -123,3 +125,23 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Revisar privacidad, audio y recursos con licencia.
 - [ ] Integrar el SDK del portal solo donde aporte valor.
 - [ ] Preparar una build candidata para CrazyGames y/o Poki.
+
+## Proxima sesion de pruebas
+
+- [ ] Probar en movil pequeno, movil grande y escritorio con mouse.
+- [ ] Confirmar que el HUD inferior no invade la zona tactil.
+- [ ] Medir si cuatro `Perfect` son una meta alcanzable y emocionante.
+- [ ] Ajustar la duracion de FLOW segun la cantidad de objetivos restantes.
+- [ ] Revisar que un `Miss` se sienta claro sin parecer injusto.
+- [ ] Ajustar el beatmap de la cancion de prueba escuchando sus golpes reales.
+- [ ] Registrar mejor puntuacion local por cancion.
+
+## Estado de una partida ideal
+
+```text
+primer toque -> audio y objetivos
+aciertos -> combo y medidor FLOW
+cuatro Perfect -> FLOW x2 y transformacion visual
+fallo -> perdida de vida, combo roto y posible ruptura de FLOW
+fin -> resultado, monedas y deseo de repetir para mejorar
+```

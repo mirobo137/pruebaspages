@@ -18,6 +18,31 @@ El primer destino de pruebas es GitHub Pages. Cuando el nucleo sea solido, se pr
 - GitHub Actions + GitHub Pages para el despliegue de prueba.
 - Persistencia local al inicio; sin backend, cuentas ni ranking online hasta validar la diversion.
 
+## Estado actual de implementacion
+
+El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
+
+- Una cancion de prueba: `coffee-in-the-driveway`.
+- Beatmap separado en `public/assets/beatmaps/coffee-in-the-driveway.json`.
+- Modo Cancion, con duracion definida por el beatmap.
+- Modo Supervivencia, con audio en bucle y dificultad abierta.
+- Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
+- Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
+- Menu inicial, pantalla de partida y pantalla de resultado.
+- Audio desbloqueado despues del primer gesto del usuario.
+- Catalogo musical generado automaticamente desde `public/assets/audio/`.
+- Juice procedural con particulas, anillos, texto flotante, vibracion, shake y fondo reactivo.
+- Mecanica FLOW con medidor, multiplicador x2, cuenta regresiva, ruptura por fallo y resumen final.
+
+La build verificada es `npm run build`. No se deben subir `node_modules/` ni `dist/`; ambos son generados o ignorados por Git.
+
+Requisitos actuales:
+
+- Node.js 22 o superior. Node.js 24 tambien es compatible.
+- npm incluido con Node.js.
+- Git.
+- No se necesita Godot para ejecutar este repositorio.
+
 ## Arquitectura y responsabilidades
 
 ```text
@@ -57,6 +82,8 @@ Reglas de modularidad:
 9. La precision touch tiene prioridad sobre el espectaculo: los efectos nunca deben bloquear eventos ni mover la zona logica sin actualizar su transformacion.
 10. Las mecanicas de enganche deben premiar dominio y claridad. FLOW es una regla de gameplay independiente; HUD, fondo, efectos y haptics solo representan su estado.
 
+11. Los nombres de canciones deben usar un identificador estable en minusculas y guiones, por ejemplo `mi-cancion.mp3` y `mi-cancion.json`.
+
 ## Mecanica central de FLOW
 
 - Perfect carga 25 puntos y Bien carga 12; un fallo fuera de FLOW resta 30.
@@ -66,6 +93,31 @@ Reglas de modularidad:
 - Los valores viven en `src/game/config.ts` para balancearlos tras pruebas reales.
 
 ## Flujo de trabajo
+
+### Preparar otra PC
+
+Clonar el repositorio y entrar en la carpeta:
+
+```bash
+git clone https://github.com/mirobo137/pruebaspages.git
+cd pruebaspages
+npm install
+npm run build
+```
+
+Para continuar desarrollo:
+
+```bash
+npm run dev
+```
+
+Si Git informa `detected dubious ownership` en Windows, ejecutar una vez desde la terminal del usuario actual:
+
+```powershell
+git config --global --add safe.directory C:/PROYECTOS/pruebas_gitpages
+```
+
+Si la carpeta del nuevo equipo tiene otra ruta, sustituirla por la ruta absoluta real.
 
 En el ordenador:
 
@@ -92,6 +144,35 @@ git push origin main
 
 El workflow de GitHub Pages vuelve a generar el catalogo musical en cada build. Para agregar una cancion desde el movil basta con subirla a `public/assets/audio/` y hacer pull en el ordenador; el nombre del archivo determina el `id` y el nombre esperado del beatmap. Si existe un beatmap con ese `id`, se carga automaticamente.
 
+### Agregar una cancion
+
+1. Subir desde el movil un archivo comprimido propio o con licencia compatible a `public/assets/audio/`.
+2. En cualquier PC ejecutar `git pull --rebase origin main`.
+3. Crear `public/assets/beatmaps/<mismo-id>.json` si aun no existe.
+4. Confirmar que `trackId` coincide con el nombre base del archivo.
+5. Ejecutar `npm run build`; el script `music:manifest` detecta la cancion automaticamente.
+6. Probar en movil y hacer commit/push cuando el beatmap este ajustado.
+
+### Ciclo de prueba recomendado
+
+```text
+editar codigo o beatmap -> npm run build -> npm run dev -- --host 0.0.0.0
+-> probar en movil -> corregir -> git add/commit/push -> GitHub Pages
+```
+
+La primera prueba de FLOW consiste en acertar cuatro objetivos seguidos como `Perfect`. Durante la prueba hay que observar si el objetivo se entiende, si el toque se siente inmediato y si la transformacion visual ayuda o distrae.
+
+### Checklist antes de push
+
+- `npm run build` termina sin errores.
+- La cancion se escucha despues del primer toque.
+- El toque funciona sin scroll accidental.
+- El arrastre sigue el rastro y llega al destino.
+- Los fallos reducen vida y rompen combo.
+- FLOW carga, activa x2 y se rompe con un fallo.
+- La pantalla de resultado aparece al terminar.
+- Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.
+
 ## Restricciones de producto
 
 - Solo usar audio propio o con licencia compatible con distribucion web.
@@ -100,3 +181,12 @@ El workflow de GitHub Pages vuelve a generar el catalogo musical en cada build. 
 - No introducir anuncios, monedas, backend o ranking online antes de que el bucle basico sea divertido y medible.
 - Las monedas locales solo sirven como experimento de progresion; no se deben convertir en una barrera frustrante antes de tener varias canciones.
 - El juego puede inspirarse en generos conocidos, pero la identidad visual, los nombres, el ritmo y las reglas deben evolucionar hacia una propuesta propia.
+
+## Proxima prioridad tecnica
+
+1. Probar tacto y legibilidad en varios moviles reales.
+2. Ajustar el beatmap provisional escuchando la cancion.
+3. Balancear carga, duracion y dificultad de FLOW.
+4. Guardar mejor puntuacion y estadisticas por cancion.
+5. Agregar feedback sonoro corto generado con Web Audio API.
+6. Solo despues evaluar preparacion para CrazyGames o Poki.
