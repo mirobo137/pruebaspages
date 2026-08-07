@@ -1,9 +1,10 @@
 export const GAME_CONFIG = {
   targetRadius: 30,
-  targetHitRadius: 48,
+  targetHitRadius: 56,
   targetSpawnTop: 130,
   targetSideMargin: 62,
   dragDistance: 120,
+  dragPathTolerance: 72,
   targetLeadTime: 0.65,
   perfectWindow: 0.1,
   goodWindow: 0.25,

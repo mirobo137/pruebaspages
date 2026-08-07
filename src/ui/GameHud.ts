@@ -35,6 +35,14 @@ export class GameHud extends Container {
   private readonly comboText = new Text({ text: 'Toca para empezar', style: infoStyle });
   private readonly timingText = new Text({ text: '', style: timingStyle });
   private timingAge = 10;
+  private displayLifeRatio = 1;
+  private targetLifeRatio = 1;
+  private comboPunch = 0;
+  private scorePunch = 0;
+  private lifePulse = 0;
+  private lastCombo = 0;
+  private lastLives = 5;
+  private lastScore = 0;
 
   constructor() {
     super();
@@ -56,16 +64,23 @@ export class GameHud extends Container {
   update(snapshot: ScoreSnapshot): void {
     this.scoreText.text = 'Puntos: ' + snapshot.score;
     this.lifeText.text = 'Vidas: ' + snapshot.lives + '/' + snapshot.maxLives;
-    const lifeRatio = snapshot.maxLives > 0 ? snapshot.lives / snapshot.maxLives : 0;
+    this.targetLifeRatio = snapshot.maxLives > 0
+      ? snapshot.lives / snapshot.maxLives
+      : 0;
+    if (snapshot.score > this.lastScore) this.scorePunch = 1;
+    if (snapshot.combo > this.lastCombo) this.comboPunch = 1;
+    if (snapshot.lives !== this.lastLives) this.lifePulse = 1;
+    this.lastCombo = snapshot.combo;
+    this.lastLives = snapshot.lives;
+    this.lastScore = snapshot.score;
     this.lifeBarBackground.clear().roundRect(0, 0, 140, 10, 5).fill({
       color: 0x26304f,
     });
-    this.lifeBarFill.clear().roundRect(0, 0, 140 * lifeRatio, 10, 5).fill({
-      color: lifeRatio > 0.4 ? 0x7df2ba : 0xff7d9b,
-    });
     this.comboText.text = snapshot.combo > 0
       ? 'Combo x' + snapshot.combo
-      : 'Combo roto';
+      : snapshot.misses > 0
+        ? 'Combo roto'
+        : 'Toca para empezar';
   }
 
   showTiming(grade: TimingGrade): void {
@@ -80,12 +95,35 @@ export class GameHud extends Container {
         ? '#ffe08a'
         : '#ff7d9b';
     this.timingText.alpha = 1;
+    this.timingText.scale.set(0.72);
     this.timingAge = 0;
   }
 
   animate(deltaSeconds: number): void {
     this.timingAge += deltaSeconds;
     this.timingText.alpha = Math.max(0, 1 - this.timingAge / 0.8);
+    const timingScale = this.timingText.scale.x
+      + (1 - this.timingText.scale.x) * Math.min(1, deltaSeconds * 16);
+    this.timingText.scale.set(timingScale);
+    this.displayLifeRatio += (
+      this.targetLifeRatio - this.displayLifeRatio
+    ) * Math.min(1, deltaSeconds * 12);
+    this.comboPunch = Math.max(0, this.comboPunch - deltaSeconds * 5.5);
+    this.scorePunch = Math.max(0, this.scorePunch - deltaSeconds * 7);
+    this.lifePulse = Math.max(0, this.lifePulse - deltaSeconds * 4);
+    this.comboText.scale.set(1 + this.comboPunch * 0.22);
+    this.scoreText.scale.set(1 + this.scorePunch * 0.08);
+    this.lifeText.scale.set(1 + this.lifePulse * 0.08);
+    this.lifeBarFill.clear().roundRect(
+      0,
+      0,
+      140 * Math.max(0, this.displayLifeRatio),
+      10,
+      5,
+    ).fill({
+      color: this.displayLifeRatio > 0.4 ? 0x7df2ba : 0xff7d9b,
+    });
+    this.lifeBarFill.alpha = 0.85 + this.lifePulse * 0.15;
   }
 
   resize(width: number): void {

@@ -7,10 +7,23 @@ export interface TargetPoint {
   y: number;
 }
 
+export interface DragPointerResult {
+  progress: number;
+  valid: boolean;
+  completed: boolean;
+}
+
 export class TargetNode extends Container {
+  private readonly glow = new Graphics();
+  private readonly approachRing = new Graphics();
   private readonly trail = new Graphics();
+  private readonly progressTrail = new Graphics();
+  private readonly destination = new Graphics();
   private readonly marker = new Graphics();
   private ageSeconds = 0;
+  private earlyBump = 0;
+  private pressed = false;
+  private dragProgress = 0;
   private readonly dragVector: TargetPoint;
 
   constructor(
@@ -18,80 +31,196 @@ export class TargetNode extends Container {
     dragEnd: TargetPoint | null = null,
   ) {
     super();
-    this.eventMode = 'static';
-    this.cursor = 'pointer';
+    this.eventMode = 'none';
     this.dragVector = dragEnd ?? { x: 0, y: 0 };
-    this.addChild(this.trail, this.marker);
+    this.addChild(
+      this.glow,
+      this.approachRing,
+      this.trail,
+      this.progressTrail,
+      this.destination,
+      this.marker,
+    );
     this.drawTarget();
+    this.alpha = 0;
+    this.scale.set(0.72);
   }
 
   animate(deltaSeconds: number): void {
     this.ageSeconds += deltaSeconds;
-    const appearProgress = Math.min(1, this.ageSeconds / 0.18);
-    const pulse = 1 + Math.sin(this.ageSeconds * 8) * 0.035;
+    this.earlyBump = Math.max(0, this.earlyBump - deltaSeconds * 5.5);
+    const appearProgress = Math.min(1, this.ageSeconds / 0.14);
+    const pulse = 1 + Math.sin(this.ageSeconds * 9) * 0.025;
+    const pressScale = this.pressed ? 0.92 : 1;
+    const earlyScale = 1 + this.earlyBump * 0.14;
 
     this.alpha = appearProgress;
-    this.scale.set((0.5 + appearProgress * 0.5) * pulse);
+    this.scale.set((0.72 + appearProgress * 0.28) * pulse);
+    this.marker.scale.set(earlyScale * pressScale);
+    this.glow.alpha = 0.18 + Math.sin(this.ageSeconds * 5) * 0.06;
+    this.destination.alpha = this.kind === 'drag'
+      ? 0.55 + Math.sin(this.ageSeconds * 7) * 0.2
+      : 0;
+  }
+
+  updateTiming(timeUntilHit: number, leadTime: number): void {
+    const progress = Math.max(0, Math.min(1, 1 - timeUntilHit / leadTime));
+    const approachScale = 1 + (1 - progress) * 1.35;
+    this.approachRing.scale.set(approachScale);
+    this.approachRing.alpha = 0.2 + progress * 0.72;
+
+    if (Math.abs(timeUntilHit) <= GAME_CONFIG.perfectWindow) {
+      this.approachRing.alpha = 1;
+      this.marker.scale.set(
+        (1 + Math.sin(this.ageSeconds * 22) * 0.055)
+        * (this.pressed ? 0.92 : 1),
+      );
+    }
   }
 
   isHitAt(x: number, y: number): boolean {
-    return Math.hypot(x - this.x, y - this.y) <= GAME_CONFIG.targetHitRadius;
+    const origin = this.toGlobal({ x: 0, y: 0 });
+    return Math.hypot(x - origin.x, y - origin.y) <= GAME_CONFIG.targetHitRadius;
   }
 
-  setDragProgress(progress: number): void {
-    if (this.kind !== 'drag') return;
+  setPressed(pressed: boolean): void {
+    this.pressed = pressed;
+  }
 
-    const safeProgress = Math.max(0, Math.min(1, progress));
-    this.marker.position.set(
-      this.dragVector.x * safeProgress,
-      this.dragVector.y * safeProgress,
+  nudgeEarly(): void {
+    this.earlyBump = 1;
+  }
+
+  updateDragFromPointer(globalX: number, globalY: number): DragPointerResult {
+    if (this.kind !== 'drag') {
+      return { progress: 0, valid: false, completed: false };
+    }
+
+    const pointer = this.toLocal({ x: globalX, y: globalY });
+    const lengthSquared = this.dragVector.x ** 2 + this.dragVector.y ** 2;
+    if (lengthSquared <= 0) {
+      return { progress: 0, valid: false, completed: false };
+    }
+
+    const rawProgress = (
+      pointer.x * this.dragVector.x
+      + pointer.y * this.dragVector.y
+    ) / lengthSquared;
+    const nearestX = this.dragVector.x * rawProgress;
+    const nearestY = this.dragVector.y * rawProgress;
+    const lateralDistance = Math.hypot(
+      pointer.x - nearestX,
+      pointer.y - nearestY,
     );
+    const valid = lateralDistance <= GAME_CONFIG.dragPathTolerance
+      && rawProgress >= -0.18;
+
+    if (valid) {
+      this.setDragProgress(Math.max(this.dragProgress, rawProgress));
+    }
+
+    return {
+      progress: this.dragProgress,
+      valid,
+      completed: this.dragProgress >= 0.985,
+    };
+  }
+
+  getFeedbackPoint(): TargetPoint {
+    const point = this.toGlobal({
+      x: this.dragVector.x * this.dragProgress,
+      y: this.dragVector.y * this.dragProgress,
+    });
+    return { x: point.x, y: point.y };
   }
 
   get requiredDragDistance(): number {
-    return Math.max(GAME_CONFIG.dragDistance, Math.hypot(
-      this.dragVector.x,
-      this.dragVector.y,
-    ));
+    return Math.max(
+      GAME_CONFIG.dragDistance,
+      Math.hypot(this.dragVector.x, this.dragVector.y),
+    );
+  }
+
+  private setDragProgress(progress: number): void {
+    if (this.kind !== 'drag') return;
+
+    this.dragProgress = Math.max(0, Math.min(1, progress));
+    const markerX = this.dragVector.x * this.dragProgress;
+    const markerY = this.dragVector.y * this.dragProgress;
+    this.marker.position.set(markerX, markerY);
+    this.approachRing.position.set(markerX, markerY);
+
+    this.progressTrail.clear();
+    this.progressTrail.moveTo(0, 0).lineTo(markerX, markerY).stroke({
+      color: 0xc5f7ff,
+      alpha: 0.95,
+      width: 10,
+    });
+    this.progressTrail.blendMode = 'add';
   }
 
   private drawTarget(): void {
     const isDrag = this.kind === 'drag';
     const color = isDrag ? 0x56d8ff : 0xffd166;
-    const outline = isDrag ? 0xb3f0ff : 0xfff3b0;
+    const outline = isDrag ? 0xc6f5ff : 0xfff3b0;
 
-    this.marker.circle(0, 0, GAME_CONFIG.targetRadius).fill({ color });
-    this.marker.circle(0, 0, GAME_CONFIG.targetRadius + 12).stroke({
+    this.glow.circle(0, 0, GAME_CONFIG.targetRadius + 18).fill({
+      color,
+      alpha: 0.2,
+    });
+    this.glow.blendMode = 'add';
+
+    this.approachRing.circle(0, 0, GAME_CONFIG.targetRadius + 10).stroke({
       color: outline,
-      alpha: 0.35,
+      alpha: 0.95,
       width: 3,
     });
+
+    this.marker.circle(0, 0, GAME_CONFIG.targetRadius).fill({ color });
+    this.marker.circle(0, 0, GAME_CONFIG.targetRadius - 7).stroke({
+      color: 0xffffff,
+      alpha: 0.74,
+      width: 3,
+    });
+    this.marker.circle(0, 0, 5).fill({ color: 0xffffff, alpha: 0.9 });
 
     if (!isDrag) return;
 
-    const distance = Math.hypot(this.dragVector.x, this.dragVector.y);
     const angle = Math.atan2(this.dragVector.y, this.dragVector.x);
-    const arrowX = this.dragVector.x * 0.72;
-    const arrowY = this.dragVector.y * 0.72;
+    const arrowX = this.dragVector.x * 0.66;
+    const arrowY = this.dragVector.y * 0.66;
 
     this.trail.moveTo(0, 0).lineTo(this.dragVector.x, this.dragVector.y).stroke({
-      color: 0x8ee9ff,
-      alpha: 0.55,
-      width: 8,
+      color: 0x5f799b,
+      alpha: 0.72,
+      width: 13,
     });
-    this.trail.circle(this.dragVector.x, this.dragVector.y, 24).stroke({
+    this.trail.moveTo(0, 0).lineTo(this.dragVector.x, this.dragVector.y).stroke({
+      color: 0x8ee9ff,
+      alpha: 0.38,
+      width: 5,
+    });
+    this.destination.circle(this.dragVector.x, this.dragVector.y, 27).fill({
+      color: 0x56d8ff,
+      alpha: 0.12,
+    });
+    this.destination.circle(this.dragVector.x, this.dragVector.y, 27).stroke({
       color: 0xd7f8ff,
-      alpha: 0.75,
-      width: 3,
+      alpha: 0.9,
+      width: 4,
+    });
+    this.destination.circle(this.dragVector.x, this.dragVector.y, 9).stroke({
+      color: 0xffffff,
+      alpha: 0.9,
+      width: 2,
     });
     this.trail.moveTo(arrowX, arrowY).lineTo(
       arrowX - Math.cos(angle - 0.5) * 18,
       arrowY - Math.sin(angle - 0.5) * 18,
-    ).stroke({ color: 0xffffff, alpha: 0.85, width: 4 });
+    ).stroke({ color: 0xffffff, alpha: 0.8, width: 4 });
     this.trail.moveTo(arrowX, arrowY).lineTo(
       arrowX - Math.cos(angle + 0.5) * 18,
       arrowY - Math.sin(angle + 0.5) * 18,
-    ).stroke({ color: 0xffffff, alpha: 0.85, width: 4 });
-    this.trail.alpha = Math.min(1, distance / GAME_CONFIG.dragDistance);
+    ).stroke({ color: 0xffffff, alpha: 0.8, width: 4 });
   }
 }

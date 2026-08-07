@@ -30,6 +30,7 @@ src/
   ui/                        HUD, menus y resultados
   audio/                     Reproduccion, desbloqueo y analisis de audio
   content/                   Catalogos y carga de JSON
+  input/                     Captura y utilidades de puntero/touch
   platform/                  Adaptadores para persistencia y portales
   progression/               Monedas y desbloqueos locales
 public/assets/
@@ -52,6 +53,7 @@ Reglas de modularidad:
 6. Los datos variables de canciones y niveles van en JSON, no escondidos dentro de clases grandes.
 7. Cada cambio debe mantener `npm run build` funcionando antes de hacer push.
 8. Preferir composicion y clases pequenas. Si una clase empieza a gestionar audio, menus, score y entidades a la vez, se debe dividir.
+9. La precision touch tiene prioridad sobre el espectaculo: los efectos nunca deben bloquear eventos ni mover la zona logica sin actualizar su transformacion.
 
 ## Flujo de trabajo
 

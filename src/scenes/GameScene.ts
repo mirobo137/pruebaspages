@@ -7,19 +7,23 @@ import type { Scene } from '../core/scene/Scene';
 import { randomBetween } from '../core/utils/random';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
 import { GAME_CONFIG } from '../game/config';
+import { JuiceSystem } from '../game/effects/JuiceSystem';
+import { RhythmBackground } from '../game/effects/RhythmBackground';
 import type { GameMode } from '../game/modes/GameMode';
 import { ScoreModel } from '../game/score/ScoreModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { TargetNode } from '../game/targets/TargetNode';
 import type { TargetPoint } from '../game/targets/TargetNode';
 import type { TimingGrade } from '../game/timing/TimingGrade';
+import { capturePointer, releasePointer } from '../input/PointerCapture';
+import { HapticsService } from '../platform/HapticsService';
 import { GameHud } from '../ui/GameHud';
 
 interface DragState {
   pointerId: number;
-  startX: number;
-  startY: number;
   completed: boolean;
+  lastSparkX: number;
+  lastSparkY: number;
 }
 
 export interface GameSceneOptions {
@@ -34,10 +38,13 @@ export class GameScene implements Scene {
   readonly id = 'game';
   readonly root = new Container();
 
+  private readonly background = new RhythmBackground();
   private readonly playfield = new Container();
   private readonly targets = new Container();
+  private readonly effects = new JuiceSystem();
   private readonly hud = new GameHud();
   private readonly score = new ScoreModel(GAME_CONFIG.maxLives);
+  private readonly haptics = new HapticsService();
   private readonly audioManager: AudioManager;
   private readonly track: MusicTrack;
   private readonly mode: GameMode;
@@ -63,7 +70,7 @@ export class GameScene implements Scene {
     this.beatmapPlayer = new BeatmapPlayer(options.beatmap, options.mode === 'survival');
     this.onFinished = options.onFinished;
     this.playfield.addChild(this.targets);
-    this.root.addChild(this.playfield, this.hud);
+    this.root.addChild(this.background, this.playfield, this.effects, this.hud);
   }
 
   mount(): void {
@@ -72,6 +79,7 @@ export class GameScene implements Scene {
     this.playfield.on('pointermove', this.handlePointerMove);
     this.playfield.on('pointerup', this.handlePointerUp);
     this.playfield.on('pointerupoutside', this.handlePointerUp);
+    this.playfield.on('pointercancel', this.handlePointerUp);
     this.hud.setMode(this.mode);
     this.hud.update(this.score.snapshot());
     this.resize(this.width, this.height);
@@ -79,7 +87,19 @@ export class GameScene implements Scene {
 
   update(deltaSeconds: number): void {
     this.hud.animate(deltaSeconds);
+    this.background.updateBackground(deltaSeconds);
+    this.effects.updateEffects(deltaSeconds);
     this.activeTarget?.animate(deltaSeconds);
+    const shake = this.effects.getShakeOffset();
+    this.targets.position.set(shake.x, shake.y);
+    this.background.position.set(shake.x * 0.35, shake.y * 0.35);
+
+    if (this.activeTarget && this.activeEvent && this.musicStarted) {
+      this.activeTarget.updateTiming(
+        this.activeEvent.time - this.audioManager.currentTime,
+        GAME_CONFIG.targetLeadTime,
+      );
+    }
 
     if (this.gameEnded || !this.musicStarted || !this.audioManager.isPlaying) return;
 
@@ -119,6 +139,8 @@ export class GameScene implements Scene {
     this.width = width;
     this.height = height;
     this.playfield.hitArea = new Rectangle(0, 0, width, height);
+    this.background.resize(width, height);
+    this.effects.resize(width, height);
     this.hud.resize(width);
   }
 
@@ -127,20 +149,31 @@ export class GameScene implements Scene {
     this.playfield.off('pointermove', this.handlePointerMove);
     this.playfield.off('pointerup', this.handlePointerUp);
     this.playfield.off('pointerupoutside', this.handlePointerUp);
+    this.playfield.off('pointercancel', this.handlePointerUp);
     this.activeTarget?.destroy();
     this.activeTarget = null;
     this.dragState = null;
+    this.targets.position.set(0, 0);
   }
 
   private readonly handlePointerDown = (event: FederatedPointerEvent): void => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    capturePointer(event);
+    this.effects.emitTouch(event.global.x, event.global.y);
     this.startMusic();
+
+    if (this.dragState) return;
 
     const target = this.activeTarget;
     const beatEvent = this.activeEvent;
     if (!target || !beatEvent || !target.isHitAt(event.global.x, event.global.y)) return;
 
     const grade = this.getTimingGrade(beatEvent);
-    if (!grade) return;
+    if (!grade) {
+      target.nudgeEarly();
+      return;
+    }
 
     if (target.kind === 'drag') {
       if (grade === 'miss') {
@@ -148,11 +181,12 @@ export class GameScene implements Scene {
         return;
       }
 
+      target.setPressed(true);
       this.dragState = {
         pointerId: event.pointerId,
-        startX: event.global.x,
-        startY: event.global.y,
         completed: false,
+        lastSparkX: event.global.x,
+        lastSparkY: event.global.y,
       };
       return;
     }
@@ -162,18 +196,24 @@ export class GameScene implements Scene {
 
   private readonly handlePointerMove = (event: FederatedPointerEvent): void => {
     if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
+    event.preventDefault();
 
     const target = this.activeTarget;
     if (!target) return;
 
-    const distance = Math.hypot(
-      event.global.x - this.dragState.startX,
-      event.global.y - this.dragState.startY,
+    const dragResult = target.updateDragFromPointer(event.global.x, event.global.y);
+    target.setPressed(dragResult.valid);
+    const sparkDistance = Math.hypot(
+      event.global.x - this.dragState.lastSparkX,
+      event.global.y - this.dragState.lastSparkY,
     );
-    const progress = Math.min(1, distance / target.requiredDragDistance);
-    target.setDragProgress(progress);
+    if (dragResult.valid && sparkDistance >= 12) {
+      this.effects.emitDragSpark(event.global.x, event.global.y);
+      this.dragState.lastSparkX = event.global.x;
+      this.dragState.lastSparkY = event.global.y;
+    }
 
-    if (progress >= 1) {
+    if (dragResult.completed) {
       this.dragState.completed = true;
       if (
         this.activeEvent
@@ -185,8 +225,10 @@ export class GameScene implements Scene {
   };
 
   private readonly handlePointerUp = (event: FederatedPointerEvent): void => {
+    releasePointer(event);
     if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
 
+    this.activeTarget?.setPressed(false);
     this.dragState = null;
     this.resolveTarget('miss');
   };
@@ -214,12 +256,17 @@ export class GameScene implements Scene {
   }
 
   private resolveTarget(grade: TimingGrade): void {
-    if (!this.activeTarget) return;
+    const target = this.activeTarget;
+    if (!target) return;
 
+    const feedbackPoint = target.getFeedbackPoint();
     this.score.register(grade);
     this.hud.update(this.score.snapshot());
     this.hud.showTiming(grade);
-    this.activeTarget.destroy();
+    this.effects.emitImpact(feedbackPoint.x, feedbackPoint.y, grade);
+    this.background.pulse(grade === 'perfect' ? 1 : grade === 'good' ? 0.65 : 0.8);
+    this.haptics.feedback(grade);
+    target.destroy();
     this.activeTarget = null;
     this.activeEvent = null;
     this.dragState = null;
@@ -257,6 +304,7 @@ export class GameScene implements Scene {
     this.activeTarget = target;
     this.activeEvent = event;
     this.targets.addChild(target);
+    this.background.pulse(0.22);
   }
 
   private randomStartPoint(): TargetPoint {

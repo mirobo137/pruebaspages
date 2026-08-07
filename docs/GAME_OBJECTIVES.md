@@ -39,15 +39,24 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 
 El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador ve y oye en cada accion:
 
-- [ ] Particulas y anillo expansivo al acertar.
+- [x] Particulas y anillo expansivo al acertar.
 - [ ] Sonido corto de confirmacion y variaciones por combo.
-- [ ] Texto flotante `Perfect`, `Good` o `Miss`.
-- [ ] Vibracion tactil opcional y respetuosa.
+- [x] Texto flotante `Perfect`, `Bien` o `Miss`.
+- [x] Vibracion tactil opcional y respetuosa.
 - [ ] Hit-stop o micro pausa solo en aciertos importantes.
 - [ ] Fondo que respire con volumen, graves y agudos.
-- [ ] Pulsos o anillos sincronizados con el beat.
-- [ ] Efectos visuales de combo alto y cambio de paleta por intensidad.
+- [x] Pulsos o anillos sincronizados con el beat.
+- [x] Primer efecto visual de combo mediante punch del HUD.
 - [ ] Indicadores que no dependan solo del color para accesibilidad.
+
+## Prioridad tactil
+
+- [x] Area de toque mayor que el circulo visible.
+- [x] Captura de puntero durante arrastres.
+- [x] Soporte para pointer cancel y salida del canvas.
+- [x] Arrastre calculado sobre el trayecto y con tolerancia lateral.
+- [x] Feedback visual inmediato incluso al tocar fuera de tiempo.
+- [x] Bloqueo de scroll, seleccion y gestos del navegador sobre el canvas.
 
 ## Enganche y retorno
 
