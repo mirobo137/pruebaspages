@@ -135,7 +135,6 @@ export class GameScene implements Scene {
     if (this.musicStarted) return;
 
     this.musicStarted = true;
-    this.audioManager.unlock();
     if (this.track) {
       void this.audioManager.play(this.track).catch((error: unknown) => {
         this.musicStarted = false;

@@ -22,19 +22,14 @@ export class AudioManager {
     return !this.element.paused;
   }
 
-  unlock(): void {
-    this.ensureAudioGraph();
-    void this.context?.resume();
-  }
-
-  async play(track: MusicTrack): Promise<void> {
+  play(track: MusicTrack): Promise<void> {
     this.element.src = new URL(track.audioPath, document.baseURI).toString();
     this.element.preload = 'auto';
     this.element.loop = true;
 
-    this.ensureAudioGraph();
-    await this.context?.resume();
-    await this.element.play();
+    // Keep this call before any await. Mobile browsers associate it with the
+    // original pointer gesture and can reject delayed autoplay requests.
+    return this.element.play();
   }
 
   stop(): void {
@@ -65,12 +60,10 @@ export class AudioManager {
 
   destroy(): void {
     this.stop();
-    this.source?.disconnect();
-    this.analyser?.disconnect();
-    void this.context?.close();
+    this.disconnectAudioGraph();
   }
 
-  private ensureAudioGraph(): void {
+  private ensureAudioContext(): void {
     if (this.context) return;
 
     this.context = new AudioContext();
@@ -78,9 +71,24 @@ export class AudioManager {
     this.analyser.fftSize = 512;
     this.analyser.smoothingTimeConstant = 0.75;
     this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
+  }
+
+  private connectAudioGraph(): void {
+    if (!this.context || !this.analyser || this.source) return;
+
     this.source = this.context.createMediaElementSource(this.element);
     this.source.connect(this.analyser);
     this.analyser.connect(this.context.destination);
+  }
+
+  private disconnectAudioGraph(): void {
+    this.source?.disconnect();
+    this.analyser?.disconnect();
+    void this.context?.close();
+    this.source = null;
+    this.analyser = null;
+    this.context = null;
+    this.frequencyData = new Uint8Array(0);
   }
 
   private average(start: number, end: number): number {
