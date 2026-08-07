@@ -9,6 +9,8 @@ import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
 import { GAME_CONFIG } from '../game/config';
 import { JuiceSystem } from '../game/effects/JuiceSystem';
 import { RhythmBackground } from '../game/effects/RhythmBackground';
+import { FlowModel } from '../game/flow/FlowModel';
+import type { FlowSnapshot } from '../game/flow/FlowModel';
 import type { GameMode } from '../game/modes/GameMode';
 import { ScoreModel } from '../game/score/ScoreModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
@@ -31,7 +33,7 @@ export interface GameSceneOptions {
   audioManager: AudioManager;
   track: MusicTrack;
   beatmap: Beatmap;
-  onFinished: (snapshot: ScoreSnapshot) => void;
+  onFinished: (snapshot: ScoreSnapshot, flow: FlowSnapshot) => void;
 }
 
 export class GameScene implements Scene {
@@ -44,6 +46,7 @@ export class GameScene implements Scene {
   private readonly effects = new JuiceSystem();
   private readonly hud = new GameHud();
   private readonly score = new ScoreModel(GAME_CONFIG.maxLives);
+  private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
   private readonly audioManager: AudioManager;
   private readonly track: MusicTrack;
@@ -82,10 +85,13 @@ export class GameScene implements Scene {
     this.playfield.on('pointercancel', this.handlePointerUp);
     this.hud.setMode(this.mode);
     this.hud.update(this.score.snapshot());
+    this.syncFlowState(this.flow.snapshot());
     this.resize(this.width, this.height);
   }
 
   update(deltaSeconds: number): void {
+    const flowChange = this.flow.update(deltaSeconds);
+    this.syncFlowState(flowChange.snapshot);
     this.hud.animate(deltaSeconds);
     this.background.updateBackground(deltaSeconds);
     this.effects.updateEffects(deltaSeconds);
@@ -141,7 +147,7 @@ export class GameScene implements Scene {
     this.playfield.hitArea = new Rectangle(0, 0, width, height);
     this.background.resize(width, height);
     this.effects.resize(width, height);
-    this.hud.resize(width);
+    this.hud.resize(width, height);
   }
 
   unmount(): void {
@@ -260,12 +266,24 @@ export class GameScene implements Scene {
     if (!target) return;
 
     const feedbackPoint = target.getFeedbackPoint();
-    this.score.register(grade);
+    const flowChange = this.flow.register(grade);
+    this.syncFlowState(flowChange.snapshot);
+    this.score.register(grade, flowChange.snapshot.multiplier);
     this.hud.update(this.score.snapshot());
     this.hud.showTiming(grade);
     this.effects.emitImpact(feedbackPoint.x, feedbackPoint.y, grade);
     this.background.pulse(grade === 'perfect' ? 1 : grade === 'good' ? 0.65 : 0.8);
-    this.haptics.feedback(grade);
+    if (flowChange.activated) {
+      this.effects.emitFlowActivation();
+      this.hud.showFlowActivation();
+      this.haptics.flowActivation();
+    } else if (flowChange.ended) {
+      this.effects.emitFlowBreak();
+      this.hud.showFlowBreak();
+      this.haptics.flowBreak();
+    } else {
+      this.haptics.feedback(grade);
+    }
     target.destroy();
     this.activeTarget = null;
     this.activeEvent = null;
@@ -301,6 +319,7 @@ export class GameScene implements Scene {
 
     const target = new TargetNode(event.kind, dragEnd);
     target.position.set(start.x, start.y);
+    target.setFlowActive(this.flow.snapshot().active);
     this.activeTarget = target;
     this.activeEvent = event;
     this.targets.addChild(target);
@@ -354,6 +373,13 @@ export class GameScene implements Scene {
 
     this.gameEnded = true;
     this.audioManager.stop();
-    this.onFinished(this.score.snapshot());
+    this.onFinished(this.score.snapshot(), this.flow.snapshot());
+  }
+
+  private syncFlowState(snapshot: FlowSnapshot): void {
+    this.hud.updateFlow(snapshot);
+    this.effects.setFlowActive(snapshot.active);
+    this.background.setFlowActive(snapshot.active);
+    this.activeTarget?.setFlowActive(snapshot.active);
   }
 }

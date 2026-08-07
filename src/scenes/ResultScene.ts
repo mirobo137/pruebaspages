@@ -8,6 +8,7 @@ import { MenuButton } from '../ui/MenuButton';
 export interface ResultSceneOptions {
   mode: GameMode;
   snapshot: ScoreSnapshot;
+  flowActivations: number;
   rewardCoins: number;
   onBackToMenu: () => void;
 }
@@ -55,6 +56,7 @@ export class ResultScene implements Scene {
       'Combo maximo: x' + snapshot.bestCombo,
       'Perfect: ' + snapshot.perfects + '   Bien: ' + snapshot.goods,
       'Fallos: ' + snapshot.misses,
+      'FLOW activado: ' + this.options.flowActivations,
       '',
       '+' + this.options.rewardCoins + ' monedas',
     ].join('\n');

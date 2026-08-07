@@ -28,6 +28,9 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [x] Beatmap JSON separado del codigo.
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
 - [x] Feedback visual distinto para Perfect, Bien y Miss.
+- [x] Medidor FLOW cargado mediante precision.
+- [x] Estado FLOW temporal con puntuacion x2 y transformacion audiovisual.
+- [x] Riesgo de romper FLOW inmediatamente al fallar.
 - [ ] Feedback sonoro distinto para Perfect, Bien y Miss.
 - [ ] Objetivos que se mueven con la musica.
 - [ ] Cadenas de varios objetivos y patrones reconocibles.
@@ -47,6 +50,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [ ] Fondo que respire con volumen, graves y agudos.
 - [x] Pulsos o anillos sincronizados con el beat.
 - [x] Primer efecto visual de combo mediante punch del HUD.
+- [x] Transformacion completa del fondo, objetivos e impactos durante FLOW.
 - [ ] Indicadores que no dependan solo del color para accesibilidad.
 
 ## Prioridad tactil
@@ -61,6 +65,8 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 ## Enganche y retorno
 
 - [x] Monedas locales como base para desbloquear futuras canciones.
+- [x] Meta visible de corto plazo: cargar y mantener FLOW durante la partida.
+- [x] Resumen de activaciones FLOW al terminar.
 - [ ] Mejor puntuacion local por cancion.
 - [ ] Estadisticas de precision, maximo combo y errores.
 - [ ] Reto diario determinista cuando exista una base de niveles estable.
@@ -106,6 +112,7 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Pantalla inicial y boton de jugar.
 - [x] Pantalla de resultado y regreso al menu.
 - [x] Feedback visual de aciertos y errores.
+- [x] Primera mecanica de enganche basada en habilidad: FLOW y multiplicador x2.
 - [ ] Juice de particulas, audio, combo y fondo reactivo.
 - [ ] Pruebas reales en movil y distintos tamanos de pantalla.
 

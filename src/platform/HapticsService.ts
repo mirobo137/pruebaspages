@@ -12,4 +12,12 @@ export class HapticsService {
       navigator.vibrate(24);
     }
   }
+
+  flowActivation(): void {
+    if ('vibrate' in navigator) navigator.vibrate([12, 25, 12, 25, 28]);
+  }
+
+  flowBreak(): void {
+    if ('vibrate' in navigator) navigator.vibrate([35, 18, 45]);
+  }
 }

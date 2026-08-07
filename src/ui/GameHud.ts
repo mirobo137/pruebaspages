@@ -1,4 +1,5 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import type { FlowSnapshot } from '../game/flow/FlowModel';
 import type { GameMode } from '../game/modes/GameMode';
 import { getGameModeLabel } from '../game/modes/GameMode';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
@@ -26,6 +27,30 @@ const timingStyle = new TextStyle({
   align: 'center',
 });
 
+const flowStyle = new TextStyle({
+  fill: '#8ea7ff',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 15,
+  fontWeight: '900',
+  letterSpacing: 2,
+  align: 'center',
+});
+
+const flowBannerStyle = new TextStyle({
+  fill: '#fff2a8',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 42,
+  fontWeight: '900',
+  letterSpacing: 4,
+  align: 'center',
+  dropShadow: {
+    alpha: 0.8,
+    blur: 12,
+    color: '#6e4cff',
+    distance: 0,
+  },
+});
+
 export class GameHud extends Container {
   private readonly modeText = new Text({ text: '', style: infoStyle });
   private readonly scoreText = new Text({ text: 'Puntos: 0', style: scoreStyle });
@@ -34,9 +59,19 @@ export class GameHud extends Container {
   private readonly lifeBarFill = new Graphics();
   private readonly comboText = new Text({ text: 'Toca para empezar', style: infoStyle });
   private readonly timingText = new Text({ text: '', style: timingStyle });
+  private readonly flowLabel = new Text({ text: 'FLOW 0%', style: flowStyle });
+  private readonly flowBarBackground = new Graphics();
+  private readonly flowBarFill = new Graphics();
+  private readonly flowBanner = new Text({ text: '', style: flowBannerStyle });
   private timingAge = 10;
+  private flowBannerAge = 10;
   private displayLifeRatio = 1;
   private targetLifeRatio = 1;
+  private displayFlowRatio = 0;
+  private targetFlowRatio = 0;
+  private flowActive = false;
+  private flowPulse = 0;
+  private flowBarWidth = 240;
   private comboPunch = 0;
   private scorePunch = 0;
   private lifePulse = 0;
@@ -46,6 +81,7 @@ export class GameHud extends Container {
 
   constructor() {
     super();
+    this.eventMode = 'none';
     this.addChild(
       this.modeText,
       this.scoreText,
@@ -54,6 +90,10 @@ export class GameHud extends Container {
       this.lifeBarFill,
       this.comboText,
       this.timingText,
+      this.flowBarBackground,
+      this.flowBarFill,
+      this.flowLabel,
+      this.flowBanner,
     );
   }
 
@@ -99,8 +139,38 @@ export class GameHud extends Container {
     this.timingAge = 0;
   }
 
+  updateFlow(snapshot: FlowSnapshot): void {
+    const wasActive = this.flowActive;
+    this.flowActive = snapshot.active;
+    this.targetFlowRatio = snapshot.active
+      ? snapshot.remaining / snapshot.duration
+      : snapshot.charge / snapshot.maxCharge;
+    this.flowLabel.text = snapshot.active
+      ? 'FLOW x' + snapshot.multiplier + '  ' + snapshot.remaining.toFixed(1) + 's'
+      : 'FLOW ' + Math.round(this.targetFlowRatio * 100) + '%';
+    this.flowLabel.style.fill = snapshot.active ? '#fff2a8' : '#8ea7ff';
+    if (snapshot.active && !wasActive) this.flowPulse = 1;
+  }
+
+  showFlowActivation(): void {
+    this.flowBanner.text = 'FLOW x2';
+    this.flowBanner.style.fill = '#fff2a8';
+    this.flowBanner.alpha = 1;
+    this.flowBanner.scale.set(0.45);
+    this.flowBannerAge = 0;
+  }
+
+  showFlowBreak(): void {
+    this.flowBanner.text = 'FLOW ROTO';
+    this.flowBanner.style.fill = '#ff7d9b';
+    this.flowBanner.alpha = 1;
+    this.flowBanner.scale.set(0.78);
+    this.flowBannerAge = 0;
+  }
+
   animate(deltaSeconds: number): void {
     this.timingAge += deltaSeconds;
+    this.flowBannerAge += deltaSeconds;
     this.timingText.alpha = Math.max(0, 1 - this.timingAge / 0.8);
     const timingScale = this.timingText.scale.x
       + (1 - this.timingText.scale.x) * Math.min(1, deltaSeconds * 16);
@@ -108,9 +178,13 @@ export class GameHud extends Container {
     this.displayLifeRatio += (
       this.targetLifeRatio - this.displayLifeRatio
     ) * Math.min(1, deltaSeconds * 12);
+    this.displayFlowRatio += (
+      this.targetFlowRatio - this.displayFlowRatio
+    ) * Math.min(1, deltaSeconds * 10);
     this.comboPunch = Math.max(0, this.comboPunch - deltaSeconds * 5.5);
     this.scorePunch = Math.max(0, this.scorePunch - deltaSeconds * 7);
     this.lifePulse = Math.max(0, this.lifePulse - deltaSeconds * 4);
+    this.flowPulse = Math.max(0, this.flowPulse - deltaSeconds * 2.5);
     this.comboText.scale.set(1 + this.comboPunch * 0.22);
     this.scoreText.scale.set(1 + this.scorePunch * 0.08);
     this.lifeText.scale.set(1 + this.lifePulse * 0.08);
@@ -124,9 +198,33 @@ export class GameHud extends Container {
       color: this.displayLifeRatio > 0.4 ? 0x7df2ba : 0xff7d9b,
     });
     this.lifeBarFill.alpha = 0.85 + this.lifePulse * 0.15;
+
+    const bannerProgress = Math.min(1, this.flowBannerAge / 1.05);
+    this.flowBanner.alpha = Math.max(0, 1 - Math.max(0, bannerProgress - 0.42) / 0.58);
+    const bannerScale = this.flowBanner.scale.x
+      + (1 + Math.sin(bannerProgress * Math.PI) * 0.12 - this.flowBanner.scale.x)
+      * Math.min(1, deltaSeconds * 14);
+    this.flowBanner.scale.set(bannerScale);
+    this.flowLabel.scale.set(1 + this.flowPulse * 0.16);
+    this.flowBarBackground.clear().roundRect(0, 0, this.flowBarWidth, 11, 6).fill({
+      color: this.flowActive ? 0x4b3f50 : 0x26304f,
+      alpha: 0.92,
+    });
+    this.flowBarFill.clear().roundRect(
+      0,
+      0,
+      this.flowBarWidth * Math.max(0, this.displayFlowRatio),
+      11,
+      6,
+    ).fill({
+      color: this.flowActive ? 0xffdd72 : 0x718cff,
+    });
+    this.flowBarFill.alpha = this.flowActive
+      ? 0.82 + Math.sin(this.flowBannerAge * 15) * 0.18
+      : 0.9;
   }
 
-  resize(width: number): void {
+  resize(width: number, height: number): void {
     this.modeText.position.set(20, 20);
     this.scoreText.position.set(20, 46);
     this.lifeText.anchor.set(1, 0);
@@ -137,5 +235,12 @@ export class GameHud extends Container {
     this.comboText.position.set(width / 2, 66);
     this.timingText.anchor.set(0.5);
     this.timingText.position.set(width / 2, 108);
+    this.flowBarWidth = Math.min(300, Math.max(180, width - 80));
+    this.flowLabel.anchor.set(0.5, 1);
+    this.flowLabel.position.set(width / 2, height - 30);
+    this.flowBarBackground.position.set((width - this.flowBarWidth) / 2, height - 24);
+    this.flowBarFill.position.set((width - this.flowBarWidth) / 2, height - 24);
+    this.flowBanner.anchor.set(0.5);
+    this.flowBanner.position.set(width / 2, height * 0.3);
   }
 }

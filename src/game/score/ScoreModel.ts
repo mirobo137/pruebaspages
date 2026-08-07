@@ -25,7 +25,7 @@ export class ScoreModel {
     this.lives = maxLives;
   }
 
-  register(grade: TimingGrade): void {
+  register(grade: TimingGrade, multiplier = 1): void {
     if (grade === 'miss') {
       this.misses += 1;
       this.combo = 0;
@@ -36,7 +36,9 @@ export class ScoreModel {
     const baseScore = grade === 'perfect'
       ? GAME_CONFIG.perfectScore
       : GAME_CONFIG.goodScore;
-    this.score += baseScore + this.combo * GAME_CONFIG.comboBonus;
+    this.score += Math.round(
+      (baseScore + this.combo * GAME_CONFIG.comboBonus) * multiplier,
+    );
     this.combo += 1;
     this.bestCombo = Math.max(this.bestCombo, this.combo);
 

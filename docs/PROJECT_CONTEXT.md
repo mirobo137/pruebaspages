@@ -27,6 +27,7 @@ src/
   core/                      Contratos reutilizables, escenas y utilidades
   scenes/                    Flujo jugable y futuras pantallas
   game/                      Reglas, score, modos, timing y entidades de juego
+    flow/                    Estado FLOW, carga, duracion y multiplicador
   ui/                        HUD, menus y resultados
   audio/                     Reproduccion, desbloqueo y analisis de audio
   content/                   Catalogos y carga de JSON
@@ -54,6 +55,15 @@ Reglas de modularidad:
 7. Cada cambio debe mantener `npm run build` funcionando antes de hacer push.
 8. Preferir composicion y clases pequenas. Si una clase empieza a gestionar audio, menus, score y entidades a la vez, se debe dividir.
 9. La precision touch tiene prioridad sobre el espectaculo: los efectos nunca deben bloquear eventos ni mover la zona logica sin actualizar su transformacion.
+10. Las mecanicas de enganche deben premiar dominio y claridad. FLOW es una regla de gameplay independiente; HUD, fondo, efectos y haptics solo representan su estado.
+
+## Mecanica central de FLOW
+
+- Perfect carga 25 puntos y Bien carga 12; un fallo fuera de FLOW resta 30.
+- Al llegar a 100, FLOW se activa automaticamente durante 8 segundos.
+- Mientras esta activo, la puntuacion se multiplica por 2 y toda la presentacion cambia.
+- Un fallo rompe FLOW de inmediato. Al expirar, el medidor vuelve a cero.
+- Los valores viven en `src/game/config.ts` para balancearlos tras pruebas reales.
 
 ## Flujo de trabajo
 

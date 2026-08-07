@@ -36,6 +36,21 @@ const floatingTextStyle = new TextStyle({
   },
 });
 
+const announcementStyle = new TextStyle({
+  fill: '#fff2a8',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 34,
+  fontWeight: '900',
+  letterSpacing: 3,
+  align: 'center',
+  dropShadow: {
+    alpha: 0.8,
+    blur: 10,
+    color: '#6e4cff',
+    distance: 0,
+  },
+});
+
 export class JuiceSystem extends Container {
   private readonly flash = new Graphics();
   private readonly particles: ParticleEffect[] = [];
@@ -48,6 +63,7 @@ export class JuiceSystem extends Container {
   private shakeStrength = 0;
   private shakeX = 0;
   private shakeY = 0;
+  private flowActive = false;
 
   constructor() {
     super();
@@ -63,7 +79,7 @@ export class JuiceSystem extends Container {
   }
 
   emitTouch(x: number, y: number): void {
-    this.createRing(x, y, 0x8ea7ff, 22, 0.22, 2);
+    this.createRing(x, y, this.flowActive ? 0xffe276 : 0x8ea7ff, 22, 0.22, 2);
   }
 
   emitDragSpark(x: number, y: number): void {
@@ -72,7 +88,7 @@ export class JuiceSystem extends Container {
       this.createParticle(
         x,
         y,
-        0x9deeff,
+        this.flowActive ? 0xffef9f : 0x9deeff,
         Math.cos(angle) * (18 + Math.random() * 28),
         Math.sin(angle) * (18 + Math.random() * 28),
         2 + Math.random() * 2,
@@ -83,13 +99,17 @@ export class JuiceSystem extends Container {
   }
 
   emitImpact(x: number, y: number, grade: TimingGrade): void {
-    const color = grade === 'perfect'
+    const color = this.flowActive && grade !== 'miss'
+      ? 0xffe276
+      : grade === 'perfect'
       ? 0x7df2ba
       : grade === 'good'
         ? 0xffdf78
         : 0xff6f91;
-    const particleCount = grade === 'perfect' ? 18 : grade === 'good' ? 12 : 8;
-    const speedMultiplier = grade === 'perfect' ? 1.25 : 1;
+    const baseParticleCount = grade === 'perfect' ? 18 : grade === 'good' ? 12 : 8;
+    const particleCount = Math.round(baseParticleCount * (this.flowActive ? 1.65 : 1));
+    const speedMultiplier = (grade === 'perfect' ? 1.25 : 1)
+      * (this.flowActive ? 1.3 : 1);
 
     for (let index = 0; index < particleCount; index += 1) {
       const angle = (index / particleCount) * Math.PI * 2 + Math.random() * 0.28;
@@ -108,17 +128,67 @@ export class JuiceSystem extends Container {
 
     this.createRing(x, y, color, 32, grade === 'perfect' ? 0.5 : 0.38, 4);
     if (grade === 'perfect') this.createRing(x, y, 0xffffff, 20, 0.34, 2);
+    if (this.flowActive && grade !== 'miss') {
+      this.createRing(x, y, 0xcba4ff, 45, 0.55, 3);
+    }
     this.createFloatingText(x, y - 42, grade, color);
 
     this.flashColor = color;
     this.flashStrength = Math.max(
       this.flashStrength,
-      grade === 'perfect' ? 0.11 : grade === 'good' ? 0.06 : 0.09,
+      this.flowActive ? 0.15 : grade === 'perfect' ? 0.11 : grade === 'good' ? 0.06 : 0.09,
     );
     this.shakeStrength = Math.max(
       this.shakeStrength,
-      grade === 'perfect' ? 4.5 : grade === 'miss' ? 5.5 : 2.5,
+      this.flowActive ? 6.5 : grade === 'perfect' ? 4.5 : grade === 'miss' ? 5.5 : 2.5,
     );
+    this.redrawFlash();
+  }
+
+  setFlowActive(active: boolean): void {
+    this.flowActive = active;
+  }
+
+  emitFlowActivation(): void {
+    const x = this.viewportWidth / 2;
+    const y = this.viewportHeight * 0.48;
+    const particleCount = 34;
+
+    for (let index = 0; index < particleCount; index += 1) {
+      const angle = (index / particleCount) * Math.PI * 2;
+      const speed = 125 + Math.random() * 180;
+      this.createParticle(
+        x,
+        y,
+        index % 2 === 0 ? 0xffe276 : 0xb38cff,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        3 + Math.random() * 4,
+        0.65 + Math.random() * 0.25,
+        15,
+      );
+    }
+
+    this.createRing(x, y, 0xffe276, 60, 0.75, 7);
+    this.createRing(x, y, 0xb38cff, 95, 0.9, 4);
+    this.createAnnouncement(x, y - 52, 'MODO FLOW', 0xfff2a8, 1.15);
+    this.flashColor = 0xffe276;
+    this.flashStrength = 0.24;
+    this.shakeStrength = 11;
+    this.redrawFlash();
+  }
+
+  emitFlowBreak(): void {
+    this.createAnnouncement(
+      this.viewportWidth / 2,
+      this.viewportHeight * 0.48,
+      'FLOW ROTO',
+      0xff6f91,
+      0.85,
+    );
+    this.flashColor = 0xff416c;
+    this.flashStrength = Math.max(this.flashStrength, 0.16);
+    this.shakeStrength = Math.max(this.shakeStrength, 8);
     this.redrawFlash();
   }
 
@@ -231,6 +301,22 @@ export class JuiceSystem extends Container {
     node.position.set(x, y);
     this.addChild(node);
     this.texts.push({ node, life: 0, duration: 0.7 });
+  }
+
+  private createAnnouncement(
+    x: number,
+    y: number,
+    label: string,
+    color: number,
+    duration: number,
+  ): void {
+    const node = new Text({ text: label, style: announcementStyle });
+    node.style.fill = color;
+    node.anchor.set(0.5);
+    node.position.set(x, y);
+    node.scale.set(0.72);
+    this.addChild(node);
+    this.texts.push({ node, life: 0, duration });
   }
 
   private redrawFlash(): void {

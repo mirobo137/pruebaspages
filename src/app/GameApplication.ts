@@ -11,6 +11,7 @@ import { GameScene } from '../scenes/GameScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { ResultScene } from '../scenes/ResultScene';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
+import type { FlowSnapshot } from '../game/flow/FlowModel';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -71,17 +72,22 @@ export class GameApplication {
         audioManager: this.audioManager,
         track: selection.track,
         beatmap: selection.beatmap,
-        onFinished: (snapshot) => this.showResult(mode, snapshot),
+        onFinished: (snapshot, flow) => this.showResult(mode, snapshot, flow),
       }),
     );
   };
 
-  private readonly showResult = (mode: GameMode, snapshot: ScoreSnapshot): void => {
+  private readonly showResult = (
+    mode: GameMode,
+    snapshot: ScoreSnapshot,
+    flow: FlowSnapshot,
+  ): void => {
     const rewardCoins = this.progression.awardForRun(snapshot.score, mode);
     this.sceneManager.switchTo(
       new ResultScene(this.app.screen.width, this.app.screen.height, {
         mode,
         snapshot,
+        flowActivations: flow.activations,
         rewardCoins,
         onBackToMenu: this.showMenu,
       }),

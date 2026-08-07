@@ -12,4 +12,10 @@ export const GAME_CONFIG = {
   perfectScore: 150,
   goodScore: 100,
   comboBonus: 10,
+  flowMax: 100,
+  flowPerfectGain: 25,
+  flowGoodGain: 12,
+  flowMissPenalty: 30,
+  flowDuration: 8,
+  flowScoreMultiplier: 2,
 } as const;
