@@ -6,12 +6,16 @@ export interface MusicTrack {
   bpm?: number;
 }
 
-export const MUSIC_TRACKS: Record<string, MusicTrack> = {
-  prototype: {
-    id: 'prototype',
-    title: 'Prototype Track',
-    audioPath: './assets/audio/prototype.mp3',
-    beatmapPath: './assets/beatmaps/prototype.json',
-  },
-};
+export const MUSIC_MANIFEST_PATH = './assets/music-manifest.json';
+
+export async function loadMusicCatalog(): Promise<MusicTrack[]> {
+  const manifestUrl = new URL(MUSIC_MANIFEST_PATH, document.baseURI);
+  const response = await fetch(manifestUrl);
+
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar el catálogo musical: ${response.status}`);
+  }
+
+  return response.json() as Promise<MusicTrack[]>;
+}
 
