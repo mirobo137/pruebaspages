@@ -22,6 +22,10 @@ interface TextEffect {
   duration: number;
 }
 
+const MAX_PARTICLES = 140;
+const MAX_RINGS = 28;
+const MAX_TEXTS = 12;
+
 const floatingTextStyle = new TextStyle({
   fill: '#ffffff',
   fontFamily: 'system-ui, sans-serif',
@@ -292,6 +296,10 @@ export class JuiceSystem extends Container {
     duration: number,
     gravity: number,
   ): void {
+    while (this.particles.length >= MAX_PARTICLES) {
+      const oldest = this.particles.shift();
+      oldest?.node.destroy();
+    }
     const node = new Graphics();
     node.circle(0, 0, radius).fill({ color });
     node.position.set(x, y);
@@ -315,6 +323,10 @@ export class JuiceSystem extends Container {
     duration: number,
     width: number,
   ): void {
+    while (this.rings.length >= MAX_RINGS) {
+      const oldest = this.rings.shift();
+      oldest?.node.destroy();
+    }
     const node = new Graphics();
     node.circle(0, 0, radius).stroke({ color, alpha: 0.9, width });
     node.position.set(x, y);
@@ -329,6 +341,7 @@ export class JuiceSystem extends Container {
     grade: TimingGrade,
     color: number,
   ): void {
+    this.trimTexts();
     const label = grade === 'perfect' ? 'PERFECT' : grade === 'good' ? 'BIEN' : 'MISS';
     const node = new Text({ text: label, style: floatingTextStyle });
     node.style.fill = color;
@@ -345,6 +358,7 @@ export class JuiceSystem extends Container {
     color: number,
     duration: number,
   ): void {
+    this.trimTexts();
     const node = new Text({ text: label, style: announcementStyle });
     node.style.fill = color;
     node.anchor.set(0.5);
@@ -352,6 +366,13 @@ export class JuiceSystem extends Container {
     node.scale.set(0.72);
     this.addChild(node);
     this.texts.push({ node, life: 0, duration });
+  }
+
+  private trimTexts(): void {
+    while (this.texts.length >= MAX_TEXTS) {
+      const oldest = this.texts.shift();
+      oldest?.node.destroy();
+    }
   }
 
   private redrawFlash(): void {

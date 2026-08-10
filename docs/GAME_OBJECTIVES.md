@@ -67,6 +67,12 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Bloqueo de scroll, seleccion y gestos del navegador sobre el canvas.
 - [x] Lista de canciones desplazable con dedo y rueda del mouse.
 - [x] Selector compacto de dificultad sin tres botones grandes.
+- [x] Area logica adaptativa para touch, pen, mouse y pantallas pequenas.
+- [x] Buffer temprano corto para absorber variacion real del dedo.
+- [x] Compensacion limitada por timestamp para telefonos con input tardio.
+- [x] Arrastre con tolerancia adicional, progreso monotono y final al 94% en touch.
+- [x] Drag completado conservado al soltar dentro de la ventana temprana.
+- [x] Limites de particulas, anillos y textos para proteger el frame rate.
 
 ## Enganche y retorno
 
@@ -136,6 +142,10 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 ## Proxima sesion de pruebas
 
 - [ ] Probar en movil pequeno, movil grande y escritorio con mouse.
+- [ ] Probar especificamente en Android de gama baja a 60 Hz.
+- [ ] Probar iPhone/Safari y rotacion de pantalla.
+- [ ] Comparar touch con mouse para confirmar que la asistencia no trivializa el timing.
+- [ ] Verificar taps muy rapidos, dedos alternados y arrastres diagonales.
 - [ ] Confirmar que el HUD inferior no invade la zona tactil.
 - [ ] Medir si cuatro `Perfect` son una meta alcanzable y emocionante.
 - [ ] Ajustar FLOW para una partida completa de 90 segundos.

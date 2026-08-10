@@ -2,6 +2,7 @@
   color-scheme: dark;
   font-family: system-ui, sans-serif;
   background: #0b1022;
+  -webkit-text-size-adjust: 100%;
 }
 * {
   box-sizing: border-box;
@@ -19,6 +20,7 @@ body,
   overscroll-behavior: none;
   user-select: none;
   -webkit-user-select: none;
+  isolation: isolate;
 }
 
 body {
@@ -34,4 +36,6 @@ canvas {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-user-drag: none;
+  contain: strict;
 }

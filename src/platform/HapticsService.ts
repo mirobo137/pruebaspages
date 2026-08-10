@@ -24,4 +24,8 @@ export class HapticsService {
   phaseTransition(): void {
     if ('vibrate' in navigator) navigator.vibrate([10, 35, 16]);
   }
+
+  dragStart(): void {
+    if ('vibrate' in navigator) navigator.vibrate(5);
+  }
 }

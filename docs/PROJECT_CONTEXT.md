@@ -87,6 +87,21 @@ Reglas de modularidad:
 
 11. Los nombres de canciones deben usar un identificador estable en minusculas y guiones, por ejemplo `mi-cancion.mp3` y la carpeta `mi-cancion/`.
 
+## Contrato de interaccion tactil
+
+La dificultad debe medir ritmo y lectura, no las limitaciones fisicas del dispositivo. `src/input/TouchTuning.ts` adapta la interaccion sin alterar las ventanas principales de cada dificultad:
+
+- Dedo: suma 12 px al radio logico y 14 px a la tolerancia lateral del arrastre.
+- Pantallas estrechas: agregan entre 2 y 7 px adicionales de asistencia invisible.
+- Pen: recibe una asistencia intermedia; mouse conserva la precision base.
+- Un arrastre tactil termina al 94% del trayecto para evitar exigir que el dedo cubra visualmente el centro exacto del destino.
+- Los toques ligeramente tempranos se guardan hasta 85 ms adicionales en touch, 55 ms en pen y 30 ms en mouse.
+- El timestamp del evento compensa hasta 60 ms de retraso de despacho en moviles lentos; nunca inventa tiempo fuera de ese limite.
+- Un drag completado y soltado dentro del buffer permanece valido hasta entrar en la ventana de timing.
+- El progreso de un drag nunca retrocede por jitter ni falla por salir brevemente del corredor.
+
+Los efectos tienen limites simultaneos de particulas, anillos y textos para evitar que FLOW o Dificil provoquen pausas de recoleccion de memoria. HUD y efectos mantienen `eventMode = none` para no interceptar el canvas jugable.
+
 ## Canciones cortas y fases
 
 - Cada audio se trata como un loop de 30 segundos.
@@ -202,6 +217,9 @@ La primera prueba de FLOW consiste en acertar cuatro objetivos seguidos como `Pe
 - `npm run build` termina sin errores.
 - La cancion se escucha despues del primer toque.
 - El toque funciona sin scroll accidental.
+- Dedo, pen y mouse conservan una respuesta coherente.
+- Los taps tempranos dentro del buffer se aceptan una sola vez.
+- Soltar un drag completado ligeramente antes no produce un Miss injusto.
 - El arrastre sigue el rastro y llega al destino.
 - Los fallos reducen vida y rompen combo.
 - FLOW carga, activa x2 y se rompe con un fallo.

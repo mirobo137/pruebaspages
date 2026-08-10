@@ -90,9 +90,10 @@ export class TargetNode extends Container {
     }
   }
 
-  isHitAt(x: number, y: number): boolean {
+  isHitAt(x: number, y: number, radiusBonus = 0): boolean {
     const origin = this.toGlobal({ x: 0, y: 0 });
-    return Math.hypot(x - origin.x, y - origin.y) <= this.interaction.hitRadius;
+    return Math.hypot(x - origin.x, y - origin.y)
+      <= this.interaction.hitRadius + radiusBonus;
   }
 
   setPressed(pressed: boolean): void {
@@ -113,7 +114,12 @@ export class TargetNode extends Container {
     this.earlyBump = 1;
   }
 
-  updateDragFromPointer(globalX: number, globalY: number): DragPointerResult {
+  updateDragFromPointer(
+    globalX: number,
+    globalY: number,
+    toleranceBonus = 0,
+    completionThreshold = 0.985,
+  ): DragPointerResult {
     if (this.kind !== 'drag') {
       return { progress: 0, valid: false, completed: false };
     }
@@ -134,7 +140,7 @@ export class TargetNode extends Container {
       pointer.x - nearestX,
       pointer.y - nearestY,
     );
-    const valid = lateralDistance <= this.interaction.dragPathTolerance
+    const valid = lateralDistance <= this.interaction.dragPathTolerance + toleranceBonus
       && rawProgress >= -0.18;
 
     if (valid) {
@@ -144,7 +150,7 @@ export class TargetNode extends Container {
     return {
       progress: this.dragProgress,
       valid,
-      completed: this.dragProgress >= 0.985,
+      completed: this.dragProgress >= completionThreshold,
     };
   }
 

@@ -19,14 +19,18 @@ import { TargetNode } from '../game/targets/TargetNode';
 import type { TargetPoint } from '../game/targets/TargetNode';
 import type { TimingGrade } from '../game/timing/TimingGrade';
 import { capturePointer, releasePointer } from '../input/PointerCapture';
+import { TouchTuning } from '../input/TouchTuning';
+import type { PointerTuning } from '../input/TouchTuning';
 import { HapticsService } from '../platform/HapticsService';
 import { GameHud } from '../ui/GameHud';
 
 interface DragState {
   pointerId: number;
   completed: boolean;
+  released: boolean;
   lastSparkX: number;
   lastSparkY: number;
+  tuning: PointerTuning;
 }
 
 export interface GameSceneOptions {
@@ -53,6 +57,7 @@ export class GameScene implements Scene {
   private readonly score: ScoreModel;
   private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
+  private readonly touchTuning = new TouchTuning();
   private readonly audioManager: AudioManager;
   private readonly track: MusicTrack;
   private readonly difficulty: Difficulty;
@@ -64,6 +69,7 @@ export class GameScene implements Scene {
   private activeTarget: TargetNode | null = null;
   private activeEvent: BeatEvent | null = null;
   private dragState: DragState | null = null;
+  private bufferedTapEvent: BeatEvent | null = null;
   private width: number;
   private height: number;
   private musicStarted = false;
@@ -141,6 +147,17 @@ export class GameScene implements Scene {
     );
 
     if (
+      this.bufferedTapEvent
+      && this.activeEvent === this.bufferedTapEvent
+      && currentTime >= this.bufferedTapEvent.time - this.difficultyProfile.goodWindow
+    ) {
+      const bufferedEvent = this.bufferedTapEvent;
+      this.bufferedTapEvent = null;
+      this.resolveTarget(this.getTimingGrade(bufferedEvent) ?? 'good');
+      return;
+    }
+
+    if (
       this.activeEvent
       && currentTime - this.activeEvent.time > this.difficultyProfile.goodWindow
     ) {
@@ -169,6 +186,7 @@ export class GameScene implements Scene {
     this.background.resize(width, height);
     this.effects.resize(width, height);
     this.hud.resize(width, height);
+    this.touchTuning.resize(width, height);
   }
 
   unmount(): void {
@@ -180,6 +198,7 @@ export class GameScene implements Scene {
     this.activeTarget?.destroy();
     this.activeTarget = null;
     this.dragState = null;
+    this.bufferedTapEvent = null;
     this.targets.position.set(0, 0);
   }
 
@@ -194,10 +213,18 @@ export class GameScene implements Scene {
 
     const target = this.activeTarget;
     const beatEvent = this.activeEvent;
-    if (!target || !beatEvent || !target.isHitAt(event.global.x, event.global.y)) return;
+    const tuning = this.touchTuning.forPointer(event.pointerType);
+    if (
+      !target
+      || !beatEvent
+      || !target.isHitAt(event.global.x, event.global.y, tuning.hitRadiusBonus)
+    ) return;
 
-    const grade = this.getTimingGrade(beatEvent);
-    if (!grade) {
+    const inputTime = this.getCompensatedInputTime(event, tuning);
+    const grade = this.getTimingGrade(beatEvent, inputTime);
+    const canBufferEarly = !grade
+      && this.isWithinEarlyInputBuffer(beatEvent, tuning, inputTime);
+    if (!grade && !canBufferEarly) {
       target.nudgeEarly();
       return;
     }
@@ -209,32 +236,49 @@ export class GameScene implements Scene {
       }
 
       target.setPressed(true);
+      this.haptics.dragStart();
       this.dragState = {
         pointerId: event.pointerId,
         completed: false,
+        released: false,
         lastSparkX: event.global.x,
         lastSparkY: event.global.y,
+        tuning,
       };
       return;
     }
 
-    this.resolveTarget(grade);
+    if (grade) {
+      this.resolveTarget(grade);
+    } else {
+      this.bufferedTapEvent = beatEvent;
+      target.setPressed(true);
+    }
   };
 
   private readonly handlePointerMove = (event: FederatedPointerEvent): void => {
-    if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
+    if (
+      !this.dragState
+      || this.dragState.pointerId !== event.pointerId
+      || this.dragState.released
+    ) return;
     event.preventDefault();
 
     const target = this.activeTarget;
     if (!target) return;
 
-    const dragResult = target.updateDragFromPointer(event.global.x, event.global.y);
+    const dragResult = target.updateDragFromPointer(
+      event.global.x,
+      event.global.y,
+      this.dragState.tuning.dragToleranceBonus,
+      this.dragState.tuning.dragCompletionThreshold,
+    );
     target.setPressed(dragResult.valid);
     const sparkDistance = Math.hypot(
       event.global.x - this.dragState.lastSparkX,
       event.global.y - this.dragState.lastSparkY,
     );
-    if (dragResult.valid && sparkDistance >= 12) {
+    if (dragResult.valid && sparkDistance >= this.dragState.tuning.sparkDistance) {
       this.effects.emitDragSpark(event.global.x, event.global.y);
       this.dragState.lastSparkX = event.global.x;
       this.dragState.lastSparkY = event.global.y;
@@ -242,12 +286,13 @@ export class GameScene implements Scene {
 
     if (dragResult.completed) {
       this.dragState.completed = true;
+      const inputTime = this.getCompensatedInputTime(event, this.dragState.tuning);
       if (
         this.activeEvent
-        && this.audioManager.currentTime - this.activeEvent.time
+        && inputTime - this.activeEvent.time
           >= -this.difficultyProfile.goodWindow
       ) {
-        this.resolveTarget(this.getTimingGrade(this.activeEvent) ?? 'miss');
+        this.resolveTarget(this.getTimingGrade(this.activeEvent, inputTime) ?? 'miss');
       }
     }
   };
@@ -255,6 +300,20 @@ export class GameScene implements Scene {
   private readonly handlePointerUp = (event: FederatedPointerEvent): void => {
     releasePointer(event);
     if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
+
+    if (
+      event.type !== 'pointercancel'
+      && this.dragState.completed
+      && this.activeEvent
+      && this.isWithinReleaseBuffer(
+        this.activeEvent,
+        this.dragState.tuning,
+        this.getCompensatedInputTime(event, this.dragState.tuning),
+      )
+    ) {
+      this.dragState.released = true;
+      return;
+    }
 
     this.activeTarget?.setPressed(false);
     this.dragState = null;
@@ -277,8 +336,11 @@ export class GameScene implements Scene {
     );
   }
 
-  private getTimingGrade(event: BeatEvent): TimingGrade | null {
-    const delta = this.audioManager.currentTime - event.time;
+  private getTimingGrade(
+    event: BeatEvent,
+    currentTime = this.audioManager.currentTime,
+  ): TimingGrade | null {
+    const delta = currentTime - event.time;
     const absoluteDelta = Math.abs(delta);
 
     if (absoluteDelta <= this.difficultyProfile.perfectWindow) return 'perfect';
@@ -314,6 +376,7 @@ export class GameScene implements Scene {
     this.activeTarget = null;
     this.activeEvent = null;
     this.dragState = null;
+    this.bufferedTapEvent = null;
 
     if (this.score.isGameOver()) {
       this.finishGame();
@@ -330,6 +393,7 @@ export class GameScene implements Scene {
 
   private spawnTarget(event: BeatEvent): void {
     this.activeTarget?.destroy();
+    this.bufferedTapEvent = null;
 
     const start = event.start
       ? this.fromNormalizedPoint(event.start)
@@ -436,5 +500,36 @@ export class GameScene implements Scene {
     this.effects.setFlowActive(snapshot.active);
     this.background.setFlowActive(snapshot.active);
     this.activeTarget?.setFlowActive(snapshot.active);
+  }
+
+  private isWithinEarlyInputBuffer(
+    event: BeatEvent,
+    tuning: PointerTuning,
+    currentTime = this.audioManager.currentTime,
+  ): boolean {
+    const timeUntilHit = event.time - currentTime;
+    return timeUntilHit > this.difficultyProfile.goodWindow
+      && timeUntilHit <= this.difficultyProfile.goodWindow + tuning.earlyInputBuffer;
+  }
+
+  private isWithinReleaseBuffer(
+    event: BeatEvent,
+    tuning: PointerTuning,
+    currentTime = this.audioManager.currentTime,
+  ): boolean {
+    const timeUntilHit = event.time - currentTime;
+    return timeUntilHit >= -this.difficultyProfile.goodWindow
+      && timeUntilHit <= this.difficultyProfile.goodWindow + tuning.earlyInputBuffer;
+  }
+
+  private getCompensatedInputTime(
+    event: FederatedPointerEvent,
+    tuning: PointerTuning,
+  ): number {
+    return this.touchTuning.compensateAudioTime(
+      this.audioManager.currentTime,
+      event.timeStamp,
+      tuning,
+    );
   }
 }
