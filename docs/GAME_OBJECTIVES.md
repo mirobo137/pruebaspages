@@ -29,6 +29,10 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
 - [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
+- [x] Estrellas independientes por cancion y dificultad.
+- [x] Records locales de puntuacion, combo, precision e intentos.
+- [x] Guardado local versionado, validado, con checksum, respaldo y migracion.
+- [x] Selector musical enriquecido con progreso visible y respuesta al cambio de dificultad.
 - [x] Portada de presentacion neon antes del selector de canciones.
 - [x] Cuenta regresiva antes de iniciar sin segundo toque sobre el gameplay.
 - [x] Pausa con Continuar, Reiniciar y Volver al menu.
@@ -96,8 +100,8 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Resumen de activaciones FLOW al terminar.
 - [x] Resumen de activaciones SUPER FLOW al terminar.
 - [x] Recompensa de monedas multiplicada por dificultad.
-- [ ] Mejor puntuacion local por cancion.
-- [ ] Estadisticas de precision, maximo combo y errores.
+- [x] Mejor puntuacion local por cancion y dificultad.
+- [x] Estadisticas de precision, maximo combo y errores.
 - [ ] Reto diario determinista cuando exista una base de niveles estable.
 - [x] Dificultades que cambian densidad, vidas, timing y tolerancia tactil.
 - [ ] Resultado facil de compartir como imagen o texto.
@@ -141,6 +145,7 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 
 - [x] Pantalla inicial y boton de jugar.
 - [x] Pantalla de resultado y regreso al menu.
+- [x] Resultado con estrellas obtenidas, precision y aviso de nuevo record.
 - [x] Feedback visual de aciertos y errores.
 - [x] Primera mecanica de enganche basada en habilidad: FLOW y multiplicador x2.
 - [x] Recompensa avanzada de precision: SUPER FLOW y multiplicador x4.
@@ -179,7 +184,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Probar la lista con suficientes canciones para requerir scroll real.
 - [ ] Revisar que un `Miss` se sienta claro sin parecer injusto.
 - [ ] Ajustar el beatmap de la cancion de prueba escuchando sus golpes reales.
-- [ ] Registrar mejor puntuacion local por cancion.
+- [x] Registrar mejor puntuacion local por cancion y dificultad.
+- [ ] Confirmar que estrellas y records persisten despues de cerrar y volver a abrir el navegador.
+- [ ] Confirmar que Facil, Medio y Dificil muestran progreso independiente para la misma cancion.
 
 ## Estado de una partida ideal
 

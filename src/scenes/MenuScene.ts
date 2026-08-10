@@ -7,6 +7,7 @@ import { ProgressionStore } from '../progression/ProgressionStore';
 import { DifficultySelector } from '../ui/DifficultySelector';
 import { MenuButton } from '../ui/MenuButton';
 import { SongList } from '../ui/SongList';
+import { TrackProgressPanel } from '../ui/TrackProgressPanel';
 
 export interface MenuSceneOptions {
   tracks: TrackSelection[];
@@ -17,23 +18,23 @@ export interface MenuSceneOptions {
 const titleStyle = new TextStyle({
   fill: '#ffffff',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 32,
+  fontSize: 30,
   fontWeight: '900',
-  letterSpacing: 1,
+  letterSpacing: 2,
   align: 'center',
 });
 
 const subtitleStyle = new TextStyle({
   fill: '#9eabc9',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 15,
+  fontSize: 13,
   align: 'center',
 });
 
 const sectionStyle = new TextStyle({
   fill: '#d9e1fa',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 14,
+  fontSize: 12,
   fontWeight: '900',
   letterSpacing: 2,
 });
@@ -41,14 +42,15 @@ const sectionStyle = new TextStyle({
 const infoStyle = new TextStyle({
   fill: '#dfe6ff',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 15,
+  fontSize: 13,
+  fontWeight: '700',
   align: 'center',
 });
 
 const DIFFICULTY_HINTS: Record<Difficulty, string> = {
   easy: 'Ritmo accesible · 6 vidas',
   medium: 'Subdivisiones y arrastres · 4 vidas',
-  hard: 'Alta densidad y precision · 3 vidas',
+  hard: 'Alta densidad y precisión · 3 vidas',
 };
 
 export class MenuScene implements Scene {
@@ -68,6 +70,7 @@ export class MenuScene implements Scene {
   private readonly status = new Text({ text: '', style: subtitleStyle });
   private readonly songList: SongList;
   private readonly difficultySelector: DifficultySelector;
+  private readonly progressPanel = new TrackProgressPanel();
   private readonly playButton: MenuButton;
   private readonly tracks: TrackSelection[];
   private readonly progression: ProgressionStore;
@@ -85,7 +88,7 @@ export class MenuScene implements Scene {
     this.onStart = options.onStart;
     this.songList = new SongList(this.handleSongSelected);
     this.difficultySelector = new DifficultySelector(this.handleDifficultyChanged);
-    this.playButton = new MenuButton('JUGAR', this.handlePlay, 0x3958b8);
+    this.playButton = new MenuButton('JUGAR', this.handlePlay, 0x3155a5);
 
     this.root.addChild(
       this.background,
@@ -97,6 +100,7 @@ export class MenuScene implements Scene {
       this.difficultySection,
       this.difficultySelector,
       this.difficultyHint,
+      this.progressPanel,
       this.playButton,
       this.status,
     );
@@ -113,35 +117,51 @@ export class MenuScene implements Scene {
   resize(width: number, height: number): void {
     this.width = width;
     this.height = height;
-    const contentWidth = Math.min(500, Math.max(250, width - 32));
-    const contentX = (width - contentWidth) / 2;
-    const titleY = Math.max(48, height * 0.075);
-    const listTop = Math.max(132, height * 0.18);
-    const listHeight = Math.max(150, Math.min(290, height * 0.34));
+    const landscape = width > height && width >= 650;
+    const titleY = landscape ? 31 : Math.max(43, height * 0.065);
 
-    this.background.clear().rect(0, 0, width, height).fill({ color: 0x0b1022 });
+    this.background.clear().rect(0, 0, width, height).fill({ color: 0x070c1c });
+    this.background
+      .circle(width * 0.08, height * 0.12, Math.max(width, height) * 0.22)
+      .fill({ color: 0x1686ad, alpha: 0.04 });
+    this.background
+      .circle(width * 0.94, height * 0.65, Math.max(width, height) * 0.25)
+      .fill({ color: 0xc12b9e, alpha: 0.028 });
     this.title.anchor.set(0.5);
     this.title.position.set(width / 2, titleY);
     this.subtitle.anchor.set(0.5);
-    this.subtitle.position.set(width / 2, titleY + 42);
+    this.subtitle.position.set(width / 2, titleY + (landscape ? 30 : 36));
     this.currency.anchor.set(1, 0);
-    this.currency.position.set(width - 16, 16);
+    this.currency.position.set(width - 14, 14);
 
-    this.songSection.position.set(contentX + 4, listTop - 27);
+    if (landscape) {
+      this.resizeLandscape(width, height);
+      return;
+    }
+
+    const contentWidth = Math.min(500, Math.max(250, width - 28));
+    const contentX = (width - contentWidth) / 2;
+    const listTop = Math.max(118, height * 0.155);
+    const availableListHeight = height - listTop - 330;
+    const listHeight = Math.max(134, Math.min(238, availableListHeight));
+
+    this.songSection.position.set(contentX + 4, listTop - 25);
     this.songList.position.set(contentX, listTop);
     this.songList.resize(contentWidth, listHeight);
 
-    const difficultyTop = listTop + listHeight + 21;
+    const difficultyTop = listTop + listHeight + 16;
     this.difficultySection.position.set(contentX + 4, difficultyTop);
-    this.difficultySelector.position.set(contentX, difficultyTop + 28);
+    this.difficultySelector.position.set(contentX, difficultyTop + 24);
     this.difficultySelector.resize(contentWidth);
     this.difficultyHint.anchor.set(0.5, 0);
-    this.difficultyHint.position.set(width / 2, difficultyTop + 87);
+    this.difficultyHint.position.set(width / 2, difficultyTop + 81);
 
+    this.progressPanel.position.set(contentX, difficultyTop + 103);
+    this.progressPanel.resize(contentWidth);
     this.playButton.resize(contentWidth);
-    this.playButton.position.set(contentX, difficultyTop + 116);
+    this.playButton.position.set(contentX, difficultyTop + 218);
     this.status.anchor.set(0.5, 0);
-    this.status.position.set(width / 2, Math.min(height - 25, difficultyTop + 190));
+    this.status.position.set(width / 2, Math.min(height - 18, difficultyTop + 287));
   }
 
   unmount(): void {}
@@ -155,13 +175,13 @@ export class MenuScene implements Scene {
   private readonly handleDifficultyChanged = (difficulty: Difficulty): void => {
     this.selectedDifficulty = difficulty;
     this.status.text = '';
-    this.refreshDetails();
+    this.refresh();
   };
 
   private readonly handlePlay = (): void => {
     const selection = this.tracks[this.selectedTrackIndex];
     if (!selection) {
-      this.status.text = 'Todavia no hay canciones disponibles.';
+      this.status.text = 'Todavía no hay canciones disponibles.';
       return;
     }
 
@@ -175,8 +195,8 @@ export class MenuScene implements Scene {
         this.selectedTrackIndex,
       );
       this.status.text = unlockedNow
-        ? 'Cancion desbloqueada. Pulsa JUGAR para comenzar.'
-        : 'Necesitas mas monedas para desbloquearla.';
+        ? 'Canción desbloqueada. Pulsa JUGAR para comenzar.'
+        : 'Necesitas más monedas para desbloquearla.';
       this.refresh();
       return;
     }
@@ -185,15 +205,23 @@ export class MenuScene implements Scene {
   };
 
   private refresh(): void {
-    this.currency.text = 'Monedas: ' + this.progression.coins;
+    this.currency.text = `${this.progression.coins.toLocaleString()} MONEDAS`;
     this.songList.setItems(this.tracks.map((selection, index) => {
       const unlocked = this.progression.isTrackUnlocked(selection.track.id, index);
+      const record = this.progression.getRecord(
+        selection.track.id,
+        this.selectedDifficulty,
+      );
       return {
         title: selection.track.title,
         subtitle: unlocked
-          ? '3 fases · 90 segundos'
-          : this.progression.getTrackUnlockCost(index) + ' monedas',
+          ? '3 FASES · 90 SEGUNDOS'
+          : `${this.progression.getTrackUnlockCost(index)} MONEDAS`,
         locked: !unlocked,
+        stars: record?.stars ?? 0,
+        highScore: record?.highScore ?? 0,
+        bestCombo: record?.bestCombo ?? 0,
+        attempts: record?.attempts ?? 0,
       };
     }));
     this.songList.setSelectedIndex(this.selectedTrackIndex);
@@ -208,14 +236,46 @@ export class MenuScene implements Scene {
     const cost = selection
       ? this.progression.getTrackUnlockCost(this.selectedTrackIndex)
       : 0;
-    this.difficultySection.text = 'DIFICULTAD · '
-      + getDifficultyLabel(this.selectedDifficulty).toUpperCase();
+    const record = selection
+      ? this.progression.getRecord(selection.track.id, this.selectedDifficulty)
+      : null;
+    this.difficultySection.text = `DIFICULTAD · ${getDifficultyLabel(
+      this.selectedDifficulty,
+    ).toUpperCase()}`;
     this.difficultyHint.text = DIFFICULTY_HINTS[this.selectedDifficulty];
+    this.progressPanel.setProgress(this.selectedDifficulty, record);
     this.playButton.setText(!selection
       ? 'SIN CANCIONES'
       : unlocked
         ? 'JUGAR'
-        : 'DESBLOQUEAR · ' + cost);
+        : `DESBLOQUEAR · ${cost}`);
     this.playButton.setEnabled(Boolean(selection));
+  }
+
+  private resizeLandscape(width: number, height: number): void {
+    const contentWidth = Math.min(920, width - 32);
+    const contentX = (width - contentWidth) / 2;
+    const gap = 18;
+    const leftWidth = contentWidth * 0.54;
+    const rightWidth = contentWidth - leftWidth - gap;
+    const top = Math.max(88, height * 0.21);
+    const listHeight = Math.max(180, height - top - 18);
+    const rightX = contentX + leftWidth + gap;
+
+    this.songSection.position.set(contentX + 4, top - 23);
+    this.songList.position.set(contentX, top);
+    this.songList.resize(leftWidth, listHeight);
+
+    this.difficultySection.position.set(rightX + 4, top - 23);
+    this.difficultySelector.position.set(rightX, top);
+    this.difficultySelector.resize(rightWidth);
+    this.difficultyHint.anchor.set(0.5, 0);
+    this.difficultyHint.position.set(rightX + rightWidth / 2, top + 58);
+    this.progressPanel.position.set(rightX, top + 80);
+    this.progressPanel.resize(rightWidth);
+    this.playButton.resize(rightWidth);
+    this.playButton.position.set(rightX, top + 195);
+    this.status.anchor.set(0.5, 0);
+    this.status.position.set(rightX + rightWidth / 2, top + 264);
   }
 }

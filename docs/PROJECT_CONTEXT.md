@@ -32,6 +32,8 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Audio de 30 segundos precargado y decodificado con Web Audio, con reloj jugable continuo durante las tres fases.
 - Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
 - Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
+- Una calificacion independiente de 0 a 3 estrellas para cada cancion y dificultad.
+- Mejores puntuaciones, combo, precision, Perfect, fallos, FLOW, intentos y partidas completadas guardados localmente.
 - Portada inicial procedural con identidad neon, entrada tactil de pantalla completa y transicion al selector musical.
 - Selector musical, pantalla de partida y pantalla de resultado.
 - Audio desbloqueado desde el boton JUGAR, seguido por cuenta regresiva 3-2-1 sin toque adicional.
@@ -66,7 +68,7 @@ src/
   content/                   Catalogos y carga de JSON
   input/                     Captura y utilidades de puntero/touch
   platform/                  Adaptadores para persistencia y portales
-  progression/               Monedas y desbloqueos locales
+  progression/               Estrellas, records, monedas y desbloqueos locales
 public/assets/
   audio/                     Canciones distribuidas
   beatmaps/                  Eventos sincronizados por cancion
@@ -93,6 +95,27 @@ Reglas de modularidad:
 11. La portada es una escena independiente. Solo aparece al abrir el juego; volver desde pausa o resultados lleva directamente al selector musical.
 
 12. Los nombres de canciones deben usar un identificador estable en minusculas y guiones, por ejemplo `mi-cancion.mp3` y la carpeta `mi-cancion/`.
+
+## Estrellas y records
+
+- Cada combinacion `cancion + dificultad` mantiene un progreso independiente.
+- Cero estrellas significa que todavia no se completo la partida.
+- Una estrella se obtiene al completar las tres fases con cualquier precision valida.
+- Dos estrellas requieren al menos 70% de precision ponderada.
+- Tres estrellas requieren al menos 90% de precision ponderada.
+- Un `Perfect` aporta 100%, un `Bien` aporta 70% y un `Miss` aporta 0% al calculo.
+- Repetir con un resultado inferior nunca elimina estrellas ni reduce un record anterior.
+- La ficha conserva puntuacion, combo, precision, Perfect, menor cantidad de fallos, FLOW, SUPER FLOW, intentos, partidas completadas y ultima fecha de juego.
+
+## Persistencia local
+
+- `LocalProgressStorage` es el unico modulo que lee o escribe `localStorage`.
+- El formato actual es version 2 y usa la clave `superflow:progress:v2`.
+- Los datos se codifican, incluyen checksum, se validan campo por campo y mantienen una copia anterior de respaldo.
+- Si el registro principal esta corrupto se intenta recuperar el respaldo.
+- La progresion antigua de `rhythm-circles:progression` migra automaticamente para conservar monedas y canciones desbloqueadas.
+- Esta proteccion detecta corrupcion y manipulacion casual, pero no es seguridad criptografica: el navegador pertenece al jugador y un usuario experto puede modificar su almacenamiento.
+- Un portal con ranking competitivo necesitara validar las puntuaciones en un backend o mediante el SDK del portal.
 
 ## Contrato de interaccion tactil
 
@@ -263,6 +286,9 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Impulso y Climax entran sin notas antiguas, Miss invisible ni perdida de combo.
 - Pausa congela audio, notas y FLOW; Continuar conserva el estado.
 - La pantalla de resultado muestra dificultad y fase alcanzada.
+- La pantalla de resultado muestra las estrellas obtenidas y conserva un record superior anterior.
+- Cambiar dificultad en el menu actualiza estrellas, mejor puntuacion, combo, precision e intentos.
+- Recargar la pagina conserva monedas, desbloqueos y records.
 - Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.
 
 ## Restricciones de producto

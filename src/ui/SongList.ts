@@ -7,39 +7,66 @@ import {
 } from 'pixi.js';
 import type { FederatedPointerEvent, FederatedWheelEvent } from 'pixi.js';
 import { capturePointer, releasePointer } from '../input/PointerCapture';
+import { formatStars } from '../progression/StarRating';
 
 export interface SongListItem {
   title: string;
   subtitle: string;
   locked: boolean;
+  stars: number;
+  highScore: number;
+  bestCombo: number;
+  attempts: number;
 }
 
 interface SongRow {
   root: Container;
   background: Graphics;
+  accent: Graphics;
   title: Text;
   subtitle: Text;
+  stars: Text;
+  stats: Text;
   lock: Text;
 }
 
 const titleStyle = new TextStyle({
-  fill: '#ffffff',
+  fill: '#f7f9ff',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 18,
+  fontSize: 16,
   fontWeight: '800',
 });
 
 const subtitleStyle = new TextStyle({
-  fill: '#9ba8c9',
+  fill: '#8695bb',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 13,
+  fontSize: 11,
+  fontWeight: '600',
+  letterSpacing: 0.4,
+});
+
+const starsStyle = new TextStyle({
+  fill: '#ffd76a',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 17,
+  fontWeight: '800',
+  letterSpacing: 1,
+});
+
+const statsStyle = new TextStyle({
+  fill: '#aab8d9',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 10,
+  fontWeight: '700',
+  letterSpacing: 0.6,
 });
 
 const lockStyle = new TextStyle({
   fill: '#ffcf70',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 13,
-  fontWeight: '800',
+  fontSize: 10,
+  fontWeight: '900',
+  letterSpacing: 1,
 });
 
 export class SongList extends Container {
@@ -56,8 +83,8 @@ export class SongList extends Container {
   private pointerStartY = 0;
   private scrollStart = 0;
   private draggedDistance = 0;
-  private readonly rowHeight = 66;
-  private readonly rowGap = 8;
+  private readonly rowHeight = 82;
+  private readonly rowGap = 7;
 
   constructor(private readonly onSelect: (index: number) => void) {
     super();
@@ -82,14 +109,17 @@ export class SongList extends Container {
     items.forEach((item, index) => {
       const root = new Container();
       const background = new Graphics();
+      const accent = new Graphics();
       const title = new Text({ text: item.title, style: titleStyle });
       const subtitle = new Text({ text: item.subtitle, style: subtitleStyle });
+      const stars = new Text({ text: formatStars(item.stars), style: starsStyle });
+      const stats = new Text({ text: '', style: statsStyle });
       const lock = new Text({ text: item.locked ? 'BLOQUEADA' : '', style: lockStyle });
       root.eventMode = 'none';
       root.position.y = index * (this.rowHeight + this.rowGap);
-      root.addChild(background, title, subtitle, lock);
+      root.addChild(background, accent, title, subtitle, stars, stats, lock);
       this.viewport.addChild(root);
-      this.rows.push({ root, background, title, subtitle, lock });
+      this.rows.push({ root, background, accent, title, subtitle, stars, stats, lock });
     });
 
     this.selectedIndex = Math.max(0, Math.min(items.length - 1, this.selectedIndex));
@@ -107,11 +137,19 @@ export class SongList extends Container {
     this.listWidth = width;
     this.listHeight = height;
     this.hitArea = new Rectangle(0, 0, width, height);
-    this.frame.clear().roundRect(0, 0, width, height, 18).fill({
-      color: 0x11182d,
-      alpha: 0.95,
-    }).stroke({ color: 0x7087cf, alpha: 0.2, width: 2 });
-    this.viewportMask.clear().roundRect(0, 0, width, height, 18).fill({ color: 0xffffff });
+    this.frame.clear()
+      .roundRect(0, 0, width, height, 14)
+      .fill({ color: 0x090f22, alpha: 0.86 })
+      .stroke({ color: 0x6cecff, alpha: 0.2, width: 1 });
+    this.frame
+      .moveTo(18, 0)
+      .lineTo(width * 0.42, 0)
+      .stroke({ color: 0x67efff, alpha: 0.65, width: 1.4 });
+    this.frame
+      .moveTo(width * 0.7, height)
+      .lineTo(width - 18, height)
+      .stroke({ color: 0xff56d7, alpha: 0.5, width: 1.4 });
+    this.viewportMask.clear().roundRect(0, 0, width, height, 14).fill({ color: 0xffffff });
     this.clampScroll();
     this.drawRows();
   }
@@ -188,19 +226,46 @@ export class SongList extends Container {
     this.rows.forEach((row, index) => {
       const selected = index === this.selectedIndex;
       const item = this.items[index];
-      row.background.clear().roundRect(6, 0, Math.max(0, this.listWidth - 12), this.rowHeight, 14).fill({
-        color: selected ? 0x263f86 : 0x18213b,
-        alpha: selected ? 1 : 0.8,
-      }).stroke({
-        color: selected ? 0x91aaff : 0x52628f,
-        alpha: selected ? 0.8 : 0.18,
-        width: selected ? 2 : 1,
-      });
-      row.title.position.set(22, 12);
-      row.title.style.fill = item?.locked ? '#bac3dc' : '#ffffff';
-      row.subtitle.position.set(22, 39);
+      if (!item) return;
+
+      row.background.clear()
+        .roundRect(7, 3, Math.max(0, this.listWidth - 14), this.rowHeight - 6, 11)
+        .fill({
+          color: selected ? 0x152d53 : 0x11182d,
+          alpha: selected ? 0.96 : 0.78,
+        })
+        .stroke({
+          color: selected ? 0x64efff : 0x6879aa,
+          alpha: selected ? 0.58 : 0.14,
+          width: selected ? 1.2 : 0.8,
+        });
+      row.accent.clear();
+      if (selected) {
+        row.accent
+          .roundRect(7, 17, 2, this.rowHeight - 34, 1)
+          .fill({ color: 0x62efff, alpha: 0.95 });
+        row.accent
+          .circle(this.listWidth - 13, this.rowHeight / 2, 2)
+          .fill({ color: 0xff55d8, alpha: 0.9 });
+      }
+
+      row.title.position.set(20, 11);
+      row.title.style.fill = item.locked ? '#aab4ce' : '#f7f9ff';
+      row.title.scale.set(1);
+      const titleLimit = Math.max(100, this.listWidth - 154);
+      if (row.title.width > titleLimit) row.title.scale.set(titleLimit / row.title.width);
+
+      row.stars.anchor.set(1, 0);
+      row.stars.position.set(this.listWidth - 20, 9);
+      row.stars.alpha = item.stars > 0 ? 1 : 0.42;
+      row.subtitle.position.set(20, 36);
+      row.stats.position.set(20, 57);
+      row.stats.text = item.attempts > 0
+        ? `MEJOR ${item.highScore.toLocaleString()}  ·  COMBO ${item.bestCombo}`
+        : 'SIN REGISTRO EN ESTA DIFICULTAD';
+      row.stats.alpha = item.locked ? 0.45 : 0.85;
       row.lock.anchor.set(1, 0.5);
-      row.lock.position.set(this.listWidth - 24, this.rowHeight / 2);
+      row.lock.position.set(this.listWidth - 20, 45);
     });
   }
 }

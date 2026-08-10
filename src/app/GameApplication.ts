@@ -91,6 +91,7 @@ export class GameApplication {
         onRestart: () => this.startGame(difficulty, selection),
         onExit: this.showMenu,
         onFinished: (snapshot, flow, phaseReached) => this.showResult(
+          selection,
           difficulty,
           snapshot,
           flow,
@@ -101,20 +102,31 @@ export class GameApplication {
   };
 
   private readonly showResult = (
+    selection: TrackSelection,
     difficulty: Difficulty,
     snapshot: ScoreSnapshot,
     flow: FlowSnapshot,
     phaseReached: number,
   ): void => {
-    const rewardCoins = this.progression.awardForRun(snapshot.score, difficulty);
+    const run = this.progression.recordRun(
+      selection.track.id,
+      difficulty,
+      snapshot,
+      flow,
+      phaseReached,
+    );
     this.sceneManager.switchTo(
       new ResultScene(this.app.screen.width, this.app.screen.height, {
+        trackTitle: selection.track.title,
         difficulty,
         snapshot,
         flowActivations: flow.activations,
         superFlowActivations: flow.superActivations,
         phaseReached,
-        rewardCoins,
+        rewardCoins: run.rewardCoins,
+        earnedStars: run.earnedStars,
+        previousStars: run.previousStars,
+        isNewHighScore: run.isNewHighScore,
         onBackToMenu: this.showMenu,
       }),
     );

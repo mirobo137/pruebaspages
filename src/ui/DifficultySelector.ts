@@ -53,9 +53,10 @@ export class DifficultySelector extends Container {
 
   private draw(): void {
     const segmentWidth = this.selectorWidth / DIFFICULTIES.length;
-    this.background.clear().roundRect(0, 0, this.selectorWidth, this.selectorHeight, 15).fill({
-      color: 0x151d34,
-    });
+    this.background.clear().roundRect(0, 0, this.selectorWidth, this.selectorHeight, 13).fill({
+      color: 0x0d152a,
+      alpha: 0.94,
+    }).stroke({ color: 0x718cff, alpha: 0.24, width: 1 });
 
     DIFFICULTIES.forEach((difficulty, index) => {
       const selected = difficulty === this.selected;
@@ -70,8 +71,20 @@ export class DifficultySelector extends Container {
           4,
           segmentWidth - 8,
           this.selectorHeight - 8,
-          12,
-        ).fill({ color });
+          10,
+        ).fill({ color, alpha: 0.5 }).stroke({
+          color: difficulty === 'easy'
+            ? 0x61f0c2
+            : difficulty === 'medium'
+              ? 0x76a0ff
+              : 0xff6f9f,
+          alpha: 0.72,
+          width: 1,
+        });
+        this.background
+          .moveTo(index * segmentWidth + 18, this.selectorHeight - 5)
+          .lineTo((index + 1) * segmentWidth - 18, this.selectorHeight - 5)
+          .stroke({ color: 0xffffff, alpha: 0.62, width: 1.4 });
       }
       if (index > 0) {
         this.background.moveTo(index * segmentWidth, 12).lineTo(
