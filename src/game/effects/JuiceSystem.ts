@@ -8,13 +8,17 @@ interface ParticleEffect {
   life: number;
   duration: number;
   gravity: number;
+  rotationSpeed: number;
 }
 
 interface RingEffect {
   node: Graphics;
   life: number;
   duration: number;
+  rotationSpeed: number;
 }
+
+type ParticleShape = 'dot' | 'diamond' | 'streak';
 
 interface TextEffect {
   node: Text;
@@ -141,6 +145,12 @@ export class JuiceSystem extends Container {
         2 + Math.random() * 4,
         0.42 + Math.random() * 0.2,
         grade === 'miss' ? 100 : 45,
+        this.superFlowActive && index % 3 === 0
+          ? 'streak'
+          : grade === 'perfect' && index % 4 === 0
+            ? 'diamond'
+            : 'dot',
+        (Math.random() - 0.5) * 7,
       );
     }
 
@@ -201,11 +211,14 @@ export class JuiceSystem extends Container {
         3 + Math.random() * 4,
         0.65 + Math.random() * 0.25,
         15,
+        index % 4 === 0 ? 'diamond' : 'dot',
+        (index % 2 === 0 ? 1 : -1) * (2 + Math.random() * 3),
       );
     }
 
     this.createRing(x, y, 0xffe276, 60, 0.75, 7);
     this.createRing(x, y, 0xb38cff, 95, 0.9, 4);
+    this.createArcRing(x, y, 0xfff1a6, 128, 0.95, 2.5, 1.8);
     this.createAnnouncement(x, y - 52, 'MODO FLOW', 0xfff2a8, 1.15);
     this.flashColor = 0xffe276;
     this.flashStrength = 0.24;
@@ -244,12 +257,16 @@ export class JuiceSystem extends Container {
         3 + Math.random() * 5,
         0.75 + Math.random() * 0.3,
         8,
+        index % 3 === 0 ? 'streak' : index % 3 === 1 ? 'diamond' : 'dot',
+        (index % 2 === 0 ? 1 : -1) * (4 + Math.random() * 5),
       );
     }
 
     this.createRing(x, y, 0xffffff, 48, 0.65, 8);
     this.createRing(x, y, 0x8ffaff, 82, 0.9, 6);
     this.createRing(x, y, 0xff83e6, 122, 1.1, 4);
+    this.createArcRing(x, y, 0x8ffaff, 154, 1.15, 3, 2.7);
+    this.createArcRing(x, y, 0xff83e6, 188, 1.3, 2, -2.1);
     this.createAnnouncement(x, y - 60, 'SUPER FLOW x4', 0x8ffaff, 1.45);
     this.flashColor = 0xa8f8ff;
     this.flashStrength = 0.34;
@@ -311,9 +328,13 @@ export class JuiceSystem extends Container {
     this.flashStrength = Math.max(0, this.flashStrength - deltaSeconds * 0.55);
     this.flash.alpha = this.flashStrength;
     this.superFrame.alpha = this.superFlowActive
-      ? 0.58 + Math.sin(this.elapsed * 10) * 0.18
-      : Math.max(0, this.superFrame.alpha - deltaSeconds * 5);
-    this.superFrame.tint = Math.sin(this.elapsed * 7) > 0 ? 0x8ffaff : 0xff83e6;
+      ? 0.5 + Math.sin(this.elapsed * 10) * 0.16
+      : this.flowActive
+        ? 0.1 + Math.sin(this.elapsed * 4) * 0.035
+        : Math.max(0, this.superFrame.alpha - deltaSeconds * 4);
+    this.superFrame.tint = this.superFlowActive
+      ? 0x8ffaff
+      : 0xffdd72;
     this.shakeStrength = Math.max(0, this.shakeStrength - deltaSeconds * 24);
     this.shakeX = (Math.random() * 2 - 1) * this.shakeStrength;
     this.shakeY = (Math.random() * 2 - 1) * this.shakeStrength;
@@ -327,6 +348,7 @@ export class JuiceSystem extends Container {
       const remaining = Math.max(0, 1 - particle.life / particle.duration);
       particle.node.alpha = remaining;
       particle.node.scale.set(0.65 + remaining * 0.55);
+      particle.node.rotation += particle.rotationSpeed * deltaSeconds;
 
       if (particle.life >= particle.duration) {
         particle.node.destroy();
@@ -340,6 +362,7 @@ export class JuiceSystem extends Container {
       const progress = Math.min(1, ring.life / ring.duration);
       ring.node.alpha = (1 - progress) * 0.9;
       ring.node.scale.set(0.75 + progress * 1.65);
+      ring.node.rotation += ring.rotationSpeed * deltaSeconds;
 
       if (ring.life >= ring.duration) {
         ring.node.destroy();
@@ -375,13 +398,25 @@ export class JuiceSystem extends Container {
     radius: number,
     duration: number,
     gravity: number,
+    shape: ParticleShape = 'dot',
+    rotationSpeed = 0,
   ): void {
     while (this.particles.length >= MAX_PARTICLES) {
       const oldest = this.particles.shift();
       oldest?.node.destroy();
     }
     const node = new Graphics();
-    node.circle(0, 0, radius).fill({ color });
+    if (shape === 'streak') {
+      node.roundRect(-radius * 3, -radius * 0.45, radius * 6, radius * 0.9, radius).fill({
+        color,
+      });
+      node.rotation = Math.atan2(velocityY, velocityX);
+    } else if (shape === 'diamond') {
+      node.rect(-radius, -radius, radius * 2, radius * 2).fill({ color });
+      node.rotation = Math.PI / 4;
+    } else {
+      node.circle(0, 0, radius).fill({ color });
+    }
     node.position.set(x, y);
     node.blendMode = 'add';
     this.addChild(node);
@@ -392,6 +427,7 @@ export class JuiceSystem extends Container {
       life: 0,
       duration,
       gravity,
+      rotationSpeed,
     });
   }
 
@@ -412,7 +448,35 @@ export class JuiceSystem extends Container {
     node.position.set(x, y);
     node.blendMode = 'add';
     this.addChild(node);
-    this.rings.push({ node, life: 0, duration });
+    this.rings.push({ node, life: 0, duration, rotationSpeed: 0 });
+  }
+
+  private createArcRing(
+    x: number,
+    y: number,
+    color: number,
+    radius: number,
+    duration: number,
+    width: number,
+    rotationSpeed: number,
+  ): void {
+    while (this.rings.length >= MAX_RINGS) {
+      const oldest = this.rings.shift();
+      oldest?.node.destroy();
+    }
+    const node = new Graphics();
+    for (let segment = 0; segment < 4; segment += 1) {
+      const start = segment * Math.PI * 0.5 + 0.1;
+      node.arc(0, 0, radius, start, start + Math.PI * 0.29).stroke({
+        color,
+        alpha: 0.9 - segment * 0.1,
+        width,
+      });
+    }
+    node.position.set(x, y);
+    node.blendMode = 'add';
+    this.addChild(node);
+    this.rings.push({ node, life: 0, duration, rotationSpeed });
   }
 
   private createFloatingText(
@@ -463,7 +527,8 @@ export class JuiceSystem extends Container {
   }
 
   private redrawSuperFrame(): void {
-    const inset = 7;
+    const inset = 8;
+    const corner = Math.min(54, Math.max(28, Math.min(this.viewportWidth, this.viewportHeight) * 0.09));
     this.superFrame.clear();
     this.superFrame.roundRect(
       inset,
@@ -471,14 +536,27 @@ export class JuiceSystem extends Container {
       Math.max(0, this.viewportWidth - inset * 2),
       Math.max(0, this.viewportHeight - inset * 2),
       20,
-    ).stroke({ color: 0xffffff, alpha: 0.9, width: 5 });
+    ).stroke({ color: 0xffffff, alpha: 0.52, width: 1.5 });
     this.superFrame.roundRect(
-      inset + 7,
-      inset + 7,
-      Math.max(0, this.viewportWidth - (inset + 7) * 2),
-      Math.max(0, this.viewportHeight - (inset + 7) * 2),
+      inset + 5,
+      inset + 5,
+      Math.max(0, this.viewportWidth - (inset + 5) * 2),
+      Math.max(0, this.viewportHeight - (inset + 5) * 2),
       15,
-    ).stroke({ color: 0xffffff, alpha: 0.38, width: 2 });
-    this.superFrame.alpha = this.superFlowActive ? 0.7 : 0;
+    ).stroke({ color: 0xffffff, alpha: 0.2, width: 0.8 });
+    const right = this.viewportWidth - inset;
+    const bottom = this.viewportHeight - inset;
+    for (const [x, y, directionX, directionY] of [
+      [inset, inset, 1, 1],
+      [right, inset, -1, 1],
+      [right, bottom, -1, -1],
+      [inset, bottom, 1, -1],
+    ] as const) {
+      this.superFrame.moveTo(x, y + directionY * corner).lineTo(x, y).lineTo(
+        x + directionX * corner,
+        y,
+      ).stroke({ color: 0xffffff, alpha: 0.92, width: 3 });
+    }
+    this.superFrame.alpha = this.superFlowActive ? 0.62 : this.flowActive ? 0.1 : 0;
   }
 }

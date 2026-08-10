@@ -188,6 +188,7 @@ export class GameScene implements Scene {
         this.activeEvent.time - currentTime,
         this.difficultyProfile.targetLeadTime,
         this.difficultyProfile.perfectWindow,
+        this.difficultyProfile.goodWindow,
       );
     }
 

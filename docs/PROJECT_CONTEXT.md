@@ -33,7 +33,7 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Menu inicial, pantalla de partida y pantalla de resultado.
 - Audio desbloqueado desde el boton JUGAR, seguido por cuenta regresiva 3-2-1 sin toque adicional.
 - Catalogo musical generado automaticamente desde `public/assets/audio/`.
-- Juice procedural con particulas, anillos, texto flotante, vibracion, shake y fondo reactivo.
+- Juice procedural con objetivos en capas, particulas geometricas, anillos, texto, shake y fondo reactivo.
 - Mecanicas FLOW x2 y SUPER FLOW x4 con progresion, degradacion y resumen final.
 - Pausa real de Web Audio con Continuar, Reiniciar y Volver al menu.
 
@@ -103,6 +103,15 @@ La dificultad debe medir ritmo y lectura, no las limitaciones fisicas del dispos
 
 Los efectos tienen limites simultaneos de particulas, anillos y textos para evitar que FLOW o Dificil provoquen pausas de recoleccion de memoria. HUD y efectos mantienen `eventMode = none` para no interceptar el canvas jugable.
 
+## Contrato visual de objetivos
+
+- Los objetivos usan sombra, capas interiores, brillo y reflejo para dar profundidad sin assets externos.
+- El aro exterior comunica aproximacion. El aro ambar se intensifica dentro de `Bien` y el verde-agua dentro de `Perfect`.
+- Estos aros solo representan las ventanas de dificultad existentes; no alteran hitbox, timing, puntuacion ni asistencia tactil.
+- Los drag conservan el mismo corredor logico, pero muestran una guia fina, puntos intermedios, flecha discreta y destino de doble aro.
+- FLOW suma geometria dorada y marco sutil. SUPER FLOW suma tunel cian/magenta, estelas radiales y marco de esquinas.
+- Nebulosas, poligonos, tunel y particulas se dibujan una vez y se animan mediante transformaciones para proteger el rendimiento movil.
+
 ## Canciones cortas y fases
 
 - Cada audio se trata como un loop de 30 segundos.
@@ -140,9 +149,9 @@ public/assets/beatmaps/<id-cancion>/
 ## Balance actual de dificultad
 
 ```text
-Facil    60 objetivos   6 vidas   Bien +/-260 ms   radio tactil 60 px
-Medio   162 objetivos   4 vidas   Bien +/-180 ms   radio tactil 50 px
-Dificil 192 objetivos   3 vidas   Bien +/-140 ms   radio tactil 44 px
+Facil    58 objetivos   6 vidas   Bien +/-260 ms   radio tactil 60 px
+Medio   159 objetivos   4 vidas   Bien +/-180 ms   radio tactil 50 px
+Dificil 189 objetivos   3 vidas   Bien +/-140 ms   radio tactil 44 px
 ```
 
 Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el pulso provisional de 0.75 segundos. La dificultad debe venir principalmente de densidad, alternancia, arrastres y precision; no de ocultar informacion al jugador.
@@ -238,6 +247,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Los taps tempranos dentro del buffer se aceptan una sola vez.
 - Soltar un drag completado ligeramente antes no produce un Miss injusto.
 - El arrastre sigue el rastro y llega al destino.
+- Los aros Bien/Perfect coinciden visualmente con el resultado sin cambiar la ventana real.
 - Los fallos reducen vida y rompen combo.
 - FLOW carga, activa x2 y se rompe con un fallo.
 - Cuatro Perfect consecutivos dentro de FLOW activan SUPER FLOW x4.

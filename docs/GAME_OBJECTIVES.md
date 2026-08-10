@@ -35,6 +35,9 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [x] Beatmap JSON separado del codigo.
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
 - [x] Feedback visual distinto para Perfect, Bien y Miss.
+- [x] Objetivos con profundidad, brillo, reflejo y bordes finos.
+- [x] Aros semanticos que hacen visibles las ventanas Bien y Perfect.
+- [x] Trayectoria drag fina con puntos guia y destino profesional.
 - [x] Medidor FLOW cargado mediante precision.
 - [x] Estado FLOW temporal con puntuacion x2 y transformacion audiovisual.
 - [x] Riesgo de romper FLOW inmediatamente al fallar.
@@ -62,6 +65,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Transformacion completa del fondo, objetivos e impactos durante FLOW.
 - [x] Pantalla, marco, objetivos e impactos exclusivos de SUPER FLOW.
 - [x] Fondo procedural, particulas, shake y feedback visual sin assets externos.
+- [x] Nebulosas, geometria FLOW, tunel SUPER FLOW y particulas geometricas.
 - [ ] Indicadores que no dependan solo del color para accesibilidad.
 
 ## Prioridad tactil
@@ -166,6 +170,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Ajustar FLOW para una partida completa de 90 segundos.
 - [ ] Confirmar que el loop de audio no tiene corte perceptible entre fases.
 - [ ] Confirmar que Medio y Dificil siguen siendo exigentes pero legibles con dedo.
+- [ ] Confirmar que los aros Bien/Perfect ayudan a aprender sin saturar la pantalla.
+- [ ] Medir FPS durante SUPER FLOW en Android de gama baja.
 - [ ] Probar la lista con suficientes canciones para requerir scroll real.
 - [ ] Revisar que un `Miss` se sienta claro sin parecer injusto.
 - [ ] Ajustar el beatmap de la cancion de prueba escuchando sus golpes reales.
