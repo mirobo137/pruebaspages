@@ -34,7 +34,7 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Audio desbloqueado despues del primer gesto del usuario.
 - Catalogo musical generado automaticamente desde `public/assets/audio/`.
 - Juice procedural con particulas, anillos, texto flotante, vibracion, shake y fondo reactivo.
-- Mecanica FLOW con medidor, multiplicador x2, cuenta regresiva, ruptura por fallo y resumen final.
+- Mecanicas FLOW x2 y SUPER FLOW x4 con progresion, degradacion y resumen final.
 
 La build verificada es `npm run build`. No se deben subir `node_modules/` ni `dist/`; ambos son generados o ignorados por Git.
 
@@ -54,7 +54,7 @@ src/
   core/                      Contratos reutilizables, escenas y utilidades
   scenes/                    Flujo jugable y futuras pantallas
   game/                      Reglas, score, modos, timing y entidades de juego
-    flow/                    Estado FLOW, carga, duracion y multiplicador
+    flow/                    Estados normal, FLOW y SUPER FLOW
     difficulty/              Perfiles Facil, Medio y Dificil
   ui/                        HUD, menus y resultados
   audio/                     Reproduccion, desbloqueo y analisis de audio
@@ -109,7 +109,8 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - El audio vuelve a empezar en cada fase, pero el reloj, score, vidas, combo y FLOW continuan.
 - Cada fase tiene un patron distinto para que la repeticion musical no produzca la misma lectura tactil.
 - Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.
-- El cambio de fase modifica HUD, color del fondo, particulas y vibracion.
+- El cambio real a Impulso o Climax modifica HUD, fondo, particulas y vibracion.
+- La inicializacion de Lectura no emite vibracion, shake ni anuncio de transicion; ningun cambio de fase registra aciertos o modifica FLOW.
 - El motor agenda tres fuentes de audio y mezcla cada union durante 450 ms con curvas de potencia constante. Esto elimina el hueco tecnico del loop nativo.
 
 Si la composicion contiene un cierre, silencio o fade-out muy marcado, el crossfade reduce el corte pero no puede convertirla por completo en un loop musical. Para futuras canciones se debe pedir `seamless loop`, BPM constante, sin intro larga y sin fade-out.
@@ -137,7 +138,10 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 
 - Perfect carga 25 puntos y Bien carga 12; un fallo fuera de FLOW resta 30.
 - Al llegar a 100, FLOW se activa automaticamente durante 8 segundos.
-- Mientras esta activo, la puntuacion se multiplica por 2 y toda la presentacion cambia.
+- Mientras esta activo, la puntuacion se multiplica por 2 y comienza un medidor separado de SUPER FLOW.
+- SUPER FLOW exige cuatro `Perfect` consecutivos dentro de FLOW; un `Bien` reinicia ese progreso.
+- SUPER FLOW multiplica la puntuacion por 4, tiene marco y presentacion propios y se sostiene mejor con nuevos `Perfect`.
+- Un `Bien` durante SUPER FLOW lo degrada a FLOW x2 con al menos 3.5 segundos restantes; no rompe FLOW.
 - Un fallo rompe FLOW de inmediato. Al expirar, el medidor vuelve a cero.
 - Los valores viven en `src/game/config.ts` para balancearlos tras pruebas reales.
 
@@ -210,7 +214,7 @@ editar codigo o beatmap -> npm run build -> npm run dev -- --host 0.0.0.0
 -> probar en movil -> corregir -> git add/commit/push -> GitHub Pages
 ```
 
-La primera prueba de FLOW consiste en acertar cuatro objetivos seguidos como `Perfect`. Durante la prueba hay que observar si el objetivo se entiende, si el toque se siente inmediato y si la transformacion visual ayuda o distrae.
+La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perfect` consecutivos. Hay que confirmar que un `Bien` dentro de SUPER FLOW regresa a FLOW x2, mientras un `Miss` rompe todo el estado.
 
 ### Checklist antes de push
 
@@ -223,6 +227,9 @@ La primera prueba de FLOW consiste en acertar cuatro objetivos seguidos como `Pe
 - El arrastre sigue el rastro y llega al destino.
 - Los fallos reducen vida y rompen combo.
 - FLOW carga, activa x2 y se rompe con un fallo.
+- Cuatro Perfect consecutivos dentro de FLOW activan SUPER FLOW x4.
+- Bien degrada SUPER FLOW a FLOW; Miss rompe ambos.
+- El inicio de Lectura no genera vibracion o transicion fantasma.
 - La pantalla de resultado muestra dificultad y fase alcanzada.
 - Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.
 

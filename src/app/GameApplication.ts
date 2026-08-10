@@ -99,6 +99,7 @@ export class GameApplication {
         difficulty,
         snapshot,
         flowActivations: flow.activations,
+        superFlowActivations: flow.superActivations,
         phaseReached,
         rewardCoins,
         onBackToMenu: this.showMenu,

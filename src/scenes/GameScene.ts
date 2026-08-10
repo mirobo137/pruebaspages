@@ -12,7 +12,7 @@ import { DIFFICULTY_PROFILES } from '../game/difficulty/Difficulty';
 import { JuiceSystem } from '../game/effects/JuiceSystem';
 import { RhythmBackground } from '../game/effects/RhythmBackground';
 import { FlowModel } from '../game/flow/FlowModel';
-import type { FlowSnapshot } from '../game/flow/FlowModel';
+import type { FlowChange, FlowSnapshot } from '../game/flow/FlowModel';
 import { ScoreModel } from '../game/score/ScoreModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { TargetNode } from '../game/targets/TargetNode';
@@ -114,7 +114,7 @@ export class GameScene implements Scene {
     const isRunning = this.musicStarted && this.audioManager.isPlaying;
     const currentTime = isRunning ? this.audioManager.currentTime : 0;
     const flowChange = this.flow.update(isRunning ? deltaSeconds : 0);
-    this.syncFlowState(flowChange.snapshot);
+    this.applyFlowChange(flowChange);
     this.hud.animate(deltaSeconds);
     this.background.updateBackground(deltaSeconds);
     this.effects.updateEffects(deltaSeconds);
@@ -355,21 +355,13 @@ export class GameScene implements Scene {
 
     const feedbackPoint = target.getFeedbackPoint();
     const flowChange = this.flow.register(grade);
-    this.syncFlowState(flowChange.snapshot);
+    const flowTransitionHandled = this.applyFlowChange(flowChange);
     this.score.register(grade, flowChange.snapshot.multiplier);
     this.hud.update(this.score.snapshot());
     this.hud.showTiming(grade);
     this.effects.emitImpact(feedbackPoint.x, feedbackPoint.y, grade);
     this.background.pulse(grade === 'perfect' ? 1 : grade === 'good' ? 0.65 : 0.8);
-    if (flowChange.activated) {
-      this.effects.emitFlowActivation();
-      this.hud.showFlowActivation();
-      this.haptics.flowActivation();
-    } else if (flowChange.ended) {
-      this.effects.emitFlowBreak();
-      this.hud.showFlowBreak();
-      this.haptics.flowBreak();
-    } else {
+    if (!flowTransitionHandled) {
       this.haptics.feedback(grade);
     }
     target.destroy();
@@ -412,7 +404,8 @@ export class GameScene implements Scene {
       dragPathTolerance: this.difficultyProfile.dragPathTolerance,
     });
     target.position.set(start.x, start.y);
-    target.setFlowActive(this.flow.snapshot().active);
+    const flowSnapshot = this.flow.snapshot();
+    target.setFlowState(flowSnapshot.active, flowSnapshot.superActive);
     this.activeTarget = target;
     this.activeEvent = event;
     this.targets.addChild(target);
@@ -489,17 +482,54 @@ export class GameScene implements Scene {
     );
     if (nextPhaseIndex === this.phaseIndex) return;
 
+    const isInitialPhase = this.phaseIndex < 0;
     this.phaseIndex = nextPhaseIndex;
-    this.background.setPhase(nextPhaseIndex);
+    this.background.setPhase(nextPhaseIndex, !isInitialPhase);
+    if (isInitialPhase) return;
+
     this.effects.emitPhaseTransition(nextPhaseIndex + 1, phase.name);
     this.haptics.phaseTransition();
   }
 
   private syncFlowState(snapshot: FlowSnapshot): void {
     this.hud.updateFlow(snapshot);
-    this.effects.setFlowActive(snapshot.active);
-    this.background.setFlowActive(snapshot.active);
-    this.activeTarget?.setFlowActive(snapshot.active);
+    this.effects.setFlowState(snapshot.active, snapshot.superActive);
+    this.background.setFlowState(snapshot.active, snapshot.superActive);
+    this.activeTarget?.setFlowState(snapshot.active, snapshot.superActive);
+  }
+
+  private applyFlowChange(change: FlowChange): boolean {
+    this.syncFlowState(change.snapshot);
+
+    if (change.superActivated) {
+      this.effects.emitSuperFlowActivation();
+      this.hud.showSuperFlowActivation();
+      this.haptics.superFlowActivation();
+      return true;
+    }
+
+    if (change.superDemoted) {
+      this.effects.emitSuperFlowDemotion();
+      this.hud.showSuperFlowDemotion();
+      this.haptics.superFlowDemotion();
+      return true;
+    }
+
+    if (change.activated) {
+      this.effects.emitFlowActivation();
+      this.hud.showFlowActivation();
+      this.haptics.flowActivation();
+      return true;
+    }
+
+    if (change.ended) {
+      this.effects.emitFlowBreak();
+      this.hud.showFlowBreak();
+      this.haptics.flowBreak();
+      return true;
+    }
+
+    return false;
   }
 
   private isWithinEarlyInputBuffer(

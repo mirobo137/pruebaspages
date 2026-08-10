@@ -34,6 +34,8 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [x] Medidor FLOW cargado mediante precision.
 - [x] Estado FLOW temporal con puntuacion x2 y transformacion audiovisual.
 - [x] Riesgo de romper FLOW inmediatamente al fallar.
+- [x] SUPER FLOW x4 desbloqueado solo con cuatro Perfect consecutivos dentro de FLOW.
+- [x] Bien degrada SUPER FLOW a FLOW x2; Miss rompe todo el estado.
 - [ ] Feedback sonoro distinto para Perfect, Bien y Miss.
 - [ ] Objetivos que se mueven con la musica.
 - [ ] Cadenas de varios objetivos y patrones reconocibles.
@@ -54,6 +56,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Pulsos o anillos sincronizados con el beat.
 - [x] Primer efecto visual de combo mediante punch del HUD.
 - [x] Transformacion completa del fondo, objetivos e impactos durante FLOW.
+- [x] Pantalla, marco, objetivos e impactos exclusivos de SUPER FLOW.
 - [x] Fondo procedural, particulas, shake y feedback visual sin assets externos.
 - [ ] Indicadores que no dependan solo del color para accesibilidad.
 
@@ -79,6 +82,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Monedas locales como base para desbloquear futuras canciones.
 - [x] Meta visible de corto plazo: cargar y mantener FLOW durante la partida.
 - [x] Resumen de activaciones FLOW al terminar.
+- [x] Resumen de activaciones SUPER FLOW al terminar.
 - [x] Recompensa de monedas multiplicada por dificultad.
 - [ ] Mejor puntuacion local por cancion.
 - [ ] Estadisticas de precision, maximo combo y errores.
@@ -126,6 +130,7 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Pantalla de resultado y regreso al menu.
 - [x] Feedback visual de aciertos y errores.
 - [x] Primera mecanica de enganche basada en habilidad: FLOW y multiplicador x2.
+- [x] Recompensa avanzada de precision: SUPER FLOW y multiplicador x4.
 - [x] Estructura de partida con crecimiento visual en tres fases.
 - [x] Juice de particulas, combo y fondo reactivo.
 - [ ] Feedback de audio corto para aciertos y combos.
@@ -148,6 +153,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Verificar taps muy rapidos, dedos alternados y arrastres diagonales.
 - [ ] Confirmar que el HUD inferior no invade la zona tactil.
 - [ ] Medir si cuatro `Perfect` son una meta alcanzable y emocionante.
+- [ ] Medir si cuatro `Perfect` adicionales dentro de FLOW hacen SUPER FLOW alcanzable sin volverlo comun.
+- [ ] Confirmar que Bien degrada a FLOW y que el cambio se entiende sin leer instrucciones.
+- [ ] Confirmar que los cambios de fase no emiten feedback fantasma ni alteran el medidor.
 - [ ] Ajustar FLOW para una partida completa de 90 segundos.
 - [ ] Confirmar que el loop de audio no tiene corte perceptible entre fases.
 - [ ] Confirmar que Medio y Dificil siguen siendo exigentes pero legibles con dedo.
@@ -163,7 +171,9 @@ primer toque -> audio y fase Lectura
 30 segundos -> Impulso con nuevo patron
 60 segundos -> Climax y mayor intensidad
 aciertos -> combo y medidor FLOW
-cuatro Perfect -> FLOW x2 y transformacion visual
-fallo -> perdida de vida, combo roto y posible ruptura de FLOW
+medidor completo -> FLOW x2 y progreso de precision
+cuatro Perfect dentro de FLOW -> SUPER FLOW x4
+Bien en SUPER FLOW -> regreso a FLOW x2
+fallo -> perdida de vida, combo roto y ruptura total de FLOW
 fin -> resultado, monedas y deseo de repetir para mejorar
 ```

@@ -9,6 +9,7 @@ export interface ResultSceneOptions {
   difficulty: Difficulty;
   snapshot: ScoreSnapshot;
   flowActivations: number;
+  superFlowActivations: number;
   phaseReached: number;
   rewardCoins: number;
   onBackToMenu: () => void;
@@ -59,6 +60,7 @@ export class ResultScene implements Scene {
       'Perfect: ' + snapshot.perfects + '   Bien: ' + snapshot.goods,
       'Fallos: ' + snapshot.misses,
       'FLOW activado: ' + this.options.flowActivations,
+      'SUPER FLOW activado: ' + this.options.superFlowActivations,
       '',
       '+' + this.options.rewardCoins + ' monedas',
     ].join('\n');

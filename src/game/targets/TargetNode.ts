@@ -29,6 +29,7 @@ export class TargetNode extends Container {
   private earlyBump = 0;
   private pressed = false;
   private flowActive = false;
+  private superFlowActive = false;
   private dragProgress = 0;
   private readonly dragVector: TargetPoint;
 
@@ -60,16 +61,18 @@ export class TargetNode extends Container {
     this.ageSeconds += deltaSeconds;
     this.earlyBump = Math.max(0, this.earlyBump - deltaSeconds * 5.5);
     const appearProgress = Math.min(1, this.ageSeconds / 0.14);
-    const pulse = 1 + Math.sin(this.ageSeconds * (this.flowActive ? 14 : 9))
-      * (this.flowActive ? 0.045 : 0.025);
+    const pulseSpeed = this.superFlowActive ? 19 : this.flowActive ? 14 : 9;
+    const pulseStrength = this.superFlowActive ? 0.065 : this.flowActive ? 0.045 : 0.025;
+    const pulse = 1 + Math.sin(this.ageSeconds * pulseSpeed) * pulseStrength;
     const pressScale = this.pressed ? 0.92 : 1;
     const earlyScale = 1 + this.earlyBump * 0.14;
 
     this.alpha = appearProgress;
     this.scale.set((0.72 + appearProgress * 0.28) * pulse);
     this.marker.scale.set(earlyScale * pressScale);
-    this.glow.alpha = (this.flowActive ? 0.32 : 0.18)
-      + Math.sin(this.ageSeconds * (this.flowActive ? 9 : 5)) * 0.06;
+    this.glow.alpha = (this.superFlowActive ? 0.44 : this.flowActive ? 0.32 : 0.18)
+      + Math.sin(this.ageSeconds * (this.superFlowActive ? 13 : this.flowActive ? 9 : 5))
+      * 0.06;
     this.destination.alpha = this.kind === 'drag'
       ? 0.55 + Math.sin(this.ageSeconds * 7) * 0.2
       : 0;
@@ -100,14 +103,16 @@ export class TargetNode extends Container {
     this.pressed = pressed;
   }
 
-  setFlowActive(active: boolean): void {
+  setFlowState(active: boolean, superActive = false): void {
     this.flowActive = active;
-    const tint = active ? 0xffe78c : 0xffffff;
-    this.marker.tint = tint;
-    this.approachRing.tint = tint;
-    this.glow.tint = tint;
-    this.progressTrail.tint = tint;
-    this.destination.tint = tint;
+    this.superFlowActive = superActive;
+    const primaryTint = superActive ? 0x8ffaff : active ? 0xffe78c : 0xffffff;
+    const accentTint = superActive ? 0xff83e6 : primaryTint;
+    this.marker.tint = primaryTint;
+    this.approachRing.tint = accentTint;
+    this.glow.tint = accentTint;
+    this.progressTrail.tint = primaryTint;
+    this.destination.tint = accentTint;
   }
 
   nudgeEarly(): void {

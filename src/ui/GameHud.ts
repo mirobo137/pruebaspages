@@ -2,6 +2,7 @@ import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import { getDifficultyLabel } from '../game/difficulty/Difficulty';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
+import type { FlowMode } from '../game/flow/FlowModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { TimingGrade } from '../game/timing/TimingGrade';
 
@@ -70,7 +71,7 @@ export class GameHud extends Container {
   private targetLifeRatio = 1;
   private displayFlowRatio = 0;
   private targetFlowRatio = 0;
-  private flowActive = false;
+  private flowMode: FlowMode = 'charging';
   private flowPulse = 0;
   private flowBarWidth = 240;
   private comboPunch = 0;
@@ -155,16 +156,26 @@ export class GameHud extends Container {
   }
 
   updateFlow(snapshot: FlowSnapshot): void {
-    const wasActive = this.flowActive;
-    this.flowActive = snapshot.active;
-    this.targetFlowRatio = snapshot.active
+    const previousMode = this.flowMode;
+    this.flowMode = snapshot.mode;
+    this.targetFlowRatio = snapshot.mode === 'super'
       ? snapshot.remaining / snapshot.duration
-      : snapshot.charge / snapshot.maxCharge;
-    this.flowLabel.text = snapshot.active
-      ? 'FLOW x' + snapshot.multiplier + '  ' + snapshot.remaining.toFixed(1) + 's'
-      : 'FLOW ' + Math.round(this.targetFlowRatio * 100) + '%';
-    this.flowLabel.style.fill = snapshot.active ? '#fff2a8' : '#8ea7ff';
-    if (snapshot.active && !wasActive) this.flowPulse = 1;
+      : snapshot.mode === 'flow'
+        ? snapshot.superPerfects / snapshot.superPerfectRequirement
+        : snapshot.charge / snapshot.maxCharge;
+    this.flowLabel.text = snapshot.mode === 'super'
+      ? 'SUPER FLOW x' + snapshot.multiplier + '  ' + snapshot.remaining.toFixed(1) + 's'
+      : snapshot.mode === 'flow'
+        ? 'FLOW x' + snapshot.multiplier + '  ·  SUPER '
+          + snapshot.superPerfects + '/' + snapshot.superPerfectRequirement
+          + '  ·  ' + snapshot.remaining.toFixed(1) + 's'
+        : 'FLOW ' + Math.round(this.targetFlowRatio * 100) + '%';
+    this.flowLabel.style.fill = snapshot.mode === 'super'
+      ? '#8ffaff'
+      : snapshot.mode === 'flow'
+        ? '#fff2a8'
+        : '#8ea7ff';
+    if (snapshot.mode !== previousMode) this.flowPulse = 1;
   }
 
   showFlowActivation(): void {
@@ -180,6 +191,22 @@ export class GameHud extends Container {
     this.flowBanner.style.fill = '#ff7d9b';
     this.flowBanner.alpha = 1;
     this.flowBanner.scale.set(0.78);
+    this.flowBannerAge = 0;
+  }
+
+  showSuperFlowActivation(): void {
+    this.flowBanner.text = 'SUPER FLOW x4';
+    this.flowBanner.style.fill = '#8ffaff';
+    this.flowBanner.alpha = 1;
+    this.flowBanner.scale.set(0.32);
+    this.flowBannerAge = 0;
+  }
+
+  showSuperFlowDemotion(): void {
+    this.flowBanner.text = 'FLOW x2';
+    this.flowBanner.style.fill = '#fff2a8';
+    this.flowBanner.alpha = 1;
+    this.flowBanner.scale.set(0.7);
     this.flowBannerAge = 0;
   }
 
@@ -222,7 +249,11 @@ export class GameHud extends Container {
     this.flowBanner.scale.set(bannerScale);
     this.flowLabel.scale.set(1 + this.flowPulse * 0.16);
     this.flowBarBackground.clear().roundRect(0, 0, this.flowBarWidth, 11, 6).fill({
-      color: this.flowActive ? 0x4b3f50 : 0x26304f,
+      color: this.flowMode === 'super'
+        ? 0x263b52
+        : this.flowMode === 'flow'
+          ? 0x4b3f50
+          : 0x26304f,
       alpha: 0.92,
     });
     this.flowBarFill.clear().roundRect(
@@ -232,9 +263,13 @@ export class GameHud extends Container {
       11,
       6,
     ).fill({
-      color: this.flowActive ? 0xffdd72 : 0x718cff,
+      color: this.flowMode === 'super'
+        ? 0x8ffaff
+        : this.flowMode === 'flow'
+          ? 0xffdd72
+          : 0x718cff,
     });
-    this.flowBarFill.alpha = this.flowActive
+    this.flowBarFill.alpha = this.flowMode !== 'charging'
       ? 0.82 + Math.sin(this.flowBannerAge * 15) * 0.18
       : 0.9;
   }
@@ -255,9 +290,11 @@ export class GameHud extends Container {
     this.flowBarWidth = Math.min(300, Math.max(180, width - 80));
     this.flowLabel.anchor.set(0.5, 1);
     this.flowLabel.position.set(width / 2, height - 30);
+    this.flowLabel.style.fontSize = width < 380 ? 11 : 15;
     this.flowBarBackground.position.set((width - this.flowBarWidth) / 2, height - 24);
     this.flowBarFill.position.set((width - this.flowBarWidth) / 2, height - 24);
     this.flowBanner.anchor.set(0.5);
     this.flowBanner.position.set(width / 2, height * 0.3);
+    this.flowBanner.style.fontSize = width < 380 ? 31 : 42;
   }
 }

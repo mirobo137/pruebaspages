@@ -21,6 +21,14 @@ export class HapticsService {
     if ('vibrate' in navigator) navigator.vibrate([35, 18, 45]);
   }
 
+  superFlowActivation(): void {
+    if ('vibrate' in navigator) navigator.vibrate([10, 18, 14, 18, 22, 30, 32]);
+  }
+
+  superFlowDemotion(): void {
+    if ('vibrate' in navigator) navigator.vibrate([22, 16, 12]);
+  }
+
   phaseTransition(): void {
     if ('vibrate' in navigator) navigator.vibrate([10, 35, 16]);
   }

@@ -22,7 +22,9 @@ export class RhythmBackground extends Container {
   private elapsed = 0;
   private pulseEnergy = 0;
   private flowActive = false;
+  private superFlowActive = false;
   private flowIntensity = 0;
+  private superFlowIntensity = 0;
   private phaseIndex = 0;
 
   constructor() {
@@ -101,34 +103,56 @@ export class RhythmBackground extends Container {
     this.pulseEnergy = Math.max(this.pulseEnergy, strength);
   }
 
-  setFlowActive(active: boolean): void {
+  setFlowState(active: boolean, superActive = false): void {
     if (active && !this.flowActive) this.pulse(1.5);
+    if (superActive && !this.superFlowActive) this.pulse(2);
     this.flowActive = active;
+    this.superFlowActive = superActive;
   }
 
-  setPhase(phaseIndex: number): void {
+  setPhase(phaseIndex: number, animate = true): void {
     this.phaseIndex = Math.max(0, Math.min(PHASE_COLORS.length - 1, phaseIndex));
-    this.pulse(1.25);
+    if (animate) this.pulse(1.25);
   }
 
   updateBackground(deltaSeconds: number): void {
     this.elapsed += deltaSeconds;
     const flowTarget = this.flowActive ? 1 : 0;
+    const superFlowTarget = this.superFlowActive ? 1 : 0;
     this.flowIntensity += (flowTarget - this.flowIntensity)
       * Math.min(1, deltaSeconds * (this.flowActive ? 5 : 2.5));
+    this.superFlowIntensity += (superFlowTarget - this.superFlowIntensity)
+      * Math.min(1, deltaSeconds * (this.superFlowActive ? 7 : 3.5));
     this.pulseEnergy = Math.max(0, this.pulseEnergy - deltaSeconds * 2.6);
     const breathing = 1 + Math.sin(this.elapsed * (1.4 + this.flowIntensity * 3)) * 0.025;
-    this.pulseRing.scale.set(breathing + this.pulseEnergy * 0.2 + this.flowIntensity * 0.08);
-    this.pulseRing.alpha = 0.2 + this.pulseEnergy * 0.38 + this.flowIntensity * 0.35;
+    this.pulseRing.scale.set(
+      breathing + this.pulseEnergy * 0.2 + this.flowIntensity * 0.08
+      + this.superFlowIntensity * 0.12,
+    );
+    this.pulseRing.alpha = 0.2 + this.pulseEnergy * 0.38
+      + this.flowIntensity * 0.35 + this.superFlowIntensity * 0.24;
     const phaseColor = PHASE_COLORS[this.phaseIndex];
-    this.pulseRing.tint = this.flowIntensity > 0.1 ? 0xffda76 : phaseColor;
+    this.pulseRing.tint = this.superFlowIntensity > 0.1
+      ? 0x8ffaff
+      : this.flowIntensity > 0.1
+        ? 0xffda76
+        : phaseColor;
     this.grid.alpha = 0.65 + this.pulseEnergy * 0.35 + this.flowIntensity * 0.35;
-    this.grid.tint = this.flowIntensity > 0.1 ? 0xc99cff : phaseColor;
+    this.grid.tint = this.superFlowIntensity > 0.1
+      ? 0xff83e6
+      : this.flowIntensity > 0.1
+        ? 0xc99cff
+        : phaseColor;
     this.flowOverlay.alpha = this.flowIntensity
-      * (0.055 + Math.sin(this.elapsed * 8) * 0.018);
-    this.flowRays.alpha = this.flowIntensity * 0.72;
-    this.flowRays.rotation += deltaSeconds * this.flowIntensity * 0.11;
-    this.flowRays.scale.set(1 + Math.sin(this.elapsed * 4) * this.flowIntensity * 0.04);
+      * (0.055 + this.superFlowIntensity * 0.055 + Math.sin(this.elapsed * 8) * 0.018);
+    this.flowOverlay.tint = this.superFlowIntensity > 0.1 ? 0x37d6ff : 0xffffff;
+    this.flowRays.alpha = this.flowIntensity * (0.72 + this.superFlowIntensity * 0.28);
+    this.flowRays.rotation += deltaSeconds * this.flowIntensity
+      * (0.11 + this.superFlowIntensity * 0.18);
+    this.flowRays.scale.set(
+      1 + Math.sin(this.elapsed * (4 + this.superFlowIntensity * 4))
+      * this.flowIntensity * (0.04 + this.superFlowIntensity * 0.035),
+    );
 
     for (const orb of this.orbs) {
       orb.node.position.set(
@@ -142,7 +166,11 @@ export class RhythmBackground extends Container {
       orb.node.scale.set(
         1 + this.pulseEnergy * 0.6 + orb.size * 0.02 + this.flowIntensity * 0.55,
       );
-      orb.node.tint = this.flowIntensity > 0.1 ? 0xffdc83 : phaseColor;
+      orb.node.tint = this.superFlowIntensity > 0.1
+        ? (orb.phase % 2 > 1 ? 0xff83e6 : 0x8ffaff)
+        : this.flowIntensity > 0.1
+          ? 0xffdc83
+          : phaseColor;
     }
   }
 }
