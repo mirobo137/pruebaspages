@@ -30,12 +30,20 @@ import { PauseOverlay } from '../ui/PauseOverlay';
 
 interface DragState {
   pointerId: number;
+  target: ActiveTarget;
   completed: boolean;
   released: boolean;
   lastSparkX: number;
   lastSparkY: number;
   tuning: PointerTuning;
 }
+
+interface ActiveTarget {
+  node: TargetNode;
+  event: BeatEvent;
+}
+
+const TARGET_SPAWN_LATE_TOLERANCE = 0.075;
 
 export interface GameSceneOptions {
   difficulty: Difficulty;
@@ -80,10 +88,9 @@ export class GameScene implements Scene {
   private readonly onRestart: () => void;
   private readonly onExit: () => void;
   private readonly onFinished: GameSceneOptions['onFinished'];
-  private activeTarget: TargetNode | null = null;
-  private activeEvent: BeatEvent | null = null;
+  private readonly activeTargets: ActiveTarget[] = [];
   private dragState: DragState | null = null;
-  private bufferedTapEvent: BeatEvent | null = null;
+  private readonly bufferedTargets = new Set<ActiveTarget>();
   private width: number;
   private height: number;
   private musicStarted = false;
@@ -165,7 +172,7 @@ export class GameScene implements Scene {
     this.hud.animate(deltaSeconds);
     this.background.updateBackground(deltaSeconds);
     this.effects.updateEffects(deltaSeconds);
-    this.activeTarget?.animate(deltaSeconds);
+    for (const target of this.activeTargets) target.node.animate(deltaSeconds);
     const shake = this.effects.getShakeOffset();
     this.targets.position.set(shake.x, shake.y);
     this.background.position.set(shake.x * 0.35, shake.y * 0.35);
@@ -182,15 +189,6 @@ export class GameScene implements Scene {
     const phaseTransitionActive = this.phaseTransition.isActive(currentTime);
     const flowChange = this.flow.update(phaseTransitionActive ? 0 : deltaSeconds);
     this.applyFlowChange(flowChange);
-
-    if (this.activeTarget && this.activeEvent && !phaseTransitionActive) {
-      this.activeTarget.updateTiming(
-        this.activeEvent.time - currentTime,
-        this.difficultyProfile.targetLeadTime,
-        this.difficultyProfile.perfectWindow,
-        this.difficultyProfile.goodWindow,
-      );
-    }
 
     if (currentTime >= this.beatmap.duration) {
       this.finishGame();
@@ -209,36 +207,44 @@ export class GameScene implements Scene {
 
     if (phaseTransitionActive) return;
 
-    if (
-      this.bufferedTapEvent
-      && this.activeEvent === this.bufferedTapEvent
-      && currentTime >= this.bufferedTapEvent.time - this.difficultyProfile.goodWindow
-    ) {
-      const bufferedEvent = this.bufferedTapEvent;
-      this.bufferedTapEvent = null;
-      this.resolveTarget(this.getTimingGrade(bufferedEvent) ?? 'good');
-      return;
+    this.spawnPendingTargets(currentTime);
+
+    for (const target of this.activeTargets) {
+      target.node.updateTiming(
+        target.event.time - currentTime,
+        this.difficultyProfile.targetLeadTime,
+        this.difficultyProfile.perfectWindow,
+        this.difficultyProfile.goodWindow,
+      );
     }
 
-    if (
-      this.activeEvent
-      && currentTime - this.activeEvent.time > this.difficultyProfile.goodWindow
-    ) {
-      this.resolveTarget('miss');
-      return;
+    for (const bufferedTarget of [...this.bufferedTargets]) {
+      if (!this.activeTargets.includes(bufferedTarget)) {
+        this.bufferedTargets.delete(bufferedTarget);
+      } else if (
+        currentTime >= bufferedTarget.event.time - this.difficultyProfile.goodWindow
+      ) {
+        this.bufferedTargets.delete(bufferedTarget);
+        this.resolveTarget(
+          bufferedTarget,
+          this.getTimingGrade(bufferedTarget.event) ?? 'good',
+        );
+        if (this.gameEnded) return;
+      }
     }
 
-    if (
-      this.dragState?.completed
-      && this.activeEvent
-      && currentTime - this.activeEvent.time >= -this.difficultyProfile.goodWindow
-    ) {
-      this.resolveTarget(this.getTimingGrade(this.activeEvent) ?? 'miss');
-      return;
-    }
-
-    if (!this.activeTarget && this.pendingEvents.length > 0) {
-      this.spawnNextPendingTarget();
+    for (const target of [...this.activeTargets]) {
+      if (!this.activeTargets.includes(target)) continue;
+      if (currentTime - target.event.time > this.difficultyProfile.goodWindow) {
+        this.resolveTarget(target, 'miss');
+      } else if (
+        this.dragState?.target === target
+        && this.dragState.completed
+        && currentTime - target.event.time >= -this.difficultyProfile.goodWindow
+      ) {
+        this.resolveTarget(target, this.getTimingGrade(target.event) ?? 'miss');
+      }
+      if (this.gameEnded) return;
     }
   }
 
@@ -263,10 +269,10 @@ export class GameScene implements Scene {
     this.playfield.off('pointerup', this.handlePointerUp);
     this.playfield.off('pointerupoutside', this.handlePointerUp);
     this.playfield.off('pointercancel', this.handlePointerUp);
-    this.activeTarget?.destroy();
-    this.activeTarget = null;
+    for (const target of this.activeTargets) target.node.destroy();
+    this.activeTargets.length = 0;
     this.dragState = null;
-    this.bufferedTapEvent = null;
+    this.bufferedTargets.clear();
     this.targets.position.set(0, 0);
     this.audioManager.stop();
   }
@@ -280,16 +286,18 @@ export class GameScene implements Scene {
 
     if (this.dragState) return;
 
-    const target = this.activeTarget;
-    const beatEvent = this.activeEvent;
     const tuning = this.touchTuning.forPointer(event.pointerType);
-    if (
-      !target
-      || !beatEvent
-      || !target.isHitAt(event.global.x, event.global.y, tuning.hitRadiusBonus)
-    ) return;
-
     const inputTime = this.getCompensatedInputTime(event, tuning);
+    const activeTarget = this.findTargetAt(
+      event.global.x,
+      event.global.y,
+      tuning.hitRadiusBonus,
+      inputTime,
+    );
+    if (!activeTarget) return;
+
+    const target = activeTarget.node;
+    const beatEvent = activeTarget.event;
     const grade = this.getTimingGrade(beatEvent, inputTime);
     const canBufferEarly = !grade
       && this.isWithinEarlyInputBuffer(beatEvent, tuning, inputTime);
@@ -300,7 +308,7 @@ export class GameScene implements Scene {
 
     if (target.kind === 'drag') {
       if (grade === 'miss') {
-        this.resolveTarget('miss');
+        this.resolveTarget(activeTarget, 'miss');
         return;
       }
 
@@ -308,6 +316,7 @@ export class GameScene implements Scene {
       this.haptics.dragStart();
       this.dragState = {
         pointerId: event.pointerId,
+        target: activeTarget,
         completed: false,
         released: false,
         lastSparkX: event.global.x,
@@ -318,9 +327,9 @@ export class GameScene implements Scene {
     }
 
     if (grade) {
-      this.resolveTarget(grade);
+      this.resolveTarget(activeTarget, grade);
     } else {
-      this.bufferedTapEvent = beatEvent;
+      this.bufferedTargets.add(activeTarget);
       target.setPressed(true);
     }
   };
@@ -334,8 +343,9 @@ export class GameScene implements Scene {
     ) return;
     event.preventDefault();
 
-    const target = this.activeTarget;
-    if (!target) return;
+    const activeTarget = this.dragState.target;
+    if (!this.activeTargets.includes(activeTarget)) return;
+    const target = activeTarget.node;
 
     const dragResult = target.updateDragFromPointer(
       event.global.x,
@@ -358,26 +368,39 @@ export class GameScene implements Scene {
       this.dragState.completed = true;
       const inputTime = this.getCompensatedInputTime(event, this.dragState.tuning);
       if (
-        this.activeEvent
-        && inputTime - this.activeEvent.time
+        inputTime - activeTarget.event.time
           >= -this.difficultyProfile.goodWindow
       ) {
-        this.resolveTarget(this.getTimingGrade(this.activeEvent, inputTime) ?? 'miss');
+        this.resolveTarget(
+          activeTarget,
+          this.getTimingGrade(activeTarget.event, inputTime) ?? 'miss',
+        );
       }
     }
   };
 
   private readonly handlePointerUp = (event: FederatedPointerEvent): void => {
     releasePointer(event);
-    if (!this.isGameplayInteractive()) return;
+    if (!this.isGameplayInteractive()) {
+      if (this.dragState?.pointerId === event.pointerId) {
+        this.dragState.target.node.setPressed(false);
+        this.dragState = null;
+      }
+      return;
+    }
     if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
+
+    const activeTarget = this.dragState.target;
+    if (!this.activeTargets.includes(activeTarget)) {
+      this.dragState = null;
+      return;
+    }
 
     if (
       event.type !== 'pointercancel'
       && this.dragState.completed
-      && this.activeEvent
       && this.isWithinReleaseBuffer(
-        this.activeEvent,
+        activeTarget.event,
         this.dragState.tuning,
         this.getCompensatedInputTime(event, this.dragState.tuning),
       )
@@ -386,9 +409,9 @@ export class GameScene implements Scene {
       return;
     }
 
-    this.activeTarget?.setPressed(false);
+    activeTarget.node.setPressed(false);
     this.dragState = null;
-    this.resolveTarget('miss');
+    this.resolveTarget(activeTarget, 'miss');
   };
 
   private startMusic(): void {
@@ -436,11 +459,11 @@ export class GameScene implements Scene {
     return null;
   }
 
-  private resolveTarget(grade: TimingGrade): void {
-    const target = this.activeTarget;
-    if (!target) return;
+  private resolveTarget(activeTarget: ActiveTarget, grade: TimingGrade): void {
+    const targetIndex = this.activeTargets.indexOf(activeTarget);
+    if (targetIndex < 0) return;
 
-    const feedbackPoint = target.getFeedbackPoint();
+    const feedbackPoint = activeTarget.node.getFeedbackPoint();
     const flowChange = this.flow.register(grade);
     const flowTransitionHandled = this.applyFlowChange(flowChange);
     this.score.register(grade, flowChange.snapshot.multiplier);
@@ -451,29 +474,30 @@ export class GameScene implements Scene {
     if (!flowTransitionHandled) {
       this.haptics.feedback(grade);
     }
-    target.destroy();
-    this.activeTarget = null;
-    this.activeEvent = null;
-    this.dragState = null;
-    this.bufferedTapEvent = null;
+    activeTarget.node.destroy();
+    this.activeTargets.splice(targetIndex, 1);
+    if (this.dragState?.target === activeTarget) this.dragState = null;
+    this.bufferedTargets.delete(activeTarget);
 
     if (this.score.isGameOver()) {
       this.finishGame();
-      return;
     }
-
-    if (this.pendingEvents.length > 0) this.spawnNextPendingTarget();
   }
 
-  private spawnNextPendingTarget(): void {
-    const nextEvent = this.pendingEvents.shift();
-    if (nextEvent) this.spawnTarget(nextEvent);
+  private spawnPendingTargets(currentTime: number): void {
+    const pending = this.pendingEvents.splice(0);
+    for (const event of pending) {
+      if (event.phaseIndex !== this.phaseIndex) continue;
+      const remaining = event.time - currentTime;
+      if (
+        remaining
+        < this.difficultyProfile.targetLeadTime - TARGET_SPAWN_LATE_TOLERANCE
+      ) continue;
+      this.spawnTarget(event);
+    }
   }
 
   private spawnTarget(event: BeatEvent): void {
-    this.activeTarget?.destroy();
-    this.bufferedTapEvent = null;
-
     const start = event.start
       ? this.fromNormalizedPoint(event.start)
       : this.randomStartPoint();
@@ -493,10 +517,26 @@ export class GameScene implements Scene {
     target.position.set(start.x, start.y);
     const flowSnapshot = this.flow.snapshot();
     target.setFlowState(flowSnapshot.active, flowSnapshot.superActive);
-    this.activeTarget = target;
-    this.activeEvent = event;
+    this.activeTargets.push({ node: target, event });
     this.targets.addChild(target);
     this.background.pulse(0.22);
+  }
+
+  private findTargetAt(
+    x: number,
+    y: number,
+    radiusBonus: number,
+    inputTime: number,
+  ): ActiveTarget | null {
+    const candidates = this.activeTargets.filter(
+      (target) => target.node.isHitAt(x, y, radiusBonus),
+    );
+    candidates.sort((left, right) => {
+      const leftDistance = Math.abs(left.event.time - inputTime);
+      const rightDistance = Math.abs(right.event.time - inputTime);
+      return leftDistance - rightDistance || left.event.time - right.event.time;
+    });
+    return candidates[0] ?? null;
   }
 
   private randomStartPoint(): TargetPoint {
@@ -576,7 +616,6 @@ export class GameScene implements Scene {
 
     this.beginPhaseTransition(nextPhaseIndex, phase.startTime, currentTime);
     this.effects.emitPhaseTransition(nextPhaseIndex + 1, phase.name);
-    this.haptics.phaseTransition();
   }
 
   private beginPhaseTransition(
@@ -590,13 +629,15 @@ export class GameScene implements Scene {
       this.difficultyProfile.targetLeadTime,
     );
 
-    if (this.activeEvent && this.activeEvent.phaseIndex < nextPhaseIndex) {
-      this.activeTarget?.destroy();
-      this.activeTarget = null;
-      this.activeEvent = null;
+    for (let index = this.activeTargets.length - 1; index >= 0; index -= 1) {
+      const target = this.activeTargets[index];
+      if (target.event.phaseIndex !== nextPhaseIndex) {
+        target.node.destroy();
+        this.activeTargets.splice(index, 1);
+      }
     }
     this.dragState = null;
-    this.bufferedTapEvent = null;
+    this.bufferedTargets.clear();
 
     for (let index = this.pendingEvents.length - 1; index >= 0; index -= 1) {
       const event = this.pendingEvents[index];
@@ -610,10 +651,17 @@ export class GameScene implements Scene {
   }
 
   private isGameplayInteractive(): boolean {
+    const currentTime = this.audioManager.currentTime;
+    const expectedPhaseIndex = Math.min(
+      this.beatmap.phases.length - 1,
+      Math.max(0, Math.floor(currentTime / this.beatmap.loopDuration)),
+    );
     return this.musicStarted
       && this.audioManager.isPlaying
       && !this.paused
-      && !this.phaseTransition.isActive(this.audioManager.currentTime);
+      && currentTime < this.beatmap.duration
+      && expectedPhaseIndex === this.phaseIndex
+      && !this.phaseTransition.isActive(currentTime);
   }
 
   private readonly handlePause = (): void => {
@@ -628,9 +676,9 @@ export class GameScene implements Scene {
     if (this.paused || this.gameEnded) return;
 
     this.paused = true;
-    this.activeTarget?.resetInteraction();
+    for (const target of this.activeTargets) target.node.resetInteraction();
     this.dragState = null;
-    this.bufferedTapEvent = null;
+    this.bufferedTargets.clear();
     this.pauseButton.visible = false;
     this.pauseOverlay.setMessage('La música y el tiempo están detenidos');
     this.pauseReady = this.audioManager.pause().catch((error: unknown) => {
@@ -673,7 +721,9 @@ export class GameScene implements Scene {
     this.hud.updateFlow(snapshot);
     this.effects.setFlowState(snapshot.active, snapshot.superActive);
     this.background.setFlowState(snapshot.active, snapshot.superActive);
-    this.activeTarget?.setFlowState(snapshot.active, snapshot.superActive);
+    for (const target of this.activeTargets) {
+      target.node.setFlowState(snapshot.active, snapshot.superActive);
+    }
   }
 
   private applyFlowChange(change: FlowChange): boolean {

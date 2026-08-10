@@ -63,7 +63,7 @@ export class TargetNode extends Container {
     );
     this.drawTarget();
     this.alpha = 0;
-    this.scale.set(0.72);
+    this.scale.set(1);
   }
 
   animate(deltaSeconds: number): void {
@@ -75,6 +75,7 @@ export class TargetNode extends Container {
     const pulse = 1 + Math.sin(this.ageSeconds * pulseSpeed) * pulseStrength;
     const pressScale = this.pressed ? 0.92 : 1;
     const earlyScale = 1 + this.earlyBump * 0.14;
+    const appearScale = 0.82 + appearProgress * 0.18;
     const timingScale = this.timingState === 'perfect'
       ? 1 + Math.sin(this.ageSeconds * 24) * 0.045
       : this.timingState === 'good'
@@ -82,15 +83,17 @@ export class TargetNode extends Container {
         : 1;
 
     this.alpha = appearProgress;
-    this.scale.set((0.72 + appearProgress * 0.28) * pulse);
-    this.marker.scale.set(earlyScale * pressScale * timingScale);
-    this.stateAccent.scale.set(earlyScale * pressScale * timingScale);
-    this.shadow.scale.set(pressScale);
+    this.marker.scale.set(appearScale * pulse * earlyScale * pressScale * timingScale);
+    this.stateAccent.scale.set(appearScale * pulse * earlyScale * pressScale * timingScale);
+    this.shadow.scale.set(appearScale * pressScale);
+    this.glow.scale.set(appearScale * pulse);
     this.glow.alpha = (this.superFlowActive ? 0.44 : this.flowActive ? 0.32 : 0.18)
       + Math.sin(this.ageSeconds * (this.superFlowActive ? 13 : this.flowActive ? 9 : 5))
       * 0.06;
-    this.goodTimingRing.scale.set(1 + Math.sin(this.ageSeconds * 12) * 0.018);
-    this.perfectTimingRing.scale.set(1 + Math.sin(this.ageSeconds * 22) * 0.025);
+    // Timing rings intentionally never inherit cosmetic pulses. Their scale is
+    // an authoritative representation of the selected difficulty's clock.
+    this.goodTimingRing.scale.set(1);
+    this.perfectTimingRing.scale.set(1);
     this.destination.alpha = this.kind === 'drag'
       ? 0.5 + Math.sin(this.ageSeconds * 6) * 0.16
       : 0;

@@ -319,7 +319,8 @@ export class JuiceSystem extends Container {
     );
     this.flashColor = color;
     this.flashStrength = Math.max(this.flashStrength, phaseNumber === 3 ? 0.2 : 0.12);
-    this.shakeStrength = Math.max(this.shakeStrength, phaseNumber === 3 ? 8 : 4);
+    // Phase changes are informational, not impacts. Moving the playfield here
+    // can be perceived as a missed touch even while input is protected.
     this.redrawFlash();
   }
 

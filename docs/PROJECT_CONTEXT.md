@@ -135,6 +135,10 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 ## Contrato visual de objetivos
 
 - Los objetivos usan sombra, capas interiores, brillo y reflejo para dar profundidad sin assets externos.
+- El aro de aproximacion representa exclusivamente `targetLeadTime`: no hereda pulsos, escalado de aparicion, FLOW ni SUPER FLOW.
+- Cada nota debe aparecer con la anticipacion completa de su dificultad. Si la densidad solapa ventanas de lectura, pueden coexistir varios objetivos.
+- Al tocar objetivos solapados, el motor prioriza el que tenga el instante musical mas cercano al input compensado.
+- Una nota que llega al planificador con mas de 75 ms de retraso se omite sin penalizacion; nunca aparece tarde para producir un aro acelerado o un Miss invisible.
 - El aro exterior comunica aproximacion. El aro ambar se intensifica dentro de `Bien` y el verde-agua dentro de `Perfect`.
 - Estos aros solo representan las ventanas de dificultad existentes; no alteran hitbox, timing, puntuacion ni asistencia tactil.
 - Los drag conservan el mismo corredor logico, pero muestran una guia fina, puntos intermedios, flecha discreta y destino de doble aro.
@@ -151,6 +155,8 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - El cambio real a Impulso o Climax modifica HUD, fondo, particulas y vibracion.
 - La inicializacion de Lectura no emite vibracion, shake ni anuncio de transicion; ningun cambio de fase registra aciertos o modifica FLOW.
 - Cada transicion tiene 650 ms protegidos: retira objetivos anteriores sin contarlos como fallo, limpia eventos antiguos, bloquea input y congela FLOW.
+- El bloqueo tambien compara la fase esperada por el reloj de audio con la fase procesada. Esto cubre el intervalo entre el cruce musical y el siguiente frame visual.
+- La transicion no vibra ni sacude el playfield; el anuncio, color y particulas comunican el cambio sin parecer un toque o Miss fantasma.
 - Las fases posteriores reservan al menos 1.5 segundos antes de su primer golpe. El objetivo aparece despues del anuncio con su tiempo normal de lectura.
 - Si un dispositivo entra tarde a una fase por un frame lento, se omiten sin penalizacion las notas que ya no tengan tiempo completo de lectura.
 - El motor agenda tres fuentes de audio y mezcla cada union durante 450 ms con curvas de potencia constante. Esto elimina el hueco tecnico del loop nativo.
@@ -278,12 +284,14 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Soltar un drag completado ligeramente antes no produce un Miss injusto.
 - El arrastre sigue el rastro y llega al destino.
 - Los aros Bien/Perfect coinciden visualmente con el resultado sin cambiar la ventana real.
+- El aro exterior recorre una duracion constante dentro de la misma dificultad, incluso en patrones densos o con FLOW activo.
 - Los fallos reducen vida y rompen combo.
 - FLOW carga, activa x2 y se rompe con un fallo.
 - Cuatro Perfect consecutivos dentro de FLOW activan SUPER FLOW x4.
 - Bien degrada SUPER FLOW a FLOW; Miss rompe ambos.
 - El inicio de Lectura no genera vibracion o transicion fantasma.
 - Impulso y Climax entran sin notas antiguas, Miss invisible ni perdida de combo.
+- Impulso y Climax no emiten vibracion ni shake de impacto al entrar.
 - Pausa congela audio, notas y FLOW; Continuar conserva el estado.
 - La pantalla de resultado muestra dificultad y fase alcanzada.
 - La pantalla de resultado muestra las estrellas obtenidas y conserva un record superior anterior.

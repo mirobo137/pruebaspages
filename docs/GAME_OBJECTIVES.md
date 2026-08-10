@@ -38,6 +38,8 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Pausa con Continuar, Reiniciar y Volver al menu.
 - [x] Pausa automatica al ocultar la pagina o cambiar de aplicacion.
 - [x] Entrada protegida de fases sin Miss o perdida de combo invisible.
+- [x] Bloqueo de input entre el cruce de fase del audio y su procesamiento visual.
+- [x] Transiciones sin vibracion ni shake que puedan sentirse como toque fantasma.
 - [x] Rastro visual para objetivos de arrastre.
 - [x] Beatmap JSON separado del codigo.
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
@@ -45,6 +47,8 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Feedback visual distinto para Perfect, Bien y Miss.
 - [x] Objetivos con profundidad, brillo, reflejo y bordes finos.
 - [x] Aros semanticos que hacen visibles las ventanas Bien y Perfect.
+- [x] Reloj visual constante por dificultad, aislado del pulso cosmetico y de FLOW.
+- [x] Objetivos simultaneos cuando la densidad supera la ventana de anticipacion.
 - [x] Trayectoria drag fina con puntos guia y destino profesional.
 - [x] Medidor FLOW cargado mediante precision.
 - [x] Estado FLOW temporal con puntuacion x2 y transformacion audiovisual.
@@ -174,6 +178,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Medir si cuatro `Perfect` adicionales dentro de FLOW hacen SUPER FLOW alcanzable sin volverlo comun.
 - [ ] Confirmar que Bien degrada a FLOW y que el cambio se entiende sin leer instrucciones.
 - [ ] Confirmar que los cambios de fase no emiten feedback fantasma ni alteran el medidor.
+- [ ] Confirmar que el aro mantiene la misma velocidad en notas consecutivas de Medio y Dificil.
+- [ ] Probar objetivos solapados y confirmar que cada toque resuelve el objetivo temporalmente correcto.
 - [ ] Probar pausa durante tap, drag, FLOW, SUPER FLOW y cambio de fase.
 - [ ] Probar cambio de aplicacion en Android/iPhone y confirmar la pausa automatica.
 - [ ] Ajustar FLOW para una partida completa de 90 segundos.
