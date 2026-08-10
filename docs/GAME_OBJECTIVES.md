@@ -37,6 +37,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Rastro visual para objetivos de arrastre.
 - [x] Beatmap JSON separado del codigo.
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
+- [x] Beatmaps iniciales automaticos para que una cancion nueva entre al selector sin trabajo manual.
 - [x] Feedback visual distinto para Perfect, Bien y Miss.
 - [x] Objetivos con profundidad, brillo, reflejo y bordes finos.
 - [x] Aros semanticos que hacen visibles las ventanas Bien y Perfect.

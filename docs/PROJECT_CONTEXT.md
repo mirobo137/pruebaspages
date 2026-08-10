@@ -36,6 +36,7 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Selector musical, pantalla de partida y pantalla de resultado.
 - Audio desbloqueado desde el boton JUGAR, seguido por cuenta regresiva 3-2-1 sin toque adicional.
 - Catalogo musical generado automaticamente desde `public/assets/audio/`.
+- Beatmaps iniciales generados automaticamente para canciones nuevas; nunca sobrescriben mapas existentes.
 - Juice procedural con objetivos en capas, particulas geometricas, anillos, texto, shake y fondo reactivo.
 - Mecanicas FLOW x2 y SUPER FLOW x4 con progresion, degradacion y resumen final.
 - Pausa real de Web Audio con Continuar, Reiniciar y Volver al menu.
@@ -73,7 +74,8 @@ docs/
   PROJECT_CONTEXT.md         Este contrato de arquitectura
   GAME_OBJECTIVES.md         Vision viva y objetivos editables
 scripts/
-  generate-music-manifest.mjs  Automatizacion del catalogo musical
+  generate-music-manifest.mjs    Automatizacion del catalogo musical
+  generate-default-beatmaps.mjs  Mapas iniciales para audios nuevos
 ```
 
 Reglas de modularidad:
@@ -221,17 +223,18 @@ git commit -m "descripcion breve del cambio"
 git push origin main
 ```
 
-El workflow de GitHub Pages vuelve a generar el catalogo musical en cada build. Para agregar una cancion desde el movil basta con subirla a `public/assets/audio/` y hacer pull en el ordenador; el nombre del archivo determina el `id` y el nombre esperado del beatmap. Si existe un beatmap con ese `id`, se carga automaticamente.
+El workflow de GitHub Pages vuelve a sincronizar el contenido en cada build. Para agregar una cancion desde el movil basta con subirla a `public/assets/audio/` y hacer pull en el ordenador. `npm run dev` y `npm run build` generan el catalogo y, si faltan, tres beatmaps iniciales para que la cancion aparezca inmediatamente. Los archivos existentes nunca se sobrescriben.
 
 ### Agregar una cancion
 
 1. Subir desde el movil un archivo comprimido propio o con licencia compatible a `public/assets/audio/`.
 2. En cualquier PC ejecutar `git pull --rebase origin main`.
-3. Crear la carpeta `public/assets/beatmaps/<mismo-id>/`.
-4. Crear `easy.json`, `medium.json` y `hard.json` dentro de esa carpeta.
-5. Confirmar que `trackId` coincide con el nombre base del audio y que cada archivo declara su dificultad.
-6. Ejecutar `npm run build`; el script `music:manifest` detecta la cancion automaticamente.
-7. Probar en movil y hacer commit/push cuando los patrones esten ajustados.
+3. Ejecutar `npm run build`; `content:sync` detecta la cancion y crea `easy.json`, `medium.json` y `hard.json` si faltan.
+4. Probar los patrones iniciales en movil.
+5. Editar los beatmaps generados para sincronizarlos realmente con los golpes de la cancion. La automatizacion no vuelve a sobrescribirlos.
+6. Confirmar que `trackId` y dificultad son correctos, y hacer commit/push cuando los patrones esten ajustados.
+
+Los beatmaps automaticos incluyen `generated: true` como aviso de que son una base jugable, no una sincronizacion musical definitiva. Una vez ajustado manualmente se puede cambiar a `false` o quitar esa propiedad.
 
 ### Ciclo de prueba recomendado
 
