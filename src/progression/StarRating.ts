@@ -13,9 +13,8 @@ export function calculateWeightedAccuracy(snapshot: ScoreSnapshot): number {
 
 export function calculateStarRating(
   snapshot: ScoreSnapshot,
-  phaseReached: number,
+  completed: boolean,
 ): number {
-  const completed = phaseReached >= 3 && snapshot.lives > 0;
   if (!completed) return 0;
 
   const accuracy = calculateWeightedAccuracy(snapshot);

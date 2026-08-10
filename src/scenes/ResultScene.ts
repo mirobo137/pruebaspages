@@ -13,6 +13,7 @@ export interface ResultSceneOptions {
   flowActivations: number;
   superFlowActivations: number;
   phaseReached: number;
+  completed: boolean;
   rewardCoins: number;
   earnedStars: number;
   previousStars: number;
@@ -101,7 +102,7 @@ export class ResultScene implements Scene {
 
   mount(): void {
     const snapshot = this.options.snapshot;
-    const completed = this.options.earnedStars > 0;
+    const completed = this.options.completed;
     const accuracy = Math.round(calculateWeightedAccuracy(snapshot) * 100);
     this.title.text = completed ? 'NIVEL SUPERADO' : 'SIGUE INTENTANDO';
     this.track.text = `${this.options.trackTitle.toUpperCase()} · ${getDifficultyLabel(

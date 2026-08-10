@@ -4,7 +4,9 @@ export interface DifficultyProfile {
   label: string;
   maxLives: number;
   targetHitRadius: number;
+  dragStartHitRadius: number;
   dragPathTolerance: number;
+  dragCompletionTime: number;
   targetLeadTime: number;
   perfectWindow: number;
   goodWindow: number;
@@ -18,7 +20,9 @@ export const DIFFICULTY_PROFILES: Record<Difficulty, DifficultyProfile> = {
     label: 'Facil',
     maxLives: 6,
     targetHitRadius: 60,
-    dragPathTolerance: 78,
+    dragStartHitRadius: 82,
+    dragPathTolerance: 90,
+    dragCompletionTime: 1,
     targetLeadTime: 0.75,
     perfectWindow: 0.11,
     goodWindow: 0.26,
@@ -28,7 +32,9 @@ export const DIFFICULTY_PROFILES: Record<Difficulty, DifficultyProfile> = {
     label: 'Medio',
     maxLives: 4,
     targetHitRadius: 50,
-    dragPathTolerance: 62,
+    dragStartHitRadius: 72,
+    dragPathTolerance: 76,
+    dragCompletionTime: 0.76,
     targetLeadTime: 0.55,
     perfectWindow: 0.075,
     goodWindow: 0.18,
@@ -38,7 +44,9 @@ export const DIFFICULTY_PROFILES: Record<Difficulty, DifficultyProfile> = {
     label: 'Dificil',
     maxLives: 3,
     targetHitRadius: 44,
-    dragPathTolerance: 52,
+    dragStartHitRadius: 64,
+    dragPathTolerance: 66,
+    dragCompletionTime: 0.62,
     targetLeadTime: 0.44,
     perfectWindow: 0.055,
     goodWindow: 0.14,

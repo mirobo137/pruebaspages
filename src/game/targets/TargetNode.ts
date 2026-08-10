@@ -1,6 +1,7 @@
 import { Container, Graphics } from 'pixi.js';
 import { GAME_CONFIG } from '../config';
 import type { NoteKind } from '../notes/NoteKind';
+import { DragPath, distanceToSegment } from './DragPath';
 
 export interface TargetPoint {
   x: number;
@@ -11,6 +12,7 @@ export interface DragPointerResult {
   progress: number;
   valid: boolean;
   completed: boolean;
+  checkpointsPassed: number;
 }
 
 export interface TargetInteractionOptions {
@@ -26,6 +28,7 @@ export class TargetNode extends Container {
   private readonly perfectTimingRing = new Graphics();
   private readonly trail = new Graphics();
   private readonly progressTrail = new Graphics();
+  private readonly checkpoints = new Graphics();
   private readonly destination = new Graphics();
   private readonly marker = new Graphics();
   private readonly stateAccent = new Graphics();
@@ -35,12 +38,15 @@ export class TargetNode extends Container {
   private flowActive = false;
   private superFlowActive = false;
   private dragProgress = 0;
+  private nextCheckpointIndex = 0;
+  private lastDragPointer: TargetPoint | null = null;
   private timingState: 'approach' | 'good' | 'perfect' = 'approach';
-  private readonly dragVector: TargetPoint;
+  private readonly dragPath: DragPath | null;
+  private readonly checkpointProgress = [0.33, 0.66, 1];
 
   constructor(
     readonly kind: NoteKind,
-    dragEnd: TargetPoint | null = null,
+    dragAnchors: TargetPoint[] | null = null,
     private readonly interaction: TargetInteractionOptions = {
       hitRadius: GAME_CONFIG.targetHitRadius,
       dragPathTolerance: GAME_CONFIG.dragPathTolerance,
@@ -48,10 +54,13 @@ export class TargetNode extends Container {
   ) {
     super();
     this.eventMode = 'none';
-    this.dragVector = dragEnd ?? { x: 0, y: 0 };
+    this.dragPath = kind === 'drag' && dragAnchors?.length
+      ? new DragPath([{ x: 0, y: 0 }, ...dragAnchors])
+      : null;
     this.addChild(
       this.trail,
       this.progressTrail,
+      this.checkpoints,
       this.destination,
       this.shadow,
       this.glow,
@@ -97,6 +106,9 @@ export class TargetNode extends Container {
     this.destination.alpha = this.kind === 'drag'
       ? 0.5 + Math.sin(this.ageSeconds * 6) * 0.16
       : 0;
+    this.checkpoints.alpha = this.kind === 'drag'
+      ? 0.72 + Math.sin(this.ageSeconds * 4.5) * 0.12
+      : 0;
   }
 
   updateTiming(
@@ -133,7 +145,12 @@ export class TargetNode extends Container {
 
   resetInteraction(): void {
     this.pressed = false;
-    if (this.kind === 'drag') this.setDragProgress(0);
+    if (this.kind === 'drag') {
+      this.nextCheckpointIndex = 0;
+      this.lastDragPointer = null;
+      this.setDragProgress(0);
+      this.drawCheckpoints();
+    }
   }
 
   setFlowState(active: boolean, superActive = false): void {
@@ -153,67 +170,82 @@ export class TargetNode extends Container {
     this.earlyBump = 1;
   }
 
+  beginDrag(globalX: number, globalY: number): void {
+    this.lastDragPointer = this.toLocal({ x: globalX, y: globalY });
+  }
+
   updateDragFromPointer(
     globalX: number,
     globalY: number,
     toleranceBonus = 0,
     completionThreshold = 0.985,
   ): DragPointerResult {
-    if (this.kind !== 'drag') {
-      return { progress: 0, valid: false, completed: false };
+    if (this.kind !== 'drag' || !this.dragPath) {
+      return {
+        progress: 0,
+        valid: false,
+        completed: false,
+        checkpointsPassed: 0,
+      };
     }
 
     const pointer = this.toLocal({ x: globalX, y: globalY });
-    const lengthSquared = this.dragVector.x ** 2 + this.dragVector.y ** 2;
-    if (lengthSquared <= 0) {
-      return { progress: 0, valid: false, completed: false };
-    }
-
-    const rawProgress = (
-      pointer.x * this.dragVector.x
-      + pointer.y * this.dragVector.y
-    ) / lengthSquared;
-    const nearestX = this.dragVector.x * rawProgress;
-    const nearestY = this.dragVector.y * rawProgress;
-    const lateralDistance = Math.hypot(
-      pointer.x - nearestX,
-      pointer.y - nearestY,
-    );
-    const valid = lateralDistance <= this.interaction.dragPathTolerance + toleranceBonus
-      && rawProgress >= -0.18;
+    const projection = this.dragPath.project(pointer);
+    const corridor = this.interaction.dragPathTolerance + toleranceBonus;
+    const valid = projection.distance <= corridor
+      && projection.progress >= this.dragProgress - 0.16;
+    let checkpointsPassed = 0;
 
     if (valid) {
-      this.setDragProgress(Math.max(this.dragProgress, rawProgress));
+      const movementStart = this.lastDragPointer ?? { x: 0, y: 0 };
+      const checkpointRadius = Math.min(46, Math.max(34, corridor * 0.55));
+      while (this.nextCheckpointIndex < this.checkpointProgress.length) {
+        const checkpoint = this.dragPath.pointAt(
+          this.checkpointProgress[this.nextCheckpointIndex],
+        );
+        const checkpointDistance = distanceToSegment(
+          checkpoint,
+          movementStart,
+          pointer,
+        );
+        if (checkpointDistance > checkpointRadius) break;
+        this.nextCheckpointIndex += 1;
+        checkpointsPassed += 1;
+      }
+
+      const nextLimit = this.checkpointProgress[this.nextCheckpointIndex] ?? 1;
+      this.setDragProgress(Math.max(
+        this.dragProgress,
+        Math.min(projection.progress, nextLimit),
+      ));
+      if (checkpointsPassed > 0) this.drawCheckpoints();
     }
+    this.lastDragPointer = pointer;
 
     return {
       progress: this.dragProgress,
       valid,
-      completed: this.dragProgress >= completionThreshold,
+      completed: this.nextCheckpointIndex >= this.checkpointProgress.length
+        && this.dragProgress >= completionThreshold,
+      checkpointsPassed,
     };
   }
 
   getFeedbackPoint(): TargetPoint {
-    const point = this.toGlobal({
-      x: this.dragVector.x * this.dragProgress,
-      y: this.dragVector.y * this.dragProgress,
-    });
+    const point = this.toGlobal(this.dragPath?.pointAt(this.dragProgress) ?? { x: 0, y: 0 });
     return { x: point.x, y: point.y };
   }
 
   get requiredDragDistance(): number {
-    return Math.max(
-      GAME_CONFIG.dragDistance,
-      Math.hypot(this.dragVector.x, this.dragVector.y),
-    );
+    return Math.max(GAME_CONFIG.dragDistance, this.dragPath?.length ?? 0);
   }
 
   private setDragProgress(progress: number): void {
     if (this.kind !== 'drag') return;
 
     this.dragProgress = Math.max(0, Math.min(1, progress));
-    const markerX = this.dragVector.x * this.dragProgress;
-    const markerY = this.dragVector.y * this.dragProgress;
+    if (!this.dragPath) return;
+    const markerPoint = this.dragPath.pointAt(this.dragProgress);
     for (const node of [
       this.shadow,
       this.glow,
@@ -223,20 +255,12 @@ export class TargetNode extends Container {
       this.goodTimingRing,
       this.perfectTimingRing,
     ]) {
-      node.position.set(markerX, markerY);
+      node.position.set(markerPoint.x, markerPoint.y);
     }
 
     this.progressTrail.clear();
-    this.progressTrail.moveTo(0, 0).lineTo(markerX, markerY).stroke({
-      color: 0x68e5ff,
-      alpha: 0.24,
-      width: 7,
-    });
-    this.progressTrail.moveTo(0, 0).lineTo(markerX, markerY).stroke({
-      color: 0xc5f7ff,
-      alpha: 0.92,
-      width: 2.5,
-    });
+    this.drawPathUntil(this.progressTrail, this.dragProgress, 0x68e5ff, 0.22, 8);
+    this.drawPathUntil(this.progressTrail, this.dragProgress, 0xc5f7ff, 0.94, 2.5);
     this.progressTrail.blendMode = 'add';
   }
 
@@ -320,58 +344,97 @@ export class TargetNode extends Container {
     });
     this.stateAccent.blendMode = 'add';
 
-    if (!isDrag) return;
+    if (!isDrag || !this.dragPath) return;
 
-    const angle = Math.atan2(this.dragVector.y, this.dragVector.x);
-    const arrowX = this.dragVector.x * 0.66;
-    const arrowY = this.dragVector.y * 0.66;
-
-    this.trail.moveTo(0, 0).lineTo(this.dragVector.x, this.dragVector.y).stroke({
-      color: 0x24344e,
-      alpha: 0.62,
-      width: 7,
-    });
-    this.trail.moveTo(0, 0).lineTo(this.dragVector.x, this.dragVector.y).stroke({
-      color: 0x8ee9ff,
-      alpha: 0.68,
-      width: 1.75,
-    });
-    for (let step = 1; step < 5; step += 1) {
-      this.trail.circle(
-        this.dragVector.x * step / 5,
-        this.dragVector.y * step / 5,
-        1.8,
-      ).fill({ color: 0xd7f8ff, alpha: 0.52 });
+    this.drawPathUntil(this.trail, 1, 0x111a31, 0.86, 11);
+    this.drawPathUntil(this.trail, 1, 0x75e5ff, 0.62, 2);
+    this.drawPathUntil(this.trail, 1, 0xdafaff, 0.18, 0.8);
+    for (const progress of [0.16, 0.5, 0.84]) {
+      const guide = this.dragPath.pointAt(progress);
+      this.trail.circle(guide.x, guide.y, 1.8).fill({ color: 0xd7f8ff, alpha: 0.5 });
     }
-    this.destination.circle(this.dragVector.x + 2, this.dragVector.y + 4, 25).fill({
+
+    const end = this.dragPath.pointAt(1);
+    this.destination.position.set(end.x, end.y);
+    this.destination.circle(2, 4, 27).fill({
       color: 0x02040c,
       alpha: 0.42,
     });
-    this.destination.circle(this.dragVector.x, this.dragVector.y, 25).fill({
+    this.destination.circle(0, 0, 27).fill({
       color: 0x56d8ff,
       alpha: 0.08,
     });
-    this.destination.circle(this.dragVector.x, this.dragVector.y, 25).stroke({
+    this.destination.circle(0, 0, 27).stroke({
       color: 0xd7f8ff,
       alpha: 0.82,
-      width: 1.75,
+      width: 1.5,
     });
-    this.destination.circle(this.dragVector.x, this.dragVector.y, 17).stroke({
+    this.destination.circle(0, 0, 18).stroke({
       color: 0x78e8ff,
-      alpha: 0.32,
+      alpha: 0.38,
       width: 1,
     });
-    this.destination.circle(this.dragVector.x, this.dragVector.y, 5).fill({
+    this.destination.circle(0, 0, 5).fill({
       color: 0xffffff,
       alpha: 0.76,
     });
-    this.trail.moveTo(arrowX, arrowY).lineTo(
-      arrowX - Math.cos(angle - 0.55) * 10,
-      arrowY - Math.sin(angle - 0.55) * 10,
+
+    const arrow = this.dragPath.pointAt(0.76);
+    const tangent = this.dragPath.tangentAt(0.76);
+    const angle = Math.atan2(tangent.y, tangent.x);
+    this.trail.moveTo(arrow.x, arrow.y).lineTo(
+      arrow.x - Math.cos(angle - 0.55) * 10,
+      arrow.y - Math.sin(angle - 0.55) * 10,
     ).stroke({ color: 0xffffff, alpha: 0.68, width: 2 });
-    this.trail.moveTo(arrowX, arrowY).lineTo(
-      arrowX - Math.cos(angle + 0.55) * 10,
-      arrowY - Math.sin(angle + 0.55) * 10,
+    this.trail.moveTo(arrow.x, arrow.y).lineTo(
+      arrow.x - Math.cos(angle + 0.55) * 10,
+      arrow.y - Math.sin(angle + 0.55) * 10,
     ).stroke({ color: 0xffffff, alpha: 0.68, width: 2 });
+    this.drawCheckpoints();
+  }
+
+  private drawPathUntil(
+    graphics: Graphics,
+    progress: number,
+    color: number,
+    alpha: number,
+    width: number,
+  ): void {
+    if (!this.dragPath || progress <= 0) return;
+    const sampleLimit = Math.max(1, Math.floor(
+      (this.dragPath.points.length - 1) * Math.min(1, progress),
+    ));
+    graphics.moveTo(this.dragPath.points[0].x, this.dragPath.points[0].y);
+    for (let index = 1; index <= sampleLimit; index += 1) {
+      graphics.lineTo(this.dragPath.points[index].x, this.dragPath.points[index].y);
+    }
+    const end = this.dragPath.pointAt(progress);
+    graphics.lineTo(end.x, end.y).stroke({ color, alpha, width });
+  }
+
+  private drawCheckpoints(): void {
+    if (!this.dragPath) return;
+    this.checkpoints.clear();
+    this.checkpointProgress.slice(0, -1).forEach((progress, index) => {
+      const point = this.dragPath!.pointAt(progress);
+      const reached = index < this.nextCheckpointIndex;
+      const radius = reached ? 8 : 9;
+      this.checkpoints.circle(point.x, point.y, radius + 5).fill({
+        color: reached ? 0x70f6bd : 0x54dfff,
+        alpha: reached ? 0.12 : 0.055,
+      });
+      this.checkpoints.circle(point.x, point.y, radius).fill({
+        color: reached ? 0x70f6bd : 0x0b1730,
+        alpha: reached ? 0.75 : 0.92,
+      }).stroke({
+        color: reached ? 0xc8ffe8 : 0x9cefff,
+        alpha: reached ? 0.95 : 0.7,
+        width: 1.2,
+      });
+      this.checkpoints.circle(point.x, point.y, reached ? 3.5 : 2.5).fill({
+        color: 0xffffff,
+        alpha: reached ? 0.95 : 0.58,
+      });
+    });
   }
 }

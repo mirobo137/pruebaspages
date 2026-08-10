@@ -90,12 +90,13 @@ export class GameApplication {
         audioReady,
         onRestart: () => this.startGame(difficulty, selection),
         onExit: this.showMenu,
-        onFinished: (snapshot, flow, phaseReached) => this.showResult(
+        onFinished: (snapshot, flow, phaseReached, completed) => this.showResult(
           selection,
           difficulty,
           snapshot,
           flow,
           phaseReached,
+          completed,
         ),
       }),
     );
@@ -107,13 +108,14 @@ export class GameApplication {
     snapshot: ScoreSnapshot,
     flow: FlowSnapshot,
     phaseReached: number,
+    completed: boolean,
   ): void => {
     const run = this.progression.recordRun(
       selection.track.id,
       difficulty,
       snapshot,
       flow,
-      phaseReached,
+      completed,
     );
     this.sceneManager.switchTo(
       new ResultScene(this.app.screen.width, this.app.screen.height, {
@@ -123,6 +125,7 @@ export class GameApplication {
         flowActivations: flow.activations,
         superFlowActivations: flow.superActivations,
         phaseReached,
+        completed,
         rewardCoins: run.rewardCoins,
         earnedStars: run.earnedStars,
         previousStars: run.previousStars,

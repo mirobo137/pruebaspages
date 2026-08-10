@@ -8,6 +8,7 @@ export interface BeatEvent {
   phaseIndex: number;
   start?: BeatPosition;
   end?: BeatPosition;
+  controls?: BeatPosition[];
 }
 
 export const PHASE_TRANSITION_DURATION = 0.65;
@@ -37,6 +38,7 @@ interface PatternEvent {
   kind: NoteKind;
   start?: BeatPosition;
   end?: BeatPosition;
+  controls?: BeatPosition[];
   gap?: number;
 }
 
@@ -96,6 +98,7 @@ function expandBeatmap(documentData: BeatmapDocument): Beatmap {
         phaseIndex,
         start: patternEvent.start,
         end: patternEvent.end,
+        controls: patternEvent.controls?.slice(0, 2),
       });
       localTime += grid * Math.max(1, patternEvent.gap ?? 1);
       patternIndex += 1;

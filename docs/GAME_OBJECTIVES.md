@@ -20,7 +20,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 ## Mecanicas
 
 - [x] Toque sobre objetivo amarillo: acierto y puntos.
-- [x] Objetivo de arrastre: mantener el dedo/mouse y alcanzar una distancia minima.
+- [x] Slider curvo: acertar la cabeza y recorrer checkpoints sucesivos hasta el destino.
 - [x] Fallar un objetivo o dejar pasar su ventana resta vida y rompe el combo.
 - [x] Ventanas de timing Perfect, Bien y Miss.
 - [x] Vida limitada y fin de partida.
@@ -50,6 +50,9 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Reloj visual constante por dificultad, aislado del pulso cosmetico y de FLOW.
 - [x] Objetivos simultaneos cuando la densidad supera la ventana de anticipacion.
 - [x] Trayectoria drag fina con puntos guia y destino profesional.
+- [x] Curvas Bezier procedurales y puntos de control opcionales desde el beatmap.
+- [x] Cabeza, corredor y tiempo de finalizacion propios por dificultad.
+- [x] Dos checkpoints con feedback visual y tactil antes del destino.
 - [x] Medidor FLOW cargado mediante precision.
 - [x] Estado FLOW temporal con puntuacion x2 y transformacion audiovisual.
 - [x] Riesgo de romper FLOW inmediatamente al fallar.
@@ -173,6 +176,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Probar iPhone/Safari y rotacion de pantalla.
 - [ ] Comparar touch con mouse para confirmar que la asistencia no trivializa el timing.
 - [ ] Verificar taps muy rapidos, dedos alternados y arrastres diagonales.
+- [ ] Probar curvas hacia ambos lados y confirmar que el dedo puede corregir una salida breve.
+- [ ] Confirmar que cada checkpoint se activa en orden y que no es posible saltar directo al final.
+- [ ] Confirmar una estrella al completar los 90 segundos incluso terminando con una sola vida.
 - [ ] Confirmar que el HUD inferior no invade la zona tactil.
 - [ ] Medir si cuatro `Perfect` son una meta alcanzable y emocionante.
 - [ ] Medir si cuatro `Perfect` adicionales dentro de FLOW hacen SUPER FLOW alcanzable sin volverlo comun.

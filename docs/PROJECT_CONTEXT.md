@@ -100,7 +100,7 @@ Reglas de modularidad:
 
 - Cada combinacion `cancion + dificultad` mantiene un progreso independiente.
 - Cero estrellas significa que todavia no se completo la partida.
-- Una estrella se obtiene al completar las tres fases con cualquier precision valida.
+- Una estrella se obtiene cuando el motor confirma explicitamente que el reloj llego al final de la cancion; alcanzar Climax y perder antes del final no cuenta como completar.
 - Dos estrellas requieren al menos 70% de precision ponderada.
 - Tres estrellas requieren al menos 90% de precision ponderada.
 - Un `Perfect` aporta 100%, un `Bien` aporta 70% y un `Miss` aporta 0% al calculo.
@@ -122,6 +122,8 @@ Reglas de modularidad:
 La dificultad debe medir ritmo y lectura, no las limitaciones fisicas del dispositivo. `src/input/TouchTuning.ts` adapta la interaccion sin alterar las ventanas principales de cada dificultad:
 
 - Dedo: suma 12 px al radio logico y 14 px a la tolerancia lateral del arrastre.
+- La cabeza de un drag tiene radio propio, mayor que el de un tap: 82 px en Facil, 72 px en Medio y 64 px en Dificil, antes de sumar asistencia por dispositivo.
+- El corredor del drag tambien es independiente: 90 px en Facil, 76 px en Medio y 66 px en Dificil, mas la asistencia tactil.
 - Pantallas estrechas: agregan entre 2 y 7 px adicionales de asistencia invisible.
 - Pen: recibe una asistencia intermedia; mouse conserva la precision base.
 - Un arrastre tactil termina al 94% del trayecto para evitar exigir que el dedo cubra visualmente el centro exacto del destino.
@@ -129,6 +131,8 @@ La dificultad debe medir ritmo y lectura, no las limitaciones fisicas del dispos
 - El timestamp del evento compensa hasta 60 ms de retraso de despacho en moviles lentos; nunca inventa tiempo fuera de ese limite.
 - Un drag completado y soltado dentro del buffer permanece valido hasta entrar en la ventana de timing.
 - El progreso de un drag nunca retrocede por jitter ni falla por salir brevemente del corredor.
+- El timing `Perfect/Bien` del drag se decide al tocar su cabeza. Despues hay 1.0, 0.76 o 0.62 segundos segun dificultad para completar la trayectoria.
+- Cada drag exige cruzar dos checkpoints y el destino en orden. Salir del corredor no falla de inmediato; el jugador puede corregir antes de soltar o agotar el tiempo.
 
 Los efectos tienen limites simultaneos de particulas, anillos y textos para evitar que FLOW o Dificil provoquen pausas de recoleccion de memoria. HUD y efectos mantienen `eventMode = none` para no interceptar el canvas jugable.
 
@@ -141,7 +145,8 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - Una nota que llega al planificador con mas de 75 ms de retraso se omite sin penalizacion; nunca aparece tarde para producir un aro acelerado o un Miss invisible.
 - El aro exterior comunica aproximacion. El aro ambar se intensifica dentro de `Bien` y el verde-agua dentro de `Perfect`.
 - Estos aros solo representan las ventanas de dificultad existentes; no alteran hitbox, timing, puntuacion ni asistencia tactil.
-- Los drag conservan el mismo corredor logico, pero muestran una guia fina, puntos intermedios, flecha discreta y destino de doble aro.
+- Los drag usan curvas Bezier procedurales, marcador movil, dos checkpoints obligatorios, flecha tangente y destino de doble aro.
+- Un evento de beatmap puede declarar hasta dos `controls`; si no existen, el motor crea una curvatura determinista y segura dentro del playfield.
 - FLOW suma geometria dorada y marco sutil. SUPER FLOW suma tunel cian/magenta, estelas radiales y marco de esquinas.
 - Nebulosas, poligonos, tunel y particulas se dibujan una vez y se animan mediante transformaciones para proteger el rendimiento movil.
 

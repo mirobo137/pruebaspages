@@ -32,4 +32,8 @@ export class HapticsService {
   dragStart(): void {
     if ('vibrate' in navigator) navigator.vibrate(5);
   }
+
+  dragCheckpoint(): void {
+    if ('vibrate' in navigator) navigator.vibrate(4);
+  }
 }

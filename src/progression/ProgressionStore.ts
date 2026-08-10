@@ -55,14 +55,14 @@ export class ProgressionStore {
     difficulty: Difficulty,
     snapshot: ScoreSnapshot,
     flow: FlowSnapshot,
-    phaseReached: number,
+    completed: boolean,
   ): RecordedRun {
     const profile = DIFFICULTY_PROFILES[difficulty];
     const rewardCoins = Math.max(
       10,
       Math.floor((snapshot.score / 250) * profile.rewardMultiplier),
     );
-    const earnedStars = calculateStarRating(snapshot, phaseReached);
+    const earnedStars = calculateStarRating(snapshot, completed);
     const accuracy = calculateWeightedAccuracy(snapshot);
     const previous = this.getRecord(trackId, difficulty);
     const previousStars = previous?.stars ?? 0;
