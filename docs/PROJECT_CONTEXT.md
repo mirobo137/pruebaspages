@@ -6,6 +6,8 @@ Este documento es la referencia de trabajo para cualquier cambio futuro. Si una 
 
 Crear un juego casual de ritmo y precision para movil y navegador de escritorio. El jugador escucha una cancion, anticipa objetivos que aparecen en pantalla y los resuelve con toques o deslizamientos. El juego debe ser facil de entender en segundos, satisfactorio de jugar en sesiones cortas y suficientemente claro para mejorar con cada intento.
 
+El nombre provisional del juego es **SUPERFLOW**, con el descriptor **RHYTHM RUSH**. Puede cambiar durante el desarrollo, pero debe mantenerse consistente en portada, menu y metadatos mientras siga vigente.
+
 El primer destino de pruebas es GitHub Pages. Cuando el nucleo sea solido, se preparara una version web para portales como CrazyGames o Poki. No se contempla Play Store ni App Store en esta etapa.
 
 ## Stack acordado
@@ -30,7 +32,8 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Audio de 30 segundos precargado y decodificado con Web Audio, con reloj jugable continuo durante las tres fases.
 - Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
 - Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
-- Menu inicial, pantalla de partida y pantalla de resultado.
+- Portada inicial procedural con identidad neon, entrada tactil de pantalla completa y transicion al selector musical.
+- Selector musical, pantalla de partida y pantalla de resultado.
 - Audio desbloqueado desde el boton JUGAR, seguido por cuenta regresiva 3-2-1 sin toque adicional.
 - Catalogo musical generado automaticamente desde `public/assets/audio/`.
 - Juice procedural con objetivos en capas, particulas geometricas, anillos, texto, shake y fondo reactivo.
@@ -85,8 +88,9 @@ Reglas de modularidad:
 8. Preferir composicion y clases pequenas. Si una clase empieza a gestionar audio, menus, score y entidades a la vez, se debe dividir.
 9. La precision touch tiene prioridad sobre el espectaculo: los efectos nunca deben bloquear eventos ni mover la zona logica sin actualizar su transformacion.
 10. Las mecanicas de enganche deben premiar dominio y claridad. FLOW es una regla de gameplay independiente; HUD, fondo, efectos y haptics solo representan su estado.
+11. La portada es una escena independiente. Solo aparece al abrir el juego; volver desde pausa o resultados lleva directamente al selector musical.
 
-11. Los nombres de canciones deben usar un identificador estable en minusculas y guiones, por ejemplo `mi-cancion.mp3` y la carpeta `mi-cancion/`.
+12. Los nombres de canciones deben usar un identificador estable en minusculas y guiones, por ejemplo `mi-cancion.mp3` y la carpeta `mi-cancion/`.
 
 ## Contrato de interaccion tactil
 

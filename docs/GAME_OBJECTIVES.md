@@ -6,6 +6,8 @@ Este archivo se puede editar despues de cada sesion de prueba. Representa lo que
 
 Un juego casual de precision ritmica en el que el jugador pasa de escuchar la musica a sentirla con los dedos: anticipa, toca, desliza y encadena aciertos. Una partida debe poder empezar casi de inmediato, durar poco y dejar una razon clara para intentar superar el resultado.
 
+Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la que la precision transforma progresivamente la pantalla.
+
 ## Bucle principal
 
 1. El jugador pulsa JUGAR y ve una cuenta regresiva 3-2-1.
@@ -27,6 +29,7 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
 - [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
+- [x] Portada de presentacion neon antes del selector de canciones.
 - [x] Cuenta regresiva antes de iniciar sin segundo toque sobre el gameplay.
 - [x] Pausa con Continuar, Reiniciar y Volver al menu.
 - [x] Pausa automatica al ocultar la pagina o cambiar de aplicacion.

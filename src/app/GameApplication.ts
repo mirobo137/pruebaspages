@@ -11,6 +11,7 @@ import { ProgressionStore } from '../progression/ProgressionStore';
 import { GameScene } from '../scenes/GameScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { ResultScene } from '../scenes/ResultScene';
+import { TitleScene } from '../scenes/TitleScene';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
 
@@ -43,7 +44,7 @@ export class GameApplication {
     this.app.stage.addChild(this.sceneHost);
     this.tracks = await this.loadMusic();
     void this.audioManager.preload(this.tracks.map((selection) => selection.track));
-    this.showMenu();
+    this.showTitle();
 
     this.app.ticker.add(this.tick);
     window.addEventListener('resize', this.handleResize);
@@ -55,6 +56,14 @@ export class GameApplication {
     this.sceneManager.destroy();
     this.audioManager.destroy();
     this.app.destroy(true);
+  }
+
+  private showTitle(): void {
+    this.sceneManager.switchTo(
+      new TitleScene(this.app.screen.width, this.app.screen.height, {
+        onEnter: this.showMenu,
+      }),
+    );
   }
 
   private showMenu = (): void => {

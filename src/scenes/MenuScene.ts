@@ -56,9 +56,9 @@ export class MenuScene implements Scene {
   readonly root = new Container();
 
   private readonly background = new Graphics();
-  private readonly title = new Text({ text: 'RHYTHM CIRCLES', style: titleStyle });
+  private readonly title = new Text({ text: 'SUPERFLOW', style: titleStyle });
   private readonly subtitle = new Text({
-    text: 'Elige una pista. Domina sus tres fases.',
+    text: 'RHYTHM RUSH · Elige una pista y entra en flow.',
     style: subtitleStyle,
   });
   private readonly currency = new Text({ text: '', style: infoStyle });
