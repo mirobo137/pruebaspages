@@ -20,4 +20,8 @@ export class HapticsService {
   flowBreak(): void {
     if ('vibrate' in navigator) navigator.vibrate([35, 18, 45]);
   }
+
+  phaseTransition(): void {
+    if ('vibrate' in navigator) navigator.vibrate([10, 35, 16]);
+  }
 }

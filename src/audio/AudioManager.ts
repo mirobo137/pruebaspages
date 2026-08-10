@@ -13,19 +13,42 @@ export class AudioManager {
   private analyser: AnalyserNode | null = null;
   private source: MediaElementAudioSourceNode | null = null;
   private frequencyData = new Uint8Array(0);
+  private continuousTimeline = false;
+  private loopDuration = 0;
+  private loopCount = 0;
+  private previousMediaTime = 0;
 
   get currentTime(): number {
-    return this.element.currentTime;
+    const mediaTime = this.element.currentTime;
+    if (
+      this.continuousTimeline
+      && this.previousMediaTime > 0.5
+      && mediaTime + 0.25 < this.previousMediaTime
+    ) {
+      this.loopCount += 1;
+    }
+    this.previousMediaTime = mediaTime;
+    return this.continuousTimeline
+      ? this.loopCount * this.loopDuration + mediaTime
+      : mediaTime;
   }
 
   get isPlaying(): boolean {
     return !this.element.paused;
   }
 
-  play(track: MusicTrack, options: { loop?: boolean } = {}): Promise<void> {
+  play(
+    track: MusicTrack,
+    options: { loop?: boolean; loopDuration?: number } = {},
+  ): Promise<void> {
+    this.element.pause();
     this.element.src = new URL(track.audioPath, document.baseURI).toString();
     this.element.preload = 'auto';
     this.element.loop = options.loop ?? false;
+    this.continuousTimeline = Boolean(options.loop && options.loopDuration);
+    this.loopDuration = options.loopDuration ?? 0;
+    this.loopCount = 0;
+    this.previousMediaTime = 0;
 
     // Keep this call before any await. Mobile browsers associate it with the
     // original pointer gesture and can reject delayed autoplay requests.
@@ -35,6 +58,10 @@ export class AudioManager {
   stop(): void {
     this.element.pause();
     this.element.currentTime = 0;
+    this.continuousTimeline = false;
+    this.loopDuration = 0;
+    this.loopCount = 0;
+    this.previousMediaTime = 0;
   }
 
   readFrame(): AudioFrame {

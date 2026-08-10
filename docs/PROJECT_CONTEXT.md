@@ -23,9 +23,10 @@ El primer destino de pruebas es GitHub Pages. Cuando el nucleo sea solido, se pr
 El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 
 - Una cancion de prueba: `coffee-in-the-driveway`.
-- Beatmap separado en `public/assets/beatmaps/coffee-in-the-driveway.json`.
-- Modo Cancion, con duracion definida por el beatmap.
-- Modo Supervivencia, con audio en bucle y dificultad abierta.
+- Tres beatmaps separados en `public/assets/beatmaps/coffee-in-the-driveway/`.
+- Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
+- Partidas de 90 segundos divididas en Lectura, Impulso y Climax.
+- Audio de 30 segundos en bucle con reloj jugable continuo durante las tres fases.
 - Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
 - Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
 - Menu inicial, pantalla de partida y pantalla de resultado.
@@ -53,6 +54,7 @@ src/
   scenes/                    Flujo jugable y futuras pantallas
   game/                      Reglas, score, modos, timing y entidades de juego
     flow/                    Estado FLOW, carga, duracion y multiplicador
+    difficulty/              Perfiles Facil, Medio y Dificil
   ui/                        HUD, menus y resultados
   audio/                     Reproduccion, desbloqueo y analisis de audio
   content/                   Catalogos y carga de JSON
@@ -82,7 +84,25 @@ Reglas de modularidad:
 9. La precision touch tiene prioridad sobre el espectaculo: los efectos nunca deben bloquear eventos ni mover la zona logica sin actualizar su transformacion.
 10. Las mecanicas de enganche deben premiar dominio y claridad. FLOW es una regla de gameplay independiente; HUD, fondo, efectos y haptics solo representan su estado.
 
-11. Los nombres de canciones deben usar un identificador estable en minusculas y guiones, por ejemplo `mi-cancion.mp3` y `mi-cancion.json`.
+11. Los nombres de canciones deben usar un identificador estable en minusculas y guiones, por ejemplo `mi-cancion.mp3` y la carpeta `mi-cancion/`.
+
+## Canciones cortas y fases
+
+- Cada audio se trata como un loop de 30 segundos.
+- Una partida contiene tres fases y dura 90 segundos.
+- El audio vuelve a empezar en cada fase, pero el reloj, score, vidas, combo y FLOW continuan.
+- Cada fase tiene un patron distinto para que la repeticion musical no produzca la misma lectura tactil.
+- Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.
+- El cambio de fase modifica HUD, color del fondo, particulas y vibracion.
+
+Los beatmaps son compactos. Cada archivo declara `grid`, `offset`, `gap` y un patron que se repite durante la fase. `grid` es la unidad ritmica en segundos y `gap` indica cuantas unidades pasan antes del siguiente objetivo. El cargador expande los patrones a eventos absolutos de 0 a 90 segundos.
+
+```text
+public/assets/beatmaps/<id-cancion>/
+  easy.json
+  medium.json
+  hard.json
+```
 
 ## Mecanica central de FLOW
 
@@ -148,10 +168,11 @@ El workflow de GitHub Pages vuelve a generar el catalogo musical en cada build. 
 
 1. Subir desde el movil un archivo comprimido propio o con licencia compatible a `public/assets/audio/`.
 2. En cualquier PC ejecutar `git pull --rebase origin main`.
-3. Crear `public/assets/beatmaps/<mismo-id>.json` si aun no existe.
-4. Confirmar que `trackId` coincide con el nombre base del archivo.
-5. Ejecutar `npm run build`; el script `music:manifest` detecta la cancion automaticamente.
-6. Probar en movil y hacer commit/push cuando el beatmap este ajustado.
+3. Crear la carpeta `public/assets/beatmaps/<mismo-id>/`.
+4. Crear `easy.json`, `medium.json` y `hard.json` dentro de esa carpeta.
+5. Confirmar que `trackId` coincide con el nombre base del audio y que cada archivo declara su dificultad.
+6. Ejecutar `npm run build`; el script `music:manifest` detecta la cancion automaticamente.
+7. Probar en movil y hacer commit/push cuando los patrones esten ajustados.
 
 ### Ciclo de prueba recomendado
 
@@ -170,7 +191,7 @@ La primera prueba de FLOW consiste en acertar cuatro objetivos seguidos como `Pe
 - El arrastre sigue el rastro y llega al destino.
 - Los fallos reducen vida y rompen combo.
 - FLOW carga, activa x2 y se rompe con un fallo.
-- La pantalla de resultado aparece al terminar.
+- La pantalla de resultado muestra dificultad y fase alcanzada.
 - Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.
 
 ## Restricciones de producto
@@ -186,7 +207,7 @@ La primera prueba de FLOW consiste en acertar cuatro objetivos seguidos como `Pe
 
 1. Probar tacto y legibilidad en varios moviles reales.
 2. Ajustar el beatmap provisional escuchando la cancion.
-3. Balancear carga, duracion y dificultad de FLOW.
+3. Balancear densidad, timing y tolerancia de las tres dificultades.
 4. Guardar mejor puntuacion y estadisticas por cancion.
 5. Agregar feedback sonoro corto generado con Web Audio API.
 6. Solo despues evaluar preparacion para CrazyGames o Poki.

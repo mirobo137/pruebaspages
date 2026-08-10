@@ -192,6 +192,41 @@ export class JuiceSystem extends Container {
     this.redrawFlash();
   }
 
+  emitPhaseTransition(phaseNumber: number, phaseName: string): void {
+    const x = this.viewportWidth / 2;
+    const y = this.viewportHeight * 0.42;
+    const colors = [0x83a7ff, 0xb58cff, 0xffbd69];
+    const color = colors[Math.max(0, Math.min(colors.length - 1, phaseNumber - 1))];
+
+    for (let index = 0; index < 18; index += 1) {
+      const angle = (index / 18) * Math.PI * 2;
+      const speed = 75 + Math.random() * 90;
+      this.createParticle(
+        x,
+        y,
+        color,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        2 + Math.random() * 3,
+        0.55 + Math.random() * 0.2,
+        12,
+      );
+    }
+
+    this.createRing(x, y, color, 70, 0.75, 5);
+    this.createAnnouncement(
+      x,
+      y - 36,
+      'FASE ' + phaseNumber + ' · ' + phaseName,
+      color,
+      1.15,
+    );
+    this.flashColor = color;
+    this.flashStrength = Math.max(this.flashStrength, phaseNumber === 3 ? 0.2 : 0.12);
+    this.shakeStrength = Math.max(this.shakeStrength, phaseNumber === 3 ? 8 : 4);
+    this.redrawFlash();
+  }
+
   updateEffects(deltaSeconds: number): void {
     this.flashStrength = Math.max(0, this.flashStrength - deltaSeconds * 0.55);
     this.flash.alpha = this.flashStrength;

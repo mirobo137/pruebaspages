@@ -5,7 +5,8 @@ import { loadBeatmap } from '../content/Beatmap';
 import type { TrackSelection } from '../content/TrackSelection';
 import { loadMusicCatalog } from '../content/MusicCatalog';
 import { SceneManager } from '../core/scene/SceneManager';
-import type { GameMode } from '../game/modes/GameMode';
+import { DIFFICULTIES } from '../game/difficulty/Difficulty';
+import type { Difficulty } from '../game/difficulty/Difficulty';
 import { ProgressionStore } from '../progression/ProgressionStore';
 import { GameScene } from '../scenes/GameScene';
 import { MenuScene } from '../scenes/MenuScene';
@@ -65,29 +66,39 @@ export class GameApplication {
     );
   };
 
-  private readonly startGame = (mode: GameMode, selection: TrackSelection): void => {
+  private readonly startGame = (
+    difficulty: Difficulty,
+    selection: TrackSelection,
+  ): void => {
     this.sceneManager.switchTo(
       new GameScene(this.app.screen.width, this.app.screen.height, {
-        mode,
+        difficulty,
         audioManager: this.audioManager,
         track: selection.track,
-        beatmap: selection.beatmap,
-        onFinished: (snapshot, flow) => this.showResult(mode, snapshot, flow),
+        beatmap: selection.beatmaps[difficulty],
+        onFinished: (snapshot, flow, phaseReached) => this.showResult(
+          difficulty,
+          snapshot,
+          flow,
+          phaseReached,
+        ),
       }),
     );
   };
 
   private readonly showResult = (
-    mode: GameMode,
+    difficulty: Difficulty,
     snapshot: ScoreSnapshot,
     flow: FlowSnapshot,
+    phaseReached: number,
   ): void => {
-    const rewardCoins = this.progression.awardForRun(snapshot.score, mode);
+    const rewardCoins = this.progression.awardForRun(snapshot.score, difficulty);
     this.sceneManager.switchTo(
       new ResultScene(this.app.screen.width, this.app.screen.height, {
-        mode,
+        difficulty,
         snapshot,
         flowActivations: flow.activations,
+        phaseReached,
         rewardCoins,
         onBackToMenu: this.showMenu,
       }),
@@ -99,8 +110,19 @@ export class GameApplication {
       const catalog = await loadMusicCatalog();
       const loadedTracks = await Promise.all(
         catalog.map(async (track) => {
-          const beatmap = await loadBeatmap(track);
-          return beatmap ? { track, beatmap } : null;
+          const loadedBeatmaps = await Promise.all(
+            DIFFICULTIES.map((difficulty) => loadBeatmap(track, difficulty)),
+          );
+          if (loadedBeatmaps.some((beatmap) => beatmap === null)) return null;
+
+          return {
+            track,
+            beatmaps: {
+              easy: loadedBeatmaps[0]!,
+              medium: loadedBeatmaps[1]!,
+              hard: loadedBeatmaps[2]!,
+            },
+          };
         }),
       );
       return loadedTracks.filter((selection): selection is TrackSelection => selection !== null);

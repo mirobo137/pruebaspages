@@ -39,7 +39,11 @@ for (const fileName of files) {
     id,
     title: createTitle(fileName),
     audioPath: `./assets/audio/${fileName}`,
-    beatmapPath: `./assets/beatmaps/${id}.json`,
+    beatmapPaths: {
+      easy: `./assets/beatmaps/${id}/easy.json`,
+      medium: `./assets/beatmaps/${id}/medium.json`,
+      hard: `./assets/beatmaps/${id}/hard.json`,
+    },
   });
 
   const sizeInKiB = Math.round(fileInfo.size / 1024);
@@ -49,4 +53,3 @@ for (const fileName of files) {
 
 await writeFile(manifestPath, `${JSON.stringify(tracks, null, 2)}\n`, 'utf8');
 console.log(`Catálogo musical generado: ${tracks.length} canción(es)`);
-

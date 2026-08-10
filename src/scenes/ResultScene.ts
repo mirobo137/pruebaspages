@@ -1,14 +1,15 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { Scene } from '../core/scene/Scene';
-import type { GameMode } from '../game/modes/GameMode';
-import { getGameModeLabel } from '../game/modes/GameMode';
+import type { Difficulty } from '../game/difficulty/Difficulty';
+import { getDifficultyLabel } from '../game/difficulty/Difficulty';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { MenuButton } from '../ui/MenuButton';
 
 export interface ResultSceneOptions {
-  mode: GameMode;
+  difficulty: Difficulty;
   snapshot: ScoreSnapshot;
   flowActivations: number;
+  phaseReached: number;
   rewardCoins: number;
   onBackToMenu: () => void;
 }
@@ -50,7 +51,8 @@ export class ResultScene implements Scene {
   mount(): void {
     const snapshot = this.options.snapshot;
     this.info.text = [
-      getGameModeLabel(this.options.mode),
+      'Dificultad: ' + getDifficultyLabel(this.options.difficulty),
+      'Fase alcanzada: ' + this.options.phaseReached + '/3',
       '',
       'Puntos: ' + snapshot.score,
       'Combo maximo: x' + snapshot.bestCombo,

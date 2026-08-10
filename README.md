@@ -27,13 +27,21 @@ Coloca una versión comprimida de la canción en:
 public/assets/audio/mi-cancion.mp3
 ```
 
-Los archivos de proyecto y WAV sin comprimir deben mantenerse fuera del bundle web. En cada build, `scripts/generate-music-manifest.mjs` escanea la carpeta y genera el catálogo automáticamente. El beatmap esperado para `mi-cancion.mp3` es `public/assets/beatmaps/mi-cancion.json`.
+Los archivos de proyecto y WAV sin comprimir deben mantenerse fuera del bundle web. En cada build, `scripts/generate-music-manifest.mjs` escanea la carpeta y genera el catálogo automáticamente. Los beatmaps esperados para `mi-cancion.mp3` son:
+
+```text
+public/assets/beatmaps/mi-cancion/easy.json
+public/assets/beatmaps/mi-cancion/medium.json
+public/assets/beatmaps/mi-cancion/hard.json
+```
+
+Cada archivo define tres fases sobre un loop de 30 segundos. La partida completa dura 90 segundos y conserva puntuación, vidas, combo y FLOW al repetir el audio.
 
 Para incorporar una canción subida desde el móvil:
 
 1. Sube el archivo a `public/assets/audio/`.
 2. En el ordenador ejecuta `git pull --rebase origin main`.
-3. Crea o ajusta el beatmap con el mismo nombre base.
+3. Crea o ajusta los tres beatmaps dentro de una carpeta con el mismo nombre base.
 4. Verifica con `npm run build`, haz commit y push.
 
 ## Desarrollo local

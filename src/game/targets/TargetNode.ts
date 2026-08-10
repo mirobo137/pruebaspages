@@ -13,6 +13,11 @@ export interface DragPointerResult {
   completed: boolean;
 }
 
+export interface TargetInteractionOptions {
+  hitRadius: number;
+  dragPathTolerance: number;
+}
+
 export class TargetNode extends Container {
   private readonly glow = new Graphics();
   private readonly approachRing = new Graphics();
@@ -30,6 +35,10 @@ export class TargetNode extends Container {
   constructor(
     readonly kind: NoteKind,
     dragEnd: TargetPoint | null = null,
+    private readonly interaction: TargetInteractionOptions = {
+      hitRadius: GAME_CONFIG.targetHitRadius,
+      dragPathTolerance: GAME_CONFIG.dragPathTolerance,
+    },
   ) {
     super();
     this.eventMode = 'none';
@@ -66,13 +75,13 @@ export class TargetNode extends Container {
       : 0;
   }
 
-  updateTiming(timeUntilHit: number, leadTime: number): void {
+  updateTiming(timeUntilHit: number, leadTime: number, perfectWindow: number): void {
     const progress = Math.max(0, Math.min(1, 1 - timeUntilHit / leadTime));
     const approachScale = 1 + (1 - progress) * 1.35;
     this.approachRing.scale.set(approachScale);
     this.approachRing.alpha = 0.2 + progress * 0.72;
 
-    if (Math.abs(timeUntilHit) <= GAME_CONFIG.perfectWindow) {
+    if (Math.abs(timeUntilHit) <= perfectWindow) {
       this.approachRing.alpha = 1;
       this.marker.scale.set(
         (1 + Math.sin(this.ageSeconds * 22) * 0.055)
@@ -83,7 +92,7 @@ export class TargetNode extends Container {
 
   isHitAt(x: number, y: number): boolean {
     const origin = this.toGlobal({ x: 0, y: 0 });
-    return Math.hypot(x - origin.x, y - origin.y) <= GAME_CONFIG.targetHitRadius;
+    return Math.hypot(x - origin.x, y - origin.y) <= this.interaction.hitRadius;
   }
 
   setPressed(pressed: boolean): void {
@@ -125,7 +134,7 @@ export class TargetNode extends Container {
       pointer.x - nearestX,
       pointer.y - nearestY,
     );
-    const valid = lateralDistance <= GAME_CONFIG.dragPathTolerance
+    const valid = lateralDistance <= this.interaction.dragPathTolerance
       && rawProgress >= -0.18;
 
     if (valid) {

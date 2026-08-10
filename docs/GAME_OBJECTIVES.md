@@ -12,7 +12,7 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 2. La cancion empieza y aparecen objetivos sincronizados.
 3. El jugador resuelve cada objetivo con la accion indicada.
 4. Los aciertos aumentan puntos y combo; los errores rompen el ritmo.
-5. La partida termina o entra en una nueva ronda y muestra el resultado.
+5. La cancion completa tres fases y muestra el resultado, o termina antes si se agotan las vidas.
 6. El jugador entiende que puede mejorar su precision, combo o puntuacion.
 
 ## Mecanicas
@@ -22,7 +22,9 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [x] Fallar un objetivo o dejar pasar su ventana resta vida y rompe el combo.
 - [x] Ventanas de timing Perfect, Bien y Miss.
 - [x] Vida limitada y fin de partida.
-- [x] Modo Cancion y modo Supervivencia.
+- [x] Dificultades Facil, Medio y Dificil por cancion.
+- [x] Tres fases de 30 segundos: Lectura, Impulso y Climax.
+- [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
 - [x] Menu inicial y pantalla de resultado.
 - [x] Rastro visual para objetivos de arrastre.
 - [x] Beatmap JSON separado del codigo.
@@ -35,7 +37,7 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [ ] Objetivos que se mueven con la musica.
 - [ ] Cadenas de varios objetivos y patrones reconocibles.
 - [ ] Objetivo hold, en el que hay que mantener presionado durante un intervalo.
-- [x] Modo Supervivencia como partida sin duracion fija.
+- [x] Densidad, vidas y ventanas de timing diferenciadas por dificultad.
 - [ ] Modo entrenamiento separado.
 
 ## Juice prioritario
@@ -68,6 +70,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Monedas locales como base para desbloquear futuras canciones.
 - [x] Meta visible de corto plazo: cargar y mantener FLOW durante la partida.
 - [x] Resumen de activaciones FLOW al terminar.
+- [x] Recompensa de monedas multiplicada por dificultad.
 - [ ] Mejor puntuacion local por cancion.
 - [ ] Estadisticas de precision, maximo combo y errores.
 - [ ] Reto diario determinista cuando exista una base de niveles estable.
@@ -114,6 +117,7 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Pantalla de resultado y regreso al menu.
 - [x] Feedback visual de aciertos y errores.
 - [x] Primera mecanica de enganche basada en habilidad: FLOW y multiplicador x2.
+- [x] Estructura de partida con crecimiento visual en tres fases.
 - [x] Juice de particulas, combo y fondo reactivo.
 - [ ] Feedback de audio corto para aciertos y combos.
 - [ ] Pruebas reales en movil y distintos tamanos de pantalla.
@@ -131,7 +135,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Probar en movil pequeno, movil grande y escritorio con mouse.
 - [ ] Confirmar que el HUD inferior no invade la zona tactil.
 - [ ] Medir si cuatro `Perfect` son una meta alcanzable y emocionante.
-- [ ] Ajustar la duracion de FLOW segun la cantidad de objetivos restantes.
+- [ ] Ajustar FLOW para una partida completa de 90 segundos.
+- [ ] Confirmar que el loop de audio no tiene corte perceptible entre fases.
 - [ ] Revisar que un `Miss` se sienta claro sin parecer injusto.
 - [ ] Ajustar el beatmap de la cancion de prueba escuchando sus golpes reales.
 - [ ] Registrar mejor puntuacion local por cancion.
@@ -139,7 +144,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 ## Estado de una partida ideal
 
 ```text
-primer toque -> audio y objetivos
+primer toque -> audio y fase Lectura
+30 segundos -> Impulso con nuevo patron
+60 segundos -> Climax y mayor intensidad
 aciertos -> combo y medidor FLOW
 cuatro Perfect -> FLOW x2 y transformacion visual
 fallo -> perdida de vida, combo roto y posible ruptura de FLOW

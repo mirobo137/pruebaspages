@@ -1,7 +1,7 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import type { Difficulty } from '../game/difficulty/Difficulty';
+import { getDifficultyLabel } from '../game/difficulty/Difficulty';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
-import type { GameMode } from '../game/modes/GameMode';
-import { getGameModeLabel } from '../game/modes/GameMode';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { TimingGrade } from '../game/timing/TimingGrade';
 
@@ -52,7 +52,8 @@ const flowBannerStyle = new TextStyle({
 });
 
 export class GameHud extends Container {
-  private readonly modeText = new Text({ text: '', style: infoStyle });
+  private readonly difficultyText = new Text({ text: '', style: infoStyle });
+  private readonly phaseText = new Text({ text: '1/3 LECTURA · 1:30', style: infoStyle });
   private readonly scoreText = new Text({ text: 'Puntos: 0', style: scoreStyle });
   private readonly lifeText = new Text({ text: 'Vidas: 5/5', style: infoStyle });
   private readonly lifeBarBackground = new Graphics();
@@ -83,7 +84,8 @@ export class GameHud extends Container {
     super();
     this.eventMode = 'none';
     this.addChild(
-      this.modeText,
+      this.difficultyText,
+      this.phaseText,
       this.scoreText,
       this.lifeText,
       this.lifeBarBackground,
@@ -97,8 +99,21 @@ export class GameHud extends Container {
     );
   }
 
-  setMode(mode: GameMode): void {
-    this.modeText.text = getGameModeLabel(mode);
+  setDifficulty(difficulty: Difficulty): void {
+    this.difficultyText.text = getDifficultyLabel(difficulty);
+  }
+
+  updateRunProgress(
+    currentTime: number,
+    duration: number,
+    phaseIndex: number,
+    phaseName: string,
+  ): void {
+    const remaining = Math.max(0, Math.ceil(duration - currentTime));
+    const minutes = Math.floor(remaining / 60);
+    const seconds = String(remaining % 60).padStart(2, '0');
+    this.phaseText.text = (phaseIndex + 1) + '/3 '
+      + phaseName + ' · ' + minutes + ':' + seconds;
   }
 
   update(snapshot: ScoreSnapshot): void {
@@ -225,7 +240,9 @@ export class GameHud extends Container {
   }
 
   resize(width: number, height: number): void {
-    this.modeText.position.set(20, 20);
+    this.difficultyText.position.set(20, 20);
+    this.phaseText.anchor.set(0.5, 0);
+    this.phaseText.position.set(width / 2, 20);
     this.scoreText.position.set(20, 46);
     this.lifeText.anchor.set(1, 0);
     this.lifeText.position.set(width - 20, 22);

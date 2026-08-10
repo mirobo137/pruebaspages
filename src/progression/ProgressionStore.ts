@@ -1,4 +1,5 @@
-import type { GameMode } from '../game/modes/GameMode';
+import type { Difficulty } from '../game/difficulty/Difficulty';
+import { DIFFICULTY_PROFILES } from '../game/difficulty/Difficulty';
 
 interface ProgressState {
   coins: number;
@@ -38,9 +39,12 @@ export class ProgressionStore {
     return true;
   }
 
-  awardForRun(score: number, mode: GameMode): number {
-    const baseReward = mode === 'survival' ? 5 : 10;
-    const reward = Math.max(baseReward, Math.floor(score / 250));
+  awardForRun(score: number, difficulty: Difficulty): number {
+    const profile = DIFFICULTY_PROFILES[difficulty];
+    const reward = Math.max(
+      10,
+      Math.floor((score / 250) * profile.rewardMultiplier),
+    );
     this.state.coins += reward;
     this.save();
     return reward;

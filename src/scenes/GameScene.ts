@@ -7,11 +7,12 @@ import type { Scene } from '../core/scene/Scene';
 import { randomBetween } from '../core/utils/random';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
 import { GAME_CONFIG } from '../game/config';
+import type { Difficulty, DifficultyProfile } from '../game/difficulty/Difficulty';
+import { DIFFICULTY_PROFILES } from '../game/difficulty/Difficulty';
 import { JuiceSystem } from '../game/effects/JuiceSystem';
 import { RhythmBackground } from '../game/effects/RhythmBackground';
 import { FlowModel } from '../game/flow/FlowModel';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
-import type { GameMode } from '../game/modes/GameMode';
 import { ScoreModel } from '../game/score/ScoreModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { TargetNode } from '../game/targets/TargetNode';
@@ -29,11 +30,15 @@ interface DragState {
 }
 
 export interface GameSceneOptions {
-  mode: GameMode;
+  difficulty: Difficulty;
   audioManager: AudioManager;
   track: MusicTrack;
   beatmap: Beatmap;
-  onFinished: (snapshot: ScoreSnapshot, flow: FlowSnapshot) => void;
+  onFinished: (
+    snapshot: ScoreSnapshot,
+    flow: FlowSnapshot,
+    phaseReached: number,
+  ) => void;
 }
 
 export class GameScene implements Scene {
@@ -45,12 +50,13 @@ export class GameScene implements Scene {
   private readonly targets = new Container();
   private readonly effects = new JuiceSystem();
   private readonly hud = new GameHud();
-  private readonly score = new ScoreModel(GAME_CONFIG.maxLives);
+  private readonly score: ScoreModel;
   private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
   private readonly audioManager: AudioManager;
   private readonly track: MusicTrack;
-  private readonly mode: GameMode;
+  private readonly difficulty: Difficulty;
+  private readonly difficultyProfile: DifficultyProfile;
   private readonly beatmap: Beatmap;
   private readonly beatmapPlayer: BeatmapPlayer;
   private readonly pendingEvents: BeatEvent[] = [];
@@ -62,15 +68,18 @@ export class GameScene implements Scene {
   private height: number;
   private musicStarted = false;
   private gameEnded = false;
+  private phaseIndex = -1;
 
   constructor(width: number, height: number, options: GameSceneOptions) {
     this.width = width;
     this.height = height;
     this.audioManager = options.audioManager;
     this.track = options.track;
-    this.mode = options.mode;
+    this.difficulty = options.difficulty;
+    this.difficultyProfile = DIFFICULTY_PROFILES[options.difficulty];
+    this.score = new ScoreModel(this.difficultyProfile.maxLives);
     this.beatmap = options.beatmap;
-    this.beatmapPlayer = new BeatmapPlayer(options.beatmap, options.mode === 'survival');
+    this.beatmapPlayer = new BeatmapPlayer(options.beatmap);
     this.onFinished = options.onFinished;
     this.playfield.addChild(this.targets);
     this.root.addChild(this.background, this.playfield, this.effects, this.hud);
@@ -83,14 +92,22 @@ export class GameScene implements Scene {
     this.playfield.on('pointerup', this.handlePointerUp);
     this.playfield.on('pointerupoutside', this.handlePointerUp);
     this.playfield.on('pointercancel', this.handlePointerUp);
-    this.hud.setMode(this.mode);
+    this.hud.setDifficulty(this.difficulty);
     this.hud.update(this.score.snapshot());
+    this.hud.updateRunProgress(
+      0,
+      this.beatmap.duration,
+      0,
+      this.beatmap.phases[0]?.name ?? 'LECTURA',
+    );
     this.syncFlowState(this.flow.snapshot());
     this.resize(this.width, this.height);
   }
 
   update(deltaSeconds: number): void {
-    const flowChange = this.flow.update(deltaSeconds);
+    const isRunning = this.musicStarted && this.audioManager.isPlaying;
+    const currentTime = isRunning ? this.audioManager.currentTime : 0;
+    const flowChange = this.flow.update(isRunning ? deltaSeconds : 0);
     this.syncFlowState(flowChange.snapshot);
     this.hud.animate(deltaSeconds);
     this.background.updateBackground(deltaSeconds);
@@ -100,17 +117,18 @@ export class GameScene implements Scene {
     this.targets.position.set(shake.x, shake.y);
     this.background.position.set(shake.x * 0.35, shake.y * 0.35);
 
-    if (this.activeTarget && this.activeEvent && this.musicStarted) {
+    if (this.activeTarget && this.activeEvent && isRunning) {
       this.activeTarget.updateTiming(
-        this.activeEvent.time - this.audioManager.currentTime,
-        GAME_CONFIG.targetLeadTime,
+        this.activeEvent.time - currentTime,
+        this.difficultyProfile.targetLeadTime,
+        this.difficultyProfile.perfectWindow,
       );
     }
 
-    if (this.gameEnded || !this.musicStarted || !this.audioManager.isPlaying) return;
+    if (this.gameEnded || !isRunning) return;
 
-    const currentTime = this.audioManager.currentTime;
-    if (this.mode === 'song' && currentTime >= this.beatmap.duration) {
+    this.updatePhase(currentTime);
+    if (currentTime >= this.beatmap.duration) {
       this.finishGame();
       return;
     }
@@ -118,11 +136,14 @@ export class GameScene implements Scene {
     this.pendingEvents.push(
       ...this.beatmapPlayer.collectUpcomingEvents(
         currentTime,
-        GAME_CONFIG.targetLeadTime,
+        this.difficultyProfile.targetLeadTime,
       ),
     );
 
-    if (this.activeEvent && currentTime - this.activeEvent.time > GAME_CONFIG.goodWindow) {
+    if (
+      this.activeEvent
+      && currentTime - this.activeEvent.time > this.difficultyProfile.goodWindow
+    ) {
       this.resolveTarget('miss');
       return;
     }
@@ -130,7 +151,7 @@ export class GameScene implements Scene {
     if (
       this.dragState?.completed
       && this.activeEvent
-      && currentTime - this.activeEvent.time >= -GAME_CONFIG.goodWindow
+      && currentTime - this.activeEvent.time >= -this.difficultyProfile.goodWindow
     ) {
       this.resolveTarget(this.getTimingGrade(this.activeEvent) ?? 'miss');
       return;
@@ -223,7 +244,8 @@ export class GameScene implements Scene {
       this.dragState.completed = true;
       if (
         this.activeEvent
-        && this.audioManager.currentTime - this.activeEvent.time >= -GAME_CONFIG.goodWindow
+        && this.audioManager.currentTime - this.activeEvent.time
+          >= -this.difficultyProfile.goodWindow
       ) {
         this.resolveTarget(this.getTimingGrade(this.activeEvent) ?? 'miss');
       }
@@ -243,7 +265,10 @@ export class GameScene implements Scene {
     if (this.musicStarted) return;
 
     this.musicStarted = true;
-    void this.audioManager.play(this.track, { loop: this.mode === 'survival' }).catch(
+    void this.audioManager.play(this.track, {
+      loop: true,
+      loopDuration: this.beatmap.loopDuration,
+    }).catch(
       (error: unknown) => {
         this.musicStarted = false;
         console.warn('No se pudo reproducir la cancion.', error);
@@ -255,9 +280,9 @@ export class GameScene implements Scene {
     const delta = this.audioManager.currentTime - event.time;
     const absoluteDelta = Math.abs(delta);
 
-    if (absoluteDelta <= GAME_CONFIG.perfectWindow) return 'perfect';
-    if (absoluteDelta <= GAME_CONFIG.goodWindow) return 'good';
-    if (delta > GAME_CONFIG.goodWindow) return 'miss';
+    if (absoluteDelta <= this.difficultyProfile.perfectWindow) return 'perfect';
+    if (absoluteDelta <= this.difficultyProfile.goodWindow) return 'good';
+    if (delta > this.difficultyProfile.goodWindow) return 'miss';
     return null;
   }
 
@@ -317,7 +342,10 @@ export class GameScene implements Scene {
       ? { x: end.x - start.x, y: end.y - start.y }
       : null;
 
-    const target = new TargetNode(event.kind, dragEnd);
+    const target = new TargetNode(event.kind, dragEnd, {
+      hitRadius: this.difficultyProfile.targetHitRadius,
+      dragPathTolerance: this.difficultyProfile.dragPathTolerance,
+    });
     target.position.set(start.x, start.y);
     target.setFlowActive(this.flow.snapshot().active);
     this.activeTarget = target;
@@ -373,7 +401,33 @@ export class GameScene implements Scene {
 
     this.gameEnded = true;
     this.audioManager.stop();
-    this.onFinished(this.score.snapshot(), this.flow.snapshot());
+    this.onFinished(
+      this.score.snapshot(),
+      this.flow.snapshot(),
+      Math.max(1, this.phaseIndex + 1),
+    );
+  }
+
+  private updatePhase(currentTime: number): void {
+    const nextPhaseIndex = Math.min(
+      this.beatmap.phases.length - 1,
+      Math.max(0, Math.floor(currentTime / this.beatmap.loopDuration)),
+    );
+    const phase = this.beatmap.phases[nextPhaseIndex];
+    if (!phase) return;
+
+    this.hud.updateRunProgress(
+      currentTime,
+      this.beatmap.duration,
+      nextPhaseIndex,
+      phase.name,
+    );
+    if (nextPhaseIndex === this.phaseIndex) return;
+
+    this.phaseIndex = nextPhaseIndex;
+    this.background.setPhase(nextPhaseIndex);
+    this.effects.emitPhaseTransition(nextPhaseIndex + 1, phase.name);
+    this.haptics.phaseTransition();
   }
 
   private syncFlowState(snapshot: FlowSnapshot): void {

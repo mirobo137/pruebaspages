@@ -8,6 +8,8 @@ interface AmbientOrb {
   size: number;
 }
 
+const PHASE_COLORS = [0x83a7ff, 0xb58cff, 0xffbd69];
+
 export class RhythmBackground extends Container {
   private readonly backdrop = new Graphics();
   private readonly flowOverlay = new Graphics();
@@ -21,6 +23,7 @@ export class RhythmBackground extends Container {
   private pulseEnergy = 0;
   private flowActive = false;
   private flowIntensity = 0;
+  private phaseIndex = 0;
 
   constructor() {
     super();
@@ -103,6 +106,11 @@ export class RhythmBackground extends Container {
     this.flowActive = active;
   }
 
+  setPhase(phaseIndex: number): void {
+    this.phaseIndex = Math.max(0, Math.min(PHASE_COLORS.length - 1, phaseIndex));
+    this.pulse(1.25);
+  }
+
   updateBackground(deltaSeconds: number): void {
     this.elapsed += deltaSeconds;
     const flowTarget = this.flowActive ? 1 : 0;
@@ -112,9 +120,10 @@ export class RhythmBackground extends Container {
     const breathing = 1 + Math.sin(this.elapsed * (1.4 + this.flowIntensity * 3)) * 0.025;
     this.pulseRing.scale.set(breathing + this.pulseEnergy * 0.2 + this.flowIntensity * 0.08);
     this.pulseRing.alpha = 0.2 + this.pulseEnergy * 0.38 + this.flowIntensity * 0.35;
-    this.pulseRing.tint = this.flowIntensity > 0.1 ? 0xffda76 : 0xffffff;
+    const phaseColor = PHASE_COLORS[this.phaseIndex];
+    this.pulseRing.tint = this.flowIntensity > 0.1 ? 0xffda76 : phaseColor;
     this.grid.alpha = 0.65 + this.pulseEnergy * 0.35 + this.flowIntensity * 0.35;
-    this.grid.tint = this.flowIntensity > 0.1 ? 0xc99cff : 0xffffff;
+    this.grid.tint = this.flowIntensity > 0.1 ? 0xc99cff : phaseColor;
     this.flowOverlay.alpha = this.flowIntensity
       * (0.055 + Math.sin(this.elapsed * 8) * 0.018);
     this.flowRays.alpha = this.flowIntensity * 0.72;
@@ -133,7 +142,7 @@ export class RhythmBackground extends Container {
       orb.node.scale.set(
         1 + this.pulseEnergy * 0.6 + orb.size * 0.02 + this.flowIntensity * 0.55,
       );
-      orb.node.tint = this.flowIntensity > 0.1 ? 0xffdc83 : 0xffffff;
+      orb.node.tint = this.flowIntensity > 0.1 ? 0xffdc83 : phaseColor;
     }
   }
 }

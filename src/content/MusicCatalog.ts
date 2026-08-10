@@ -1,8 +1,10 @@
+import type { Difficulty } from '../game/difficulty/Difficulty';
+
 export interface MusicTrack {
   id: string;
   title: string;
   audioPath: string;
-  beatmapPath: string;
+  beatmapPaths: Record<Difficulty, string>;
   bpm?: number;
 }
 
@@ -18,4 +20,3 @@ export async function loadMusicCatalog(): Promise<MusicTrack[]> {
 
   return response.json() as Promise<MusicTrack[]>;
 }
-
