@@ -8,60 +8,133 @@ export interface AudioFrame {
 }
 
 export class AudioManager {
-  private readonly element = new Audio();
   private context: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
-  private source: MediaElementAudioSourceNode | null = null;
+  private readonly sources: Array<{
+    source: AudioBufferSourceNode;
+    gain: GainNode;
+  }> = [];
   private frequencyData = new Uint8Array(0);
-  private continuousTimeline = false;
-  private loopDuration = 0;
-  private loopCount = 0;
-  private previousMediaTime = 0;
+  private readonly trackData = new Map<string, Promise<ArrayBuffer>>();
+  private readonly decodedTracks = new Map<string, Promise<AudioBuffer>>();
+  private startedAt = 0;
+  private playing = false;
+  private playbackToken = 0;
 
   get currentTime(): number {
-    const mediaTime = this.element.currentTime;
-    if (
-      this.continuousTimeline
-      && this.previousMediaTime > 0.5
-      && mediaTime + 0.25 < this.previousMediaTime
-    ) {
-      this.loopCount += 1;
-    }
-    this.previousMediaTime = mediaTime;
-    return this.continuousTimeline
-      ? this.loopCount * this.loopDuration + mediaTime
-      : mediaTime;
+    if (!this.playing || !this.context) return 0;
+    return Math.max(0, this.context.currentTime - this.startedAt);
   }
 
   get isPlaying(): boolean {
-    return !this.element.paused;
+    return this.playing;
   }
 
-  play(
-    track: MusicTrack,
-    options: { loop?: boolean; loopDuration?: number } = {},
-  ): Promise<void> {
-    this.element.pause();
-    this.element.src = new URL(track.audioPath, document.baseURI).toString();
-    this.element.preload = 'auto';
-    this.element.loop = options.loop ?? false;
-    this.continuousTimeline = Boolean(options.loop && options.loopDuration);
-    this.loopDuration = options.loopDuration ?? 0;
-    this.loopCount = 0;
-    this.previousMediaTime = 0;
+  async preload(tracks: MusicTrack[]): Promise<void> {
+    await Promise.all(tracks.map(async (track) => {
+      try {
+        await this.getTrackData(track);
+      } catch {
+        // A failed preload is retried when the player starts the song.
+      }
+    }));
+  }
 
-    // Keep this call before any await. Mobile browsers associate it with the
-    // original pointer gesture and can reject delayed autoplay requests.
-    return this.element.play();
+  async play(
+    track: MusicTrack,
+    options: {
+      loop?: boolean;
+      loopDuration?: number;
+      playbackDuration?: number;
+    } = {},
+  ): Promise<void> {
+    this.stop();
+    const token = ++this.playbackToken;
+    this.ensureAudioContext();
+    const context = this.context!;
+
+    // Resume is intentionally requested before the first await so mobile
+    // browsers associate it with the original touch gesture.
+    const resumePromise = context.resume();
+    const bufferPromise = this.getDecodedTrack(track);
+    await resumePromise;
+    const buffer = await bufferPromise;
+    if (token !== this.playbackToken) return;
+
+    const startAt = context.currentTime + 0.025;
+    const canCrossfade = Boolean(
+      options.loop
+      && options.loopDuration
+      && options.playbackDuration,
+    );
+
+    if (canCrossfade) {
+      const loopDuration = options.loopDuration!;
+      const cycleCount = Math.ceil(options.playbackDuration! / loopDuration);
+      const crossfade = Math.min(0.45, loopDuration * 0.025);
+      const renderedCycleDuration = loopDuration + crossfade;
+      const fadeIn = this.createFadeCurve(true);
+      const fadeOut = this.createFadeCurve(false);
+
+      for (let cycle = 0; cycle < cycleCount; cycle += 1) {
+        const cycleStart = startAt + cycle * loopDuration;
+        const source = context.createBufferSource();
+        const gain = context.createGain();
+        source.buffer = buffer;
+        source.playbackRate.value = buffer.duration / renderedCycleDuration;
+        source.connect(gain);
+        gain.connect(this.analyser!);
+
+        gain.gain.setValueAtTime(cycle === 0 ? 1 : 0, cycleStart);
+        if (cycle > 0) {
+          gain.gain.setValueCurveAtTime(fadeIn, cycleStart, crossfade);
+        }
+        if (cycle < cycleCount - 1) {
+          gain.gain.setValueAtTime(1, cycleStart + loopDuration);
+          gain.gain.setValueCurveAtTime(
+            fadeOut,
+            cycleStart + loopDuration,
+            crossfade,
+          );
+        }
+
+        source.start(cycleStart);
+        this.sources.push({ source, gain });
+      }
+    } else {
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      source.loop = options.loop ?? false;
+      source.loopStart = 0;
+      source.loopEnd = buffer.duration;
+      if (options.loopDuration && options.loopDuration > 0) {
+        source.playbackRate.value = buffer.duration / options.loopDuration;
+      }
+      source.connect(gain);
+      gain.connect(this.analyser!);
+      source.start(startAt);
+      this.sources.push({ source, gain });
+    }
+
+    this.startedAt = startAt;
+    this.playing = true;
   }
 
   stop(): void {
-    this.element.pause();
-    this.element.currentTime = 0;
-    this.continuousTimeline = false;
-    this.loopDuration = 0;
-    this.loopCount = 0;
-    this.previousMediaTime = 0;
+    this.playbackToken += 1;
+    for (const entry of this.sources) {
+      try {
+        entry.source.stop();
+      } catch {
+        // A source that already ended cannot be stopped again.
+      }
+      entry.source.disconnect();
+      entry.gain.disconnect();
+    }
+    this.sources.length = 0;
+    this.startedAt = 0;
+    this.playing = false;
   }
 
   readFrame(): AudioFrame {
@@ -87,35 +160,59 @@ export class AudioManager {
 
   destroy(): void {
     this.stop();
-    this.disconnectAudioGraph();
+    this.analyser?.disconnect();
+    void this.context?.close();
+    this.analyser = null;
+    this.context = null;
+    this.frequencyData = new Uint8Array(0);
+    this.trackData.clear();
+    this.decodedTracks.clear();
   }
 
   private ensureAudioContext(): void {
     if (this.context) return;
 
-    this.context = new AudioContext();
+    this.context = new AudioContext({ latencyHint: 'interactive' });
     this.analyser = this.context.createAnalyser();
     this.analyser.fftSize = 512;
     this.analyser.smoothingTimeConstant = 0.75;
     this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
-  }
-
-  private connectAudioGraph(): void {
-    if (!this.context || !this.analyser || this.source) return;
-
-    this.source = this.context.createMediaElementSource(this.element);
-    this.source.connect(this.analyser);
     this.analyser.connect(this.context.destination);
   }
 
-  private disconnectAudioGraph(): void {
-    this.source?.disconnect();
-    this.analyser?.disconnect();
-    void this.context?.close();
-    this.source = null;
-    this.analyser = null;
-    this.context = null;
-    this.frequencyData = new Uint8Array(0);
+  private getTrackData(track: MusicTrack): Promise<ArrayBuffer> {
+    const cached = this.trackData.get(track.id);
+    if (cached) return cached;
+
+    const request = fetch(new URL(track.audioPath, document.baseURI))
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('No se pudo cargar el audio: ' + response.status);
+        }
+        return response.arrayBuffer();
+      })
+      .catch((error: unknown) => {
+        this.trackData.delete(track.id);
+        throw error;
+      });
+    this.trackData.set(track.id, request);
+    return request;
+  }
+
+  private getDecodedTrack(track: MusicTrack): Promise<AudioBuffer> {
+    const cached = this.decodedTracks.get(track.id);
+    if (cached) return cached;
+    if (!this.context) throw new Error('AudioContext no disponible.');
+
+    const context = this.context;
+    const request = this.getTrackData(track)
+      .then((data) => context.decodeAudioData(data.slice(0)))
+      .catch((error: unknown) => {
+        this.decodedTracks.delete(track.id);
+        throw error;
+      });
+    this.decodedTracks.set(track.id, request);
+    return request;
   }
 
   private average(start: number, end: number): number {
@@ -127,5 +224,16 @@ export class AudioManager {
     }
 
     return sum / ((safeEnd - start) * 255);
+  }
+
+  private createFadeCurve(fadeIn: boolean): Float32Array<ArrayBuffer> {
+    const curve = new Float32Array(32);
+    for (let index = 0; index < curve.length; index += 1) {
+      const progress = index / (curve.length - 1);
+      curve[index] = fadeIn
+        ? Math.sin(progress * Math.PI * 0.5)
+        : Math.cos(progress * Math.PI * 0.5);
+    }
+    return curve;
   }
 }

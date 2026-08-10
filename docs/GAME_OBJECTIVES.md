@@ -25,6 +25,7 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [x] Dificultades Facil, Medio y Dificil por cancion.
 - [x] Tres fases de 30 segundos: Lectura, Impulso y Climax.
 - [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
+- [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
 - [x] Rastro visual para objetivos de arrastre.
 - [x] Beatmap JSON separado del codigo.
@@ -64,6 +65,8 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Arrastre calculado sobre el trayecto y con tolerancia lateral.
 - [x] Feedback visual inmediato incluso al tocar fuera de tiempo.
 - [x] Bloqueo de scroll, seleccion y gestos del navegador sobre el canvas.
+- [x] Lista de canciones desplazable con dedo y rueda del mouse.
+- [x] Selector compacto de dificultad sin tres botones grandes.
 
 ## Enganche y retorno
 
@@ -74,7 +77,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [ ] Mejor puntuacion local por cancion.
 - [ ] Estadisticas de precision, maximo combo y errores.
 - [ ] Reto diario determinista cuando exista una base de niveles estable.
-- [ ] Dificultades o modificadores que cambien la lectura del patron.
+- [x] Dificultades que cambian densidad, vidas, timing y tolerancia tactil.
 - [ ] Resultado facil de compartir como imagen o texto.
 - [ ] Desbloqueo cosmetico sin afectar la habilidad ni la justicia del juego.
 
@@ -137,6 +140,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Medir si cuatro `Perfect` son una meta alcanzable y emocionante.
 - [ ] Ajustar FLOW para una partida completa de 90 segundos.
 - [ ] Confirmar que el loop de audio no tiene corte perceptible entre fases.
+- [ ] Confirmar que Medio y Dificil siguen siendo exigentes pero legibles con dedo.
+- [ ] Probar la lista con suficientes canciones para requerir scroll real.
 - [ ] Revisar que un `Miss` se sienta claro sin parecer injusto.
 - [ ] Ajustar el beatmap de la cancion de prueba escuchando sus golpes reales.
 - [ ] Registrar mejor puntuacion local por cancion.

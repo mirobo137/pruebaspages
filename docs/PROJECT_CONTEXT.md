@@ -25,8 +25,9 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Una cancion de prueba: `coffee-in-the-driveway`.
 - Tres beatmaps separados en `public/assets/beatmaps/coffee-in-the-driveway/`.
 - Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
+- Menu con lista vertical de canciones desplazable por dedo o rueda, selector segmentado de dificultad y un solo boton Jugar.
 - Partidas de 90 segundos divididas en Lectura, Impulso y Climax.
-- Audio de 30 segundos en bucle con reloj jugable continuo durante las tres fases.
+- Audio de 30 segundos precargado y decodificado con Web Audio, con reloj jugable continuo durante las tres fases.
 - Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
 - Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
 - Menu inicial, pantalla de partida y pantalla de resultado.
@@ -94,6 +95,9 @@ Reglas de modularidad:
 - Cada fase tiene un patron distinto para que la repeticion musical no produzca la misma lectura tactil.
 - Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.
 - El cambio de fase modifica HUD, color del fondo, particulas y vibracion.
+- El motor agenda tres fuentes de audio y mezcla cada union durante 450 ms con curvas de potencia constante. Esto elimina el hueco tecnico del loop nativo.
+
+Si la composicion contiene un cierre, silencio o fade-out muy marcado, el crossfade reduce el corte pero no puede convertirla por completo en un loop musical. Para futuras canciones se debe pedir `seamless loop`, BPM constante, sin intro larga y sin fade-out.
 
 Los beatmaps son compactos. Cada archivo declara `grid`, `offset`, `gap` y un patron que se repite durante la fase. `grid` es la unidad ritmica en segundos y `gap` indica cuantas unidades pasan antes del siguiente objetivo. El cargador expande los patrones a eventos absolutos de 0 a 90 segundos.
 
@@ -103,6 +107,16 @@ public/assets/beatmaps/<id-cancion>/
   medium.json
   hard.json
 ```
+
+## Balance actual de dificultad
+
+```text
+Facil    60 objetivos   6 vidas   Bien +/-260 ms   radio tactil 60 px
+Medio   162 objetivos   4 vidas   Bien +/-180 ms   radio tactil 50 px
+Dificil 192 objetivos   3 vidas   Bien +/-140 ms   radio tactil 44 px
+```
+
+Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el pulso provisional de 0.75 segundos. La dificultad debe venir principalmente de densidad, alternancia, arrastres y precision; no de ocultar informacion al jugador.
 
 ## Mecanica central de FLOW
 

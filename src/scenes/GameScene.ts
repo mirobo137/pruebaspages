@@ -268,6 +268,7 @@ export class GameScene implements Scene {
     void this.audioManager.play(this.track, {
       loop: true,
       loopDuration: this.beatmap.loopDuration,
+      playbackDuration: this.beatmap.duration,
     }).catch(
       (error: unknown) => {
         this.musicStarted = false;

@@ -1,0 +1,89 @@
+import { Container, Graphics, Rectangle, Text, TextStyle } from 'pixi.js';
+import type { FederatedPointerEvent } from 'pixi.js';
+import type { Difficulty } from '../game/difficulty/Difficulty';
+import { DIFFICULTIES, getDifficultyLabel } from '../game/difficulty/Difficulty';
+
+const labelStyle = new TextStyle({
+  fill: '#c7d1ed',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 15,
+  fontWeight: '800',
+  align: 'center',
+});
+
+export class DifficultySelector extends Container {
+  private readonly background = new Graphics();
+  private readonly labels = DIFFICULTIES.map((difficulty) => new Text({
+    text: getDifficultyLabel(difficulty),
+    style: labelStyle,
+  }));
+  private selected: Difficulty = 'medium';
+  private selectorWidth = 320;
+  private readonly selectorHeight = 52;
+
+  constructor(private readonly onChange: (difficulty: Difficulty) => void) {
+    super();
+    this.eventMode = 'static';
+    this.cursor = 'pointer';
+    this.addChild(this.background, ...this.labels);
+    this.on('pointertap', this.handleTap);
+  }
+
+  setSelected(difficulty: Difficulty): void {
+    this.selected = difficulty;
+    this.draw();
+  }
+
+  resize(width: number): void {
+    this.selectorWidth = width;
+    this.hitArea = new Rectangle(0, 0, width, this.selectorHeight);
+    this.draw();
+  }
+
+  private readonly handleTap = (event: FederatedPointerEvent): void => {
+    const local = this.toLocal(event.global);
+    const index = Math.max(
+      0,
+      Math.min(DIFFICULTIES.length - 1, Math.floor(local.x / (this.selectorWidth / 3))),
+    );
+    this.selected = DIFFICULTIES[index];
+    this.onChange(this.selected);
+    this.draw();
+  };
+
+  private draw(): void {
+    const segmentWidth = this.selectorWidth / DIFFICULTIES.length;
+    this.background.clear().roundRect(0, 0, this.selectorWidth, this.selectorHeight, 15).fill({
+      color: 0x151d34,
+    });
+
+    DIFFICULTIES.forEach((difficulty, index) => {
+      const selected = difficulty === this.selected;
+      if (selected) {
+        const color = difficulty === 'easy'
+          ? 0x287a62
+          : difficulty === 'medium'
+            ? 0x3958b8
+            : 0x9f3e61;
+        this.background.roundRect(
+          index * segmentWidth + 4,
+          4,
+          segmentWidth - 8,
+          this.selectorHeight - 8,
+          12,
+        ).fill({ color });
+      }
+      if (index > 0) {
+        this.background.moveTo(index * segmentWidth, 12).lineTo(
+          index * segmentWidth,
+          this.selectorHeight - 12,
+        ).stroke({ color: 0x7181ad, alpha: 0.2, width: 1 });
+      }
+
+      const label = this.labels[index];
+      label.anchor.set(0.5);
+      label.position.set(index * segmentWidth + segmentWidth / 2, this.selectorHeight / 2);
+      label.style.fill = selected ? '#ffffff' : '#aab6d5';
+    });
+  }
+}

@@ -42,6 +42,7 @@ export class GameApplication {
     this.mountElement.appendChild(this.app.canvas);
     this.app.stage.addChild(this.sceneHost);
     this.tracks = await this.loadMusic();
+    void this.audioManager.preload(this.tracks.map((selection) => selection.track));
     this.showMenu();
 
     this.app.ticker.add(this.tick);

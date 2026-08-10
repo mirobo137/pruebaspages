@@ -2,7 +2,7 @@
   "trackId": "coffee-in-the-driveway",
   "difficulty": "hard",
   "loopDuration": 30,
-  "grid": 0.75,
+  "grid": 0.375,
   "phases": [
     {
       "name": "LECTURA",
