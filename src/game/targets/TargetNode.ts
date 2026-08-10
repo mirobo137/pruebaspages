@@ -103,6 +103,11 @@ export class TargetNode extends Container {
     this.pressed = pressed;
   }
 
+  resetInteraction(): void {
+    this.pressed = false;
+    if (this.kind === 'drag') this.setDragProgress(0);
+  }
+
   setFlowState(active: boolean, superActive = false): void {
     this.flowActive = active;
     this.superFlowActive = superActive;

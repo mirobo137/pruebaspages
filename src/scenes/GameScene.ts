@@ -6,6 +6,7 @@ import type { MusicTrack } from '../content/MusicCatalog';
 import type { Scene } from '../core/scene/Scene';
 import { randomBetween } from '../core/utils/random';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
+import { PhaseTransitionGuard } from '../game/beatmap/PhaseTransitionGuard';
 import { GAME_CONFIG } from '../game/config';
 import type { Difficulty, DifficultyProfile } from '../game/difficulty/Difficulty';
 import { DIFFICULTY_PROFILES } from '../game/difficulty/Difficulty';
@@ -23,6 +24,9 @@ import { TouchTuning } from '../input/TouchTuning';
 import type { PointerTuning } from '../input/TouchTuning';
 import { HapticsService } from '../platform/HapticsService';
 import { GameHud } from '../ui/GameHud';
+import { GameCountdown } from '../ui/GameCountdown';
+import { PauseButton } from '../ui/PauseButton';
+import { PauseOverlay } from '../ui/PauseOverlay';
 
 interface DragState {
   pointerId: number;
@@ -38,6 +42,9 @@ export interface GameSceneOptions {
   audioManager: AudioManager;
   track: MusicTrack;
   beatmap: Beatmap;
+  audioReady: Promise<void>;
+  onRestart: () => void;
+  onExit: () => void;
   onFinished: (
     snapshot: ScoreSnapshot,
     flow: FlowSnapshot,
@@ -54,6 +61,9 @@ export class GameScene implements Scene {
   private readonly targets = new Container();
   private readonly effects = new JuiceSystem();
   private readonly hud = new GameHud();
+  private readonly countdown = new GameCountdown();
+  private readonly pauseButton: PauseButton;
+  private readonly pauseOverlay: PauseOverlay;
   private readonly score: ScoreModel;
   private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
@@ -64,7 +74,11 @@ export class GameScene implements Scene {
   private readonly difficultyProfile: DifficultyProfile;
   private readonly beatmap: Beatmap;
   private readonly beatmapPlayer: BeatmapPlayer;
+  private readonly phaseTransition = new PhaseTransitionGuard();
+  private readonly audioReady: Promise<void>;
   private readonly pendingEvents: BeatEvent[] = [];
+  private readonly onRestart: () => void;
+  private readonly onExit: () => void;
   private readonly onFinished: GameSceneOptions['onFinished'];
   private activeTarget: TargetNode | null = null;
   private activeEvent: BeatEvent | null = null;
@@ -73,7 +87,11 @@ export class GameScene implements Scene {
   private width: number;
   private height: number;
   private musicStarted = false;
+  private musicStartRequested = false;
   private gameEnded = false;
+  private paused = false;
+  private pauseReady: Promise<void> = Promise.resolve();
+  private mounted = false;
   private phaseIndex = -1;
 
   constructor(width: number, height: number, options: GameSceneOptions) {
@@ -86,12 +104,30 @@ export class GameScene implements Scene {
     this.score = new ScoreModel(this.difficultyProfile.maxLives);
     this.beatmap = options.beatmap;
     this.beatmapPlayer = new BeatmapPlayer(options.beatmap);
+    this.audioReady = options.audioReady;
+    this.onRestart = options.onRestart;
+    this.onExit = options.onExit;
     this.onFinished = options.onFinished;
+    this.pauseButton = new PauseButton(this.handlePause);
+    this.pauseOverlay = new PauseOverlay({
+      onContinue: this.handleContinue,
+      onRestart: this.handleRestart,
+      onExit: this.handleExit,
+    });
     this.playfield.addChild(this.targets);
-    this.root.addChild(this.background, this.playfield, this.effects, this.hud);
+    this.root.addChild(
+      this.background,
+      this.playfield,
+      this.effects,
+      this.hud,
+      this.pauseButton,
+      this.countdown,
+      this.pauseOverlay,
+    );
   }
 
   mount(): void {
+    this.mounted = true;
     this.playfield.eventMode = 'static';
     this.playfield.on('pointerdown', this.handlePointerDown);
     this.playfield.on('pointermove', this.handlePointerMove);
@@ -107,14 +143,25 @@ export class GameScene implements Scene {
       this.beatmap.phases[0]?.name ?? 'LECTURA',
     );
     this.syncFlowState(this.flow.snapshot());
+    this.pauseButton.visible = false;
+    this.countdown.showLoading();
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
     this.resize(this.width, this.height);
+    void this.audioReady.then(() => {
+      if (this.mounted && !this.gameEnded) this.countdown.start();
+    }).catch((error: unknown) => {
+      if (!this.mounted) return;
+      this.paused = true;
+      this.countdown.showError();
+      this.pauseOverlay.setMessage('El audio no inició. Puedes reintentar o volver al menú.');
+      this.pauseOverlay.show();
+      console.warn('No se pudo preparar la canción.', error);
+    });
   }
 
   update(deltaSeconds: number): void {
-    const isRunning = this.musicStarted && this.audioManager.isPlaying;
-    const currentTime = isRunning ? this.audioManager.currentTime : 0;
-    const flowChange = this.flow.update(isRunning ? deltaSeconds : 0);
-    this.applyFlowChange(flowChange);
+    if (this.gameEnded || this.paused) return;
+
     this.hud.animate(deltaSeconds);
     this.background.updateBackground(deltaSeconds);
     this.effects.updateEffects(deltaSeconds);
@@ -123,7 +170,20 @@ export class GameScene implements Scene {
     this.targets.position.set(shake.x, shake.y);
     this.background.position.set(shake.x * 0.35, shake.y * 0.35);
 
-    if (this.activeTarget && this.activeEvent && isRunning) {
+    if (!this.musicStarted) {
+      if (this.countdown.updateCountdown(deltaSeconds)) this.startMusic();
+      return;
+    }
+
+    if (!this.audioManager.isPlaying) return;
+
+    const currentTime = this.audioManager.currentTime;
+    this.updatePhase(currentTime);
+    const phaseTransitionActive = this.phaseTransition.isActive(currentTime);
+    const flowChange = this.flow.update(phaseTransitionActive ? 0 : deltaSeconds);
+    this.applyFlowChange(flowChange);
+
+    if (this.activeTarget && this.activeEvent && !phaseTransitionActive) {
       this.activeTarget.updateTiming(
         this.activeEvent.time - currentTime,
         this.difficultyProfile.targetLeadTime,
@@ -131,20 +191,22 @@ export class GameScene implements Scene {
       );
     }
 
-    if (this.gameEnded || !isRunning) return;
-
-    this.updatePhase(currentTime);
     if (currentTime >= this.beatmap.duration) {
       this.finishGame();
       return;
     }
 
+    const upcomingEvents = this.beatmapPlayer.collectUpcomingEvents(
+      currentTime,
+      this.difficultyProfile.targetLeadTime,
+    );
     this.pendingEvents.push(
-      ...this.beatmapPlayer.collectUpcomingEvents(
-        currentTime,
-        this.difficultyProfile.targetLeadTime,
+      ...upcomingEvents.filter(
+        (event) => this.phaseTransition.accepts(event, this.phaseIndex),
       ),
     );
+
+    if (phaseTransitionActive) return;
 
     if (
       this.bufferedTapEvent
@@ -186,10 +248,15 @@ export class GameScene implements Scene {
     this.background.resize(width, height);
     this.effects.resize(width, height);
     this.hud.resize(width, height);
+    this.countdown.resize(width, height);
+    this.pauseButton.position.set(width - 58, 78);
+    this.pauseOverlay.resize(width, height);
     this.touchTuning.resize(width, height);
   }
 
   unmount(): void {
+    this.mounted = false;
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.playfield.off('pointerdown', this.handlePointerDown);
     this.playfield.off('pointermove', this.handlePointerMove);
     this.playfield.off('pointerup', this.handlePointerUp);
@@ -200,14 +267,15 @@ export class GameScene implements Scene {
     this.dragState = null;
     this.bufferedTapEvent = null;
     this.targets.position.set(0, 0);
+    this.audioManager.stop();
   }
 
   private readonly handlePointerDown = (event: FederatedPointerEvent): void => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (!this.isGameplayInteractive()) return;
 
     capturePointer(event);
     this.effects.emitTouch(event.global.x, event.global.y);
-    this.startMusic();
 
     if (this.dragState) return;
 
@@ -257,6 +325,7 @@ export class GameScene implements Scene {
   };
 
   private readonly handlePointerMove = (event: FederatedPointerEvent): void => {
+    if (!this.isGameplayInteractive()) return;
     if (
       !this.dragState
       || this.dragState.pointerId !== event.pointerId
@@ -299,6 +368,7 @@ export class GameScene implements Scene {
 
   private readonly handlePointerUp = (event: FederatedPointerEvent): void => {
     releasePointer(event);
+    if (!this.isGameplayInteractive()) return;
     if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
 
     if (
@@ -321,16 +391,32 @@ export class GameScene implements Scene {
   };
 
   private startMusic(): void {
-    if (this.musicStarted) return;
+    if (this.musicStartRequested || this.gameEnded) return;
 
-    this.musicStarted = true;
+    this.musicStartRequested = true;
     void this.audioManager.play(this.track, {
       loop: true,
       loopDuration: this.beatmap.loopDuration,
       playbackDuration: this.beatmap.duration,
+    }).then(() => {
+      if (!this.mounted || this.gameEnded) return;
+      this.musicStarted = true;
+      if (this.paused) {
+        this.pauseReady = this.audioManager.pause().catch((error: unknown) => {
+          console.warn('No se pudo suspender el audio.', error);
+        });
+        return;
+      }
+      this.countdown.hide();
+      this.pauseButton.visible = true;
     }).catch(
       (error: unknown) => {
-        this.musicStarted = false;
+        this.musicStartRequested = false;
+        this.paused = true;
+        this.countdown.showError();
+        this.pauseButton.visible = false;
+        this.pauseOverlay.setMessage('El audio no inició. Puedes reintentar o volver al menú.');
+        this.pauseOverlay.show();
         console.warn('No se pudo reproducir la cancion.', error);
       },
     );
@@ -487,9 +573,100 @@ export class GameScene implements Scene {
     this.background.setPhase(nextPhaseIndex, !isInitialPhase);
     if (isInitialPhase) return;
 
+    this.beginPhaseTransition(nextPhaseIndex, phase.startTime, currentTime);
     this.effects.emitPhaseTransition(nextPhaseIndex + 1, phase.name);
     this.haptics.phaseTransition();
   }
+
+  private beginPhaseTransition(
+    nextPhaseIndex: number,
+    phaseStartTime: number,
+    currentTime: number,
+  ): void {
+    this.phaseTransition.begin(
+      phaseStartTime,
+      currentTime,
+      this.difficultyProfile.targetLeadTime,
+    );
+
+    if (this.activeEvent && this.activeEvent.phaseIndex < nextPhaseIndex) {
+      this.activeTarget?.destroy();
+      this.activeTarget = null;
+      this.activeEvent = null;
+    }
+    this.dragState = null;
+    this.bufferedTapEvent = null;
+
+    for (let index = this.pendingEvents.length - 1; index >= 0; index -= 1) {
+      const event = this.pendingEvents[index];
+      if (
+        event.phaseIndex < nextPhaseIndex
+        || !this.phaseTransition.accepts(event, nextPhaseIndex)
+      ) {
+        this.pendingEvents.splice(index, 1);
+      }
+    }
+  }
+
+  private isGameplayInteractive(): boolean {
+    return this.musicStarted
+      && this.audioManager.isPlaying
+      && !this.paused
+      && !this.phaseTransition.isActive(this.audioManager.currentTime);
+  }
+
+  private readonly handlePause = (): void => {
+    this.pauseGame();
+  };
+
+  private readonly handleVisibilityChange = (): void => {
+    if (document.hidden) this.pauseGame();
+  };
+
+  private pauseGame(): void {
+    if (this.paused || this.gameEnded) return;
+
+    this.paused = true;
+    this.activeTarget?.resetInteraction();
+    this.dragState = null;
+    this.bufferedTapEvent = null;
+    this.pauseButton.visible = false;
+    this.pauseOverlay.setMessage('La música y el tiempo están detenidos');
+    this.pauseReady = this.audioManager.pause().catch((error: unknown) => {
+      console.warn('No se pudo suspender el audio.', error);
+    });
+    void this.pauseReady.then(() => {
+      if (this.mounted && this.paused && !this.gameEnded) this.pauseOverlay.show();
+    });
+  }
+
+  private readonly handleContinue = (): void => {
+    const ready = this.pauseReady.then(() => this.musicStarted
+      ? this.audioManager.resume()
+      : this.audioManager.prepare(this.track));
+    void ready.then(() => {
+      if (!this.mounted || this.gameEnded) return;
+      this.paused = false;
+      this.pauseOverlay.hide();
+      if (!this.musicStarted && !this.musicStartRequested) {
+        this.countdown.start();
+      }
+      this.pauseButton.visible = this.musicStarted;
+    }).catch((error: unknown) => {
+      this.pauseOverlay.setMessage('No se pudo continuar. Intenta de nuevo o vuelve al menú.');
+      console.warn('No se pudo continuar la partida.', error);
+    });
+  };
+
+  private readonly handleRestart = (): void => {
+    this.audioManager.stop();
+    this.onRestart();
+  };
+
+  private readonly handleExit = (): void => {
+    this.audioManager.stop();
+    this.onExit();
+  };
 
   private syncFlowState(snapshot: FlowSnapshot): void {
     this.hud.updateFlow(snapshot);

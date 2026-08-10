@@ -298,7 +298,7 @@ export class JuiceSystem extends Container {
       y - 36,
       'FASE ' + phaseNumber + ' · ' + phaseName,
       color,
-      1.15,
+      0.8,
     );
     this.flashColor = color;
     this.flashStrength = Math.max(this.flashStrength, phaseNumber === 3 ? 0.2 : 0.12);

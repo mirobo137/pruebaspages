@@ -19,6 +19,7 @@ export class AudioManager {
   private readonly decodedTracks = new Map<string, Promise<AudioBuffer>>();
   private startedAt = 0;
   private playing = false;
+  private paused = false;
   private playbackToken = 0;
 
   get currentTime(): number {
@@ -27,7 +28,18 @@ export class AudioManager {
   }
 
   get isPlaying(): boolean {
-    return this.playing;
+    return this.playing && !this.paused;
+  }
+
+  prepare(track: MusicTrack): Promise<void> {
+    this.ensureAudioContext();
+    const context = this.context!;
+
+    // Both operations start inside the JUGAR gesture. This unlocks Web Audio
+    // on mobile while leaving the actual song start for the countdown.
+    const resumePromise = context.resume();
+    const decodePromise = this.getDecodedTrack(track);
+    return Promise.all([resumePromise, decodePromise]).then(() => undefined);
   }
 
   async preload(tracks: MusicTrack[]): Promise<void> {
@@ -119,6 +131,26 @@ export class AudioManager {
 
     this.startedAt = startAt;
     this.playing = true;
+    this.paused = false;
+  }
+
+  async pause(): Promise<void> {
+    if (!this.playing || this.paused || !this.context) return;
+
+    this.paused = true;
+    try {
+      await this.context.suspend();
+    } catch (error) {
+      this.paused = false;
+      throw error;
+    }
+  }
+
+  async resume(): Promise<void> {
+    if (!this.playing || !this.context) return;
+
+    await this.context.resume();
+    this.paused = false;
   }
 
   stop(): void {
@@ -135,6 +167,7 @@ export class AudioManager {
     this.sources.length = 0;
     this.startedAt = 0;
     this.playing = false;
+    this.paused = false;
   }
 
   readFrame(): AudioFrame {

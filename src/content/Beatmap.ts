@@ -5,9 +5,13 @@ import type { MusicTrack } from './MusicCatalog';
 export interface BeatEvent {
   time: number;
   kind: NoteKind;
+  phaseIndex: number;
   start?: BeatPosition;
   end?: BeatPosition;
 }
+
+export const PHASE_TRANSITION_DURATION = 0.65;
+export const PHASE_ENTRY_SAFE_OFFSET = 1.5;
 
 export interface BeatPosition {
   x: number;
@@ -79,13 +83,17 @@ function expandBeatmap(documentData: BeatmapDocument): Beatmap {
 
     if (phase.pattern.length === 0) return;
 
-    let localTime = Math.max(0, phase.offset ?? grid);
+    let localTime = Math.max(
+      phaseIndex === 0 ? 0 : PHASE_ENTRY_SAFE_OFFSET,
+      phase.offset ?? grid,
+    );
     let patternIndex = 0;
     while (localTime < loopDuration - 0.05) {
       const patternEvent = phase.pattern[patternIndex % phase.pattern.length];
       events.push({
         time: phaseStart + localTime,
         kind: patternEvent.kind,
+        phaseIndex,
         start: patternEvent.start,
         end: patternEvent.end,
       });

@@ -8,8 +8,8 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 
 ## Bucle principal
 
-1. El jugador toca la pantalla para desbloquear el audio.
-2. La cancion empieza y aparecen objetivos sincronizados.
+1. El jugador pulsa JUGAR y ve una cuenta regresiva 3-2-1.
+2. La cancion comienza automaticamente y aparecen objetivos sincronizados.
 3. El jugador resuelve cada objetivo con la accion indicada.
 4. Los aciertos aumentan puntos y combo; los errores rompen el ritmo.
 5. La cancion completa tres fases y muestra el resultado, o termina antes si se agotan las vidas.
@@ -27,6 +27,10 @@ Un juego casual de precision ritmica en el que el jugador pasa de escuchar la mu
 - [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
 - [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
+- [x] Cuenta regresiva antes de iniciar sin segundo toque sobre el gameplay.
+- [x] Pausa con Continuar, Reiniciar y Volver al menu.
+- [x] Pausa automatica al ocultar la pagina o cambiar de aplicacion.
+- [x] Entrada protegida de fases sin Miss o perdida de combo invisible.
 - [x] Rastro visual para objetivos de arrastre.
 - [x] Beatmap JSON separado del codigo.
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
@@ -118,6 +122,7 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 ### Hito 1 — Prototipo jugable
 
 - [x] Reproducir la cancion despues de la primera interaccion.
+- [x] Desbloquear audio desde JUGAR y comenzar despues de 3-2-1.
 - [x] Detectar automaticamente archivos de audio nuevos.
 - [x] Cargar el beatmap desde JSON.
 - [x] Implementar toque, arrastre y peligro.
@@ -156,6 +161,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Medir si cuatro `Perfect` adicionales dentro de FLOW hacen SUPER FLOW alcanzable sin volverlo comun.
 - [ ] Confirmar que Bien degrada a FLOW y que el cambio se entiende sin leer instrucciones.
 - [ ] Confirmar que los cambios de fase no emiten feedback fantasma ni alteran el medidor.
+- [ ] Probar pausa durante tap, drag, FLOW, SUPER FLOW y cambio de fase.
+- [ ] Probar cambio de aplicacion en Android/iPhone y confirmar la pausa automatica.
 - [ ] Ajustar FLOW para una partida completa de 90 segundos.
 - [ ] Confirmar que el loop de audio no tiene corte perceptible entre fases.
 - [ ] Confirmar que Medio y Dificil siguen siendo exigentes pero legibles con dedo.
@@ -167,9 +174,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 ## Estado de una partida ideal
 
 ```text
-primer toque -> audio y fase Lectura
-30 segundos -> Impulso con nuevo patron
-60 segundos -> Climax y mayor intensidad
+JUGAR -> preparar audio -> 3, 2, 1 -> fase Lectura
+30 segundos -> transicion segura -> Impulso con nuevo patron
+60 segundos -> transicion segura -> Climax y mayor intensidad
 aciertos -> combo y medidor FLOW
 medidor completo -> FLOW x2 y progreso de precision
 cuatro Perfect dentro de FLOW -> SUPER FLOW x4

@@ -31,10 +31,11 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
 - Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
 - Menu inicial, pantalla de partida y pantalla de resultado.
-- Audio desbloqueado despues del primer gesto del usuario.
+- Audio desbloqueado desde el boton JUGAR, seguido por cuenta regresiva 3-2-1 sin toque adicional.
 - Catalogo musical generado automaticamente desde `public/assets/audio/`.
 - Juice procedural con particulas, anillos, texto flotante, vibracion, shake y fondo reactivo.
 - Mecanicas FLOW x2 y SUPER FLOW x4 con progresion, degradacion y resumen final.
+- Pausa real de Web Audio con Continuar, Reiniciar y Volver al menu.
 
 La build verificada es `npm run build`. No se deben subir `node_modules/` ni `dist/`; ambos son generados o ignorados por Git.
 
@@ -111,11 +112,23 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.
 - El cambio real a Impulso o Climax modifica HUD, fondo, particulas y vibracion.
 - La inicializacion de Lectura no emite vibracion, shake ni anuncio de transicion; ningun cambio de fase registra aciertos o modifica FLOW.
+- Cada transicion tiene 650 ms protegidos: retira objetivos anteriores sin contarlos como fallo, limpia eventos antiguos, bloquea input y congela FLOW.
+- Las fases posteriores reservan al menos 1.5 segundos antes de su primer golpe. El objetivo aparece despues del anuncio con su tiempo normal de lectura.
+- Si un dispositivo entra tarde a una fase por un frame lento, se omiten sin penalizacion las notas que ya no tengan tiempo completo de lectura.
 - El motor agenda tres fuentes de audio y mezcla cada union durante 450 ms con curvas de potencia constante. Esto elimina el hueco tecnico del loop nativo.
 
 Si la composicion contiene un cierre, silencio o fade-out muy marcado, el crossfade reduce el corte pero no puede convertirla por completo en un loop musical. Para futuras canciones se debe pedir `seamless loop`, BPM constante, sin intro larga y sin fade-out.
 
 Los beatmaps son compactos. Cada archivo declara `grid`, `offset`, `gap` y un patron que se repite durante la fase. `grid` es la unidad ritmica en segundos y `gap` indica cuantas unidades pasan antes del siguiente objetivo. El cargador expande los patrones a eventos absolutos de 0 a 90 segundos.
+
+## Inicio y pausa de partida
+
+- `JUGAR` prepara y desbloquea Web Audio dentro del gesto permitido por el navegador.
+- La escena muestra Preparando audio y despues 3, 2, 1, Ya. La musica comienza al terminar la cuenta.
+- Durante cuenta regresiva, pausa o transicion de fase no se aceptan toques jugables.
+- Pausar suspende el `AudioContext`; por eso musica, reloj, notas y FLOW quedan congelados juntos.
+- Ocultar la pagina o cambiar de aplicacion activa la pausa automaticamente para evitar fallos injustos.
+- Continuar reanuda el mismo reloj. Reiniciar crea una partida nueva y Volver al menu no entrega recompensa.
 
 ```text
 public/assets/beatmaps/<id-cancion>/
@@ -219,7 +232,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 ### Checklist antes de push
 
 - `npm run build` termina sin errores.
-- La cancion se escucha despues del primer toque.
+- JUGAR muestra 3-2-1 y la cancion comienza sin pedir un segundo toque.
 - El toque funciona sin scroll accidental.
 - Dedo, pen y mouse conservan una respuesta coherente.
 - Los taps tempranos dentro del buffer se aceptan una sola vez.
@@ -230,6 +243,8 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Cuatro Perfect consecutivos dentro de FLOW activan SUPER FLOW x4.
 - Bien degrada SUPER FLOW a FLOW; Miss rompe ambos.
 - El inicio de Lectura no genera vibracion o transicion fantasma.
+- Impulso y Climax entran sin notas antiguas, Miss invisible ni perdida de combo.
+- Pausa congela audio, notas y FLOW; Continuar conserva el estado.
 - La pantalla de resultado muestra dificultad y fase alcanzada.
 - Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.
 

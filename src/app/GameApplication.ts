@@ -71,12 +71,16 @@ export class GameApplication {
     difficulty: Difficulty,
     selection: TrackSelection,
   ): void => {
+    const audioReady = this.audioManager.prepare(selection.track);
     this.sceneManager.switchTo(
       new GameScene(this.app.screen.width, this.app.screen.height, {
         difficulty,
         audioManager: this.audioManager,
         track: selection.track,
         beatmap: selection.beatmaps[difficulty],
+        audioReady,
+        onRestart: () => this.startGame(difficulty, selection),
+        onExit: this.showMenu,
         onFinished: (snapshot, flow, phaseReached) => this.showResult(
           difficulty,
           snapshot,

@@ -12,15 +12,21 @@ export class MenuButton extends Container {
   private readonly background = new Graphics();
   private readonly textLabel = new Text({ text: '', style: buttonTextStyle });
   private buttonWidth: number;
-  private readonly buttonHeight = 64;
+  private readonly buttonHeight: number;
   private enabled = true;
   private hovered = false;
   private readonly color: number;
   private readonly onPress: () => void;
 
-  constructor(text: string, onPress: () => void, color = 0x3958b8) {
+  constructor(
+    text: string,
+    onPress: () => void,
+    color = 0x3958b8,
+    height = 64,
+  ) {
     super();
     this.buttonWidth = 320;
+    this.buttonHeight = height;
     this.color = color;
     this.onPress = onPress;
     this.eventMode = 'static';
