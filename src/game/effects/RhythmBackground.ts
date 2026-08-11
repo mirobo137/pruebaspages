@@ -1,5 +1,9 @@
 import { Container, Graphics } from 'pixi.js';
 import type { BackgroundVisualTheme } from '../../customization/ThemeTypes';
+import {
+  FULL_VISUAL_QUALITY,
+  type VisualQualityProfile,
+} from '../../customization/VisualQuality';
 import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
 
 interface AmbientOrb {
@@ -34,6 +38,7 @@ export class RhythmBackground extends Container {
 
   constructor(
     private readonly visualTheme: BackgroundVisualTheme = DEFAULT_VISUAL_THEME.background,
+    private readonly quality: VisualQualityProfile = FULL_VISUAL_QUALITY,
   ) {
     super();
     this.eventMode = 'none';
@@ -55,7 +60,7 @@ export class RhythmBackground extends Container {
       this.pulseRing,
     );
 
-    for (let index = 0; index < 18; index += 1) {
+    for (let index = 0; index < this.quality.ambientOrbCount; index += 1) {
       const node = new Graphics();
       const size = 2 + (index % 4);
       node.circle(0, 0, size).fill({
@@ -92,8 +97,8 @@ export class RhythmBackground extends Container {
 
     this.flowRays.clear();
     const rayLength = Math.hypot(width, height);
-    for (let index = 0; index < 18; index += 1) {
-      const angle = (index / 18) * Math.PI * 2;
+    for (let index = 0; index < this.quality.rayCount; index += 1) {
+      const angle = (index / this.quality.rayCount) * Math.PI * 2;
       this.flowRays.moveTo(width / 2, height / 2).lineTo(
         width / 2 + Math.cos(angle) * rayLength,
         height / 2 + Math.sin(angle) * rayLength,
@@ -110,42 +115,11 @@ export class RhythmBackground extends Container {
 
     const shortestSide = Math.min(width, height);
     this.flowGeometry.clear();
-    this.drawPolygonRing(
-      this.flowGeometry,
-      shortestSide * 0.19,
-      6,
-      this.visualTheme.flowGeometry[0],
-      0.42,
-      1.4,
-    );
-    this.drawPolygonRing(
-      this.flowGeometry,
-      shortestSide * 0.31,
-      8,
-      this.visualTheme.flowGeometry[1],
-      0.3,
-      1.2,
-    );
-    this.drawPolygonRing(
-      this.flowGeometry,
-      shortestSide * 0.44,
-      12,
-      this.visualTheme.flowGeometry[2],
-      0.2,
-      1,
-    );
+    this.drawFlowPattern(width, height, shortestSide);
     this.flowGeometry.position.set(width / 2, height / 2);
 
     this.superTunnel.clear();
-    for (let ring = 1; ring <= 5; ring += 1) {
-      this.superTunnel.circle(0, 0, shortestSide * (0.1 + ring * 0.085)).stroke({
-        color: ring % 2 === 0
-          ? this.visualTheme.superSecondary
-          : this.visualTheme.superPrimary,
-        alpha: 0.34 - ring * 0.035,
-        width: ring === 1 ? 2 : 1.2,
-      });
-    }
+    this.drawSuperFlowPattern(shortestSide);
     this.superTunnel.position.set(width / 2, height / 2);
 
     this.grid.clear();
@@ -321,6 +295,128 @@ export class RhythmBackground extends Container {
       graphics.circle(0, 0, radius * layer / 3).fill({
         color,
         alpha: 0.014 + (4 - layer) * 0.012,
+      });
+    }
+  }
+
+  private drawFlowPattern(width: number, height: number, shortestSide: number): void {
+    if (this.visualTheme.flowPattern === 'waves') {
+      const samples = Math.max(18, Math.round(34 * this.quality.geometryDetail));
+      for (let wave = 0; wave < 5; wave += 1) {
+        for (let sample = 0; sample <= samples; sample += 1) {
+          const progress = sample / samples;
+          const x = (progress - 0.5) * width * 1.1;
+          const y = (wave - 2) * height * 0.1
+            + Math.sin(progress * Math.PI * 4 + wave * 0.8) * shortestSide * 0.055;
+          if (sample === 0) this.flowGeometry.moveTo(x, y);
+          else this.flowGeometry.lineTo(x, y);
+        }
+        this.flowGeometry.stroke({
+          color: this.visualTheme.flowGeometry[wave % 3],
+          alpha: 0.18 + wave * 0.045,
+          width: wave === 2 ? 1.8 : 1.1,
+        });
+      }
+      return;
+    }
+
+    if (this.visualTheme.flowPattern === 'vortex') {
+      const arms = this.quality.id === 'reduced' ? 4 : 6;
+      const samples = Math.max(20, Math.round(42 * this.quality.geometryDetail));
+      for (let arm = 0; arm < arms; arm += 1) {
+        for (let sample = 0; sample <= samples; sample += 1) {
+          const progress = sample / samples;
+          const radius = shortestSide * (0.08 + progress * 0.43);
+          const angle = arm * Math.PI * 2 / arms + progress * Math.PI * 2.2;
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius;
+          if (sample === 0) this.flowGeometry.moveTo(x, y);
+          else this.flowGeometry.lineTo(x, y);
+        }
+        this.flowGeometry.stroke({
+          color: this.visualTheme.flowGeometry[arm % 3],
+          alpha: 0.3,
+          width: arm % 2 === 0 ? 1.6 : 1,
+        });
+      }
+      return;
+    }
+
+    this.drawPolygonRing(
+      this.flowGeometry,
+      shortestSide * 0.19,
+      6,
+      this.visualTheme.flowGeometry[0],
+      0.42,
+      1.4,
+    );
+    this.drawPolygonRing(
+      this.flowGeometry,
+      shortestSide * 0.31,
+      8,
+      this.visualTheme.flowGeometry[1],
+      0.3,
+      1.2,
+    );
+    this.drawPolygonRing(
+      this.flowGeometry,
+      shortestSide * 0.44,
+      12,
+      this.visualTheme.flowGeometry[2],
+      0.2,
+      1,
+    );
+  }
+
+  private drawSuperFlowPattern(shortestSide: number): void {
+    if (this.visualTheme.superFlowPattern === 'hyperspace') {
+      const streaks = this.quality.id === 'reduced' ? 18 : 28;
+      for (let streak = 0; streak < streaks; streak += 1) {
+        const angle = streak / streaks * Math.PI * 2;
+        const inner = shortestSide * (0.08 + (streak % 3) * 0.018);
+        const outer = shortestSide * (0.38 + (streak % 5) * 0.024);
+        this.superTunnel.moveTo(
+          Math.cos(angle) * inner,
+          Math.sin(angle) * inner,
+        ).lineTo(
+          Math.cos(angle) * outer,
+          Math.sin(angle) * outer,
+        ).stroke({
+          color: streak % 2 === 0
+            ? this.visualTheme.superPrimary
+            : this.visualTheme.superSecondary,
+          alpha: 0.18 + (streak % 4) * 0.045,
+          width: streak % 3 === 0 ? 2.2 : 1,
+        });
+      }
+      return;
+    }
+
+    if (this.visualTheme.superFlowPattern === 'prism') {
+      const ringCount = this.quality.id === 'reduced' ? 4 : 6;
+      for (let ring = 1; ring <= ringCount; ring += 1) {
+        this.drawPolygonRing(
+          this.superTunnel,
+          shortestSide * (0.08 + ring * 0.065),
+          ring % 2 === 0 ? 6 : 3,
+          ring % 2 === 0
+            ? this.visualTheme.superSecondary
+            : this.visualTheme.superPrimary,
+          0.38 - ring * 0.035,
+          ring === 1 ? 2.2 : 1.2,
+        );
+      }
+      return;
+    }
+
+    const ringCount = this.quality.id === 'reduced' ? 4 : 5;
+    for (let ring = 1; ring <= ringCount; ring += 1) {
+      this.superTunnel.circle(0, 0, shortestSide * (0.1 + ring * 0.085)).stroke({
+        color: ring % 2 === 0
+          ? this.visualTheme.superSecondary
+          : this.visualTheme.superPrimary,
+        alpha: 0.34 - ring * 0.035,
+        width: ring === 1 ? 2 : 1.2,
       });
     }
   }

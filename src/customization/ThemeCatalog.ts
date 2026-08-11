@@ -1,8 +1,14 @@
 import { resolveVisualTheme } from './ThemeSelection';
 import type { VisualTheme } from './ThemeTypes';
+import { CYBER_SAKURA_THEME } from './themes/cyberSakuraTheme';
 import { DEFAULT_VISUAL_THEME } from './themes/defaultTheme';
+import { SOLAR_FLUX_THEME } from './themes/solarFluxTheme';
 
-const THEMES = [resolveVisualTheme(DEFAULT_VISUAL_THEME)] as const;
+const THEMES = [
+  resolveVisualTheme(DEFAULT_VISUAL_THEME),
+  resolveVisualTheme(CYBER_SAKURA_THEME),
+  resolveVisualTheme(SOLAR_FLUX_THEME),
+] as const;
 const THEMES_BY_ID = new Map<string, VisualTheme>(
   THEMES.map((theme) => [theme.id, theme]),
 );

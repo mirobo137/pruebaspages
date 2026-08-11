@@ -4,6 +4,7 @@ import type { AudioManager } from '../audio/AudioManager';
 import type { BeatEvent, Beatmap } from '../content/Beatmap';
 import type { MusicTrack } from '../content/MusicCatalog';
 import type { VisualTheme } from '../customization/ThemeTypes';
+import type { VisualQualityProfile } from '../customization/VisualQuality';
 import type { Scene } from '../core/scene/Scene';
 import { randomBetween } from '../core/utils/random';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
@@ -57,6 +58,7 @@ export interface GameSceneOptions {
   track: MusicTrack;
   beatmap: Beatmap;
   visualTheme: VisualTheme;
+  visualQuality: VisualQualityProfile;
   audioReady: Promise<void>;
   onRestart: () => void;
   onExit: () => void;
@@ -117,8 +119,11 @@ export class GameScene implements Scene {
     this.track = options.track;
     this.difficulty = options.difficulty;
     this.visualTheme = options.visualTheme;
-    this.background = new RhythmBackground(this.visualTheme.background);
-    this.effects = new JuiceSystem(this.visualTheme.effects);
+    this.background = new RhythmBackground(
+      this.visualTheme.background,
+      options.visualQuality,
+    );
+    this.effects = new JuiceSystem(this.visualTheme.effects, options.visualQuality);
     this.difficultyProfile = DIFFICULTY_PROFILES[options.difficulty];
     this.score = new ScoreModel(this.difficultyProfile.maxLives);
     this.beatmap = options.beatmap;

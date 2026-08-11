@@ -1,5 +1,9 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { EffectsVisualTheme } from '../../customization/ThemeTypes';
+import {
+  FULL_VISUAL_QUALITY,
+  type VisualQualityProfile,
+} from '../../customization/VisualQuality';
 import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
 import type { TimingGrade } from '../timing/TimingGrade';
 
@@ -80,6 +84,7 @@ export class JuiceSystem extends Container {
 
   constructor(
     private readonly visualTheme: EffectsVisualTheme = DEFAULT_VISUAL_THEME.effects,
+    private readonly quality: VisualQualityProfile = FULL_VISUAL_QUALITY,
   ) {
     super();
     this.flashColor = visualTheme.highlight;
@@ -106,7 +111,8 @@ export class JuiceSystem extends Container {
   }
 
   emitDragSpark(x: number, y: number): void {
-    for (let index = 0; index < 2; index += 1) {
+    const sparkCount = Math.max(1, Math.round(2 * this.quality.particleMultiplier));
+    for (let index = 0; index < sparkCount; index += 1) {
       const angle = Math.random() * Math.PI * 2;
       this.createParticle(
         x,
@@ -139,7 +145,9 @@ export class JuiceSystem extends Container {
         : this.visualTheme.miss;
     const baseParticleCount = grade === 'perfect' ? 18 : grade === 'good' ? 12 : 8;
     const particleCount = Math.round(
-      baseParticleCount * (this.superFlowActive ? 2.05 : this.flowActive ? 1.65 : 1),
+      baseParticleCount
+      * (this.superFlowActive ? 2.05 : this.flowActive ? 1.65 : 1)
+      * this.quality.particleMultiplier,
     );
     const speedMultiplier = (grade === 'perfect' ? 1.25 : 1)
       * (this.superFlowActive ? 1.5 : this.flowActive ? 1.3 : 1);
@@ -219,7 +227,7 @@ export class JuiceSystem extends Container {
   emitFlowActivation(): void {
     const x = this.viewportWidth / 2;
     const y = this.viewportHeight * 0.48;
-    const particleCount = 34;
+    const particleCount = Math.max(18, Math.round(34 * this.quality.particleMultiplier));
 
     for (let index = 0; index < particleCount; index += 1) {
       const angle = (index / particleCount) * Math.PI * 2;
@@ -275,7 +283,7 @@ export class JuiceSystem extends Container {
   emitSuperFlowActivation(): void {
     const x = this.viewportWidth / 2;
     const y = this.viewportHeight * 0.48;
-    const particleCount = 52;
+    const particleCount = Math.max(28, Math.round(52 * this.quality.particleMultiplier));
 
     for (let index = 0; index < particleCount; index += 1) {
       const angle = (index / particleCount) * Math.PI * 2;
@@ -334,8 +342,9 @@ export class JuiceSystem extends Container {
     const colors = this.visualTheme.phaseColors;
     const color = colors[Math.max(0, Math.min(colors.length - 1, phaseNumber - 1))];
 
-    for (let index = 0; index < 18; index += 1) {
-      const angle = (index / 18) * Math.PI * 2;
+    const particleCount = Math.max(10, Math.round(18 * this.quality.particleMultiplier));
+    for (let index = 0; index < particleCount; index += 1) {
+      const angle = (index / particleCount) * Math.PI * 2;
       const speed = 75 + Math.random() * 90;
       this.createParticle(
         x,
@@ -447,6 +456,7 @@ export class JuiceSystem extends Container {
       oldest?.node.destroy();
     }
     const node = new Graphics();
+    shape = this.resolveParticleShape(shape);
     if (shape === 'streak') {
       node.roundRect(-radius * 3, -radius * 0.45, radius * 6, radius * 0.9, radius).fill({
         color,
@@ -470,6 +480,13 @@ export class JuiceSystem extends Container {
       gravity,
       rotationSpeed,
     });
+  }
+
+  private resolveParticleShape(shape: ParticleShape): ParticleShape {
+    if (shape !== 'dot') return shape;
+    if (this.visualTheme.particleStyle === 'spark') return 'streak';
+    if (this.visualTheme.particleStyle === 'diamond') return 'diamond';
+    return shape;
   }
 
   private createRing(

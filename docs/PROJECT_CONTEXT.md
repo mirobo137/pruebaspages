@@ -52,6 +52,10 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Dominio modular de temas visuales con `Neon Pulse` como identidad predeterminada.
 - Colores y estilos de objetivos, drags, impactos, FLOW y SUPER FLOW separados de las reglas de gameplay.
 - Catalogo y seleccion de temas en memoria, con fallback validado para configuraciones incompletas o invalidas.
+- Tres identidades visuales procedurales: `Neon Pulse`, `Cyber Sakura` y `Solar Flux`.
+- Cada identidad modifica objetivos, aros de timing, estelas, checkpoints, particulas y fondos FLOW/SUPER FLOW sin alterar gameplay.
+- Seleccion temporal para pruebas mediante `?theme=neon-pulse`, `?theme=cyber-sakura` o `?theme=solar-flux`.
+- Perfil visual automatico `full`/`reduced`; puede forzarse durante pruebas con `?quality=full` o `?quality=reduced`.
 
 La build verificada es `npm run build`. No se deben subir `node_modules/` ni `dist/`; ambos son generados o ignorados por Git.
 
@@ -355,6 +359,8 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 ## Personalizacion, eventos y monetizacion
 
 - Las skins, fondos FLOW y fondos SUPER FLOW se construyen proceduralmente con PixiJS y configuraciones de datos.
+- La primera familia incluye Neon Pulse (orbital), Cyber Sakura (segmentada) y Solar Flux (facetada).
+- El perfil visual reducido disminuye particulas y geometria ambiental, nunca notas ni respuesta tactil.
 - Una skin nunca modifica hitboxes, timing, posiciones logicas ni asistencia tactil.
 - El evento semanal desbloquea progresivamente componentes de una coleccion visual durante siete escalones.
 - Los anuncios recompensados se ofrecen fuera del gameplay y siempre son opcionales.

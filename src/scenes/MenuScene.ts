@@ -1,5 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { TrackSelection } from '../content/TrackSelection';
+import type { VisualTheme } from '../customization/ThemeTypes';
 import { MENU_TRACK_PREVIEW_SECONDS } from '../content/MenuMusic';
 import {
   getSongTierDefinition,
@@ -18,6 +19,7 @@ import { TrackProgressPanel } from '../ui/TrackProgressPanel';
 export interface MenuSceneOptions {
   tracks: TrackSelection[];
   progression: ProgressionStore;
+  visualTheme: VisualTheme;
   onPreview: (selection: TrackSelection) => void;
   onStopPreview: () => void;
   onStart: (difficulty: Difficulty, selection: TrackSelection) => void;
@@ -83,6 +85,7 @@ export class MenuScene implements Scene {
   private readonly playButton: MenuButton;
   private readonly tracks: TrackSelection[];
   private readonly progression: ProgressionStore;
+  private readonly visualTheme: VisualTheme;
   private readonly onPreview: MenuSceneOptions['onPreview'];
   private readonly onStopPreview: MenuSceneOptions['onStopPreview'];
   private readonly onStart: MenuSceneOptions['onStart'];
@@ -101,6 +104,8 @@ export class MenuScene implements Scene {
     this.height = height;
     this.tracks = options.tracks;
     this.progression = options.progression;
+    this.visualTheme = options.visualTheme;
+    this.subtitle.text = `TEMA ${this.visualTheme.name.toUpperCase()} - Toca una pista para escuchar 5 segundos.`;
     this.onPreview = options.onPreview;
     this.onStopPreview = options.onStopPreview;
     this.onStart = options.onStart;
@@ -162,13 +167,15 @@ export class MenuScene implements Scene {
     const landscape = width > height && width >= 650;
     const titleY = landscape ? 31 : Math.max(43, height * 0.065);
 
-    this.background.clear().rect(0, 0, width, height).fill({ color: 0x070c1c });
+    this.background.clear().rect(0, 0, width, height).fill({
+      color: this.visualTheme.background.backdrop,
+    });
     this.background
       .circle(width * 0.08, height * 0.12, Math.max(width, height) * 0.22)
-      .fill({ color: 0x1686ad, alpha: 0.04 });
+      .fill({ color: this.visualTheme.background.phasePrimary[0], alpha: 0.04 });
     this.background
       .circle(width * 0.94, height * 0.65, Math.max(width, height) * 0.25)
-      .fill({ color: 0xc12b9e, alpha: 0.028 });
+      .fill({ color: this.visualTheme.background.phaseSecondary[1], alpha: 0.028 });
     this.title.anchor.set(0.5);
     this.title.position.set(width / 2, titleY);
     this.subtitle.anchor.set(0.5);

@@ -98,6 +98,9 @@ export class TargetNode extends Container {
     this.alpha = appearProgress;
     this.marker.scale.set(appearScale * pulse * earlyScale * pressScale * timingScale);
     this.stateAccent.scale.set(appearScale * pulse * earlyScale * pressScale * timingScale);
+    this.stateAccent.rotation = this.visualTheme.timingRingStyle === 'orbiting'
+      ? this.ageSeconds * (this.superFlowActive ? 2.4 : this.flowActive ? 1.8 : 1.2)
+      : 0;
     this.shadow.scale.set(appearScale * pressScale);
     this.glow.scale.set(appearScale * pulse);
     this.glow.alpha = (this.superFlowActive ? 0.44 : this.flowActive ? 0.32 : 0.18)
@@ -271,19 +274,29 @@ export class TargetNode extends Container {
     }
 
     this.progressTrail.clear();
+    const progressBaseWidth = this.dragVisualTheme.trailStyle === 'comet'
+      ? 10
+      : this.dragVisualTheme.trailStyle === 'electric'
+        ? 6
+        : 8;
+    const progressHighlightWidth = this.dragVisualTheme.trailStyle === 'comet'
+      ? 3
+      : this.dragVisualTheme.trailStyle === 'electric'
+        ? 1.8
+        : 2.5;
     this.drawPathUntil(
       this.progressTrail,
       this.dragProgress,
       this.dragVisualTheme.progressBase,
       0.22,
-      8,
+      progressBaseWidth,
     );
     this.drawPathUntil(
       this.progressTrail,
       this.dragProgress,
       this.dragVisualTheme.progressHighlight,
       0.94,
-      2.5,
+      progressHighlightWidth,
     );
     this.progressTrail.blendMode = 'add';
   }
@@ -295,15 +308,7 @@ export class TargetNode extends Container {
       ? this.visualTheme.dragOutline
       : this.visualTheme.tapOutline;
 
-    this.shadow.circle(2, 5, GAME_CONFIG.targetRadius + 3).fill({
-      color: this.visualTheme.shadow,
-      alpha: 0.5,
-    });
-    this.shadow.circle(0, 1, GAME_CONFIG.targetRadius + 1).stroke({
-      color: this.visualTheme.shadowOutline,
-      alpha: 0.5,
-      width: 2,
-    });
+    this.drawShadow();
 
     this.glow.circle(0, 0, GAME_CONFIG.targetRadius + 17).fill({
       color,
@@ -315,73 +320,18 @@ export class TargetNode extends Container {
     });
     this.glow.blendMode = 'add';
 
-    this.approachRing.circle(0, 0, GAME_CONFIG.targetRadius + 11).stroke({
-      color: outline,
-      alpha: 0.86,
-      width: 1.75,
-    });
-    this.goodTimingRing.circle(0, 0, GAME_CONFIG.targetRadius + 6).stroke({
-      color: this.visualTheme.goodTiming,
-      alpha: 0.95,
-      width: 2,
-    });
-    this.perfectTimingRing.circle(0, 0, GAME_CONFIG.targetRadius + 2).stroke({
-      color: this.visualTheme.perfectTiming,
-      alpha: 1,
-      width: 1.6,
-    });
-    this.goodTimingRing.alpha = 0.1;
-    this.perfectTimingRing.alpha = 0.07;
+    this.drawTimingRings(outline);
 
-    this.marker.circle(0, 0, GAME_CONFIG.targetRadius).fill({
-      color: this.visualTheme.surface,
-      alpha: 0.98,
-    });
-    this.marker.circle(0, 0, GAME_CONFIG.targetRadius - 1.5).fill({
-      color,
-      alpha: 0.9,
-    });
-    this.marker.circle(0, 0, GAME_CONFIG.targetRadius - 7).fill({
-      color: this.visualTheme.innerSurface,
-      alpha: 0.2,
-    });
-    this.marker.circle(0, 0, GAME_CONFIG.targetRadius - 7).stroke({
-      color: this.visualTheme.highlight,
-      alpha: 0.48,
-      width: 1.25,
-    });
-    this.marker.arc(
-      0,
-      0,
-      GAME_CONFIG.targetRadius - 4,
-      Math.PI * 1.08,
-      Math.PI * 1.76,
-    ).stroke({
-      color: this.visualTheme.highlight,
-      alpha: 0.72,
-      width: 2,
-    });
-    this.marker.circle(-8, -9, 3.5).fill({
-      color: this.visualTheme.highlight,
-      alpha: 0.42,
-    });
-    this.marker.circle(0, 0, 4).fill({
-      color: this.visualTheme.highlight,
-      alpha: 0.9,
-    });
-    this.stateAccent.circle(0, 0, GAME_CONFIG.targetRadius - 3).stroke({
-      color: this.visualTheme.highlight,
-      alpha: 0.8,
-      width: 1.4,
-    });
-    this.stateAccent.blendMode = 'add';
+    this.drawMarker(color);
+    this.drawStateAccent();
 
     if (!isDrag || !this.dragPath) return;
 
-    this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailBase, 0.86, 11);
-    this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailPrimary, 0.62, 2);
-    this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailHighlight, 0.18, 0.8);
-    for (const progress of [0.16, 0.5, 0.84]) {
+    this.drawDragTrail();
+    const guidePoints = this.dragVisualTheme.trailStyle === 'comet'
+      ? [0.12, 0.3, 0.5, 0.7, 0.88]
+      : [0.16, 0.5, 0.84];
+    for (const progress of guidePoints) {
       const guide = this.dragPath.pointAt(progress);
       this.trail.circle(guide.x, guide.y, 1.8).fill({
         color: this.dragVisualTheme.guide,
@@ -426,6 +376,273 @@ export class TargetNode extends Container {
       arrow.y - Math.sin(angle + 0.55) * 10,
     ).stroke({ color: this.visualTheme.highlight, alpha: 0.68, width: 2 });
     this.drawCheckpoints();
+  }
+
+  private drawShadow(): void {
+    if (this.visualTheme.shape === 'faceted') {
+      this.tracePolygon(this.shadow, GAME_CONFIG.targetRadius + 3, 6, Math.PI / 6, 2, 5);
+      this.shadow.fill({ color: this.visualTheme.shadow, alpha: 0.5 });
+      this.tracePolygon(this.shadow, GAME_CONFIG.targetRadius + 1, 6, Math.PI / 6, 0, 1);
+      this.shadow.stroke({
+        color: this.visualTheme.shadowOutline,
+        alpha: 0.5,
+        width: 2,
+      });
+      return;
+    }
+
+    this.shadow.circle(2, 5, GAME_CONFIG.targetRadius + 3).fill({
+      color: this.visualTheme.shadow,
+      alpha: 0.5,
+    });
+    this.shadow.circle(0, 1, GAME_CONFIG.targetRadius + 1).stroke({
+      color: this.visualTheme.shadowOutline,
+      alpha: 0.5,
+      width: 2,
+    });
+  }
+
+  private drawTimingRings(outline: number): void {
+    if (this.visualTheme.timingRingStyle === 'broken') {
+      this.drawArcSegments(
+        this.approachRing,
+        GAME_CONFIG.targetRadius + 11,
+        6,
+        outline,
+        0.86,
+        1.75,
+      );
+      this.drawArcSegments(
+        this.goodTimingRing,
+        GAME_CONFIG.targetRadius + 6,
+        5,
+        this.visualTheme.goodTiming,
+        0.95,
+        2,
+      );
+      this.drawArcSegments(
+        this.perfectTimingRing,
+        GAME_CONFIG.targetRadius + 2,
+        4,
+        this.visualTheme.perfectTiming,
+        1,
+        1.6,
+      );
+    } else if (this.visualTheme.timingRingStyle === 'orbiting') {
+      this.approachRing.circle(0, 0, GAME_CONFIG.targetRadius + 11).stroke({
+        color: outline,
+        alpha: 0.52,
+        width: 1.25,
+      });
+      this.drawArcSegments(
+        this.approachRing,
+        GAME_CONFIG.targetRadius + 11,
+        3,
+        outline,
+        0.9,
+        2.3,
+        0.32,
+      );
+      this.goodTimingRing.circle(0, 0, GAME_CONFIG.targetRadius + 6).stroke({
+        color: this.visualTheme.goodTiming,
+        alpha: 0.7,
+        width: 1.4,
+      });
+      this.drawArcSegments(
+        this.perfectTimingRing,
+        GAME_CONFIG.targetRadius + 2,
+        3,
+        this.visualTheme.perfectTiming,
+        1,
+        2,
+        0.38,
+      );
+    } else {
+      this.approachRing.circle(0, 0, GAME_CONFIG.targetRadius + 11).stroke({
+        color: outline,
+        alpha: 0.86,
+        width: 1.75,
+      });
+      this.goodTimingRing.circle(0, 0, GAME_CONFIG.targetRadius + 6).stroke({
+        color: this.visualTheme.goodTiming,
+        alpha: 0.95,
+        width: 2,
+      });
+      this.perfectTimingRing.circle(0, 0, GAME_CONFIG.targetRadius + 2).stroke({
+        color: this.visualTheme.perfectTiming,
+        alpha: 1,
+        width: 1.6,
+      });
+    }
+    this.goodTimingRing.alpha = 0.1;
+    this.perfectTimingRing.alpha = 0.07;
+  }
+
+  private drawMarker(color: number): void {
+    const radius = GAME_CONFIG.targetRadius;
+    if (this.visualTheme.shape === 'faceted') {
+      this.tracePolygon(this.marker, radius, 6, Math.PI / 6);
+      this.marker.fill({ color: this.visualTheme.surface, alpha: 0.98 });
+      this.tracePolygon(this.marker, radius - 1.5, 6, Math.PI / 6);
+      this.marker.fill({ color, alpha: 0.9 });
+      this.tracePolygon(this.marker, radius - 8, 6, Math.PI / 6);
+      this.marker.fill({ color: this.visualTheme.innerSurface, alpha: 0.3 });
+      this.tracePolygon(this.marker, radius - 8, 6, Math.PI / 6);
+      this.marker.stroke({ color: this.visualTheme.highlight, alpha: 0.46, width: 1.25 });
+      for (let side = 0; side < 3; side += 1) {
+        const angle = side * Math.PI * 2 / 3 - Math.PI / 2;
+        this.marker.circle(
+          Math.cos(angle) * (radius - 8),
+          Math.sin(angle) * (radius - 8),
+          2.2,
+        ).fill({ color: this.visualTheme.highlight, alpha: 0.54 });
+      }
+    } else {
+      this.marker.circle(0, 0, radius).fill({
+        color: this.visualTheme.surface,
+        alpha: 0.98,
+      });
+      this.marker.circle(0, 0, radius - 1.5).fill({ color, alpha: 0.9 });
+      this.marker.circle(0, 0, radius - 7).fill({
+        color: this.visualTheme.innerSurface,
+        alpha: 0.2,
+      });
+      this.marker.circle(0, 0, radius - 7).stroke({
+        color: this.visualTheme.highlight,
+        alpha: 0.48,
+        width: 1.25,
+      });
+      if (this.visualTheme.shape === 'segmented') {
+        this.drawArcSegments(
+          this.marker,
+          radius - 4,
+          6,
+          this.visualTheme.highlight,
+          0.72,
+          2,
+          0.44,
+        );
+      } else {
+        this.marker.arc(0, 0, radius - 4, Math.PI * 1.08, Math.PI * 1.76).stroke({
+          color: this.visualTheme.highlight,
+          alpha: 0.72,
+          width: 2,
+        });
+        this.marker.circle(-8, -9, 3.5).fill({
+          color: this.visualTheme.highlight,
+          alpha: 0.42,
+        });
+      }
+    }
+    this.marker.circle(0, 0, 4).fill({
+      color: this.visualTheme.highlight,
+      alpha: 0.9,
+    });
+  }
+
+  private drawStateAccent(): void {
+    const radius = GAME_CONFIG.targetRadius - 3;
+    if (this.visualTheme.shape === 'faceted') {
+      this.tracePolygon(this.stateAccent, radius, 6, Math.PI / 6);
+      this.stateAccent.stroke({
+        color: this.visualTheme.highlight,
+        alpha: 0.8,
+        width: 1.4,
+      });
+    } else if (this.visualTheme.shape === 'segmented') {
+      this.drawArcSegments(
+        this.stateAccent,
+        radius,
+        6,
+        this.visualTheme.highlight,
+        0.8,
+        1.4,
+        0.48,
+      );
+    } else {
+      this.stateAccent.circle(0, 0, radius).stroke({
+        color: this.visualTheme.highlight,
+        alpha: 0.8,
+        width: 1.4,
+      });
+    }
+    this.stateAccent.blendMode = 'add';
+  }
+
+  private drawDragTrail(): void {
+    if (this.dragVisualTheme.trailStyle === 'electric') {
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailBase, 0.8, 9);
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailPrimary, 0.7, 1.5);
+      this.drawElectricPath();
+    } else if (this.dragVisualTheme.trailStyle === 'comet') {
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailBase, 0.68, 14);
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailPrimary, 0.34, 5);
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailHighlight, 0.72, 1.2);
+    } else {
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailBase, 0.86, 11);
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailPrimary, 0.62, 2);
+      this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailHighlight, 0.18, 0.8);
+    }
+  }
+
+  private drawElectricPath(): void {
+    if (!this.dragPath) return;
+    const points = this.dragPath.points;
+    const step = Math.max(2, Math.floor(points.length / 18));
+    this.trail.moveTo(points[0].x, points[0].y);
+    for (let index = step; index < points.length; index += step) {
+      const point = points[index];
+      const previous = points[Math.max(0, index - step)];
+      const angle = Math.atan2(point.y - previous.y, point.x - previous.x) + Math.PI / 2;
+      const offset = (Math.floor(index / step) % 2 === 0 ? 1 : -1) * 3.5;
+      this.trail.lineTo(
+        point.x + Math.cos(angle) * offset,
+        point.y + Math.sin(angle) * offset,
+      );
+    }
+    const end = points[points.length - 1];
+    this.trail.lineTo(end.x, end.y).stroke({
+      color: this.dragVisualTheme.trailHighlight,
+      alpha: 0.86,
+      width: 1.1,
+    });
+  }
+
+  private drawArcSegments(
+    graphics: Graphics,
+    radius: number,
+    segments: number,
+    color: number,
+    alpha: number,
+    width: number,
+    coverage = 0.58,
+  ): void {
+    const step = Math.PI * 2 / segments;
+    for (let segment = 0; segment < segments; segment += 1) {
+      const start = segment * step - Math.PI / 2;
+      graphics.arc(0, 0, radius, start, start + step * coverage).stroke({
+        color,
+        alpha,
+        width,
+      });
+    }
+  }
+
+  private tracePolygon(
+    graphics: Graphics,
+    radius: number,
+    sides: number,
+    rotation: number,
+    offsetX = 0,
+    offsetY = 0,
+  ): void {
+    for (let side = 0; side <= sides; side += 1) {
+      const angle = rotation + side * Math.PI * 2 / sides;
+      const x = offsetX + Math.cos(angle) * radius;
+      const y = offsetY + Math.sin(angle) * radius;
+      if (side === 0) graphics.moveTo(x, y);
+      else graphics.lineTo(x, y);
+    }
   }
 
   private drawPathUntil(

@@ -14,8 +14,11 @@ try {
   const { DEFAULT_VISUAL_THEME } = await server.ssrLoadModule(
     '/src/customization/themes/defaultTheme.ts',
   );
-  const { getVisualTheme, ThemeSelection } = await server.ssrLoadModule(
+  const { getVisualTheme, listVisualThemes, ThemeSelection } = await server.ssrLoadModule(
     '/src/customization/ThemeCatalog.ts',
+  );
+  const { FULL_VISUAL_QUALITY, REDUCED_VISUAL_QUALITY } = await server.ssrLoadModule(
+    '/src/customization/VisualQuality.ts',
   );
 
   const partial = resolveVisualTheme({
@@ -50,10 +53,29 @@ try {
 
   const selection = new ThemeSelection();
   assert.equal(selection.current.id, DEFAULT_VISUAL_THEME.id);
+  assert.deepEqual(
+    listVisualThemes().map((theme) => theme.id),
+    ['neon-pulse', 'cyber-sakura', 'solar-flux'],
+  );
+  assert.equal(selection.select('cyber-sakura').target.shape, 'segmented');
+  assert.equal(selection.current.target.timingRingStyle, 'broken');
+  assert.equal(selection.current.drag.trailStyle, 'comet');
+  assert.equal(selection.current.background.flowPattern, 'waves');
+  assert.equal(selection.current.background.superFlowPattern, 'prism');
+  assert.equal(selection.current.effects.particleStyle, 'diamond');
+  assert.equal(selection.select('solar-flux').target.shape, 'faceted');
+  assert.equal(selection.current.target.timingRingStyle, 'orbiting');
+  assert.equal(selection.current.drag.trailStyle, 'electric');
+  assert.equal(selection.current.background.flowPattern, 'vortex');
+  assert.equal(selection.current.background.superFlowPattern, 'hyperspace');
+  assert.equal(selection.current.effects.particleStyle, 'spark');
   assert.equal(selection.select('missing-theme').id, DEFAULT_VISUAL_THEME.id);
   assert.equal(getVisualTheme('missing-theme').id, DEFAULT_VISUAL_THEME.id);
+  assert.equal(FULL_VISUAL_QUALITY.particleMultiplier, 1);
+  assert.ok(REDUCED_VISUAL_QUALITY.particleMultiplier < 1);
+  assert.ok(REDUCED_VISUAL_QUALITY.ambientOrbCount < FULL_VISUAL_QUALITY.ambientOrbCount);
 
-  console.log('Theme resolution: OK');
+  console.log('Theme catalog and visual quality: OK');
 } finally {
   await server.close();
 }

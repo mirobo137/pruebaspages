@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 1 - Validacion movil`
-- Siguiente accion: `Confirmar en movil que Neon Pulse conserva apariencia, touch y fluidez`
+- Fase activa: `Fase 2 - Validacion movil de skins procedurales`
+- Siguiente accion: `Probar los tres temas en un movil fisico y aprobar rendimiento tactil`
 - Ultima actualizacion: `2026-08-11`
 
 Estados permitidos:
@@ -88,12 +88,12 @@ Compuerta especifica:
 
 Objetivo: demostrar variedad visual real sin assets externos ni degradacion tactil.
 
-- [ ] 2.1 Crear al menos tres familias de objetivo: orbital, facetada y segmentada.
-- [ ] 2.2 Crear variantes de aro, checkpoints, destino y estela de drag.
-- [ ] 2.3 Crear particulas e impactos asociados al tema.
-- [ ] 2.4 Crear dos fondos FLOW y dos fondos SUPER FLOW claramente diferenciados.
-- [ ] 2.5 Reutilizar `GraphicsContext`, geometria o texturas generadas cuando corresponda.
-- [ ] 2.6 Incorporar perfil visual `reduced` para dispositivos de bajo rendimiento.
+- [x] 2.1 Crear al menos tres familias de objetivo: orbital, facetada y segmentada.
+- [x] 2.2 Crear variantes de aro, checkpoints, destino y estela de drag.
+- [x] 2.3 Crear particulas e impactos asociados al tema.
+- [x] 2.4 Crear dos fondos FLOW y dos fondos SUPER FLOW claramente diferenciados.
+- [x] 2.5 Reutilizar `Graphics`, geometria o texturas generadas cuando corresponda.
+- [x] 2.6 Incorporar perfil visual `reduced` para dispositivos de bajo rendimiento.
 
 Compuerta especifica:
 
@@ -359,6 +359,8 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-11 | Fase 0 | Servidor Vite local | Navegador Codex, 1280x720 y viewport 390x844 | Parcial correcto | Portada, entrada, inicio y controles ejercitados sin errores ni warnings; falta confirmar sensacion y persistencia en movil fisico |
 | 2026-08-11 | Fase 0 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma touch, FLOW, pausa y persistencia correctos; se habilita Fase 1 |
 | 2026-08-11 | Fase 1 | `npm run test:theme` + `npm run build` | Windows / Node 24 | Implementacion correcta | Fallback parcial/invalido probado; portada, partida, pausa y viewport 390x844 sin errores; falta aprobacion visual y tactil en movil fisico |
+| 2026-08-11 | Fase 1 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Neon Pulse conserva el aspecto y comportamiento anterior; se habilita Fase 2 |
+| 2026-08-11 | Fase 2 | `npm run test:theme` + `npm run build` | Windows / Node 24 y navegador 390x844 | Implementacion correcta | Tres temas y perfil reducido cargan sin errores; queda pendiente evaluar legibilidad, SUPER FLOW y fluidez tactil en movil fisico |
 
 ## Decisiones pendientes controladas
 

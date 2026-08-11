@@ -8,6 +8,12 @@ import { loadMusicCatalog } from '../content/MusicCatalog';
 import { MENU_MUSIC_TRACK_ID } from '../content/MenuMusic';
 import { SceneManager } from '../core/scene/SceneManager';
 import { ThemeSelection } from '../customization/ThemeCatalog';
+import {
+  detectVisualQuality,
+  FULL_VISUAL_QUALITY,
+  REDUCED_VISUAL_QUALITY,
+  type VisualQualityProfile,
+} from '../customization/VisualQuality';
 import { DIFFICULTIES } from '../game/difficulty/Difficulty';
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import { ProgressionStore } from '../progression/ProgressionStore';
@@ -26,6 +32,7 @@ export class GameApplication {
   private readonly menuAudio = new MenuAudioController(this.audioManager);
   private readonly progression = new ProgressionStore();
   private readonly themeSelection = new ThemeSelection();
+  private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
   private tracks: TrackSelection[] = [];
   private readonly tick = (ticker: Ticker): void => {
     this.sceneManager.update(ticker.deltaTime / 60);
@@ -44,6 +51,15 @@ export class GameApplication {
       resolution: Math.min(window.devicePixelRatio, 2),
       resizeTo: window,
     });
+
+    const query = new URLSearchParams(window.location.search);
+    this.themeSelection.select(query.get('theme') ?? '');
+    const requestedQuality = query.get('quality');
+    this.visualQuality = requestedQuality === 'reduced'
+      ? REDUCED_VISUAL_QUALITY
+      : requestedQuality === 'full'
+        ? FULL_VISUAL_QUALITY
+        : detectVisualQuality(this.app.screen.width, this.app.screen.height);
 
     this.mountElement.appendChild(this.app.canvas);
     this.app.stage.addChild(this.sceneHost);
@@ -82,6 +98,7 @@ export class GameApplication {
       new MenuScene(this.app.screen.width, this.app.screen.height, {
         tracks: this.tracks,
         progression: this.progression,
+        visualTheme: this.themeSelection.current,
         onPreview: (selection) => this.menuAudio.preview(selection.track),
         onStopPreview: this.menuAudio.start.bind(this.menuAudio),
         onStart: this.startGame,
@@ -103,6 +120,7 @@ export class GameApplication {
         track: selection.track,
         beatmap: selection.beatmaps[difficulty],
         visualTheme: this.themeSelection.current,
+        visualQuality: this.visualQuality,
         audioReady,
         onRestart: () => this.startGame(difficulty, selection),
         onExit: this.showMenu,
