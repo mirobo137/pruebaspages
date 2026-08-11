@@ -26,12 +26,12 @@ El primer destino de pruebas es GitHub Pages. Cuando el nucleo sea solido, se pr
 
 El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 
-- Catalogo actual de 11 canciones detectadas automaticamente desde `public/assets/audio/`.
+- Catalogo actual de 24 canciones detectadas automaticamente desde `public/assets/audio/`.
 - Tres beatmaps separados por cancion en `public/assets/beatmaps/<id-cancion>/`.
 - Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
 - Menu tipo playlist desplazable por dedo o rueda, con numeracion, progreso visible, indicador de scroll, selector segmentado de dificultad y un solo boton Jugar.
 - Cuatro pestañas de catalogo por precio: Gratis, Economicas, Selectas y Premium.
-- Las 11 canciones actuales son gratuitas; las futuras reciben categoria y precio exclusivamente por la carpeta donde se suban.
+- El catalogo actual contiene 11 canciones gratis, 5 economicas, 4 selectas y 4 premium; categoria y precio dependen exclusivamente de la carpeta donde se suban.
 - Preview de 5 segundos al tocar cualquier cancion, incluso si aun esta bloqueada.
 - Musica de portada/menu en bucle gestionada por `MenuAudioController`; la pista provisional se cambia en `src/content/MenuMusic.ts`.
 - Partidas de 90 segundos divididas en Lectura, Impulso y Climax.
@@ -49,6 +49,9 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Juice procedural con objetivos en capas, particulas geometricas, anillos, texto, shake y fondo reactivo.
 - Mecanicas FLOW x2 y SUPER FLOW x4 con progresion, degradacion y resumen final.
 - Pausa real de Web Audio con Continuar, Reiniciar y Volver al menu.
+- Dominio modular de temas visuales con `Neon Pulse` como identidad predeterminada.
+- Colores y estilos de objetivos, drags, impactos, FLOW y SUPER FLOW separados de las reglas de gameplay.
+- Catalogo y seleccion de temas en memoria, con fallback validado para configuraciones incompletas o invalidas.
 
 La build verificada es `npm run build`. No se deben subir `node_modules/` ni `dist/`; ambos son generados o ignorados por Git.
 
@@ -73,6 +76,7 @@ src/
   ui/                        HUD, menus y resultados
   audio/                     Reproduccion, desbloqueo y analisis de audio
   content/                   Catalogos y carga de JSON
+  customization/             Temas visuales, catalogo, seleccion y validacion
   input/                     Captura y utilidades de puntero/touch
   platform/                  Adaptadores para persistencia y portales
   progression/               Estrellas, records, monedas y desbloqueos locales
@@ -333,7 +337,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Al terminar el preview vuelve automaticamente la musica del menu.
 - Volver desde una partida o recargar conserva la cancion y dificultad seleccionadas y deja esa fila visible.
 - Las cuatro categorias filtran la playlist sin abrir pantallas adicionales.
-- Las 11 canciones actuales aparecen en Gratis y se pueden jugar sin desbloqueo.
+- Las 11 canciones gratuitas se pueden jugar sin desbloqueo; las otras 13 respetan su categoria y precio.
 - Una cancion nueva aparece en la categoria y con el precio correspondiente a su carpeta.
 - Completar cerca del final otorga al menos una estrella; 70% de precision ponderada entrega dos y 90% entrega tres.
 - Recargar la pagina conserva monedas, desbloqueos y records.

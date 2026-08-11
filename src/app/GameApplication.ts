@@ -7,6 +7,7 @@ import type { TrackSelection } from '../content/TrackSelection';
 import { loadMusicCatalog } from '../content/MusicCatalog';
 import { MENU_MUSIC_TRACK_ID } from '../content/MenuMusic';
 import { SceneManager } from '../core/scene/SceneManager';
+import { ThemeSelection } from '../customization/ThemeCatalog';
 import { DIFFICULTIES } from '../game/difficulty/Difficulty';
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import { ProgressionStore } from '../progression/ProgressionStore';
@@ -24,6 +25,7 @@ export class GameApplication {
   private readonly audioManager = new AudioManager();
   private readonly menuAudio = new MenuAudioController(this.audioManager);
   private readonly progression = new ProgressionStore();
+  private readonly themeSelection = new ThemeSelection();
   private tracks: TrackSelection[] = [];
   private readonly tick = (ticker: Ticker): void => {
     this.sceneManager.update(ticker.deltaTime / 60);
@@ -100,6 +102,7 @@ export class GameApplication {
         audioManager: this.audioManager,
         track: selection.track,
         beatmap: selection.beatmaps[difficulty],
+        visualTheme: this.themeSelection.current,
         audioReady,
         onRestart: () => this.startGame(difficulty, selection),
         onExit: this.showMenu,

@@ -1,4 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import type { EffectsVisualTheme } from '../../customization/ThemeTypes';
+import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
 import type { TimingGrade } from '../timing/TimingGrade';
 
 interface ParticleEffect {
@@ -67,7 +69,7 @@ export class JuiceSystem extends Container {
   private readonly texts: TextEffect[] = [];
   private viewportWidth = 1;
   private viewportHeight = 1;
-  private flashColor = 0xffffff;
+  private flashColor: number;
   private flashStrength = 0;
   private shakeStrength = 0;
   private shakeX = 0;
@@ -76,8 +78,11 @@ export class JuiceSystem extends Container {
   private superFlowActive = false;
   private elapsed = 0;
 
-  constructor() {
+  constructor(
+    private readonly visualTheme: EffectsVisualTheme = DEFAULT_VISUAL_THEME.effects,
+  ) {
     super();
+    this.flashColor = visualTheme.highlight;
     this.eventMode = 'none';
     this.flash.blendMode = 'add';
     this.superFrame.blendMode = 'add';
@@ -92,7 +97,11 @@ export class JuiceSystem extends Container {
   }
 
   emitTouch(x: number, y: number): void {
-    const color = this.superFlowActive ? 0x8ffaff : this.flowActive ? 0xffe276 : 0x8ea7ff;
+    const color = this.superFlowActive
+      ? this.visualTheme.touchSuper
+      : this.flowActive
+        ? this.visualTheme.touchFlow
+        : this.visualTheme.touch;
     this.createRing(x, y, color, 22, 0.22, 2);
   }
 
@@ -103,10 +112,12 @@ export class JuiceSystem extends Container {
         x,
         y,
         this.superFlowActive
-          ? (index % 2 === 0 ? 0x8ffaff : 0xff83e6)
+          ? (index % 2 === 0
+              ? this.visualTheme.dragSuperPrimary
+              : this.visualTheme.dragSuperSecondary)
           : this.flowActive
-            ? 0xffef9f
-            : 0x9deeff,
+            ? this.visualTheme.dragFlow
+            : this.visualTheme.drag,
         Math.cos(angle) * (18 + Math.random() * 28),
         Math.sin(angle) * (18 + Math.random() * 28),
         2 + Math.random() * 2,
@@ -118,14 +129,14 @@ export class JuiceSystem extends Container {
 
   emitImpact(x: number, y: number, grade: TimingGrade): void {
     const color = this.superFlowActive && grade !== 'miss'
-      ? 0x8ffaff
+      ? this.visualTheme.impactSuper
       : this.flowActive && grade !== 'miss'
-        ? 0xffe276
+        ? this.visualTheme.impactFlow
       : grade === 'perfect'
-      ? 0x7df2ba
+      ? this.visualTheme.perfect
       : grade === 'good'
-        ? 0xffdf78
-        : 0xff6f91;
+        ? this.visualTheme.good
+        : this.visualTheme.miss;
     const baseParticleCount = grade === 'perfect' ? 18 : grade === 'good' ? 12 : 8;
     const particleCount = Math.round(
       baseParticleCount * (this.superFlowActive ? 2.05 : this.flowActive ? 1.65 : 1),
@@ -155,9 +166,20 @@ export class JuiceSystem extends Container {
     }
 
     this.createRing(x, y, color, 32, grade === 'perfect' ? 0.5 : 0.38, 4);
-    if (grade === 'perfect') this.createRing(x, y, 0xffffff, 20, 0.34, 2);
+    if (grade === 'perfect') {
+      this.createRing(x, y, this.visualTheme.highlight, 20, 0.34, 2);
+    }
     if (this.flowActive && grade !== 'miss') {
-      this.createRing(x, y, this.superFlowActive ? 0xff83e6 : 0xcba4ff, 45, 0.55, 3);
+      this.createRing(
+        x,
+        y,
+        this.superFlowActive
+          ? this.visualTheme.superSecondary
+          : this.visualTheme.impactFlowAccent,
+        45,
+        0.55,
+        3,
+      );
     }
     this.createFloatingText(x, y - 42, grade, color);
 
@@ -205,7 +227,9 @@ export class JuiceSystem extends Container {
       this.createParticle(
         x,
         y,
-        index % 2 === 0 ? 0xffe276 : 0xb38cff,
+        index % 2 === 0
+          ? this.visualTheme.flowPrimary
+          : this.visualTheme.flowSecondary,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         3 + Math.random() * 4,
@@ -216,11 +240,19 @@ export class JuiceSystem extends Container {
       );
     }
 
-    this.createRing(x, y, 0xffe276, 60, 0.75, 7);
-    this.createRing(x, y, 0xb38cff, 95, 0.9, 4);
-    this.createArcRing(x, y, 0xfff1a6, 128, 0.95, 2.5, 1.8);
-    this.createAnnouncement(x, y - 52, 'MODO FLOW', 0xfff2a8, 1.15);
-    this.flashColor = 0xffe276;
+    this.createRing(x, y, this.visualTheme.flowPrimary, 60, 0.75, 7);
+    this.createRing(x, y, this.visualTheme.flowSecondary, 95, 0.9, 4);
+    this.createArcRing(
+      x,
+      y,
+      this.visualTheme.flowHighlight,
+      128,
+      0.95,
+      2.5,
+      1.8,
+    );
+    this.createAnnouncement(x, y - 52, 'MODO FLOW', this.visualTheme.flowText, 1.15);
+    this.flashColor = this.visualTheme.flowPrimary;
     this.flashStrength = 0.24;
     this.shakeStrength = 11;
     this.redrawFlash();
@@ -231,10 +263,10 @@ export class JuiceSystem extends Container {
       this.viewportWidth / 2,
       this.viewportHeight * 0.48,
       'FLOW ROTO',
-      0xff6f91,
+      this.visualTheme.flowBreak,
       0.85,
     );
-    this.flashColor = 0xff416c;
+    this.flashColor = this.visualTheme.flowBreakFlash;
     this.flashStrength = Math.max(this.flashStrength, 0.16);
     this.shakeStrength = Math.max(this.shakeStrength, 8);
     this.redrawFlash();
@@ -251,7 +283,9 @@ export class JuiceSystem extends Container {
       this.createParticle(
         x,
         y,
-        index % 2 === 0 ? 0x8ffaff : 0xff83e6,
+        index % 2 === 0
+          ? this.visualTheme.superPrimary
+          : this.visualTheme.superSecondary,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         3 + Math.random() * 5,
@@ -262,13 +296,19 @@ export class JuiceSystem extends Container {
       );
     }
 
-    this.createRing(x, y, 0xffffff, 48, 0.65, 8);
-    this.createRing(x, y, 0x8ffaff, 82, 0.9, 6);
-    this.createRing(x, y, 0xff83e6, 122, 1.1, 4);
-    this.createArcRing(x, y, 0x8ffaff, 154, 1.15, 3, 2.7);
-    this.createArcRing(x, y, 0xff83e6, 188, 1.3, 2, -2.1);
-    this.createAnnouncement(x, y - 60, 'SUPER FLOW x4', 0x8ffaff, 1.45);
-    this.flashColor = 0xa8f8ff;
+    this.createRing(x, y, this.visualTheme.highlight, 48, 0.65, 8);
+    this.createRing(x, y, this.visualTheme.superPrimary, 82, 0.9, 6);
+    this.createRing(x, y, this.visualTheme.superSecondary, 122, 1.1, 4);
+    this.createArcRing(x, y, this.visualTheme.superPrimary, 154, 1.15, 3, 2.7);
+    this.createArcRing(x, y, this.visualTheme.superSecondary, 188, 1.3, 2, -2.1);
+    this.createAnnouncement(
+      x,
+      y - 60,
+      'SUPER FLOW x4',
+      this.visualTheme.superPrimary,
+      1.45,
+    );
+    this.flashColor = this.visualTheme.superFlash;
     this.flashStrength = 0.34;
     this.shakeStrength = 14;
     this.redrawFlash();
@@ -279,10 +319,10 @@ export class JuiceSystem extends Container {
       this.viewportWidth / 2,
       this.viewportHeight * 0.44,
       'FLOW x2',
-      0xffe276,
+      this.visualTheme.demotionText,
       0.8,
     );
-    this.flashColor = 0xffd56a;
+    this.flashColor = this.visualTheme.demotionFlash;
     this.flashStrength = Math.max(this.flashStrength, 0.14);
     this.shakeStrength = Math.max(this.shakeStrength, 5);
     this.redrawFlash();
@@ -291,7 +331,7 @@ export class JuiceSystem extends Container {
   emitPhaseTransition(phaseNumber: number, phaseName: string): void {
     const x = this.viewportWidth / 2;
     const y = this.viewportHeight * 0.42;
-    const colors = [0x83a7ff, 0xb58cff, 0xffbd69];
+    const colors = this.visualTheme.phaseColors;
     const color = colors[Math.max(0, Math.min(colors.length - 1, phaseNumber - 1))];
 
     for (let index = 0; index < 18; index += 1) {
@@ -334,8 +374,8 @@ export class JuiceSystem extends Container {
         ? 0.1 + Math.sin(this.elapsed * 4) * 0.035
         : Math.max(0, this.superFrame.alpha - deltaSeconds * 4);
     this.superFrame.tint = this.superFlowActive
-      ? 0x8ffaff
-      : 0xffdd72;
+      ? this.visualTheme.frameSuper
+      : this.visualTheme.frameFlow;
     this.shakeStrength = Math.max(0, this.shakeStrength - deltaSeconds * 24);
     this.shakeX = (Math.random() * 2 - 1) * this.shakeStrength;
     this.shakeY = (Math.random() * 2 - 1) * this.shakeStrength;
@@ -537,14 +577,14 @@ export class JuiceSystem extends Container {
       Math.max(0, this.viewportWidth - inset * 2),
       Math.max(0, this.viewportHeight - inset * 2),
       20,
-    ).stroke({ color: 0xffffff, alpha: 0.52, width: 1.5 });
+    ).stroke({ color: this.visualTheme.highlight, alpha: 0.52, width: 1.5 });
     this.superFrame.roundRect(
       inset + 5,
       inset + 5,
       Math.max(0, this.viewportWidth - (inset + 5) * 2),
       Math.max(0, this.viewportHeight - (inset + 5) * 2),
       15,
-    ).stroke({ color: 0xffffff, alpha: 0.2, width: 0.8 });
+    ).stroke({ color: this.visualTheme.highlight, alpha: 0.2, width: 0.8 });
     const right = this.viewportWidth - inset;
     const bottom = this.viewportHeight - inset;
     for (const [x, y, directionX, directionY] of [
@@ -556,7 +596,7 @@ export class JuiceSystem extends Container {
       this.superFrame.moveTo(x, y + directionY * corner).lineTo(x, y).lineTo(
         x + directionX * corner,
         y,
-      ).stroke({ color: 0xffffff, alpha: 0.92, width: 3 });
+      ).stroke({ color: this.visualTheme.highlight, alpha: 0.92, width: 3 });
     }
     this.superFrame.alpha = this.superFlowActive ? 0.62 : this.flowActive ? 0.1 : 0;
   }

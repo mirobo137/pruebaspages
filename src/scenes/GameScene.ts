@@ -3,6 +3,7 @@ import type { FederatedPointerEvent } from 'pixi.js';
 import type { AudioManager } from '../audio/AudioManager';
 import type { BeatEvent, Beatmap } from '../content/Beatmap';
 import type { MusicTrack } from '../content/MusicCatalog';
+import type { VisualTheme } from '../customization/ThemeTypes';
 import type { Scene } from '../core/scene/Scene';
 import { randomBetween } from '../core/utils/random';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
@@ -55,6 +56,7 @@ export interface GameSceneOptions {
   audioManager: AudioManager;
   track: MusicTrack;
   beatmap: Beatmap;
+  visualTheme: VisualTheme;
   audioReady: Promise<void>;
   onRestart: () => void;
   onExit: () => void;
@@ -70,10 +72,10 @@ export class GameScene implements Scene {
   readonly id = 'game';
   readonly root = new Container();
 
-  private readonly background = new RhythmBackground();
+  private readonly background: RhythmBackground;
   private readonly playfield = new Container();
   private readonly targets = new Container();
-  private readonly effects = new JuiceSystem();
+  private readonly effects: JuiceSystem;
   private readonly hud = new GameHud();
   private readonly countdown = new GameCountdown();
   private readonly pauseButton: PauseButton;
@@ -87,6 +89,7 @@ export class GameScene implements Scene {
   private readonly difficulty: Difficulty;
   private readonly difficultyProfile: DifficultyProfile;
   private readonly beatmap: Beatmap;
+  private readonly visualTheme: VisualTheme;
   private readonly beatmapPlayer: BeatmapPlayer;
   private readonly phaseTransition = new PhaseTransitionGuard();
   private readonly audioReady: Promise<void>;
@@ -113,6 +116,9 @@ export class GameScene implements Scene {
     this.audioManager = options.audioManager;
     this.track = options.track;
     this.difficulty = options.difficulty;
+    this.visualTheme = options.visualTheme;
+    this.background = new RhythmBackground(this.visualTheme.background);
+    this.effects = new JuiceSystem(this.visualTheme.effects);
     this.difficultyProfile = DIFFICULTY_PROFILES[options.difficulty];
     this.score = new ScoreModel(this.difficultyProfile.maxLives);
     this.beatmap = options.beatmap;
@@ -534,7 +540,7 @@ export class GameScene implements Scene {
         ? this.difficultyProfile.dragStartHitRadius
         : this.difficultyProfile.targetHitRadius,
       dragPathTolerance: this.difficultyProfile.dragPathTolerance,
-    });
+    }, this.visualTheme.target, this.visualTheme.drag);
     target.position.set(start.x, start.y);
     const flowSnapshot = this.flow.snapshot();
     target.setFlowState(flowSnapshot.active, flowSnapshot.superActive);

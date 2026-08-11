@@ -1,4 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
+import type { DragVisualTheme, TargetVisualTheme } from '../../customization/ThemeTypes';
+import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
 import { GAME_CONFIG } from '../config';
 import type { NoteKind } from '../notes/NoteKind';
 import { DragPath, distanceToSegment } from './DragPath';
@@ -51,6 +53,8 @@ export class TargetNode extends Container {
       hitRadius: GAME_CONFIG.targetHitRadius,
       dragPathTolerance: GAME_CONFIG.dragPathTolerance,
     },
+    private readonly visualTheme: TargetVisualTheme = DEFAULT_VISUAL_THEME.target,
+    private readonly dragVisualTheme: DragVisualTheme = DEFAULT_VISUAL_THEME.drag,
   ) {
     super();
     this.eventMode = 'none';
@@ -156,8 +160,16 @@ export class TargetNode extends Container {
   setFlowState(active: boolean, superActive = false): void {
     this.flowActive = active;
     this.superFlowActive = superActive;
-    const primaryTint = superActive ? 0x8ffaff : active ? 0xffe78c : 0xffffff;
-    const accentTint = superActive ? 0xff83e6 : primaryTint;
+    const primaryTint = superActive
+      ? this.visualTheme.superPrimary
+      : active
+        ? this.visualTheme.flowPrimary
+        : this.visualTheme.highlight;
+    const accentTint = superActive
+      ? this.visualTheme.superAccent
+      : active
+        ? this.visualTheme.flowAccent
+        : primaryTint;
     this.approachRing.tint = accentTint;
     this.glow.tint = accentTint;
     this.stateAccent.tint = accentTint;
@@ -259,22 +271,36 @@ export class TargetNode extends Container {
     }
 
     this.progressTrail.clear();
-    this.drawPathUntil(this.progressTrail, this.dragProgress, 0x68e5ff, 0.22, 8);
-    this.drawPathUntil(this.progressTrail, this.dragProgress, 0xc5f7ff, 0.94, 2.5);
+    this.drawPathUntil(
+      this.progressTrail,
+      this.dragProgress,
+      this.dragVisualTheme.progressBase,
+      0.22,
+      8,
+    );
+    this.drawPathUntil(
+      this.progressTrail,
+      this.dragProgress,
+      this.dragVisualTheme.progressHighlight,
+      0.94,
+      2.5,
+    );
     this.progressTrail.blendMode = 'add';
   }
 
   private drawTarget(): void {
     const isDrag = this.kind === 'drag';
-    const color = isDrag ? 0x56d8ff : 0xffd166;
-    const outline = isDrag ? 0xc6f5ff : 0xfff3b0;
+    const color = isDrag ? this.visualTheme.dragFill : this.visualTheme.tapFill;
+    const outline = isDrag
+      ? this.visualTheme.dragOutline
+      : this.visualTheme.tapOutline;
 
     this.shadow.circle(2, 5, GAME_CONFIG.targetRadius + 3).fill({
-      color: 0x02040c,
+      color: this.visualTheme.shadow,
       alpha: 0.5,
     });
     this.shadow.circle(0, 1, GAME_CONFIG.targetRadius + 1).stroke({
-      color: 0x000000,
+      color: this.visualTheme.shadowOutline,
       alpha: 0.5,
       width: 2,
     });
@@ -295,12 +321,12 @@ export class TargetNode extends Container {
       width: 1.75,
     });
     this.goodTimingRing.circle(0, 0, GAME_CONFIG.targetRadius + 6).stroke({
-      color: 0xffbd67,
+      color: this.visualTheme.goodTiming,
       alpha: 0.95,
       width: 2,
     });
     this.perfectTimingRing.circle(0, 0, GAME_CONFIG.targetRadius + 2).stroke({
-      color: 0x74f6c1,
+      color: this.visualTheme.perfectTiming,
       alpha: 1,
       width: 1.6,
     });
@@ -308,7 +334,7 @@ export class TargetNode extends Container {
     this.perfectTimingRing.alpha = 0.07;
 
     this.marker.circle(0, 0, GAME_CONFIG.targetRadius).fill({
-      color: 0x11182b,
+      color: this.visualTheme.surface,
       alpha: 0.98,
     });
     this.marker.circle(0, 0, GAME_CONFIG.targetRadius - 1.5).fill({
@@ -316,11 +342,11 @@ export class TargetNode extends Container {
       alpha: 0.9,
     });
     this.marker.circle(0, 0, GAME_CONFIG.targetRadius - 7).fill({
-      color: 0x0a1020,
+      color: this.visualTheme.innerSurface,
       alpha: 0.2,
     });
     this.marker.circle(0, 0, GAME_CONFIG.targetRadius - 7).stroke({
-      color: 0xffffff,
+      color: this.visualTheme.highlight,
       alpha: 0.48,
       width: 1.25,
     });
@@ -331,14 +357,20 @@ export class TargetNode extends Container {
       Math.PI * 1.08,
       Math.PI * 1.76,
     ).stroke({
-      color: 0xffffff,
+      color: this.visualTheme.highlight,
       alpha: 0.72,
       width: 2,
     });
-    this.marker.circle(-8, -9, 3.5).fill({ color: 0xffffff, alpha: 0.42 });
-    this.marker.circle(0, 0, 4).fill({ color: 0xffffff, alpha: 0.9 });
+    this.marker.circle(-8, -9, 3.5).fill({
+      color: this.visualTheme.highlight,
+      alpha: 0.42,
+    });
+    this.marker.circle(0, 0, 4).fill({
+      color: this.visualTheme.highlight,
+      alpha: 0.9,
+    });
     this.stateAccent.circle(0, 0, GAME_CONFIG.targetRadius - 3).stroke({
-      color: 0xffffff,
+      color: this.visualTheme.highlight,
       alpha: 0.8,
       width: 1.4,
     });
@@ -346,36 +378,39 @@ export class TargetNode extends Container {
 
     if (!isDrag || !this.dragPath) return;
 
-    this.drawPathUntil(this.trail, 1, 0x111a31, 0.86, 11);
-    this.drawPathUntil(this.trail, 1, 0x75e5ff, 0.62, 2);
-    this.drawPathUntil(this.trail, 1, 0xdafaff, 0.18, 0.8);
+    this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailBase, 0.86, 11);
+    this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailPrimary, 0.62, 2);
+    this.drawPathUntil(this.trail, 1, this.dragVisualTheme.trailHighlight, 0.18, 0.8);
     for (const progress of [0.16, 0.5, 0.84]) {
       const guide = this.dragPath.pointAt(progress);
-      this.trail.circle(guide.x, guide.y, 1.8).fill({ color: 0xd7f8ff, alpha: 0.5 });
+      this.trail.circle(guide.x, guide.y, 1.8).fill({
+        color: this.dragVisualTheme.guide,
+        alpha: 0.5,
+      });
     }
 
     const end = this.dragPath.pointAt(1);
     this.destination.position.set(end.x, end.y);
     this.destination.circle(2, 4, 27).fill({
-      color: 0x02040c,
+      color: this.dragVisualTheme.destinationShadow,
       alpha: 0.42,
     });
     this.destination.circle(0, 0, 27).fill({
-      color: 0x56d8ff,
+      color: this.dragVisualTheme.destinationFill,
       alpha: 0.08,
     });
     this.destination.circle(0, 0, 27).stroke({
-      color: 0xd7f8ff,
+      color: this.dragVisualTheme.destinationOutline,
       alpha: 0.82,
       width: 1.5,
     });
     this.destination.circle(0, 0, 18).stroke({
-      color: 0x78e8ff,
+      color: this.dragVisualTheme.destinationInner,
       alpha: 0.38,
       width: 1,
     });
     this.destination.circle(0, 0, 5).fill({
-      color: 0xffffff,
+      color: this.visualTheme.highlight,
       alpha: 0.76,
     });
 
@@ -385,11 +420,11 @@ export class TargetNode extends Container {
     this.trail.moveTo(arrow.x, arrow.y).lineTo(
       arrow.x - Math.cos(angle - 0.55) * 10,
       arrow.y - Math.sin(angle - 0.55) * 10,
-    ).stroke({ color: 0xffffff, alpha: 0.68, width: 2 });
+    ).stroke({ color: this.visualTheme.highlight, alpha: 0.68, width: 2 });
     this.trail.moveTo(arrow.x, arrow.y).lineTo(
       arrow.x - Math.cos(angle + 0.55) * 10,
       arrow.y - Math.sin(angle + 0.55) * 10,
-    ).stroke({ color: 0xffffff, alpha: 0.68, width: 2 });
+    ).stroke({ color: this.visualTheme.highlight, alpha: 0.68, width: 2 });
     this.drawCheckpoints();
   }
 
@@ -420,19 +455,25 @@ export class TargetNode extends Container {
       const reached = index < this.nextCheckpointIndex;
       const radius = reached ? 8 : 9;
       this.checkpoints.circle(point.x, point.y, radius + 5).fill({
-        color: reached ? 0x70f6bd : 0x54dfff,
+        color: reached
+          ? this.dragVisualTheme.checkpointReachedGlow
+          : this.dragVisualTheme.checkpointPendingGlow,
         alpha: reached ? 0.12 : 0.055,
       });
       this.checkpoints.circle(point.x, point.y, radius).fill({
-        color: reached ? 0x70f6bd : 0x0b1730,
+        color: reached
+          ? this.dragVisualTheme.checkpointReachedFill
+          : this.dragVisualTheme.checkpointPendingFill,
         alpha: reached ? 0.75 : 0.92,
       }).stroke({
-        color: reached ? 0xc8ffe8 : 0x9cefff,
+        color: reached
+          ? this.dragVisualTheme.checkpointReachedOutline
+          : this.dragVisualTheme.checkpointPendingOutline,
         alpha: reached ? 0.95 : 0.7,
         width: 1.2,
       });
       this.checkpoints.circle(point.x, point.y, reached ? 3.5 : 2.5).fill({
-        color: 0xffffff,
+        color: this.visualTheme.highlight,
         alpha: reached ? 0.95 : 0.58,
       });
     });

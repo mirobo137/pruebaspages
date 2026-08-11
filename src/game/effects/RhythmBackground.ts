@@ -1,4 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
+import type { BackgroundVisualTheme } from '../../customization/ThemeTypes';
+import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
 
 interface AmbientOrb {
   node: Graphics;
@@ -7,9 +9,6 @@ interface AmbientOrb {
   phase: number;
   size: number;
 }
-
-const PHASE_COLORS = [0x83a7ff, 0xb58cff, 0xffbd69];
-const PHASE_SECONDARY_COLORS = [0x5368b8, 0x744aa8, 0xa45d57];
 
 export class RhythmBackground extends Container {
   private readonly backdrop = new Graphics();
@@ -33,7 +32,9 @@ export class RhythmBackground extends Container {
   private superFlowIntensity = 0;
   private phaseIndex = 0;
 
-  constructor() {
+  constructor(
+    private readonly visualTheme: BackgroundVisualTheme = DEFAULT_VISUAL_THEME.background,
+  ) {
     super();
     this.eventMode = 'none';
     this.flowOverlay.blendMode = 'add';
@@ -58,7 +59,9 @@ export class RhythmBackground extends Container {
       const node = new Graphics();
       const size = 2 + (index % 4);
       node.circle(0, 0, size).fill({
-        color: index % 2 === 0 ? 0x708bff : 0x56d8ff,
+        color: index % 2 === 0
+          ? this.visualTheme.orbPrimary
+          : this.visualTheme.orbSecondary,
       });
       node.blendMode = 'add';
       this.orbs.push({
@@ -76,12 +79,16 @@ export class RhythmBackground extends Container {
   resize(width: number, height: number): void {
     this.viewportWidth = width;
     this.viewportHeight = height;
-    this.backdrop.clear().rect(0, 0, width, height).fill({ color: 0x0b1022 });
-    this.flowOverlay.clear().rect(0, 0, width, height).fill({ color: 0x7956d8 });
+    this.backdrop.clear().rect(0, 0, width, height).fill({
+      color: this.visualTheme.backdrop,
+    });
+    this.flowOverlay.clear().rect(0, 0, width, height).fill({
+      color: this.visualTheme.flowOverlay,
+    });
 
     const longestSide = Math.max(width, height);
-    this.drawNebula(this.nebulaA, longestSide * 0.5, 0xffffff);
-    this.drawNebula(this.nebulaB, longestSide * 0.44, 0xffffff);
+    this.drawNebula(this.nebulaA, longestSide * 0.5, this.visualTheme.nebulaBase);
+    this.drawNebula(this.nebulaB, longestSide * 0.44, this.visualTheme.nebulaBase);
 
     this.flowRays.clear();
     const rayLength = Math.hypot(width, height);
@@ -91,7 +98,9 @@ export class RhythmBackground extends Container {
         width / 2 + Math.cos(angle) * rayLength,
         height / 2 + Math.sin(angle) * rayLength,
       ).stroke({
-        color: index % 2 === 0 ? 0xffd86a : 0xa477ff,
+        color: index % 2 === 0
+          ? this.visualTheme.flowRayPrimary
+          : this.visualTheme.flowRaySecondary,
         alpha: 0.12,
         width: index % 2 === 0 ? 3 : 1,
       });
@@ -101,15 +110,38 @@ export class RhythmBackground extends Container {
 
     const shortestSide = Math.min(width, height);
     this.flowGeometry.clear();
-    this.drawPolygonRing(this.flowGeometry, shortestSide * 0.19, 6, 0xffdc7a, 0.42, 1.4);
-    this.drawPolygonRing(this.flowGeometry, shortestSide * 0.31, 8, 0xb993ff, 0.3, 1.2);
-    this.drawPolygonRing(this.flowGeometry, shortestSide * 0.44, 12, 0x7fddff, 0.2, 1);
+    this.drawPolygonRing(
+      this.flowGeometry,
+      shortestSide * 0.19,
+      6,
+      this.visualTheme.flowGeometry[0],
+      0.42,
+      1.4,
+    );
+    this.drawPolygonRing(
+      this.flowGeometry,
+      shortestSide * 0.31,
+      8,
+      this.visualTheme.flowGeometry[1],
+      0.3,
+      1.2,
+    );
+    this.drawPolygonRing(
+      this.flowGeometry,
+      shortestSide * 0.44,
+      12,
+      this.visualTheme.flowGeometry[2],
+      0.2,
+      1,
+    );
     this.flowGeometry.position.set(width / 2, height / 2);
 
     this.superTunnel.clear();
     for (let ring = 1; ring <= 5; ring += 1) {
       this.superTunnel.circle(0, 0, shortestSide * (0.1 + ring * 0.085)).stroke({
-        color: ring % 2 === 0 ? 0xff83e6 : 0x8ffaff,
+        color: ring % 2 === 0
+          ? this.visualTheme.superSecondary
+          : this.visualTheme.superPrimary,
         alpha: 0.34 - ring * 0.035,
         width: ring === 1 ? 2 : 1.2,
       });
@@ -120,21 +152,21 @@ export class RhythmBackground extends Container {
     const spacing = Math.max(52, Math.min(width, height) / 7);
     for (let x = 0; x <= width; x += spacing) {
       this.grid.moveTo(x, 0).lineTo(x, height).stroke({
-        color: 0x6174b8,
+        color: this.visualTheme.grid,
         alpha: 0.06,
         width: 1,
       });
     }
     for (let y = 0; y <= height; y += spacing) {
       this.grid.moveTo(0, y).lineTo(width, y).stroke({
-        color: 0x6174b8,
+        color: this.visualTheme.grid,
         alpha: 0.06,
         width: 1,
       });
     }
 
     this.pulseRing.clear().circle(0, 0, Math.min(width, height) * 0.28).stroke({
-      color: 0x7890ff,
+      color: this.visualTheme.pulse,
       alpha: 0.12,
       width: 3,
     });
@@ -145,17 +177,20 @@ export class RhythmBackground extends Container {
     for (let layer = 0; layer < 4; layer += 1) {
       const depth = edgeDepth * (1 - layer * 0.2);
       const alpha = 0.055 + layer * 0.01;
-      this.vignette.rect(0, 0, width, depth).fill({ color: 0x02040d, alpha });
+      this.vignette.rect(0, 0, width, depth).fill({
+        color: this.visualTheme.vignette,
+        alpha,
+      });
       this.vignette.rect(0, height - depth, width, depth).fill({
-        color: 0x02040d,
+        color: this.visualTheme.vignette,
         alpha: alpha + 0.01,
       });
       this.vignette.rect(0, depth, depth, height - depth * 2).fill({
-        color: 0x02040d,
+        color: this.visualTheme.vignette,
         alpha: alpha * 0.72,
       });
       this.vignette.rect(width - depth, depth, depth, height - depth * 2).fill({
-        color: 0x02040d,
+        color: this.visualTheme.vignette,
         alpha: alpha * 0.72,
       });
     }
@@ -173,7 +208,10 @@ export class RhythmBackground extends Container {
   }
 
   setPhase(phaseIndex: number, animate = true): void {
-    this.phaseIndex = Math.max(0, Math.min(PHASE_COLORS.length - 1, phaseIndex));
+    this.phaseIndex = Math.max(
+      0,
+      Math.min(this.visualTheme.phasePrimary.length - 1, phaseIndex),
+    );
     if (animate) this.pulse(1.25);
   }
 
@@ -193,21 +231,23 @@ export class RhythmBackground extends Container {
     );
     this.pulseRing.alpha = 0.2 + this.pulseEnergy * 0.38
       + this.flowIntensity * 0.35 + this.superFlowIntensity * 0.24;
-    const phaseColor = PHASE_COLORS[this.phaseIndex];
+    const phaseColor = this.visualTheme.phasePrimary[this.phaseIndex];
     this.pulseRing.tint = this.superFlowIntensity > 0.1
-      ? 0x8ffaff
+      ? this.visualTheme.superPrimary
       : this.flowIntensity > 0.1
-        ? 0xffda76
+        ? this.visualTheme.flowPulse
         : phaseColor;
     this.grid.alpha = 0.65 + this.pulseEnergy * 0.35 + this.flowIntensity * 0.35;
     this.grid.tint = this.superFlowIntensity > 0.1
-      ? 0xff83e6
+      ? this.visualTheme.superSecondary
       : this.flowIntensity > 0.1
-        ? 0xc99cff
+        ? this.visualTheme.flowGrid
         : phaseColor;
     this.flowOverlay.alpha = this.flowIntensity
       * (0.055 + this.superFlowIntensity * 0.055 + Math.sin(this.elapsed * 8) * 0.018);
-    this.flowOverlay.tint = this.superFlowIntensity > 0.1 ? 0x37d6ff : 0xffffff;
+    this.flowOverlay.tint = this.superFlowIntensity > 0.1
+      ? this.visualTheme.superOverlayTint
+      : this.visualTheme.flowOverlayTint;
     this.flowRays.alpha = this.flowIntensity * (0.72 + this.superFlowIntensity * 0.28);
     this.flowRays.rotation += deltaSeconds * this.flowIntensity
       * (0.11 + this.superFlowIntensity * 0.18);
@@ -227,10 +267,12 @@ export class RhythmBackground extends Container {
       + this.superFlowIntensity * 0.2;
     this.nebulaB.alpha = 0.42 + this.flowIntensity * 0.22
       + this.superFlowIntensity * 0.25;
-    this.nebulaA.tint = this.superFlowIntensity > 0.1 ? 0x8ffaff : phaseColor;
+    this.nebulaA.tint = this.superFlowIntensity > 0.1
+      ? this.visualTheme.superPrimary
+      : phaseColor;
     this.nebulaB.tint = this.superFlowIntensity > 0.1
-      ? 0xff83e6
-      : PHASE_SECONDARY_COLORS[this.phaseIndex];
+      ? this.visualTheme.superSecondary
+      : this.visualTheme.phaseSecondary[this.phaseIndex];
     this.flowGeometry.alpha = this.flowIntensity
       * (0.38 + this.superFlowIntensity * 0.24);
     this.flowGeometry.rotation += deltaSeconds
@@ -264,9 +306,11 @@ export class RhythmBackground extends Container {
         orbScale * (1 - this.superFlowIntensity * 0.28),
       );
       orb.node.tint = this.superFlowIntensity > 0.1
-        ? (orb.phase % 2 > 1 ? 0xff83e6 : 0x8ffaff)
+        ? (orb.phase % 2 > 1
+            ? this.visualTheme.superSecondary
+            : this.visualTheme.superPrimary)
         : this.flowIntensity > 0.1
-          ? 0xffdc83
+          ? this.visualTheme.flowOrb
           : phaseColor;
     }
   }

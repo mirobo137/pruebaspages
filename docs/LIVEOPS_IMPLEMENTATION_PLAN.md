@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 0 - Linea base`
-- Siguiente accion: `0.2-0.4 Validar la linea base en un movil fisico`
+- Fase activa: `Fase 1 - Validacion movil`
+- Siguiente accion: `Confirmar en movil que Neon Pulse conserva apariencia, touch y fluidez`
 - Ultima actualizacion: `2026-08-11`
 
 Estados permitidos:
@@ -47,9 +47,9 @@ Si una prueba falla, la fase permanece en progreso. Primero se corrige y se repi
 Objetivo: registrar el comportamiento actual antes de modificar renderizado, progreso o audio.
 
 - [x] 0.1 Ejecutar `npm run build` en el estado actual.
-- [ ] 0.2 Probar una cancion completa sin FLOW, con FLOW y con SUPER FLOW.
-- [ ] 0.3 Probar tap, drag, pausa, reanudacion y cambio de aplicacion.
-- [ ] 0.4 Confirmar persistencia de monedas, estrellas, records y seleccion del menu.
+- [x] 0.2 Probar una cancion completa sin FLOW, con FLOW y con SUPER FLOW.
+- [x] 0.3 Probar tap, drag, pausa, reanudacion y cambio de aplicacion.
+- [x] 0.4 Confirmar persistencia de monedas, estrellas, records y seleccion del menu.
 - [x] 0.5 Registrar dispositivo, navegador, orientacion y observaciones.
 
 Compuerta especifica:
@@ -72,11 +72,11 @@ src/customization/
     defaultTheme.ts
 ```
 
-- [ ] 1.1 Definir contratos para objetivo, drag, impacto, FLOW y SUPER FLOW.
-- [ ] 1.2 Convertir el aspecto actual en `defaultTheme` sin cambios visibles.
-- [ ] 1.3 Inyectar el tema desde `GameApplication` sin importaciones globales ocultas.
-- [ ] 1.4 Separar valores visuales de reglas de gameplay.
-- [ ] 1.5 Añadir validacion y fallback cuando un tema este incompleto.
+- [x] 1.1 Definir contratos para objetivo, drag, impacto, FLOW y SUPER FLOW.
+- [x] 1.2 Convertir el aspecto actual en `defaultTheme` sin cambios visibles.
+- [x] 1.3 Inyectar el tema desde `GameApplication` sin importaciones globales ocultas.
+- [x] 1.4 Separar valores visuales de reglas de gameplay.
+- [x] 1.5 Añadir validacion y fallback cuando un tema este incompleto.
 
 Compuerta especifica:
 
@@ -357,6 +357,8 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-11 | Planificacion | Sin build | N/A | Plan creado | Pendiente iniciar Fase 0 |
 | 2026-08-11 | Fase 0 | `npm run build` | Windows / Node 24 | Correcto | 24 canciones detectadas, beatmaps completos, TypeScript y Vite sin errores |
 | 2026-08-11 | Fase 0 | Servidor Vite local | Navegador Codex, 1280x720 y viewport 390x844 | Parcial correcto | Portada, entrada, inicio y controles ejercitados sin errores ni warnings; falta confirmar sensacion y persistencia en movil fisico |
+| 2026-08-11 | Fase 0 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma touch, FLOW, pausa y persistencia correctos; se habilita Fase 1 |
+| 2026-08-11 | Fase 1 | `npm run test:theme` + `npm run build` | Windows / Node 24 | Implementacion correcta | Fallback parcial/invalido probado; portada, partida, pausa y viewport 390x844 sin errores; falta aprobacion visual y tactil en movil fisico |
 
 ## Decisiones pendientes controladas
 

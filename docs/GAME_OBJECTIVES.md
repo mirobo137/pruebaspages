@@ -124,6 +124,7 @@ La implementacion paso a paso y sus pruebas obligatorias se controlan en `docs/L
 - [x] Dificultades que cambian densidad, vidas, timing y tolerancia tactil.
 - [ ] Resultado facil de compartir como imagen o texto.
 - [ ] Desbloqueo cosmetico sin afectar la habilidad ni la justicia del juego.
+- [x] Dominio modular y fallback seguro para temas visuales procedurales.
 - [ ] Coleccion de skins procedurales para objetivos, drag, FLOW y SUPER FLOW.
 - [ ] Evento semanal de siete escalones con desbloqueo progresivo de una coleccion visual.
 - [ ] Anuncio recompensado opcional para duplicar monedas al terminar.
