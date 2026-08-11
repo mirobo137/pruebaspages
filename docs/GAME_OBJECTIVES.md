@@ -123,11 +123,11 @@ La implementacion paso a paso y sus pruebas obligatorias se controlan en `docs/L
 - [ ] Reto diario determinista cuando exista una base de niveles estable.
 - [x] Dificultades que cambian densidad, vidas, timing y tolerancia tactil.
 - [ ] Resultado facil de compartir como imagen o texto.
-- [ ] Desbloqueo cosmetico sin afectar la habilidad ni la justicia del juego.
+- [x] Desbloqueo cosmetico inicial sin afectar la habilidad ni la justicia del juego.
 - [x] Dominio modular y fallback seguro para temas visuales procedurales.
 - [x] Tres skins iniciales diferenciadas para objetivos, drag, particulas, FLOW y SUPER FLOW.
 - [x] Perfil visual reducido automatico para moviles con recursos limitados.
-- [ ] Coleccion de skins procedurales para objetivos, drag, FLOW y SUPER FLOW.
+- [x] Coleccion de skins procedurales con preview animado, bloqueo y equipamiento persistente.
 - [ ] Evento semanal de siete escalones con desbloqueo progresivo de una coleccion visual.
 - [ ] Anuncio recompensado opcional para duplicar monedas al terminar.
 - [ ] Segunda oportunidad recompensada que reinicia la fase de forma segura.

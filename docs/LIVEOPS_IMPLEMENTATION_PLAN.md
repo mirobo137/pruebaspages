@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 2 - Validacion movil de skins procedurales`
-- Siguiente accion: `Probar los tres temas en un movil fisico y aprobar rendimiento tactil`
+- Fase activa: `Fase 3 - Validacion movil de Coleccion`
+- Siguiente accion: `Probar scroll, preview, bloqueo, equipamiento y persistencia en un movil fisico`
 - Ultima actualizacion: `2026-08-11`
 
 Estados permitidos:
@@ -106,11 +106,11 @@ Compuerta especifica:
 
 Objetivo: permitir consultar, previsualizar y equipar contenido visual sin entrar a una partida completa.
 
-- [ ] 3.1 Crear pantalla `Coleccion` accesible desde el selector musical.
-- [ ] 3.2 Mostrar bloqueado, disponible, equipado y origen del desbloqueo.
-- [ ] 3.3 Crear una previsualizacion animada de objetivo, drag, FLOW y SUPER FLOW.
-- [ ] 3.4 Equipar tema completo o componentes permitidos por el diseño final.
-- [ ] 3.5 Garantizar navegacion y scroll tactil en pantallas pequenas.
+- [x] 3.1 Crear pantalla `Coleccion` accesible desde el selector musical.
+- [x] 3.2 Mostrar bloqueado, disponible, equipado y origen del desbloqueo.
+- [x] 3.3 Crear una previsualizacion animada de objetivo, drag, FLOW y SUPER FLOW.
+- [x] 3.4 Equipar el tema completo y persistirlo en un almacenamiento cosmetico provisional.
+- [x] 3.5 Garantizar navegacion y scroll tactil en pantallas pequenas.
 
 Compuerta especifica:
 
@@ -361,6 +361,8 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-11 | Fase 1 | `npm run test:theme` + `npm run build` | Windows / Node 24 | Implementacion correcta | Fallback parcial/invalido probado; portada, partida, pausa y viewport 390x844 sin errores; falta aprobacion visual y tactil en movil fisico |
 | 2026-08-11 | Fase 1 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Neon Pulse conserva el aspecto y comportamiento anterior; se habilita Fase 2 |
 | 2026-08-11 | Fase 2 | `npm run test:theme` + `npm run build` | Windows / Node 24 y navegador 390x844 | Implementacion correcta | Tres temas y perfil reducido cargan sin errores; queda pendiente evaluar legibilidad, SUPER FLOW y fluidez tactil en movil fisico |
+| 2026-08-11 | Fase 2 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario aprueba diferencias visuales y rendimiento; se habilita Fase 3 |
+| 2026-08-11 | Fase 3 | `npm run test:theme` + `npm run build` | Windows / Node 24 y navegador 390x844 | Implementacion correcta | Navegacion, preview, scroll, bloqueo, equipamiento y recarga probados sin errores; falta aprobacion en movil fisico |
 
 ## Decisiones pendientes controladas
 

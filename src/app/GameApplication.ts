@@ -8,6 +8,7 @@ import { loadMusicCatalog } from '../content/MusicCatalog';
 import { MENU_MUSIC_TRACK_ID } from '../content/MenuMusic';
 import { SceneManager } from '../core/scene/SceneManager';
 import { ThemeSelection } from '../customization/ThemeCatalog';
+import { isThemeUnlocked, listThemeCollection } from '../customization/ThemeCollection';
 import {
   detectVisualQuality,
   FULL_VISUAL_QUALITY,
@@ -18,6 +19,7 @@ import { DIFFICULTIES } from '../game/difficulty/Difficulty';
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import { ProgressionStore } from '../progression/ProgressionStore';
 import { GameScene } from '../scenes/GameScene';
+import { CollectionScene } from '../scenes/CollectionScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { ResultScene } from '../scenes/ResultScene';
 import { TitleScene } from '../scenes/TitleScene';
@@ -53,7 +55,8 @@ export class GameApplication {
     });
 
     const query = new URLSearchParams(window.location.search);
-    this.themeSelection.select(query.get('theme') ?? '');
+    const requestedTheme = query.get('theme');
+    if (requestedTheme) this.themeSelection.select(requestedTheme, false);
     const requestedQuality = query.get('quality');
     this.visualQuality = requestedQuality === 'reduced'
       ? REDUCED_VISUAL_QUALITY
@@ -85,6 +88,7 @@ export class GameApplication {
   }
 
   private showTitle(): void {
+    this.updateCanvasState('title');
     this.sceneManager.switchTo(
       new TitleScene(this.app.screen.width, this.app.screen.height, {
         onInteraction: this.menuAudio.start.bind(this.menuAudio),
@@ -94,14 +98,35 @@ export class GameApplication {
   }
 
   private showMenu = (): void => {
+    this.updateCanvasState('menu');
     this.sceneManager.switchTo(
       new MenuScene(this.app.screen.width, this.app.screen.height, {
         tracks: this.tracks,
         progression: this.progression,
         visualTheme: this.themeSelection.current,
+        onOpenCollection: this.showCollection,
         onPreview: (selection) => this.menuAudio.preview(selection.track),
         onStopPreview: this.menuAudio.start.bind(this.menuAudio),
         onStart: this.startGame,
+      }),
+    );
+    this.menuAudio.start();
+  };
+
+  private showCollection = (): void => {
+    this.updateCanvasState('collection');
+    this.sceneManager.switchTo(
+      new CollectionScene(this.app.screen.width, this.app.screen.height, {
+        items: listThemeCollection(this.progression.totalRuns),
+        equippedThemeId: this.themeSelection.current.id,
+        visualQuality: this.visualQuality,
+        onEquip: (themeId) => {
+          if (!isThemeUnlocked(themeId, this.progression.totalRuns)) return false;
+          this.themeSelection.select(themeId);
+          this.updateCanvasState('collection');
+          return true;
+        },
+        onBack: this.showMenu,
       }),
     );
     this.menuAudio.start();
@@ -112,6 +137,7 @@ export class GameApplication {
     selection: TrackSelection,
   ): void => {
     this.menuAudio.stop();
+    this.updateCanvasState('game');
     const audioReady = this.audioManager.prepare(selection.track);
     this.sceneManager.switchTo(
       new GameScene(this.app.screen.width, this.app.screen.height, {
@@ -144,6 +170,7 @@ export class GameApplication {
     phaseReached: number,
     completed: boolean,
   ): void => {
+    this.updateCanvasState('result');
     const run = this.progression.recordRun(
       selection.track.id,
       difficulty,
@@ -194,5 +221,11 @@ export class GameApplication {
       console.warn('La musica no esta disponible todavia.', error);
       return [];
     }
+  }
+
+  private updateCanvasState(scene: string): void {
+    this.app.canvas.dataset.scene = scene;
+    this.app.canvas.dataset.theme = this.themeSelection.current.id;
+    this.app.canvas.dataset.visualQuality = this.visualQuality.id;
   }
 }

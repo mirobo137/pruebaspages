@@ -20,6 +20,9 @@ try {
   const { FULL_VISUAL_QUALITY, REDUCED_VISUAL_QUALITY } = await server.ssrLoadModule(
     '/src/customization/VisualQuality.ts',
   );
+  const { isThemeUnlocked, listThemeCollection } = await server.ssrLoadModule(
+    '/src/customization/ThemeCollection.ts',
+  );
 
   const partial = resolveVisualTheme({
     id: 'partial-test',
@@ -75,7 +78,25 @@ try {
   assert.ok(REDUCED_VISUAL_QUALITY.particleMultiplier < 1);
   assert.ok(REDUCED_VISUAL_QUALITY.ambientOrbCount < FULL_VISUAL_QUALITY.ambientOrbCount);
 
-  console.log('Theme catalog and visual quality: OK');
+  const storageValues = new Map();
+  const storage = {
+    getItem: (key) => storageValues.get(key) ?? null,
+    setItem: (key, value) => storageValues.set(key, value),
+  };
+  const persistentSelection = new ThemeSelection(storage);
+  persistentSelection.select('cyber-sakura');
+  assert.equal(new ThemeSelection(storage).current.id, 'cyber-sakura');
+  storage.setItem('superflow:visual-theme:v1', '{"version":1,"themeId":"missing"}');
+  assert.equal(new ThemeSelection(storage).current.id, DEFAULT_VISUAL_THEME.id);
+
+  const newPlayerCollection = listThemeCollection(0);
+  assert.equal(newPlayerCollection.length, 3);
+  assert.equal(isThemeUnlocked('neon-pulse', 0), true);
+  assert.equal(isThemeUnlocked('cyber-sakura', 0), true);
+  assert.equal(isThemeUnlocked('solar-flux', 0), false);
+  assert.equal(isThemeUnlocked('solar-flux', 3), true);
+
+  console.log('Theme catalog, collection and visual quality: OK');
 } finally {
   await server.close();
 }

@@ -20,6 +20,7 @@ export interface MenuSceneOptions {
   tracks: TrackSelection[];
   progression: ProgressionStore;
   visualTheme: VisualTheme;
+  onOpenCollection: () => void;
   onPreview: (selection: TrackSelection) => void;
   onStopPreview: () => void;
   onStart: (difficulty: Difficulty, selection: TrackSelection) => void;
@@ -83,6 +84,7 @@ export class MenuScene implements Scene {
   private readonly difficultySelector: DifficultySelector;
   private readonly progressPanel = new TrackProgressPanel();
   private readonly playButton: MenuButton;
+  private readonly collectionButton: MenuButton;
   private readonly tracks: TrackSelection[];
   private readonly progression: ProgressionStore;
   private readonly visualTheme: VisualTheme;
@@ -124,9 +126,19 @@ export class MenuScene implements Scene {
     this.songList = new SongList(this.handleSongSelected);
     this.difficultySelector = new DifficultySelector(this.handleDifficultyChanged);
     this.playButton = new MenuButton('JUGAR', this.handlePlay, 0x3155a5);
+    this.collectionButton = new MenuButton(
+      'SKIN',
+      () => {
+        this.onStopPreview();
+        options.onOpenCollection();
+      },
+      0x17233e,
+      42,
+    );
 
     this.root.addChild(
       this.background,
+      this.collectionButton,
       this.title,
       this.subtitle,
       this.currency,
@@ -182,6 +194,8 @@ export class MenuScene implements Scene {
     this.subtitle.position.set(width / 2, titleY + (landscape ? 30 : 36));
     this.currency.anchor.set(1, 0);
     this.currency.position.set(width - 14, 14);
+    this.collectionButton.resize(width < 360 ? 54 : 76);
+    this.collectionButton.position.set(width < 360 ? 8 : 14, 13);
 
     if (landscape) {
       this.resizeLandscape(width, height);

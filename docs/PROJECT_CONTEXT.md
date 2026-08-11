@@ -56,6 +56,10 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Cada identidad modifica objetivos, aros de timing, estelas, checkpoints, particulas y fondos FLOW/SUPER FLOW sin alterar gameplay.
 - Seleccion temporal para pruebas mediante `?theme=neon-pulse`, `?theme=cyber-sakura` o `?theme=solar-flux`.
 - Perfil visual automatico `full`/`reduced`; puede forzarse durante pruebas con `?quality=full` o `?quality=reduced`.
+- Pantalla `Coleccion` accesible desde `SKIN` en la playlist, con lista tactil, origen y estado de cada tema.
+- Preview animado reutiliza objetivos, drag, particulas y fondos reales; alterna normal, FLOW y SUPER FLOW sin iniciar audio de gameplay.
+- El tema equipado se guarda provisionalmente en `superflow:visual-theme:v1`; la Fase 4 lo migrara al estado de progreso version 3.
+- `Solar Flux` se desbloquea al acumular 3 partidas; puede previsualizarse bloqueado, pero no equiparse.
 
 La build verificada es `npm run build`. No se deben subir `node_modules/` ni `dist/`; ambos son generados o ignorados por Git.
 
@@ -80,7 +84,7 @@ src/
   ui/                        HUD, menus y resultados
   audio/                     Reproduccion, desbloqueo y analisis de audio
   content/                   Catalogos y carga de JSON
-  customization/             Temas visuales, catalogo, seleccion y validacion
+  customization/             Temas visuales, coleccion, seleccion y validacion
   input/                     Captura y utilidades de puntero/touch
   platform/                  Adaptadores para persistencia y portales
   progression/               Estrellas, records, monedas y desbloqueos locales
@@ -361,6 +365,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Las skins, fondos FLOW y fondos SUPER FLOW se construyen proceduralmente con PixiJS y configuraciones de datos.
 - La primera familia incluye Neon Pulse (orbital), Cyber Sakura (segmentada) y Solar Flux (facetada).
 - El perfil visual reducido disminuye particulas y geometria ambiental, nunca notas ni respuesta tactil.
+- La Coleccion equipa temas completos; mezclar componentes queda reservado hasta validar que la interfaz siga siendo clara.
 - Una skin nunca modifica hitboxes, timing, posiciones logicas ni asistencia tactil.
 - El evento semanal desbloquea progresivamente componentes de una coleccion visual durante siete escalones.
 - Los anuncios recompensados se ofrecen fuera del gameplay y siempre son opcionales.
