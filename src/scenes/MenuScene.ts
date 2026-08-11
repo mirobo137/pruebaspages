@@ -1,6 +1,11 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { TrackSelection } from '../content/TrackSelection';
 import { MENU_TRACK_PREVIEW_SECONDS } from '../content/MenuMusic';
+import {
+  getSongPriceTier,
+  getSongTierDefinition,
+  type SongPriceTier,
+} from '../content/SongEconomy';
 import type { Scene } from '../core/scene/Scene';
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import { getDifficultyLabel } from '../game/difficulty/Difficulty';
@@ -8,12 +13,14 @@ import { ProgressionStore } from '../progression/ProgressionStore';
 import { DifficultySelector } from '../ui/DifficultySelector';
 import { MenuButton } from '../ui/MenuButton';
 import { SongList } from '../ui/SongList';
+import { SongTierSelector } from '../ui/SongTierSelector';
 import { TrackProgressPanel } from '../ui/TrackProgressPanel';
 
 export interface MenuSceneOptions {
   tracks: TrackSelection[];
   progression: ProgressionStore;
   onPreview: (selection: TrackSelection) => void;
+  onStopPreview: () => void;
   onStart: (difficulty: Difficulty, selection: TrackSelection) => void;
 }
 
@@ -71,14 +78,19 @@ export class MenuScene implements Scene {
   private readonly difficultyHint = new Text({ text: '', style: subtitleStyle });
   private readonly status = new Text({ text: '', style: subtitleStyle });
   private readonly songList: SongList;
+  private readonly tierSelector: SongTierSelector;
   private readonly difficultySelector: DifficultySelector;
   private readonly progressPanel = new TrackProgressPanel();
   private readonly playButton: MenuButton;
   private readonly tracks: TrackSelection[];
   private readonly progression: ProgressionStore;
   private readonly onPreview: MenuSceneOptions['onPreview'];
+  private readonly onStopPreview: MenuSceneOptions['onStopPreview'];
   private readonly onStart: MenuSceneOptions['onStart'];
   private selectedTrackIndex = 0;
+  private selectedTier: SongPriceTier = 'free';
+  private readonly selectedTrackByTier: Partial<Record<SongPriceTier, number>> = {};
+  private visibleTrackIndexes: number[] = [];
   private selectedDifficulty: Difficulty = 'medium';
   private previewTrackIndex: number | null = null;
   private previewElapsed = 0;
@@ -91,6 +103,7 @@ export class MenuScene implements Scene {
     this.tracks = options.tracks;
     this.progression = options.progression;
     this.onPreview = options.onPreview;
+    this.onStopPreview = options.onStopPreview;
     this.onStart = options.onStart;
     const preferences = this.progression.menuPreferences;
     this.selectedDifficulty = preferences.difficulty;
@@ -98,6 +111,12 @@ export class MenuScene implements Scene {
       (selection) => selection.track.id === preferences.selectedTrackId,
     );
     this.selectedTrackIndex = rememberedIndex >= 0 ? rememberedIndex : 0;
+    const rememberedTrack = this.tracks[this.selectedTrackIndex];
+    this.selectedTier = rememberedTrack
+      ? getSongPriceTier(rememberedTrack.track.id)
+      : 'free';
+    this.selectedTrackByTier[this.selectedTier] = this.selectedTrackIndex;
+    this.tierSelector = new SongTierSelector(this.handleTierChanged);
     this.songList = new SongList(this.handleSongSelected);
     this.difficultySelector = new DifficultySelector(this.handleDifficultyChanged);
     this.playButton = new MenuButton('JUGAR', this.handlePlay, 0x3155a5);
@@ -108,6 +127,7 @@ export class MenuScene implements Scene {
       this.subtitle,
       this.currency,
       this.songSection,
+      this.tierSelector,
       this.songList,
       this.difficultySection,
       this.difficultySelector,
@@ -119,6 +139,7 @@ export class MenuScene implements Scene {
   }
 
   mount(): void {
+    this.tierSelector.setSelected(this.selectedTier);
     this.difficultySelector.setSelected(this.selectedDifficulty);
     this.refresh();
     this.resize(this.width, this.height);
@@ -128,7 +149,7 @@ export class MenuScene implements Scene {
     if (this.previewTrackIndex === null) return;
     this.previewElapsed += deltaSeconds;
     const progress = Math.min(1, this.previewElapsed / MENU_TRACK_PREVIEW_SECONDS);
-    this.songList.setPreview(this.previewTrackIndex, progress);
+    this.songList.setPreview(this.getVisibleIndex(this.previewTrackIndex), progress);
     if (progress < 1) return;
 
     this.previewTrackIndex = null;
@@ -163,11 +184,14 @@ export class MenuScene implements Scene {
 
     const contentWidth = Math.min(500, Math.max(250, width - 28));
     const contentX = (width - contentWidth) / 2;
-    const listTop = Math.max(118, height * 0.155);
+    const categoryTop = Math.max(118, height * 0.15);
+    const listTop = categoryTop + this.tierSelector.selectorHeight + 8;
     const availableListHeight = height - listTop - 330;
-    const listHeight = Math.max(134, Math.min(300, availableListHeight));
+    const listHeight = Math.max(128, Math.min(246, availableListHeight));
 
-    this.songSection.position.set(contentX + 4, listTop - 25);
+    this.songSection.position.set(contentX + 4, categoryTop - 25);
+    this.tierSelector.position.set(contentX, categoryTop);
+    this.tierSelector.resize(contentWidth);
     this.songList.position.set(contentX, listTop);
     this.songList.resize(contentWidth, listHeight);
 
@@ -189,15 +213,40 @@ export class MenuScene implements Scene {
   unmount(): void {}
 
   private readonly handleSongSelected = (index: number): void => {
-    this.selectedTrackIndex = index;
-    this.previewTrackIndex = index;
+    const globalIndex = this.visibleTrackIndexes[index];
+    if (globalIndex === undefined) return;
+    this.selectedTrackIndex = globalIndex;
+    this.selectedTrackByTier[this.selectedTier] = globalIndex;
+    this.previewTrackIndex = globalIndex;
     this.previewElapsed = 0;
     this.status.text = 'PREVIEW DE 5 SEGUNDOS';
     this.persistMenuPreferences();
     this.refresh();
     this.songList.setPreview(index, 0);
-    const selection = this.tracks[index];
+    const selection = this.tracks[globalIndex];
     if (selection) this.onPreview(selection);
+  };
+
+  private readonly handleTierChanged = (tier: SongPriceTier): void => {
+    if (this.selectedTrackIndex >= 0) {
+      this.selectedTrackByTier[this.selectedTier] = this.selectedTrackIndex;
+    }
+    this.selectedTier = tier;
+    this.previewTrackIndex = null;
+    this.previewElapsed = 0;
+    this.onStopPreview();
+
+    const available = this.getTrackIndexesForTier(tier);
+    const remembered = this.selectedTrackByTier[tier];
+    this.selectedTrackIndex = remembered !== undefined && available.includes(remembered)
+      ? remembered
+      : available[0] ?? -1;
+    if (this.selectedTrackIndex >= 0) {
+      this.selectedTrackByTier[tier] = this.selectedTrackIndex;
+      this.persistMenuPreferences();
+    }
+    this.status.text = '';
+    this.refresh();
   };
 
   private readonly handleDifficultyChanged = (difficulty: Difficulty): void => {
@@ -216,15 +265,10 @@ export class MenuScene implements Scene {
       return;
     }
 
-    const unlocked = this.progression.isTrackUnlocked(
-      selection.track.id,
-      this.selectedTrackIndex,
-    );
+    const unlocked = this.progression.isTrackUnlocked(selection.track.id);
     if (!unlocked) {
-      const unlockedNow = this.progression.tryUnlockTrack(
-        selection.track.id,
-        this.selectedTrackIndex,
-      );
+      this.onStopPreview();
+      const unlockedNow = this.progression.tryUnlockTrack(selection.track.id);
       this.status.text = unlockedNow
         ? 'Canción desbloqueada. Pulsa JUGAR para comenzar.'
         : 'Necesitas más monedas para desbloquearla.';
@@ -237,8 +281,15 @@ export class MenuScene implements Scene {
 
   private refresh(): void {
     this.currency.text = `${this.progression.coins.toLocaleString()} MONEDAS`;
-    this.songList.setItems(this.tracks.map((selection, index) => {
-      const unlocked = this.progression.isTrackUnlocked(selection.track.id, index);
+    const tier = getSongTierDefinition(this.selectedTier);
+    this.visibleTrackIndexes = this.getTrackIndexesForTier(this.selectedTier);
+    this.songSection.text = `${tier.label.toUpperCase()} · ${this.visibleTrackIndexes.length} CANCIONES`;
+    this.songList.setEmptyMessage(
+      `TODAVIA NO HAY CANCIONES ${tier.label.toUpperCase()}\nLAS NUEVAS PISTAS APARECERAN AQUI`,
+    );
+    this.songList.setItems(this.visibleTrackIndexes.map((trackIndex) => {
+      const selection = this.tracks[trackIndex];
+      const unlocked = this.progression.isTrackUnlocked(selection.track.id);
       const record = this.progression.getRecord(
         selection.track.id,
         this.selectedDifficulty,
@@ -247,7 +298,7 @@ export class MenuScene implements Scene {
         title: selection.track.title,
         subtitle: unlocked
           ? '3 FASES · 90 SEGUNDOS'
-          : `${this.progression.getTrackUnlockCost(index)} MONEDAS`,
+          : `${this.progression.getTrackUnlockCost(selection.track.id)} MONEDAS`,
         locked: !unlocked,
         stars: record?.stars ?? 0,
         highScore: record?.highScore ?? 0,
@@ -255,26 +306,41 @@ export class MenuScene implements Scene {
         attempts: record?.attempts ?? 0,
       };
     }));
-    this.songList.setSelectedIndex(this.selectedTrackIndex);
+    this.songList.setSelectedIndex(this.getVisibleIndex(this.selectedTrackIndex) ?? 0);
     this.songList.setPreview(
-      this.previewTrackIndex,
+      this.getVisibleIndex(this.previewTrackIndex),
       this.previewElapsed / MENU_TRACK_PREVIEW_SECONDS,
     );
     this.refreshDetails();
   }
 
   private persistMenuPreferences(): void {
-    const trackId = this.tracks[this.selectedTrackIndex]?.track.id ?? null;
+    const trackId = this.tracks[this.selectedTrackIndex]?.track.id
+      ?? this.progression.menuPreferences.selectedTrackId;
     this.progression.setMenuPreferences(trackId, this.selectedDifficulty);
+  }
+
+  private getTrackIndexesForTier(tier: SongPriceTier): number[] {
+    const indexes: number[] = [];
+    this.tracks.forEach((selection, index) => {
+      if (getSongPriceTier(selection.track.id) === tier) indexes.push(index);
+    });
+    return indexes;
+  }
+
+  private getVisibleIndex(globalIndex: number | null): number | null {
+    if (globalIndex === null || globalIndex < 0) return null;
+    const index = this.visibleTrackIndexes.indexOf(globalIndex);
+    return index >= 0 ? index : null;
   }
 
   private refreshDetails(): void {
     const selection = this.tracks[this.selectedTrackIndex];
     const unlocked = selection
-      ? this.progression.isTrackUnlocked(selection.track.id, this.selectedTrackIndex)
+      ? this.progression.isTrackUnlocked(selection.track.id)
       : false;
     const cost = selection
-      ? this.progression.getTrackUnlockCost(this.selectedTrackIndex)
+      ? this.progression.getTrackUnlockCost(selection.track.id)
       : 0;
     const record = selection
       ? this.progression.getRecord(selection.track.id, this.selectedDifficulty)
@@ -298,12 +364,15 @@ export class MenuScene implements Scene {
     const gap = 18;
     const leftWidth = contentWidth * 0.54;
     const rightWidth = contentWidth - leftWidth - gap;
-    const top = Math.max(88, height * 0.21);
-    const listHeight = Math.max(180, height - top - 18);
+    const top = Math.max(105, height * 0.23);
+    const listTop = top + this.tierSelector.selectorHeight + 8;
+    const listHeight = Math.max(124, height - listTop - 18);
     const rightX = contentX + leftWidth + gap;
 
     this.songSection.position.set(contentX + 4, top - 23);
-    this.songList.position.set(contentX, top);
+    this.tierSelector.position.set(contentX, top);
+    this.tierSelector.resize(leftWidth);
+    this.songList.position.set(contentX, listTop);
     this.songList.resize(leftWidth, listHeight);
 
     this.difficultySection.position.set(rightX + 4, top - 23);

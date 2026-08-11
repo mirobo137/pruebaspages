@@ -1,5 +1,5 @@
 import type { Difficulty } from '../game/difficulty/Difficulty';
-import { DIFFICULTY_PROFILES } from '../game/difficulty/Difficulty';
+import { getSongPrice } from '../content/SongEconomy';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { LocalProgressStorage } from '../platform/LocalProgressStorage';
@@ -10,6 +10,7 @@ import type {
   RecordedRun,
 } from './ProgressionTypes';
 import { calculateStarRating, calculateWeightedAccuracy } from './StarRating';
+import { calculateCoinReward } from './Economy';
 
 export class ProgressionStore {
   private readonly storage = new LocalProgressStorage();
@@ -42,18 +43,19 @@ export class ProgressionStore {
     this.save();
   }
 
-  isTrackUnlocked(trackId: string, catalogIndex: number): boolean {
-    return catalogIndex === 0 || this.state.unlockedTrackIds.includes(trackId);
+  isTrackUnlocked(trackId: string): boolean {
+    return getSongPrice(trackId) === 0
+      || this.state.unlockedTrackIds.includes(trackId);
   }
 
-  getTrackUnlockCost(catalogIndex: number): number {
-    return catalogIndex === 0 ? 0 : catalogIndex * 100;
+  getTrackUnlockCost(trackId: string): number {
+    return getSongPrice(trackId);
   }
 
-  tryUnlockTrack(trackId: string, catalogIndex: number): boolean {
-    if (this.isTrackUnlocked(trackId, catalogIndex)) return true;
+  tryUnlockTrack(trackId: string): boolean {
+    if (this.isTrackUnlocked(trackId)) return true;
 
-    const cost = this.getTrackUnlockCost(catalogIndex);
+    const cost = this.getTrackUnlockCost(trackId);
     if (this.state.coins < cost) return false;
 
     this.state.coins -= cost;
@@ -73,11 +75,7 @@ export class ProgressionStore {
     flow: FlowSnapshot,
     completed: boolean,
   ): RecordedRun {
-    const profile = DIFFICULTY_PROFILES[difficulty];
-    const rewardCoins = Math.max(
-      10,
-      Math.floor((snapshot.score / 250) * profile.rewardMultiplier),
-    );
+    const rewardCoins = calculateCoinReward(snapshot, difficulty, completed);
     const earnedStars = calculateStarRating(snapshot, completed);
     const accuracy = calculateWeightedAccuracy(snapshot);
     const previous = this.getRecord(trackId, difficulty);

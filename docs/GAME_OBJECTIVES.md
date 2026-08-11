@@ -34,6 +34,9 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Guardado local versionado, validado, con checksum, respaldo y migracion.
 - [x] Selector musical enriquecido con progreso visible y respuesta al cambio de dificultad.
 - [x] Selector presentado como playlist con numeracion, scrollbar y guia tactil de desplazamiento.
+- [x] Categorias Gratis, Economicas, Selectas y Premium sobre una unica playlist.
+- [x] Precios calibrados por partidas objetivo: 0, 400, 800 y 1,400 monedas.
+- [x] Catalogo original gratuito y canciones nuevas Economicas por defecto.
 - [x] Preview de 5 segundos para canciones adquiridas y bloqueadas.
 - [x] Musica provisional de portada/menu en bucle y regreso automatico despues de cada preview.
 - [x] Memoria local de la ultima cancion y dificultad elegidas.
@@ -107,6 +110,7 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 ## Enganche y retorno
 
 - [x] Monedas locales como base para desbloquear futuras canciones.
+- [x] Recompensa monetaria normalizada por completar, precision, estrellas y dificultad.
 - [x] Meta visible de corto plazo: cargar y mantener FLOW durante la partida.
 - [x] Resumen de activaciones FLOW al terminar.
 - [x] Resumen de activaciones SUPER FLOW al terminar.
@@ -182,7 +186,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Verificar taps muy rapidos, dedos alternados y arrastres diagonales.
 - [ ] Probar curvas hacia ambos lados y confirmar que el dedo puede corregir una salida breve.
 - [ ] Confirmar que cada checkpoint se activa en orden y que no es posible saltar directo al final.
-- [ ] Confirmar una estrella al completar los 90 segundos incluso terminando con una sola vida.
+- [ ] Confirmar una estrella al completar la cancion o alcanzar la gracia final de 0.8 segundos.
+- [ ] Medir cuantas partidas reales requiere cada categoria y ajustar 400/800/1,400 con datos de prueba.
 - [ ] Confirmar que el HUD inferior no invade la zona tactil.
 - [ ] Medir si cuatro `Perfect` son una meta alcanzable y emocionante.
 - [ ] Medir si cuatro `Perfect` adicionales dentro de FLOW hacen SUPER FLOW alcanzable sin volverlo comun.

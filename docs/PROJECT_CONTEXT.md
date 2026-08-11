@@ -28,6 +28,8 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Tres beatmaps separados por cancion en `public/assets/beatmaps/<id-cancion>/`.
 - Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
 - Menu tipo playlist desplazable por dedo o rueda, con numeracion, progreso visible, indicador de scroll, selector segmentado de dificultad y un solo boton Jugar.
+- Cuatro pestañas de catalogo por precio: Gratis, Economicas, Selectas y Premium.
+- Las 11 canciones actuales son gratuitas; las futuras entran como Economicas hasta clasificarlas en `src/content/SongEconomy.ts`.
 - Preview de 5 segundos al tocar cualquier cancion, incluso si aun esta bloqueada.
 - Musica de portada/menu en bucle gestionada por `MenuAudioController`; la pista provisional se cambia en `src/content/MenuMusic.ts`.
 - Partidas de 90 segundos divididas en Lectura, Impulso y Climax.
@@ -103,7 +105,7 @@ Reglas de modularidad:
 
 - Cada combinacion `cancion + dificultad` mantiene un progreso independiente.
 - Cero estrellas significa que todavia no se completo la partida.
-- Una estrella se obtiene cuando el motor confirma explicitamente que el reloj llego al final de la cancion; alcanzar Climax y perder antes del final no cuenta como completar.
+- Una estrella se obtiene al completar la linea temporal. Existe una gracia final de 0.8 segundos porque los beatmaps colocan su ultima nota hasta 0.75 segundos antes del cierre; alcanzar esa zona cuenta como terminar aunque el ultimo fallo agote la vida.
 - Dos estrellas requieren al menos 70% de precision ponderada.
 - Tres estrellas requieren al menos 90% de precision ponderada.
 - Un `Perfect` aporta 100%, un `Bien` aporta 70% y un `Miss` aporta 0% al calculo.
@@ -120,6 +122,17 @@ Reglas de modularidad:
 - Las preferencias del menu guardan el ID estable de la ultima cancion y la dificultad; datos version 2 anteriores reciben valores predeterminados sin perder progreso.
 - Esta proteccion detecta corrupcion y manipulacion casual, pero no es seguridad criptografica: el navegador pertenece al jugador y un usuario experto puede modificar su almacenamiento.
 - Un portal con ranking competitivo necesitara validar las puntuaciones en un backend o mediante el SDK del portal.
+
+## Economia de canciones
+
+- Gratis: 0 monedas. Todo el catalogo existente queda incluido.
+- Economicas: 400 monedas, objetivo de 2 a 3 partidas completadas.
+- Selectas: 800 monedas, objetivo de 4 a 6 partidas completadas.
+- Premium: 1,400 monedas, objetivo de 7 a 10 partidas completadas.
+- Las recompensas ya no dependen directamente de la puntuacion, porque combo, FLOW y densidad hacian que Medio y Dificil entregaran cientos o miles de monedas en una sola partida.
+- Una derrota entrega 10 monedas. Una victoria combina premio base, precision, estrellas y multiplicador de dificultad.
+- Con la formula actual una partida completada entrega aproximadamente 105-165 monedas en Facil, 142-223 en Medio y 184-289 en Dificil.
+- Precios y clasificacion viven en `src/content/SongEconomy.ts`; la formula de recompensa vive en `src/progression/Economy.ts`.
 
 ## Contrato de interaccion tactil
 
@@ -308,6 +321,10 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Tocar una cancion bloqueada permite escuchar un preview de 5 segundos sin desbloquearla.
 - Al terminar el preview vuelve automaticamente la musica del menu.
 - Volver desde una partida o recargar conserva la cancion y dificultad seleccionadas y deja esa fila visible.
+- Las cuatro categorias filtran la playlist sin abrir pantallas adicionales.
+- Las 11 canciones actuales aparecen en Gratis y se pueden jugar sin desbloqueo.
+- Una cancion nueva aparece inicialmente en Economicas con precio de 400 monedas.
+- Completar cerca del final otorga al menos una estrella; 70% de precision ponderada entrega dos y 90% entrega tres.
 - Recargar la pagina conserva monedas, desbloqueos y records.
 - Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.
 

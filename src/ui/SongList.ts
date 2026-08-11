@@ -89,10 +89,25 @@ const hintStyle = new TextStyle({
   letterSpacing: 1.25,
 });
 
+const emptyStyle = new TextStyle({
+  fill: '#8190b5',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 12,
+  fontWeight: '800',
+  letterSpacing: 1,
+  align: 'center',
+  wordWrap: true,
+  wordWrapWidth: 260,
+});
+
 export class SongList extends Container {
   private readonly frame = new Graphics();
   private readonly viewport = new Container();
   private readonly viewportMask = new Graphics();
+  private readonly emptyMessage = new Text({
+    text: 'NO HAY CANCIONES EN ESTA CATEGORIA',
+    style: emptyStyle,
+  });
   private readonly scrollRail = new Graphics();
   private readonly scrollThumb = new Graphics();
   private readonly hintBackground = new Graphics();
@@ -118,6 +133,8 @@ export class SongList extends Container {
     this.eventMode = 'static';
     this.cursor = 'pointer';
     this.viewport.mask = this.viewportMask;
+    this.emptyMessage.anchor.set(0.5);
+    this.emptyMessage.eventMode = 'none';
     this.scrollRail.eventMode = 'none';
     this.scrollThumb.eventMode = 'none';
     this.hintBackground.eventMode = 'none';
@@ -127,6 +144,7 @@ export class SongList extends Container {
       this.frame,
       this.viewport,
       this.viewportMask,
+      this.emptyMessage,
       this.scrollRail,
       this.scrollThumb,
       this.hintBackground,
@@ -143,6 +161,7 @@ export class SongList extends Container {
 
   setItems(items: SongListItem[]): void {
     this.items = items;
+    this.emptyMessage.visible = items.length === 0;
     for (const row of this.rows) row.root.destroy({ children: true });
     this.rows.length = 0;
     this.viewport.removeChildren();
@@ -210,6 +229,10 @@ export class SongList extends Container {
     this.drawRows();
   }
 
+  setEmptyMessage(message: string): void {
+    this.emptyMessage.text = message;
+  }
+
   setPreview(index: number | null, progress = 0): void {
     this.previewIndex = index;
     this.previewProgress = Math.max(0, Math.min(1, progress));
@@ -234,6 +257,8 @@ export class SongList extends Container {
       .stroke({ color: 0xff56d7, alpha: 0.58, width: 1.4 });
     this.viewportMask.clear().roundRect(1, 1, width - 2, height - 2, 13)
       .fill({ color: 0xffffff });
+    this.emptyMessage.style.wordWrapWidth = Math.max(160, width - 70);
+    this.emptyMessage.position.set(width / 2, height / 2);
     this.drawScrollChrome();
     this.clampScroll();
     this.drawRows();

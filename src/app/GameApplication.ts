@@ -81,6 +81,7 @@ export class GameApplication {
         tracks: this.tracks,
         progression: this.progression,
         onPreview: (selection) => this.menuAudio.preview(selection.track),
+        onStopPreview: this.menuAudio.start.bind(this.menuAudio),
         onStart: this.startGame,
       }),
     );

@@ -46,6 +46,9 @@ interface ActiveTarget {
 }
 
 const TARGET_SPAWN_LATE_TOLERANCE = 0.075;
+// Los beatmaps pueden colocar su ultima nota hasta 0.75 s antes del final.
+// Llegar vivo a esa zona cuenta como completar aunque el ultimo fallo agote la vida.
+const SONG_COMPLETION_GRACE = 0.8;
 
 export interface GameSceneOptions {
   difficulty: Difficulty;
@@ -494,7 +497,9 @@ export class GameScene implements Scene {
     this.bufferedTargets.delete(activeTarget);
 
     if (this.score.isGameOver()) {
-      this.finishGame(false);
+      this.finishGame(
+        this.audioManager.currentTime >= this.beatmap.duration - SONG_COMPLETION_GRACE,
+      );
     }
   }
 
