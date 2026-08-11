@@ -1,0 +1,195 @@
+{
+  "trackId": "glass-and-asphalt",
+  "difficulty": "easy",
+  "generated": true,
+  "loopDuration": 30,
+  "grid": 0.75,
+  "phases": [
+    {
+      "name": "LECTURA",
+      "offset": 0.75,
+      "pattern": [
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.2,
+            "y": 0.24
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.78,
+            "y": 0.26
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.28,
+            "y": 0.68
+          },
+          "gap": 2
+        },
+        {
+          "kind": "drag",
+          "start": {
+            "x": 0.24,
+            "y": 0.44
+          },
+          "end": {
+            "x": 0.74,
+            "y": 0.44
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "gap": 2
+        },
+        {
+          "kind": "drag",
+          "start": {
+            "x": 0.68,
+            "y": 0.3
+          },
+          "end": {
+            "x": 0.3,
+            "y": 0.62
+          },
+          "gap": 2
+        }
+      ]
+    },
+    {
+      "name": "IMPULSO",
+      "offset": 0.75,
+      "pattern": [
+        {
+          "kind": "drag",
+          "start": {
+            "x": 0.28,
+            "y": 0.7
+          },
+          "end": {
+            "x": 0.72,
+            "y": 0.7
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.5,
+            "y": 0.26
+          },
+          "gap": 2
+        },
+        {
+          "kind": "drag",
+          "start": {
+            "x": 0.74,
+            "y": 0.28
+          },
+          "end": {
+            "x": 0.26,
+            "y": 0.6
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.19999999999999996,
+            "y": 0.22
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.78,
+            "y": 0.34
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.74,
+            "y": 0.7
+          },
+          "gap": 2
+        }
+      ]
+    },
+    {
+      "name": "CLIMAX",
+      "offset": 0.75,
+      "pattern": [
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.16,
+            "y": 0.72
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.84,
+            "y": 0.72
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.2,
+            "y": 0.22000000000000008
+          },
+          "gap": 2
+        },
+        {
+          "kind": "drag",
+          "start": {
+            "x": 0.2,
+            "y": 0.44000000000000006
+          },
+          "end": {
+            "x": 0.8,
+            "y": 0.44000000000000006
+          },
+          "gap": 2
+        },
+        {
+          "kind": "tap",
+          "start": {
+            "x": 0.5,
+            "y": 0.7000000000000001
+          },
+          "gap": 2
+        },
+        {
+          "kind": "drag",
+          "start": {
+            "x": 0.7,
+            "y": 0.64
+          },
+          "end": {
+            "x": 0.3,
+            "y": 0.22000000000000008
+          },
+          "gap": 2
+        }
+      ]
+    }
+  ]
+}
