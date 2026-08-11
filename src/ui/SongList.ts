@@ -23,11 +23,15 @@ interface SongRow {
   root: Container;
   background: Graphics;
   accent: Graphics;
+  number: Text;
+  playState: Graphics;
   title: Text;
   subtitle: Text;
   stars: Text;
   stats: Text;
-  lock: Text;
+  state: Text;
+  previewTrack: Graphics;
+  previewFill: Graphics;
 }
 
 const titleStyle = new TextStyle({
@@ -40,42 +44,65 @@ const titleStyle = new TextStyle({
 const subtitleStyle = new TextStyle({
   fill: '#8695bb',
   fontFamily: 'system-ui, sans-serif',
+  fontSize: 10,
+  fontWeight: '700',
+  letterSpacing: 0.7,
+});
+
+const numberStyle = new TextStyle({
+  fill: '#637397',
+  fontFamily: 'system-ui, sans-serif',
   fontSize: 11,
-  fontWeight: '600',
-  letterSpacing: 0.4,
+  fontWeight: '800',
+  letterSpacing: 1,
 });
 
 const starsStyle = new TextStyle({
   fill: '#ffd76a',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 17,
+  fontSize: 16,
   fontWeight: '800',
-  letterSpacing: 1,
+  letterSpacing: 0.8,
 });
 
 const statsStyle = new TextStyle({
   fill: '#aab8d9',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 10,
+  fontSize: 9,
   fontWeight: '700',
-  letterSpacing: 0.6,
+  letterSpacing: 0.55,
 });
 
-const lockStyle = new TextStyle({
+const stateStyle = new TextStyle({
   fill: '#ffcf70',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 10,
+  fontSize: 9,
   fontWeight: '900',
-  letterSpacing: 1,
+  letterSpacing: 0.9,
+});
+
+const hintStyle = new TextStyle({
+  fill: '#b8c7e9',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 9,
+  fontWeight: '900',
+  letterSpacing: 1.25,
 });
 
 export class SongList extends Container {
   private readonly frame = new Graphics();
   private readonly viewport = new Container();
   private readonly viewportMask = new Graphics();
+  private readonly scrollRail = new Graphics();
+  private readonly scrollThumb = new Graphics();
+  private readonly hintBackground = new Graphics();
+  private readonly scrollHint = new Text({ text: 'DESLIZA', style: hintStyle });
+  private readonly hintArrows = new Graphics();
   private readonly rows: SongRow[] = [];
   private items: SongListItem[] = [];
   private selectedIndex = 0;
+  private previewIndex: number | null = null;
+  private previewProgress = 0;
   private listWidth = 320;
   private listHeight = 220;
   private scrollOffset = 0;
@@ -83,15 +110,29 @@ export class SongList extends Container {
   private pointerStartY = 0;
   private scrollStart = 0;
   private draggedDistance = 0;
-  private readonly rowHeight = 82;
-  private readonly rowGap = 7;
+  private readonly rowHeight = 86;
+  private readonly rowGap = 6;
 
   constructor(private readonly onSelect: (index: number) => void) {
     super();
     this.eventMode = 'static';
     this.cursor = 'pointer';
     this.viewport.mask = this.viewportMask;
-    this.addChild(this.frame, this.viewport, this.viewportMask);
+    this.scrollRail.eventMode = 'none';
+    this.scrollThumb.eventMode = 'none';
+    this.hintBackground.eventMode = 'none';
+    this.scrollHint.eventMode = 'none';
+    this.hintArrows.eventMode = 'none';
+    this.addChild(
+      this.frame,
+      this.viewport,
+      this.viewportMask,
+      this.scrollRail,
+      this.scrollThumb,
+      this.hintBackground,
+      this.scrollHint,
+      this.hintArrows,
+    );
     this.on('pointerdown', this.handlePointerDown);
     this.on('pointermove', this.handlePointerMove);
     this.on('pointerup', this.handlePointerUp);
@@ -110,19 +151,55 @@ export class SongList extends Container {
       const root = new Container();
       const background = new Graphics();
       const accent = new Graphics();
+      const number = new Text({
+        text: String(index + 1).padStart(2, '0'),
+        style: numberStyle,
+      });
+      const playState = new Graphics();
       const title = new Text({ text: item.title, style: titleStyle });
       const subtitle = new Text({ text: item.subtitle, style: subtitleStyle });
       const stars = new Text({ text: formatStars(item.stars), style: starsStyle });
       const stats = new Text({ text: '', style: statsStyle });
-      const lock = new Text({ text: item.locked ? 'BLOQUEADA' : '', style: lockStyle });
+      const state = new Text({ text: '', style: stateStyle });
+      const previewTrack = new Graphics();
+      const previewFill = new Graphics();
       root.eventMode = 'none';
       root.position.y = index * (this.rowHeight + this.rowGap);
-      root.addChild(background, accent, title, subtitle, stars, stats, lock);
+      root.addChild(
+        background,
+        accent,
+        number,
+        playState,
+        title,
+        subtitle,
+        stars,
+        stats,
+        state,
+        previewTrack,
+        previewFill,
+      );
       this.viewport.addChild(root);
-      this.rows.push({ root, background, accent, title, subtitle, stars, stats, lock });
+      this.rows.push({
+        root,
+        background,
+        accent,
+        number,
+        playState,
+        title,
+        subtitle,
+        stars,
+        stats,
+        state,
+        previewTrack,
+        previewFill,
+      });
     });
 
     this.selectedIndex = Math.max(0, Math.min(items.length - 1, this.selectedIndex));
+    if (this.previewIndex !== null && this.previewIndex >= items.length) {
+      this.previewIndex = null;
+      this.previewProgress = 0;
+    }
     this.clampScroll();
     this.drawRows();
   }
@@ -133,23 +210,31 @@ export class SongList extends Container {
     this.drawRows();
   }
 
+  setPreview(index: number | null, progress = 0): void {
+    this.previewIndex = index;
+    this.previewProgress = Math.max(0, Math.min(1, progress));
+    this.drawRows();
+  }
+
   resize(width: number, height: number): void {
     this.listWidth = width;
     this.listHeight = height;
     this.hitArea = new Rectangle(0, 0, width, height);
     this.frame.clear()
       .roundRect(0, 0, width, height, 14)
-      .fill({ color: 0x090f22, alpha: 0.86 })
-      .stroke({ color: 0x6cecff, alpha: 0.2, width: 1 });
+      .fill({ color: 0x080e20, alpha: 0.92 })
+      .stroke({ color: 0x6cecff, alpha: 0.24, width: 1 });
     this.frame
       .moveTo(18, 0)
       .lineTo(width * 0.42, 0)
-      .stroke({ color: 0x67efff, alpha: 0.65, width: 1.4 });
+      .stroke({ color: 0x67efff, alpha: 0.72, width: 1.4 });
     this.frame
       .moveTo(width * 0.7, height)
       .lineTo(width - 18, height)
-      .stroke({ color: 0xff56d7, alpha: 0.5, width: 1.4 });
-    this.viewportMask.clear().roundRect(0, 0, width, height, 14).fill({ color: 0xffffff });
+      .stroke({ color: 0xff56d7, alpha: 0.58, width: 1.4 });
+    this.viewportMask.clear().roundRect(1, 1, width - 2, height - 2, 13)
+      .fill({ color: 0xffffff });
+    this.drawScrollChrome();
     this.clampScroll();
     this.drawRows();
   }
@@ -201,16 +286,15 @@ export class SongList extends Container {
     this.scrollOffset = offset;
     this.clampScroll();
     this.viewport.y = this.scrollOffset;
+    this.drawScrollChrome();
   }
 
   private clampScroll(): void {
-    const contentHeight = Math.max(
-      0,
-      this.items.length * (this.rowHeight + this.rowGap) - this.rowGap,
-    );
+    const contentHeight = this.getContentHeight();
     const minimum = Math.min(0, this.listHeight - contentHeight);
     this.scrollOffset = Math.max(minimum, Math.min(0, this.scrollOffset));
     this.viewport.y = this.scrollOffset;
+    this.drawScrollChrome();
   }
 
   private ensureSelectedVisible(): void {
@@ -222,50 +306,132 @@ export class SongList extends Container {
     }
   }
 
+  private getContentHeight(): number {
+    return Math.max(
+      0,
+      this.items.length * (this.rowHeight + this.rowGap) - this.rowGap,
+    );
+  }
+
+  private drawScrollChrome(): void {
+    const contentHeight = this.getContentHeight();
+    const canScroll = contentHeight > this.listHeight + 1;
+    this.scrollRail.visible = canScroll;
+    this.scrollThumb.visible = canScroll;
+    this.hintBackground.visible = canScroll;
+    this.scrollHint.visible = canScroll;
+    this.hintArrows.visible = canScroll;
+    if (!canScroll) return;
+
+    const railTop = 13;
+    const railHeight = Math.max(1, this.listHeight - railTop * 2);
+    const thumbHeight = Math.max(30, railHeight * (this.listHeight / contentHeight));
+    const maximumScroll = contentHeight - this.listHeight;
+    const progress = maximumScroll > 0 ? -this.scrollOffset / maximumScroll : 0;
+    const thumbY = railTop + progress * (railHeight - thumbHeight);
+    const railX = this.listWidth - 7;
+
+    this.scrollRail.clear()
+      .roundRect(railX, railTop, 2, railHeight, 1)
+      .fill({ color: 0x6e82ac, alpha: 0.18 });
+    this.scrollThumb.clear()
+      .roundRect(railX - 1, thumbY, 4, thumbHeight, 2)
+      .fill({ color: 0x65efff, alpha: 0.72 });
+
+    const hintWidth = 83;
+    this.hintBackground.clear()
+      .roundRect(this.listWidth - hintWidth - 14, 8, hintWidth, 22, 8)
+      .fill({ color: 0x071020, alpha: 0.9 })
+      .stroke({ color: 0x6defff, alpha: 0.22, width: 0.8 });
+    this.scrollHint.anchor.set(0, 0.5);
+    this.scrollHint.position.set(this.listWidth - hintWidth - 3, 19);
+    this.hintArrows.clear()
+      .moveTo(this.listWidth - 28, 15)
+      .lineTo(this.listWidth - 24, 11)
+      .lineTo(this.listWidth - 20, 15)
+      .moveTo(this.listWidth - 28, 23)
+      .lineTo(this.listWidth - 24, 27)
+      .lineTo(this.listWidth - 20, 23)
+      .stroke({ color: 0x6defff, alpha: 0.85, width: 1.2 });
+  }
+
   private drawRows(): void {
     this.rows.forEach((row, index) => {
       const selected = index === this.selectedIndex;
+      const previewing = index === this.previewIndex;
       const item = this.items[index];
       if (!item) return;
+      const rowWidth = Math.max(0, this.listWidth - 16);
 
       row.background.clear()
-        .roundRect(7, 3, Math.max(0, this.listWidth - 14), this.rowHeight - 6, 11)
+        .roundRect(6, 3, rowWidth, this.rowHeight - 6, 10)
         .fill({
-          color: selected ? 0x152d53 : 0x11182d,
-          alpha: selected ? 0.96 : 0.78,
+          color: previewing ? 0x173553 : selected ? 0x142a4a : 0x10172b,
+          alpha: selected || previewing ? 0.97 : 0.78,
         })
         .stroke({
-          color: selected ? 0x64efff : 0x6879aa,
-          alpha: selected ? 0.58 : 0.14,
-          width: selected ? 1.2 : 0.8,
+          color: previewing ? 0xff5bd8 : selected ? 0x64efff : 0x6879aa,
+          alpha: previewing ? 0.7 : selected ? 0.52 : 0.13,
+          width: previewing ? 1.2 : 0.8,
         });
       row.accent.clear();
-      if (selected) {
+      if (selected || previewing) {
         row.accent
-          .roundRect(7, 17, 2, this.rowHeight - 34, 1)
-          .fill({ color: 0x62efff, alpha: 0.95 });
-        row.accent
-          .circle(this.listWidth - 13, this.rowHeight / 2, 2)
-          .fill({ color: 0xff55d8, alpha: 0.9 });
+          .roundRect(6, 17, 2, this.rowHeight - 34, 1)
+          .fill({ color: previewing ? 0xff55d8 : 0x62efff, alpha: 0.95 });
       }
 
-      row.title.position.set(20, 11);
+      row.number.position.set(16, 13);
+      row.number.style.fill = selected || previewing ? '#7eefff' : '#637397';
+      row.playState.clear();
+      if (previewing) {
+        row.playState
+          .moveTo(27, 34)
+          .lineTo(27, 48)
+          .lineTo(38, 41)
+          .closePath()
+          .fill({ color: 0xff62da, alpha: 0.96 });
+      } else {
+        row.playState
+          .circle(32, 41, 5)
+          .stroke({ color: selected ? 0x66efff : 0x7080a6, alpha: 0.75, width: 1 });
+        row.playState
+          .circle(32, 41, 1.5)
+          .fill({ color: selected ? 0x66efff : 0x7080a6, alpha: 0.75 });
+      }
+
+      row.title.position.set(49, 10);
       row.title.style.fill = item.locked ? '#aab4ce' : '#f7f9ff';
       row.title.scale.set(1);
-      const titleLimit = Math.max(100, this.listWidth - 154);
+      const titleLimit = Math.max(90, this.listWidth - 194);
       if (row.title.width > titleLimit) row.title.scale.set(titleLimit / row.title.width);
 
       row.stars.anchor.set(1, 0);
-      row.stars.position.set(this.listWidth - 20, 9);
-      row.stars.alpha = item.stars > 0 ? 1 : 0.42;
-      row.subtitle.position.set(20, 36);
-      row.stats.position.set(20, 57);
+      row.stars.position.set(this.listWidth - 24, 8);
+      row.stars.alpha = item.stars > 0 ? 1 : 0.36;
+      row.subtitle.position.set(49, 35);
+      row.stats.position.set(49, 59);
       row.stats.text = item.attempts > 0
-        ? `MEJOR ${item.highScore.toLocaleString()}  ·  COMBO ${item.bestCombo}`
+        ? `MEJOR ${item.highScore.toLocaleString()}  /  COMBO ${item.bestCombo}`
         : 'SIN REGISTRO EN ESTA DIFICULTAD';
-      row.stats.alpha = item.locked ? 0.45 : 0.85;
-      row.lock.anchor.set(1, 0.5);
-      row.lock.position.set(this.listWidth - 20, 45);
+      row.stats.alpha = item.locked ? 0.42 : 0.82;
+      row.state.anchor.set(1, 0.5);
+      row.state.position.set(this.listWidth - 23, 46);
+      row.state.text = previewing ? 'PREVIEW 5S' : item.locked ? 'BLOQUEADA' : '';
+      row.state.style.fill = previewing ? '#ff71dc' : '#ffcf70';
+
+      row.previewTrack.clear();
+      row.previewFill.clear();
+      if (previewing) {
+        const progressWidth = Math.max(0, rowWidth - 14);
+        row.previewTrack
+          .roundRect(13, this.rowHeight - 8, progressWidth, 2, 1)
+          .fill({ color: 0x425273, alpha: 0.55 });
+        row.previewFill
+          .roundRect(13, this.rowHeight - 8, progressWidth * this.previewProgress, 2, 1)
+          .fill({ color: 0xff5bd8, alpha: 0.95 });
+      }
     });
+    this.drawScrollChrome();
   }
 }

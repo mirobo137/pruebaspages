@@ -1,5 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { TrackSelection } from '../content/TrackSelection';
+import { MENU_TRACK_PREVIEW_SECONDS } from '../content/MenuMusic';
 import type { Scene } from '../core/scene/Scene';
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import { getDifficultyLabel } from '../game/difficulty/Difficulty';
@@ -12,6 +13,7 @@ import { TrackProgressPanel } from '../ui/TrackProgressPanel';
 export interface MenuSceneOptions {
   tracks: TrackSelection[];
   progression: ProgressionStore;
+  onPreview: (selection: TrackSelection) => void;
   onStart: (difficulty: Difficulty, selection: TrackSelection) => void;
 }
 
@@ -60,11 +62,11 @@ export class MenuScene implements Scene {
   private readonly background = new Graphics();
   private readonly title = new Text({ text: 'SUPERFLOW', style: titleStyle });
   private readonly subtitle = new Text({
-    text: 'RHYTHM RUSH · Elige una pista y entra en flow.',
+    text: 'TU PLAYLIST · Toca una pista para escuchar 5 segundos.',
     style: subtitleStyle,
   });
   private readonly currency = new Text({ text: '', style: infoStyle });
-  private readonly songSection = new Text({ text: 'CANCIONES', style: sectionStyle });
+  private readonly songSection = new Text({ text: 'PLAYLIST', style: sectionStyle });
   private readonly difficultySection = new Text({ text: '', style: sectionStyle });
   private readonly difficultyHint = new Text({ text: '', style: subtitleStyle });
   private readonly status = new Text({ text: '', style: subtitleStyle });
@@ -74,9 +76,12 @@ export class MenuScene implements Scene {
   private readonly playButton: MenuButton;
   private readonly tracks: TrackSelection[];
   private readonly progression: ProgressionStore;
+  private readonly onPreview: MenuSceneOptions['onPreview'];
   private readonly onStart: MenuSceneOptions['onStart'];
   private selectedTrackIndex = 0;
   private selectedDifficulty: Difficulty = 'medium';
+  private previewTrackIndex: number | null = null;
+  private previewElapsed = 0;
   private width: number;
   private height: number;
 
@@ -85,7 +90,14 @@ export class MenuScene implements Scene {
     this.height = height;
     this.tracks = options.tracks;
     this.progression = options.progression;
+    this.onPreview = options.onPreview;
     this.onStart = options.onStart;
+    const preferences = this.progression.menuPreferences;
+    this.selectedDifficulty = preferences.difficulty;
+    const rememberedIndex = this.tracks.findIndex(
+      (selection) => selection.track.id === preferences.selectedTrackId,
+    );
+    this.selectedTrackIndex = rememberedIndex >= 0 ? rememberedIndex : 0;
     this.songList = new SongList(this.handleSongSelected);
     this.difficultySelector = new DifficultySelector(this.handleDifficultyChanged);
     this.playButton = new MenuButton('JUGAR', this.handlePlay, 0x3155a5);
@@ -112,7 +124,17 @@ export class MenuScene implements Scene {
     this.resize(this.width, this.height);
   }
 
-  update(): void {}
+  update(deltaSeconds: number): void {
+    if (this.previewTrackIndex === null) return;
+    this.previewElapsed += deltaSeconds;
+    const progress = Math.min(1, this.previewElapsed / MENU_TRACK_PREVIEW_SECONDS);
+    this.songList.setPreview(this.previewTrackIndex, progress);
+    if (progress < 1) return;
+
+    this.previewTrackIndex = null;
+    this.songList.setPreview(null);
+    this.status.text = '';
+  }
 
   resize(width: number, height: number): void {
     this.width = width;
@@ -143,7 +165,7 @@ export class MenuScene implements Scene {
     const contentX = (width - contentWidth) / 2;
     const listTop = Math.max(118, height * 0.155);
     const availableListHeight = height - listTop - 330;
-    const listHeight = Math.max(134, Math.min(238, availableListHeight));
+    const listHeight = Math.max(134, Math.min(300, availableListHeight));
 
     this.songSection.position.set(contentX + 4, listTop - 25);
     this.songList.position.set(contentX, listTop);
@@ -168,17 +190,26 @@ export class MenuScene implements Scene {
 
   private readonly handleSongSelected = (index: number): void => {
     this.selectedTrackIndex = index;
-    this.status.text = '';
+    this.previewTrackIndex = index;
+    this.previewElapsed = 0;
+    this.status.text = 'PREVIEW DE 5 SEGUNDOS';
+    this.persistMenuPreferences();
     this.refresh();
+    this.songList.setPreview(index, 0);
+    const selection = this.tracks[index];
+    if (selection) this.onPreview(selection);
   };
 
   private readonly handleDifficultyChanged = (difficulty: Difficulty): void => {
     this.selectedDifficulty = difficulty;
     this.status.text = '';
+    this.persistMenuPreferences();
     this.refresh();
   };
 
   private readonly handlePlay = (): void => {
+    this.previewTrackIndex = null;
+    this.songList.setPreview(null);
     const selection = this.tracks[this.selectedTrackIndex];
     if (!selection) {
       this.status.text = 'Todavía no hay canciones disponibles.';
@@ -225,7 +256,16 @@ export class MenuScene implements Scene {
       };
     }));
     this.songList.setSelectedIndex(this.selectedTrackIndex);
+    this.songList.setPreview(
+      this.previewTrackIndex,
+      this.previewElapsed / MENU_TRACK_PREVIEW_SECONDS,
+    );
     this.refreshDetails();
+  }
+
+  private persistMenuPreferences(): void {
+    const trackId = this.tracks[this.selectedTrackIndex]?.track.id ?? null;
+    this.progression.setMenuPreferences(trackId, this.selectedDifficulty);
   }
 
   private refreshDetails(): void {

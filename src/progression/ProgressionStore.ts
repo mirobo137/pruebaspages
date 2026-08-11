@@ -5,6 +5,7 @@ import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { LocalProgressStorage } from '../platform/LocalProgressStorage';
 import type {
   PerformanceRecord,
+  MenuPreferences,
   ProgressState,
   RecordedRun,
 } from './ProgressionTypes';
@@ -24,6 +25,21 @@ export class ProgressionStore {
 
   get totalRuns(): number {
     return this.state.totalRuns;
+  }
+
+  get menuPreferences(): MenuPreferences {
+    return { ...this.state.menuPreferences };
+  }
+
+  setMenuPreferences(selectedTrackId: string | null, difficulty: Difficulty): void {
+    const current = this.state.menuPreferences;
+    if (
+      current.selectedTrackId === selectedTrackId
+      && current.difficulty === difficulty
+    ) return;
+
+    this.state.menuPreferences = { selectedTrackId, difficulty };
+    this.save();
   }
 
   isTrackUnlocked(trackId: string, catalogIndex: number): boolean {

@@ -33,6 +33,10 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Records locales de puntuacion, combo, precision e intentos.
 - [x] Guardado local versionado, validado, con checksum, respaldo y migracion.
 - [x] Selector musical enriquecido con progreso visible y respuesta al cambio de dificultad.
+- [x] Selector presentado como playlist con numeracion, scrollbar y guia tactil de desplazamiento.
+- [x] Preview de 5 segundos para canciones adquiridas y bloqueadas.
+- [x] Musica provisional de portada/menu en bucle y regreso automatico despues de cada preview.
+- [x] Memoria local de la ultima cancion y dificultad elegidas.
 - [x] Portada de presentacion neon antes del selector de canciones.
 - [x] Cuenta regresiva antes de iniciar sin segundo toque sobre el gameplay.
 - [x] Pausa con Continuar, Reiniciar y Volver al menu.
@@ -193,7 +197,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Confirmar que Medio y Dificil siguen siendo exigentes pero legibles con dedo.
 - [ ] Confirmar que los aros Bien/Perfect ayudan a aprender sin saturar la pantalla.
 - [ ] Medir FPS durante SUPER FLOW en Android de gama baja.
-- [ ] Probar la lista con suficientes canciones para requerir scroll real.
+- [x] Probar la lista con suficientes canciones para requerir scroll real.
+- [ ] Confirmar en Android y iPhone que cada preview dura 5 segundos y vuelve al tema del menu.
+- [ ] Confirmar que cancion, dificultad y fila visible se restauran tras jugar y recargar.
 - [ ] Revisar que un `Miss` se sienta claro sin parecer injusto.
 - [ ] Ajustar el beatmap de la cancion de prueba escuchando sus golpes reales.
 - [x] Registrar mejor puntuacion local por cancion y dificultad.

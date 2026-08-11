@@ -16,12 +16,18 @@ export interface PerformanceRecord {
 
 export type TrackProgress = Partial<Record<Difficulty, PerformanceRecord>>;
 
+export interface MenuPreferences {
+  selectedTrackId: string | null;
+  difficulty: Difficulty;
+}
+
 export interface ProgressState {
   version: 2;
   coins: number;
   unlockedTrackIds: string[];
   records: Record<string, TrackProgress>;
   totalRuns: number;
+  menuPreferences: MenuPreferences;
 }
 
 export interface RecordedRun {
@@ -39,5 +45,9 @@ export function createEmptyProgressState(): ProgressState {
     unlockedTrackIds: [],
     records: {},
     totalRuns: 0,
+    menuPreferences: {
+      selectedTrackId: null,
+      difficulty: 'medium',
+    },
   };
 }

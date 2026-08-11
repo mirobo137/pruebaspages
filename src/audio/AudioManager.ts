@@ -58,6 +58,8 @@ export class AudioManager {
       loop?: boolean;
       loopDuration?: number;
       playbackDuration?: number;
+      startOffset?: number;
+      clipDuration?: number;
     } = {},
   ): Promise<void> {
     this.stop();
@@ -125,7 +127,15 @@ export class AudioManager {
       }
       source.connect(gain);
       gain.connect(this.analyser!);
-      source.start(startAt);
+      const startOffset = Math.max(
+        0,
+        Math.min(options.startOffset ?? 0, Math.max(0, buffer.duration - 0.01)),
+      );
+      const clipDuration = options.clipDuration
+        ? Math.max(0.01, Math.min(options.clipDuration, buffer.duration - startOffset))
+        : null;
+      if (clipDuration) source.start(startAt, startOffset, clipDuration);
+      else source.start(startAt, startOffset);
       this.sources.push({ source, gain });
     }
 

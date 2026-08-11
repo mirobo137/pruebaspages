@@ -3,6 +3,7 @@ import type { Scene } from '../core/scene/Scene';
 import { NeonTitleBackdrop } from '../ui/NeonTitleBackdrop';
 
 export interface TitleSceneOptions {
+  onInteraction?: () => void;
   onEnter: () => void;
 }
 
@@ -80,6 +81,7 @@ export class TitleScene implements Scene {
     }),
   });
   private readonly onEnter: () => void;
+  private readonly onInteraction?: () => void;
   private width: number;
   private height: number;
   private elapsed = 0;
@@ -93,6 +95,7 @@ export class TitleScene implements Scene {
     this.width = width;
     this.height = height;
     this.onEnter = options.onEnter;
+    this.onInteraction = options.onInteraction;
 
     this.root.eventMode = 'static';
     this.root.cursor = 'pointer';
@@ -176,20 +179,28 @@ export class TitleScene implements Scene {
     const titleFontSize = landscape
       ? Math.min(64, Math.max(42, height * 0.12))
       : Math.min(62, Math.max(compact ? 42 : 48, width * 0.145));
-    this.title.style.fontSize = titleFontSize;
-    this.titleGhostCyan.style.fontSize = titleFontSize;
-    this.titleGhostMagenta.style.fontSize = titleFontSize;
+    let fittedTitleFontSize = titleFontSize;
+    this.title.style.fontSize = fittedTitleFontSize;
+    this.titleGhostCyan.style.fontSize = fittedTitleFontSize;
+    this.titleGhostMagenta.style.fontSize = fittedTitleFontSize;
+    const maximumTitleWidth = Math.max(220, width - 30);
+    if (this.title.width > maximumTitleWidth) {
+      fittedTitleFontSize *= maximumTitleWidth / this.title.width;
+      this.title.style.fontSize = fittedTitleFontSize;
+      this.titleGhostCyan.style.fontSize = fittedTitleFontSize;
+      this.titleGhostMagenta.style.fontSize = fittedTitleFontSize;
+    }
     this.subtitle.style.fontSize = compact ? 12 : 15;
     this.tagline.style.fontSize = compact ? 11 : 13;
 
     this.logoBaseY = landscape ? height * 0.4 : height * 0.39;
     this.logo.position.set(width / 2, this.logoBaseY);
-    this.eyebrow.position.set(0, -titleFontSize * 1.02);
-    this.title.position.set(0, -titleFontSize * 0.08);
-    this.titleGhostCyan.position.set(-2, -titleFontSize * 0.08 + 2);
-    this.titleGhostMagenta.position.set(3, -titleFontSize * 0.08 - 1);
-    this.subtitle.position.set(0, titleFontSize * 0.73);
-    this.tagline.position.set(0, titleFontSize * 1.3);
+    this.eyebrow.position.set(0, -fittedTitleFontSize * 1.02);
+    this.title.position.set(0, -fittedTitleFontSize * 0.08);
+    this.titleGhostCyan.position.set(-2, -fittedTitleFontSize * 0.08 + 2);
+    this.titleGhostMagenta.position.set(3, -fittedTitleFontSize * 0.08 - 1);
+    this.subtitle.position.set(0, fittedTitleFontSize * 0.73);
+    this.tagline.position.set(0, fittedTitleFontSize * 1.3);
 
     const logoRadius = Math.min(width, height) * (landscape ? 0.25 : 0.32);
     this.logoGeometry.clear();
@@ -200,12 +211,12 @@ export class TitleScene implements Scene {
       .arc(0, 0, logoRadius, 0.25, 2.15)
       .stroke({ color: 0xff4dd5, alpha: 0.28, width: 1.1 });
     this.logoGeometry
-      .moveTo(-logoRadius * 0.58, titleFontSize * 0.53)
-      .lineTo(-logoRadius * 0.15, titleFontSize * 0.53)
+      .moveTo(-logoRadius * 0.58, fittedTitleFontSize * 0.53)
+      .lineTo(-logoRadius * 0.15, fittedTitleFontSize * 0.53)
       .stroke({ color: 0x62ecff, alpha: 0.7, width: 1 });
     this.logoGeometry
-      .moveTo(logoRadius * 0.15, titleFontSize * 0.53)
-      .lineTo(logoRadius * 0.58, titleFontSize * 0.53)
+      .moveTo(logoRadius * 0.15, fittedTitleFontSize * 0.53)
+      .lineTo(logoRadius * 0.58, fittedTitleFontSize * 0.53)
       .stroke({ color: 0xff5bd8, alpha: 0.65, width: 1 });
 
     const buttonWidth = Math.min(320, Math.max(230, width - 64));
@@ -242,6 +253,7 @@ export class TitleScene implements Scene {
     if (this.exiting) return;
     this.exiting = true;
     this.exitElapsed = 0;
+    this.onInteraction?.();
     this.backdrop.activate();
     if ('vibrate' in navigator) navigator.vibrate(8);
   };

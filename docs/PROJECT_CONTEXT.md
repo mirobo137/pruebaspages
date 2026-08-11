@@ -24,16 +24,19 @@ El primer destino de pruebas es GitHub Pages. Cuando el nucleo sea solido, se pr
 
 El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 
-- Una cancion de prueba: `coffee-in-the-driveway`.
-- Tres beatmaps separados en `public/assets/beatmaps/coffee-in-the-driveway/`.
+- Catalogo actual de 11 canciones detectadas automaticamente desde `public/assets/audio/`.
+- Tres beatmaps separados por cancion en `public/assets/beatmaps/<id-cancion>/`.
 - Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
-- Menu con lista vertical de canciones desplazable por dedo o rueda, selector segmentado de dificultad y un solo boton Jugar.
+- Menu tipo playlist desplazable por dedo o rueda, con numeracion, progreso visible, indicador de scroll, selector segmentado de dificultad y un solo boton Jugar.
+- Preview de 5 segundos al tocar cualquier cancion, incluso si aun esta bloqueada.
+- Musica de portada/menu en bucle gestionada por `MenuAudioController`; la pista provisional se cambia en `src/content/MenuMusic.ts`.
 - Partidas de 90 segundos divididas en Lectura, Impulso y Climax.
 - Audio de 30 segundos precargado y decodificado con Web Audio, con reloj jugable continuo durante las tres fases.
 - Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
 - Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
 - Una calificacion independiente de 0 a 3 estrellas para cada cancion y dificultad.
 - Mejores puntuaciones, combo, precision, Perfect, fallos, FLOW, intentos y partidas completadas guardados localmente.
+- Ultima cancion y dificultad elegidas guardadas localmente; al volver al menu la playlist mantiene esa cancion visible.
 - Portada inicial procedural con identidad neon, entrada tactil de pantalla completa y transicion al selector musical.
 - Selector musical, pantalla de partida y pantalla de resultado.
 - Audio desbloqueado desde el boton JUGAR, seguido por cuenta regresiva 3-2-1 sin toque adicional.
@@ -114,6 +117,7 @@ Reglas de modularidad:
 - Los datos se codifican, incluyen checksum, se validan campo por campo y mantienen una copia anterior de respaldo.
 - Si el registro principal esta corrupto se intenta recuperar el respaldo.
 - La progresion antigua de `rhythm-circles:progression` migra automaticamente para conservar monedas y canciones desbloqueadas.
+- Las preferencias del menu guardan el ID estable de la ultima cancion y la dificultad; datos version 2 anteriores reciben valores predeterminados sin perder progreso.
 - Esta proteccion detecta corrupcion y manipulacion casual, pero no es seguridad criptografica: el navegador pertenece al jugador y un usuario experto puede modificar su almacenamiento.
 - Un portal con ranking competitivo necesitara validar las puntuaciones en un backend o mediante el SDK del portal.
 
@@ -301,6 +305,9 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - La pantalla de resultado muestra dificultad y fase alcanzada.
 - La pantalla de resultado muestra las estrellas obtenidas y conserva un record superior anterior.
 - Cambiar dificultad en el menu actualiza estrellas, mejor puntuacion, combo, precision e intentos.
+- Tocar una cancion bloqueada permite escuchar un preview de 5 segundos sin desbloquearla.
+- Al terminar el preview vuelve automaticamente la musica del menu.
+- Volver desde una partida o recargar conserva la cancion y dificultad seleccionadas y deja esa fila visible.
 - Recargar la pagina conserva monedas, desbloqueos y records.
 - Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.
 

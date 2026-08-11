@@ -1,4 +1,5 @@
 import { DIFFICULTIES } from '../game/difficulty/Difficulty';
+import type { Difficulty } from '../game/difficulty/Difficulty';
 import type {
   PerformanceRecord,
   ProgressState,
@@ -131,7 +132,24 @@ function sanitizeState(value: unknown): ProgressState | null {
     unlockedTrackIds: sanitizeTrackIds(value.unlockedTrackIds),
     records,
     totalRuns: sanitizeInteger(value.totalRuns),
+    menuPreferences: sanitizeMenuPreferences(value.menuPreferences),
   };
+}
+
+function sanitizeMenuPreferences(value: unknown): ProgressState['menuPreferences'] {
+  if (!isRecord(value)) {
+    return { selectedTrackId: null, difficulty: 'medium' };
+  }
+
+  const selectedTrackId = value.selectedTrackId === null
+    ? null
+    : isSafeTrackId(value.selectedTrackId)
+      ? value.selectedTrackId
+      : null;
+  const difficulty = DIFFICULTIES.includes(value.difficulty as Difficulty)
+    ? value.difficulty as Difficulty
+    : 'medium';
+  return { selectedTrackId, difficulty };
 }
 
 function sanitizePerformanceRecord(value: unknown): PerformanceRecord | null {
