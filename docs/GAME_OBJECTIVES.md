@@ -110,6 +110,8 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 
 ## Enganche y retorno
 
+La implementacion paso a paso y sus pruebas obligatorias se controlan en `docs/LIVEOPS_IMPLEMENTATION_PLAN.md`.
+
 - [x] Monedas locales como base para desbloquear futuras canciones.
 - [x] Recompensa monetaria normalizada por completar, precision, estrellas y dificultad.
 - [x] Meta visible de corto plazo: cargar y mantener FLOW durante la partida.
@@ -122,6 +124,11 @@ El juice debe comunicar causa y recompensa. Primero puliremos lo que el jugador 
 - [x] Dificultades que cambian densidad, vidas, timing y tolerancia tactil.
 - [ ] Resultado facil de compartir como imagen o texto.
 - [ ] Desbloqueo cosmetico sin afectar la habilidad ni la justicia del juego.
+- [ ] Coleccion de skins procedurales para objetivos, drag, FLOW y SUPER FLOW.
+- [ ] Evento semanal de siete escalones con desbloqueo progresivo de una coleccion visual.
+- [ ] Anuncio recompensado opcional para duplicar monedas al terminar.
+- [ ] Segunda oportunidad recompensada que reinicia la fase de forma segura.
+- [ ] Skin publicitaria rotativa sin encadenar anuncios.
 
 La prioridad es que el jugador vuelva porque quiere superar su propio dominio, no por energia artificial o recompensas invasivas.
 

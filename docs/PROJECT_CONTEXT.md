@@ -2,6 +2,8 @@
 
 Este documento es la referencia de trabajo para cualquier cambio futuro. Si una propuesta contradice estas decisiones, primero se debe justificar y actualizar este documento.
 
+La ejecucion ordenada de personalizacion, eventos semanales y anuncios recompensados vive en `docs/LIVEOPS_IMPLEMENTATION_PLAN.md`. Ese documento funciona como compuerta: se implementa y prueba una fase antes de comenzar la siguiente.
+
 ## Objetivo del producto
 
 Crear un juego casual de ritmo y precision para movil y navegador de escritorio. El jugador escucha una cancion, anticipa objetivos que aparecen en pantalla y los resuelve con toques o deslizamientos. El juego debe ser facil de entender en segundos, satisfactorio de jugar en sesiones cortas y suficientemente claro para mejorar con cada intento.
@@ -342,9 +344,21 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Solo usar audio propio o con licencia compatible con distribucion web.
 - Todos los recursos deben funcionar con rutas relativas bajo el subdirectorio de GitHub Pages.
 - La interaccion debe funcionar con dedo y mouse; el teclado puede servir como apoyo de desarrollo.
-- No introducir anuncios, monedas, backend o ranking online antes de que el bucle basico sea divertido y medible.
+- No activar anuncios reales antes de completar las fases de simulacion y validacion definidas en `docs/LIVEOPS_IMPLEMENTATION_PLAN.md`. GitHub Pages no carga SDK publicitario.
 - Las monedas locales solo sirven como experimento de progresion; no se deben convertir en una barrera frustrante antes de tener varias canciones.
 - El juego puede inspirarse en generos conocidos, pero la identidad visual, los nombres, el ritmo y las reglas deben evolucionar hacia una propuesta propia.
+
+## Personalizacion, eventos y monetizacion
+
+- Las skins, fondos FLOW y fondos SUPER FLOW se construyen proceduralmente con PixiJS y configuraciones de datos.
+- Una skin nunca modifica hitboxes, timing, posiciones logicas ni asistencia tactil.
+- El evento semanal desbloquea progresivamente componentes de una coleccion visual durante siete escalones.
+- Los anuncios recompensados se ofrecen fuera del gameplay y siempre son opcionales.
+- Los primeros usos previstos son duplicar monedas, una segunda oportunidad segura por fase y una skin publicitaria rotativa.
+- Una partida solo puede consumir una oportunidad recompensada de gameplay: revivir o duplicar monedas, no ambas.
+- Reanudar tras un anuncio reinicia de forma segura la fase con cuenta regresiva; nunca devuelve al jugador a notas vencidas.
+- La integracion usa un contrato neutral con adaptadores de desarrollo, CrazyGames y Poki.
+- El juego debe continuar normalmente ante cancelacion, falta de anuncio, adblock o error del SDK.
 
 ## Proxima prioridad tecnica
 
