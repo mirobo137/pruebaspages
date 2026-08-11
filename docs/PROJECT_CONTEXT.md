@@ -29,7 +29,7 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
 - Menu tipo playlist desplazable por dedo o rueda, con numeracion, progreso visible, indicador de scroll, selector segmentado de dificultad y un solo boton Jugar.
 - Cuatro pestañas de catalogo por precio: Gratis, Economicas, Selectas y Premium.
-- Las 11 canciones actuales son gratuitas; las futuras entran como Economicas hasta clasificarlas en `src/content/SongEconomy.ts`.
+- Las 11 canciones actuales son gratuitas; las futuras reciben categoria y precio exclusivamente por la carpeta donde se suban.
 - Preview de 5 segundos al tocar cualquier cancion, incluso si aun esta bloqueada.
 - Musica de portada/menu en bucle gestionada por `MenuAudioController`; la pista provisional se cambia en `src/content/MenuMusic.ts`.
 - Partidas de 90 segundos divididas en Lectura, Impulso y Climax.
@@ -75,7 +75,10 @@ src/
   platform/                  Adaptadores para persistencia y portales
   progression/               Estrellas, records, monedas y desbloqueos locales
 public/assets/
-  audio/                     Canciones distribuidas
+  audio/                     Canciones gratuitas
+    economicas/              Canciones de 400 monedas
+    selectas/                Canciones de 800 monedas
+    premium/                 Canciones de 1,400 monedas
   beatmaps/                  Eventos sincronizados por cancion
 docs/
   PROJECT_CONTEXT.md         Este contrato de arquitectura
@@ -132,7 +135,7 @@ Reglas de modularidad:
 - Las recompensas ya no dependen directamente de la puntuacion, porque combo, FLOW y densidad hacian que Medio y Dificil entregaran cientos o miles de monedas en una sola partida.
 - Una derrota entrega 10 monedas. Una victoria combina premio base, precision, estrellas y multiplicador de dificultad.
 - Con la formula actual una partida completada entrega aproximadamente 105-165 monedas en Facil, 142-223 en Medio y 184-289 en Dificil.
-- Precios y clasificacion viven en `src/content/SongEconomy.ts`; la formula de recompensa vive en `src/progression/Economy.ts`.
+- Carpetas, precios y etiquetas viven en `src/content/song-categories.json`; la formula de recompensa vive en `src/progression/Economy.ts`.
 
 ## Contrato de interaccion tactil
 
@@ -274,18 +277,24 @@ git commit -m "descripcion breve del cambio"
 git push origin main
 ```
 
-El workflow de GitHub Pages vuelve a sincronizar el contenido en cada build. Para agregar una cancion desde el movil basta con subirla a `public/assets/audio/` y hacer pull en el ordenador. `npm run dev` y `npm run build` generan el catalogo y, si faltan, tres beatmaps iniciales para que la cancion aparezca inmediatamente. Los archivos existentes nunca se sobrescriben.
+El workflow de GitHub Pages vuelve a sincronizar el contenido en cada build. La ubicacion del audio es la unica clasificacion manual necesaria. `npm run dev` y `npm run build` recorren la raiz y las tres carpetas, generan el catalogo con precio y categoria y, si faltan, crean tres beatmaps iniciales. Los beatmaps existentes nunca se sobrescriben.
 
 ### Agregar una cancion
 
-1. Subir desde el movil un archivo comprimido propio o con licencia compatible a `public/assets/audio/`.
+1. Subir desde el movil un MP3, OGG o WAV propio o con licencia compatible a una ubicacion:
+   - `public/assets/audio/` para Gratis.
+   - `public/assets/audio/economicas/` para 400 monedas.
+   - `public/assets/audio/selectas/` para 800 monedas.
+   - `public/assets/audio/premium/` para 1,400 monedas.
 2. En cualquier PC ejecutar `git pull --rebase origin main`.
-3. Ejecutar `npm run build`; `content:sync` detecta la cancion y crea `easy.json`, `medium.json` y `hard.json` si faltan.
+3. Ejecutar `npm run build`; `content:sync` detecta la cancion, asigna categoria/precio y crea `easy.json`, `medium.json` y `hard.json` si faltan.
 4. Probar los patrones iniciales en movil.
 5. Editar los beatmaps generados para sincronizarlos realmente con los golpes de la cancion. La automatizacion no vuelve a sobrescribirlos.
 6. Confirmar que `trackId` y dificultad son correctos, y hacer commit/push cuando los patrones esten ajustados.
 
 Los beatmaps automaticos incluyen `generated: true` como aviso de que son una base jugable, no una sincronizacion musical definitiva. Una vez ajustado manualmente se puede cambiar a `false` o quitar esa propiedad.
+
+Mover una cancion entre las cuatro ubicaciones cambia su categoria y precio en la siguiente build sin cambiar su progreso, siempre que conserve el mismo nombre. No pueden existir dos canciones con el mismo nombre base aunque esten en carpetas distintas; el build se detiene con un mensaje claro para evitar IDs y beatmaps duplicados.
 
 ### Ciclo de prueba recomendado
 
@@ -323,7 +332,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Volver desde una partida o recargar conserva la cancion y dificultad seleccionadas y deja esa fila visible.
 - Las cuatro categorias filtran la playlist sin abrir pantallas adicionales.
 - Las 11 canciones actuales aparecen en Gratis y se pueden jugar sin desbloqueo.
-- Una cancion nueva aparece inicialmente en Economicas con precio de 400 monedas.
+- Una cancion nueva aparece en la categoria y con el precio correspondiente a su carpeta.
 - Completar cerca del final otorga al menos una estrella; 70% de precision ponderada entrega dos y 90% entrega tres.
 - Recargar la pagina conserva monedas, desbloqueos y records.
 - Las rutas siguen siendo relativas para el subdirectorio de GitHub Pages.

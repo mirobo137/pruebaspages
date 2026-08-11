@@ -36,7 +36,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Selector presentado como playlist con numeracion, scrollbar y guia tactil de desplazamiento.
 - [x] Categorias Gratis, Economicas, Selectas y Premium sobre una unica playlist.
 - [x] Precios calibrados por partidas objetivo: 0, 400, 800 y 1,400 monedas.
-- [x] Catalogo original gratuito y canciones nuevas Economicas por defecto.
+- [x] Catalogo original gratuito y categoria/precio automaticos segun carpeta de audio.
 - [x] Preview de 5 segundos para canciones adquiridas y bloqueadas.
 - [x] Musica provisional de portada/menu en bucle y regreso automatico despues de cada preview.
 - [x] Memoria local de la ultima cancion y dificultad elegidas.
@@ -51,6 +51,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Beatmap JSON separado del codigo.
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
 - [x] Beatmaps iniciales automaticos para que una cancion nueva entre al selector sin trabajo manual.
+- [x] Build recursiva para Gratis, Economicas, Selectas y Premium con deteccion de IDs duplicados.
 - [x] Feedback visual distinto para Perfect, Bien y Miss.
 - [x] Objetivos con profundidad, brillo, reflejo y bordes finos.
 - [x] Aros semanticos que hacen visibles las ventanas Bien y Perfect.

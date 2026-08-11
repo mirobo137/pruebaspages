@@ -1,9 +1,12 @@
 import type { Difficulty } from '../game/difficulty/Difficulty';
+import type { SongPriceTier } from './SongEconomy';
 
 export interface MusicTrack {
   id: string;
   title: string;
   audioPath: string;
+  priceTier: SongPriceTier;
+  price: number;
   beatmapPaths: Record<Difficulty, string>;
   bpm?: number;
 }

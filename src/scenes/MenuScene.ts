@@ -2,7 +2,6 @@ import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { TrackSelection } from '../content/TrackSelection';
 import { MENU_TRACK_PREVIEW_SECONDS } from '../content/MenuMusic';
 import {
-  getSongPriceTier,
   getSongTierDefinition,
   type SongPriceTier,
 } from '../content/SongEconomy';
@@ -113,7 +112,7 @@ export class MenuScene implements Scene {
     this.selectedTrackIndex = rememberedIndex >= 0 ? rememberedIndex : 0;
     const rememberedTrack = this.tracks[this.selectedTrackIndex];
     this.selectedTier = rememberedTrack
-      ? getSongPriceTier(rememberedTrack.track.id)
+      ? rememberedTrack.track.priceTier
       : 'free';
     this.selectedTrackByTier[this.selectedTier] = this.selectedTrackIndex;
     this.tierSelector = new SongTierSelector(this.handleTierChanged);
@@ -265,10 +264,16 @@ export class MenuScene implements Scene {
       return;
     }
 
-    const unlocked = this.progression.isTrackUnlocked(selection.track.id);
+    const unlocked = this.progression.isTrackUnlocked(
+      selection.track.id,
+      selection.track.price,
+    );
     if (!unlocked) {
       this.onStopPreview();
-      const unlockedNow = this.progression.tryUnlockTrack(selection.track.id);
+      const unlockedNow = this.progression.tryUnlockTrack(
+        selection.track.id,
+        selection.track.price,
+      );
       this.status.text = unlockedNow
         ? 'Canción desbloqueada. Pulsa JUGAR para comenzar.'
         : 'Necesitas más monedas para desbloquearla.';
@@ -289,7 +294,10 @@ export class MenuScene implements Scene {
     );
     this.songList.setItems(this.visibleTrackIndexes.map((trackIndex) => {
       const selection = this.tracks[trackIndex];
-      const unlocked = this.progression.isTrackUnlocked(selection.track.id);
+      const unlocked = this.progression.isTrackUnlocked(
+        selection.track.id,
+        selection.track.price,
+      );
       const record = this.progression.getRecord(
         selection.track.id,
         this.selectedDifficulty,
@@ -298,7 +306,7 @@ export class MenuScene implements Scene {
         title: selection.track.title,
         subtitle: unlocked
           ? '3 FASES · 90 SEGUNDOS'
-          : `${this.progression.getTrackUnlockCost(selection.track.id)} MONEDAS`,
+          : `${this.progression.getTrackUnlockCost(selection.track.price)} MONEDAS`,
         locked: !unlocked,
         stars: record?.stars ?? 0,
         highScore: record?.highScore ?? 0,
@@ -323,7 +331,7 @@ export class MenuScene implements Scene {
   private getTrackIndexesForTier(tier: SongPriceTier): number[] {
     const indexes: number[] = [];
     this.tracks.forEach((selection, index) => {
-      if (getSongPriceTier(selection.track.id) === tier) indexes.push(index);
+      if (selection.track.priceTier === tier) indexes.push(index);
     });
     return indexes;
   }
@@ -337,10 +345,10 @@ export class MenuScene implements Scene {
   private refreshDetails(): void {
     const selection = this.tracks[this.selectedTrackIndex];
     const unlocked = selection
-      ? this.progression.isTrackUnlocked(selection.track.id)
+      ? this.progression.isTrackUnlocked(selection.track.id, selection.track.price)
       : false;
     const cost = selection
-      ? this.progression.getTrackUnlockCost(selection.track.id)
+      ? this.progression.getTrackUnlockCost(selection.track.price)
       : 0;
     const record = selection
       ? this.progression.getRecord(selection.track.id, this.selectedDifficulty)

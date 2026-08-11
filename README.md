@@ -21,13 +21,16 @@ public/assets/beatmaps/ Eventos sincronizados con cada canción
 
 ## Añadir canciones
 
-Coloca una versión comprimida de la canción en:
+Coloca una versión comprimida de la canción en la carpeta de su precio:
 
 ```text
-public/assets/audio/mi-cancion.mp3
+public/assets/audio/mi-cancion.mp3             Gratis
+public/assets/audio/economicas/mi-cancion.mp3  400 monedas
+public/assets/audio/selectas/mi-cancion.mp3    800 monedas
+public/assets/audio/premium/mi-cancion.mp3     1,400 monedas
 ```
 
-Los archivos de proyecto y WAV sin comprimir deben mantenerse fuera del bundle web. En cada build, `scripts/generate-music-manifest.mjs` escanea la carpeta y genera el catálogo automáticamente. Los beatmaps esperados para `mi-cancion.mp3` son:
+Los archivos de proyecto y WAV sin comprimir deben mantenerse fuera del bundle web. En cada build, `scripts/generate-music-manifest.mjs` escanea las cuatro ubicaciones y genera automáticamente el catálogo, categoría y precio. Los beatmaps esperados para `mi-cancion.mp3` son:
 
 ```text
 public/assets/beatmaps/mi-cancion/easy.json
@@ -39,10 +42,10 @@ Cada archivo define tres fases sobre un loop de 30 segundos. La partida completa
 
 Para incorporar una canción subida desde el móvil:
 
-1. Sube el archivo a `public/assets/audio/`.
+1. Sube el archivo a la carpeta de precio deseada dentro de `public/assets/audio/`.
 2. En el ordenador ejecuta `git pull --rebase origin main`.
-3. Crea o ajusta los tres beatmaps dentro de una carpeta con el mismo nombre base.
-4. Verifica con `npm run build`, haz commit y push.
+3. Ejecuta `npm run build`; si faltan, los tres beatmaps se crean automáticamente.
+4. Prueba y ajusta esos beatmaps, después haz commit y push.
 
 ## Desarrollo local
 

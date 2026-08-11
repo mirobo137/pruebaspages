@@ -1,5 +1,4 @@
 import type { Difficulty } from '../game/difficulty/Difficulty';
-import { getSongPrice } from '../content/SongEconomy';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { LocalProgressStorage } from '../platform/LocalProgressStorage';
@@ -43,19 +42,19 @@ export class ProgressionStore {
     this.save();
   }
 
-  isTrackUnlocked(trackId: string): boolean {
-    return getSongPrice(trackId) === 0
+  isTrackUnlocked(trackId: string, price: number): boolean {
+    return price <= 0
       || this.state.unlockedTrackIds.includes(trackId);
   }
 
-  getTrackUnlockCost(trackId: string): number {
-    return getSongPrice(trackId);
+  getTrackUnlockCost(price: number): number {
+    return Math.max(0, Math.floor(price));
   }
 
-  tryUnlockTrack(trackId: string): boolean {
-    if (this.isTrackUnlocked(trackId)) return true;
+  tryUnlockTrack(trackId: string, price: number): boolean {
+    if (this.isTrackUnlocked(trackId, price)) return true;
 
-    const cost = this.getTrackUnlockCost(trackId);
+    const cost = this.getTrackUnlockCost(price);
     if (this.state.coins < cost) return false;
 
     this.state.coins -= cost;

@@ -2,12 +2,15 @@
 
 ## Audio
 
-Place production music in `public/assets/audio/`. The build automatically scans this folder and generates `music-manifest.json`.
+Place production music according to its unlock price. The build scans all four locations and generates `music-manifest.json` plus any missing initial beatmaps.
 
 Recommended first filename:
 
 ```text
-public/assets/audio/my-song.mp3
+public/assets/audio/my-song.mp3             Free
+public/assets/audio/economicas/my-song.mp3  400 coins
+public/assets/audio/selectas/my-song.mp3    800 coins
+public/assets/audio/premium/my-song.mp3     1,400 coins
 ```
 
 Use an original track or audio with a license that permits web distribution. Keep the editable project and uncompressed source files outside the web bundle. The game should load compressed files such as MP3 or OGG.

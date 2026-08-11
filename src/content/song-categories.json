@@ -1,0 +1,38 @@
+[
+  {
+    "id": "free",
+    "folder": null,
+    "label": "Gratis",
+    "shortLabel": "GRATIS",
+    "price": 0,
+    "targetCompletedRuns": "Incluidas",
+    "color": 6219438
+  },
+  {
+    "id": "economy",
+    "folder": "economicas",
+    "label": "Economicas",
+    "shortLabel": "ECONOMICAS",
+    "price": 400,
+    "targetCompletedRuns": "2-3 partidas",
+    "color": 6216447
+  },
+  {
+    "id": "select",
+    "folder": "selectas",
+    "label": "Selectas",
+    "shortLabel": "SELECTAS",
+    "price": 800,
+    "targetCompletedRuns": "4-6 partidas",
+    "color": 9211135
+  },
+  {
+    "id": "premium",
+    "folder": "premium",
+    "label": "Premium",
+    "shortLabel": "PREMIUM",
+    "price": 1400,
+    "targetCompletedRuns": "7-10 partidas",
+    "color": 16738265
+  }
+]
