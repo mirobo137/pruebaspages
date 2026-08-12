@@ -106,6 +106,10 @@ try {
   assert.deepEqual(migratedState.weeklyEvent.missionProgress, {});
   assert.deepEqual(migratedState.rewardedLimits.usedRewardIds, []);
   assert.deepEqual(migratedState.customization.unlockedCosmeticIds, []);
+  assert.equal(
+    migratedState.customization.customTheme.componentThemeIds['drag-trail'],
+    'neon-pulse',
+  );
 
   const deletedThemeStorage = createMemoryStorage();
   const deletedThemeState = createEmptyProgressState();
@@ -143,6 +147,21 @@ try {
     new ProgressionStore(new LocalProgressStorage(unlockStorage)).equippedThemeId,
     'solar-flux',
   );
+
+  const customStore = new ProgressionStore(new LocalProgressStorage(unlockStorage));
+  const customSelection = {
+    ...customStore.customThemeSelection,
+    'target-palette': 'cyber-sakura',
+    'flow-background': 'solar-flux',
+  };
+  const savedCustom = customStore.saveCustomTheme(customSelection, true);
+  assert.equal(savedCustom.id, 'custom-1');
+  assert.equal(customStore.equippedThemeId, 'custom-1');
+  const reloadedCustom = new ProgressionStore(new LocalProgressStorage(unlockStorage));
+  assert.equal(reloadedCustom.equippedThemeId, 'custom-1');
+  assert.equal(reloadedCustom.customThemeSelection['target-palette'], 'cyber-sakura');
+  assert.equal(reloadedCustom.customThemeSelection['flow-background'], 'solar-flux');
+  assert.equal(reloadedCustom.equippedVisualTheme.id, 'custom-1');
 
   console.log('Progress v2 -> v3 migration and recovery: OK');
 } finally {

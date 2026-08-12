@@ -171,6 +171,7 @@ try {
     assert.equal(store.claimWeeklyEventReward(catalog, reward.id, wednesday).claimed, true);
   }
   assert.equal(store.unlockedCosmeticIds.length, 7);
+  assert.equal(store.unlockedCosmeticIds.includes('neon-ascent:drag-trail'), true);
   assert.equal(store.isThemeUnlocked('neon-ascent'), true);
   const reloadedStore = new ProgressionStore(new LocalProgressStorage(storage));
   assert.equal(reloadedStore.unlockedCosmeticIds.length, 7);

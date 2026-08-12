@@ -1,5 +1,9 @@
 import { listVisualThemes } from './ThemeCatalog';
 import type { VisualTheme } from './ThemeTypes';
+import {
+  composeCustomTheme,
+  type CustomThemeSelection,
+} from './ThemeComponents';
 
 export interface ThemeCollectionItem {
   theme: VisualTheme;
@@ -50,10 +54,11 @@ export function listThemeCollection(
   totalRuns: number,
   unlockedThemeIds: readonly string[],
   unlockedCosmeticIds: readonly string[] = [],
+  customThemeSelection?: CustomThemeSelection,
 ): readonly ThemeCollectionItem[] {
   const themes = new Map(listVisualThemes().map((theme) => [theme.id, theme]));
   const safeRuns = Math.max(0, Math.floor(totalRuns));
-  return DEFINITIONS.flatMap((definition) => {
+  const items = DEFINITIONS.flatMap((definition) => {
     const theme = themes.get(definition.themeId);
     if (!theme) return [];
     const unlocked = unlockedThemeIds.includes(definition.themeId);
@@ -64,12 +69,36 @@ export function listThemeCollection(
       requiredRuns: definition.requiredRuns,
       unlocked,
       progressLabel: definition.eventCampaignId
-        ? `${unlockedCosmeticIds.filter((id) => id.startsWith(`${definition.eventCampaignId}:`)).length}/7 COMPONENTES`
+        ? `${countEventComponents(definition.themeId, definition.eventCampaignId, unlockedCosmeticIds)}/7 COMPONENTES`
         : definition.requiredRuns <= 0
         ? 'DISPONIBLE'
         : `${Math.min(safeRuns, definition.requiredRuns)}/${definition.requiredRuns} PARTIDAS`,
     }];
   });
+  if (customThemeSelection) {
+    items.push({
+      theme: composeCustomTheme(customThemeSelection),
+      origin: 'Tu taller visual',
+      unlockDescription: 'Edita y combina los componentes que has desbloqueado.',
+      requiredRuns: 0,
+      unlocked: true,
+      progressLabel: '1 SLOT PERSONAL',
+    });
+  }
+  return items;
+}
+
+function countEventComponents(
+  themeId: string,
+  legacyCampaignId: string,
+  cosmeticIds: readonly string[],
+): number {
+  const slots = new Set(cosmeticIds.flatMap((id) => {
+    const prefixes = [`${themeId}:`, `${legacyCampaignId}:`];
+    const prefix = prefixes.find((candidate) => id.startsWith(candidate));
+    return prefix ? [id.slice(prefix.length)] : [];
+  }));
+  return slots.size;
 }
 
 export function getAutomaticallyUnlockedThemeIds(totalRuns: number): string[] {

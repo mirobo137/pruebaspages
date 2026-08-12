@@ -187,6 +187,11 @@ Orden base de recompensas:
 - [x] 6.4 Crear animacion de reclamacion y equipamiento opcional.
 - [x] 6.5 Añadir indicador cuando existe un premio pendiente.
 - [x] 6.6 Confirmar que perder una semana no destruye recompensas ya obtenidas.
+- [x] 6.7 Mostrar una previsualizacion animada de la skin final desde el propio evento.
+- [x] 6.8 Permitir usar cada componente reclamado sin esperar al conjunto completo.
+- [x] 6.9 Crear un unico slot persistente `MI SKIN` para combinar seis categorias.
+- [x] 6.10 Validar que el editor solo ofrezca componentes realmente desbloqueados.
+- [x] 6.11 Guardar y equipar la skin personalizada como un tema real de gameplay.
 
 Compuerta especifica:
 
@@ -370,6 +375,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-12 | Fase 5 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma el comportamiento del motor semanal; se habilita Fase 6 |
 | 2026-08-12 | Fase 6 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Pantalla semanal, scroll, cuenta UTC, indicador pendiente, reclamacion atomica, siete componentes y desbloqueo persistente de Neon Ascent probados; falta validacion movil fisica |
 | 2026-08-12 | Fase 6 | `npm run test:layout` | 9 viewports de 320x568 a 915x412 | Correccion responsive | Cabecera, navegacion, playlist, dificultad y JUGAR verificados sin superposicion ni salida del viewport; en alturas compactas se oculta solo informacion secundaria |
+| 2026-08-12 | Fase 6 | `npm test` + `npm run build` | Windows / Node 24 | Ampliacion correcta | Vitrina animada de recompensa final, piezas independientes, editor MI SKIN, composicion segura, slot unico y persistencia tras recarga verificados; falta aprobacion tactil y visual en movil |
 
 ## Decisiones pendientes controladas
 

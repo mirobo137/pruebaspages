@@ -8,6 +8,7 @@ import { MenuButton } from '../ui/MenuButton';
 export interface EventSceneOptions {
   getSnapshot: () => WeeklyEventSnapshot;
   onClaim: (rewardId: string) => EventClaimResult;
+  onPreviewReward: () => void;
   onBack: () => void;
 }
 
@@ -40,6 +41,10 @@ export class EventScene implements Scene {
   private readonly glow = new Graphics();
   private readonly header = new Text({ text: 'EVENTO SEMANAL', style: eyebrowStyle });
   private readonly title = new Text({ text: 'NEON ASCENT', style: titleStyle });
+  private readonly previewHint = new Text({
+    text: 'TOCA PARA VER LA SKIN FINAL',
+    style: eyebrowStyle,
+  });
   private readonly countdown = new Text({ text: '', style: infoStyle });
   private readonly points = new Text({ text: '', style: infoStyle });
   private readonly progressBar = new Graphics();
@@ -65,6 +70,12 @@ export class EventScene implements Scene {
     this.height = height;
     this.snapshot = options.getSnapshot();
     this.backButton = new MenuButton('‹', options.onBack, 0x10282b, 44);
+    this.title.eventMode = 'static';
+    this.title.cursor = 'pointer';
+    this.title.on('pointertap', options.onPreviewReward);
+    this.previewHint.eventMode = 'static';
+    this.previewHint.cursor = 'pointer';
+    this.previewHint.on('pointertap', options.onPreviewReward);
     this.claimButton = new MenuButton('SIGUE JUGANDO', this.handleClaim, 0x16795f, 56);
     this.celebration.eventMode = 'none';
     this.celebration.visible = false;
@@ -79,6 +90,7 @@ export class EventScene implements Scene {
       this.glow,
       this.header,
       this.title,
+      this.previewHint,
       this.countdown,
       this.points,
       this.progressBar,
@@ -125,6 +137,7 @@ export class EventScene implements Scene {
     this.header.anchor.set(0.5);
     this.title.anchor.set(0.5);
     this.countdown.anchor.set(0.5);
+    this.previewHint.anchor.set(0.5);
     this.points.anchor.set(0.5);
     this.emptyMessage.anchor.set(0.5);
     this.celebrationFlash.clear().rect(0, 0, width, height)
@@ -145,11 +158,12 @@ export class EventScene implements Scene {
     const x = (width - contentWidth) / 2;
     this.header.position.set(width / 2, 24);
     this.title.position.set(width / 2, 51);
-    this.countdown.position.set(width / 2, 80);
-    this.points.position.set(width / 2, 103);
-    this.drawProgressBar(x, 120, contentWidth);
-    this.missionsLabel.position.set(x + 2, 140);
-    this.missionList.position.set(x, 159);
+    this.previewHint.position.set(width / 2, 75);
+    this.countdown.position.set(width / 2, 92);
+    this.points.position.set(width / 2, 111);
+    this.drawProgressBar(x, 126, contentWidth);
+    this.missionsLabel.position.set(x + 2, 142);
+    this.missionList.position.set(x, 160);
     this.missionList.resize(contentWidth);
     const rewardsTop = 352;
     this.rewardsLabel.position.set(x + 2, rewardsTop);
@@ -171,7 +185,8 @@ export class EventScene implements Scene {
     const rightX = x + leftWidth + gap;
     this.header.position.set(width / 2, 18);
     this.title.position.set(width / 2, 43);
-    this.countdown.position.set(width / 2, 68);
+    this.previewHint.position.set(width / 2, 64);
+    this.countdown.position.set(width / 2, 79);
     this.points.position.set(x + leftWidth / 2, 93);
     this.drawProgressBar(x, 109, leftWidth);
     this.missionsLabel.position.set(x + 2, 128);
@@ -209,6 +224,7 @@ export class EventScene implements Scene {
     this.rewardsLabel.visible = Boolean(active);
     this.progressBar.visible = Boolean(active);
     this.points.visible = Boolean(active);
+    this.previewHint.visible = Boolean(active);
     if (!active) {
       this.emptyMessage.text = 'NO HAY UN EVENTO ACTIVO\nVUELVE PRONTO';
       return;

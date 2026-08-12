@@ -23,6 +23,12 @@ try {
   const { getAutomaticallyUnlockedThemeIds, listThemeCollection } = await server.ssrLoadModule(
     '/src/customization/ThemeCollection.ts',
   );
+  const {
+    composeCustomTheme,
+    createDefaultCustomThemeSelection,
+    listAvailableThemeComponents,
+    sanitizeCustomThemeSelection,
+  } = await server.ssrLoadModule('/src/customization/ThemeComponents.ts');
 
   const partial = resolveVisualTheme({
     id: 'partial-test',
@@ -97,6 +103,45 @@ try {
     'neon-ascent-2026:timing-ring',
   ]);
   assert.equal(eventCollection.find((item) => item.theme.id === 'neon-ascent')?.progressLabel, '2/7 COMPONENTES');
+
+  const available = listAvailableThemeComponents(newPlayerUnlocks, [
+    'neon-ascent:drag-trail',
+  ]);
+  assert.deepEqual(
+    available['target-palette'].map((option) => option.themeId),
+    ['neon-pulse', 'cyber-sakura'],
+  );
+  assert.deepEqual(
+    available['drag-trail'].map((option) => option.themeId),
+    ['neon-pulse', 'cyber-sakura', 'neon-ascent'],
+  );
+  const customSelection = {
+    ...createDefaultCustomThemeSelection(),
+    'target-palette': 'cyber-sakura',
+    'drag-trail': 'neon-ascent',
+    'super-flow-background': 'cyber-sakura',
+  };
+  const custom = composeCustomTheme(customSelection);
+  assert.equal(custom.id, 'custom-1');
+  assert.equal(custom.target.shape, getVisualTheme('cyber-sakura').target.shape);
+  assert.equal(custom.drag.trailStyle, getVisualTheme('neon-ascent').drag.trailStyle);
+  assert.equal(
+    custom.background.superFlowPattern,
+    getVisualTheme('cyber-sakura').background.superFlowPattern,
+  );
+  const sanitizedCustom = sanitizeCustomThemeSelection(
+    { ...customSelection, 'perfect-impact': 'locked-theme' },
+    newPlayerUnlocks,
+    ['neon-ascent:drag-trail'],
+  );
+  assert.equal(sanitizedCustom['perfect-impact'], 'neon-pulse');
+  const collectionWithCustom = listThemeCollection(
+    0,
+    newPlayerUnlocks,
+    [],
+    createDefaultCustomThemeSelection(),
+  );
+  assert.equal(collectionWithCustom.at(-1)?.theme.id, 'custom-1');
 
   console.log('Theme catalog, collection and visual quality: OK');
 } finally {

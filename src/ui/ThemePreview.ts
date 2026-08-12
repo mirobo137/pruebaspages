@@ -58,7 +58,7 @@ export class ThemePreview extends Container {
   }
 
   setTheme(theme: VisualTheme): void {
-    if (this.theme?.id === theme.id) return;
+    if (this.theme === theme) return;
     this.theme = theme;
     this.elapsed = 0;
     this.modeIndex = -1;

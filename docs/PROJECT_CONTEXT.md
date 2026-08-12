@@ -373,7 +373,10 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Las skins, fondos FLOW y fondos SUPER FLOW se construyen proceduralmente con PixiJS y configuraciones de datos.
 - La primera familia incluye Neon Pulse (orbital), Cyber Sakura (segmentada) y Solar Flux (facetada).
 - El perfil visual reducido disminuye particulas y geometria ambiental, nunca notas ni respuesta tactil.
-- La Coleccion equipa temas completos; mezclar componentes queda reservado hasta validar que la interfaz siga siendo clara.
+- La Coleccion equipa temas completos y contiene un unico slot `MI SKIN` para combinar objetivos, aro, estela, Perfect, FLOW y SUPER FLOW.
+- Un tema completo desbloqueado aporta sus seis componentes al editor. Una recompensa parcial de evento aporta su componente inmediatamente, aunque la skin completa siga bloqueada.
+- `MI SKIN` se guarda sobre el mismo slot y puede equiparse como cualquier tema. Su composicion nunca modifica hitboxes, timing ni asistencia tactil.
+- El modelo conserva un `slotId` estable para permitir en el futuro desbloquear slots personalizados adicionales mediante anuncios u otra recompensa, sin activar todavia monetizacion.
 - Un ID cosmetico eliminado o invalido se descarta y el tema equipado vuelve de forma segura a `Neon Pulse`.
 - Una skin nunca modifica hitboxes, timing, posiciones logicas ni asistencia tactil.
 - El evento semanal desbloquea progresivamente componentes de una coleccion visual durante siete escalones.
@@ -386,6 +389,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - El selector musical usa layouts vertical normal, vertical compacto y horizontal compacto. En pantallas bajas conserva playlist, dificultad y `JUGAR`, y oculta solo subtitulo, ayuda y estadisticas secundarias.
 - La pantalla de evento muestra cuenta regresiva UTC, puntos, tres misiones y siete escalones desplazables sin interrumpir partidas.
 - Cada escalon reclamado se guarda inmediatamente como componente cosmetico permanente. El septimo desbloquea el tema procedural completo `Neon Ascent` en Coleccion.
+- Al tocar el nombre de un evento se abre una vitrina animada de la skin final con vista normal, drag, FLOW y SUPER FLOW, ademas del estado obtenido/pendiente de sus seis piezas.
 - Los componentes obtenidos sobreviven al cambio de semana; el progreso semanal se reinicia, pero el inventario no.
 - Durante el prototipo se usa el reloj local del dispositivo. Puede manipularse y no debe sostener rankings ni recompensas con valor real sin backend/SDK de portal.
 - Los anuncios recompensados se ofrecen fuera del gameplay y siempre son opcionales.

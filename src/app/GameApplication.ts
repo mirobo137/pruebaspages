@@ -23,11 +23,15 @@ import { CollectionScene } from '../scenes/CollectionScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { ResultScene } from '../scenes/ResultScene';
 import { EventScene } from '../scenes/EventScene';
+import { EventThemePreviewScene } from '../scenes/EventThemePreviewScene';
+import { CustomThemeScene } from '../scenes/CustomThemeScene';
 import { TitleScene } from '../scenes/TitleScene';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
 import { loadWeeklyEventCatalog } from '../events/EventCatalog';
 import type { WeeklyEventCampaign } from '../events/EventTypes';
+import { getVisualTheme } from '../customization/ThemeCatalog';
+import { listAvailableThemeComponents } from '../customization/ThemeComponents';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -74,6 +78,9 @@ export class GameApplication {
       this.loadMusic(),
       loadWeeklyEventCatalog(),
     ]);
+    if (!requestedTheme) {
+      this.themeSelection.selectResolved(this.progression.equippedVisualTheme);
+    }
     const menuSelection = this.tracks.find(
       (selection) => selection.track.id === MENU_MUSIC_TRACK_ID,
     ) ?? this.tracks[0] ?? null;
@@ -131,15 +138,17 @@ export class GameApplication {
           this.progression.totalRuns,
           this.progression.unlockedThemeIds,
           this.progression.unlockedCosmeticIds,
+          this.progression.customThemeSelection,
         ),
         equippedThemeId: this.progression.equippedThemeId,
         visualQuality: this.visualQuality,
         onEquip: (themeId) => {
           if (!this.progression.equipTheme(themeId)) return false;
-          this.themeSelection.select(themeId);
+          this.themeSelection.selectResolved(this.progression.equippedVisualTheme);
           this.updateCanvasState('collection');
           return true;
         },
+        onCustomize: this.showCustomTheme,
         onBack: this.showMenu,
       }),
     );
@@ -155,7 +164,47 @@ export class GameApplication {
           this.weeklyEvents,
           rewardId,
         ),
+        onPreviewReward: this.showEventRewardPreview,
         onBack: this.showMenu,
+      }),
+    );
+    this.menuAudio.start();
+  };
+
+  private showEventRewardPreview = (): void => {
+    const snapshot = this.progression.getWeeklyEvent(this.weeklyEvents);
+    const campaign = snapshot.activeEvent?.campaign;
+    if (!campaign) return;
+    this.updateCanvasState('event-preview');
+    this.sceneManager.switchTo(
+      new EventThemePreviewScene(this.app.screen.width, this.app.screen.height, {
+        eventName: campaign.name,
+        theme: getVisualTheme(campaign.themeId),
+        rewards: campaign.rewards,
+        claimedRewardIds: snapshot.progress.claimedRewardIds,
+        visualQuality: this.visualQuality,
+        onBack: this.showEvent,
+      }),
+    );
+    this.menuAudio.start();
+  };
+
+  private showCustomTheme = (): void => {
+    this.updateCanvasState('custom-theme');
+    this.sceneManager.switchTo(
+      new CustomThemeScene(this.app.screen.width, this.app.screen.height, {
+        initialSelection: this.progression.customThemeSelection,
+        available: listAvailableThemeComponents(
+          this.progression.unlockedThemeIds,
+          this.progression.unlockedCosmeticIds,
+        ),
+        visualQuality: this.visualQuality,
+        onSave: (selection) => {
+          const theme = this.progression.saveCustomTheme(selection, true);
+          this.themeSelection.selectResolved(theme);
+          this.showCollection();
+        },
+        onBack: this.showCollection,
       }),
     );
     this.menuAudio.start();

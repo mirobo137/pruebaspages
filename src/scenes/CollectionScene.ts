@@ -5,12 +5,14 @@ import type { Scene } from '../core/scene/Scene';
 import { MenuButton } from '../ui/MenuButton';
 import { ThemeList } from '../ui/ThemeList';
 import { ThemePreview } from '../ui/ThemePreview';
+import { CUSTOM_THEME_ID } from '../customization/ThemeComponents';
 
 export interface CollectionSceneOptions {
   items: readonly ThemeCollectionItem[];
   equippedThemeId: string;
   visualQuality: VisualQualityProfile;
   onEquip: (themeId: string) => boolean;
+  onCustomize: () => void;
   onBack: () => void;
 }
 
@@ -76,6 +78,7 @@ export class CollectionScene implements Scene {
   private readonly preview: ThemePreview;
   private readonly backButton: MenuButton;
   private readonly equipButton: MenuButton;
+  private readonly onCustomize: CollectionSceneOptions['onCustomize'];
   private readonly items: readonly ThemeCollectionItem[];
   private readonly onEquip: CollectionSceneOptions['onEquip'];
   private equippedThemeId: string;
@@ -88,6 +91,7 @@ export class CollectionScene implements Scene {
     this.height = height;
     this.items = options.items;
     this.onEquip = options.onEquip;
+    this.onCustomize = options.onCustomize;
     this.equippedThemeId = options.equippedThemeId;
     this.selectedThemeId = this.items.some(
       (item) => item.theme.id === this.equippedThemeId,
@@ -144,6 +148,9 @@ export class CollectionScene implements Scene {
       });
 
     const landscape = width > height && width >= 650;
+    const compact = !landscape && height < 680;
+    this.subtitle.visible = true;
+    this.details.visible = true;
     this.title.style.fontSize = landscape ? 27 : width < 400 ? 23 : 25;
     this.title.anchor.set(0.5);
     this.subtitle.anchor.set(0.5);
@@ -157,25 +164,29 @@ export class CollectionScene implements Scene {
 
     const contentWidth = Math.min(520, Math.max(260, width - 28));
     const contentX = (width - contentWidth) / 2;
-    this.title.position.set(width / 2, 38);
+    this.title.position.set(width / 2, compact ? 30 : 38);
+    this.subtitle.visible = !compact;
     this.subtitle.position.set(width / 2, 67);
 
-    const previewTop = 94;
-    const previewHeight = Math.max(205, Math.min(270, height * 0.31));
+    const previewTop = compact ? 58 : 94;
+    const previewHeight = compact ? 154 : Math.max(205, Math.min(270, height * 0.31));
     this.preview.position.set(contentX, previewTop);
     this.preview.resize(contentWidth, previewHeight);
 
     const listTop = previewTop + previewHeight + 13;
-    const listHeight = Math.max(145, Math.min(195, height - listTop - 190));
+    const listHeight = compact
+      ? Math.max(112, Math.min(135, height - listTop - 180))
+      : Math.max(145, Math.min(195, height - listTop - 190));
     this.themeList.position.set(contentX, listTop);
     this.themeList.resize(contentWidth, listHeight);
 
     const detailsTop = listTop + listHeight + 13;
     this.themeName.position.set(contentX + 4, detailsTop);
     this.details.style.wordWrapWidth = contentWidth - 8;
-    this.details.position.set(contentX + 4, detailsTop + 29);
+    this.details.position.set(contentX + 4, detailsTop + (compact ? 25 : 29));
+    this.details.visible = !compact;
     this.status.anchor.set(0.5, 0);
-    this.status.position.set(width / 2, Math.min(height - 96, detailsTop + 75));
+    this.status.position.set(width / 2, Math.min(height - 92, detailsTop + (compact ? 29 : 75)));
     this.equipButton.resize(contentWidth);
     this.equipButton.position.set(contentX, height - 70);
   }
@@ -190,6 +201,10 @@ export class CollectionScene implements Scene {
 
   private readonly handleEquip = (): void => {
     const item = this.selectedItem;
+    if (item?.theme.id === CUSTOM_THEME_ID) {
+      this.onCustomize();
+      return;
+    }
     if (!item || !item.unlocked) {
       this.status.text = item?.unlockDescription ?? 'Tema no disponible.';
       return;
@@ -213,11 +228,13 @@ export class CollectionScene implements Scene {
     this.details.text = `${item.theme.description}\nORIGEN: ${item.origin.toUpperCase()}`;
     const equipped = item.theme.id === this.equippedThemeId;
     this.equipButton.setText(equipped
-      ? 'EQUIPADO'
+      ? item.theme.id === CUSTOM_THEME_ID ? 'EDITAR MI SKIN' : 'EQUIPADO'
       : item.unlocked
-        ? 'EQUIPAR TEMA'
+        ? item.theme.id === CUSTOM_THEME_ID ? 'EDITAR Y EQUIPAR' : 'EQUIPAR TEMA'
         : 'BLOQUEADO');
-    this.equipButton.setEnabled(item.unlocked && !equipped);
+    this.equipButton.setEnabled(
+      item.theme.id === CUSTOM_THEME_ID || (item.unlocked && !equipped),
+    );
     if (resetStatus) {
       this.status.text = equipped
         ? 'TEMA ACTIVO EN MENU Y GAMEPLAY'

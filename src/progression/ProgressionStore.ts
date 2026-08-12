@@ -3,6 +3,14 @@ import type { FlowSnapshot } from '../game/flow/FlowModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { LocalProgressStorage } from '../platform/LocalProgressStorage';
 import { DEFAULT_THEME_ID, listVisualThemes } from '../customization/ThemeCatalog';
+import {
+  composeCustomTheme,
+  CUSTOM_THEME_ID,
+  sanitizeCustomThemeSelection,
+  type CustomThemeSelection,
+} from '../customization/ThemeComponents';
+import { getVisualTheme } from '../customization/ThemeCatalog';
+import type { VisualTheme } from '../customization/ThemeTypes';
 import { getAutomaticallyUnlockedThemeIds } from '../customization/ThemeCollection';
 import type {
   EventClaimResult,
@@ -58,17 +66,46 @@ export class ProgressionStore {
     return this.state.customization.equippedThemeId;
   }
 
+  get customThemeSelection(): CustomThemeSelection {
+    return { ...this.state.customization.customTheme.componentThemeIds };
+  }
+
+  get equippedVisualTheme(): VisualTheme {
+    return this.equippedThemeId === CUSTOM_THEME_ID
+      ? composeCustomTheme(this.customThemeSelection)
+      : getVisualTheme(this.equippedThemeId);
+  }
+
   isThemeUnlocked(themeId: string): boolean {
-    return this.state.customization.unlockedThemeIds.includes(themeId);
+    return themeId === CUSTOM_THEME_ID
+      || this.state.customization.unlockedThemeIds.includes(themeId);
   }
 
   equipTheme(themeId: string): boolean {
     if (!this.isThemeUnlocked(themeId)) return false;
-    if (!listVisualThemes().some((theme) => theme.id === themeId)) return false;
+    if (
+      themeId !== CUSTOM_THEME_ID
+      && !listVisualThemes().some((theme) => theme.id === themeId)
+    ) return false;
     if (this.state.customization.equippedThemeId === themeId) return true;
     this.state.customization.equippedThemeId = themeId;
     this.save();
     return true;
+  }
+
+  saveCustomTheme(selection: CustomThemeSelection, equip = true): VisualTheme {
+    const sanitized = sanitizeCustomThemeSelection(
+      selection,
+      this.state.customization.unlockedThemeIds,
+      this.state.customization.unlockedCosmeticIds,
+    );
+    this.state.customization.customTheme = {
+      slotId: CUSTOM_THEME_ID,
+      componentThemeIds: sanitized,
+    };
+    if (equip) this.state.customization.equippedThemeId = CUSTOM_THEME_ID;
+    this.save();
+    return composeCustomTheme(sanitized);
   }
 
   setMenuPreferences(selectedTrackId: string | null, difficulty: Difficulty): void {
@@ -199,7 +236,7 @@ export class ProgressionStore {
       this.state.weeklyEvent = result.progress;
       const campaign = snapshot.activeEvent?.campaign;
       if (campaign && result.reward) {
-        const cosmeticId = `${campaign.id}:${result.reward.id}`;
+        const cosmeticId = `${campaign.themeId}:${result.reward.id}`;
         if (!this.state.customization.unlockedCosmeticIds.includes(cosmeticId)) {
           this.state.customization.unlockedCosmeticIds.push(cosmeticId);
         }
@@ -230,18 +267,30 @@ export class ProgressionStore {
     const currentUnlocked = this.state.customization.unlockedThemeIds;
     const unlocksChanged = unlockedThemeIds.length !== currentUnlocked.length
       || unlockedThemeIds.some((themeId, index) => themeId !== currentUnlocked[index]);
-    const equippedIsValid = validThemeIds.has(this.state.customization.equippedThemeId)
-      && unlockedThemeIds.includes(this.state.customization.equippedThemeId);
+    const sanitizedCustomTheme = sanitizeCustomThemeSelection(
+      this.state.customization.customTheme.componentThemeIds,
+      unlockedThemeIds,
+      this.state.customization.unlockedCosmeticIds,
+    );
+    const customChanged = JSON.stringify(sanitizedCustomTheme)
+      !== JSON.stringify(this.state.customization.customTheme.componentThemeIds);
+    const equippedIsValid = this.state.customization.equippedThemeId === CUSTOM_THEME_ID
+      || (validThemeIds.has(this.state.customization.equippedThemeId)
+        && unlockedThemeIds.includes(this.state.customization.equippedThemeId));
     const equippedThemeId = equippedIsValid
       ? this.state.customization.equippedThemeId
       : DEFAULT_THEME_ID;
     const equippedChanged = equippedThemeId !== this.state.customization.equippedThemeId;
 
-    if (!unlocksChanged && !equippedChanged) return false;
+    if (!unlocksChanged && !equippedChanged && !customChanged) return false;
     this.state.customization = {
       unlockedThemeIds,
       unlockedCosmeticIds: this.state.customization.unlockedCosmeticIds,
       equippedThemeId,
+      customTheme: {
+        slotId: CUSTOM_THEME_ID,
+        componentThemeIds: sanitizedCustomTheme,
+      },
     };
     return true;
   }

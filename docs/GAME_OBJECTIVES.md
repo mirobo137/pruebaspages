@@ -181,6 +181,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Juice de particulas, combo y fondo reactivo.
 - [x] Coleccion de temas procedurales con previsualizacion y equipamiento persistente.
 - [x] Evento semanal con misiones, siete recompensas y tema completo desbloqueable.
+- [x] Vista previa de la skin final antes de completar el evento.
+- [x] Un slot `MI SKIN` para combinar y guardar componentes desbloqueados.
 - [ ] Feedback de audio corto para aciertos y combos.
 - [ ] Pruebas reales en movil y distintos tamanos de pantalla.
 
@@ -229,6 +231,9 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Probar scroll tactil de los siete premios en movil pequeno y orientacion horizontal.
 - [ ] Confirmar que cada premio aparece de inmediato en el progreso de Neon Ascent en Coleccion.
 - [ ] Reclamar el septimo escalon, equipar Neon Ascent y confirmar que permanece tras recargar.
+- [ ] Abrir la skin final desde el nombre del evento y revisar sus tres estados animados.
+- [ ] Reclamar una pieza de Neon Ascent y confirmar que aparece de inmediato en el editor de MI SKIN.
+- [ ] Mezclar seis fuentes, guardar, jugar una cancion y confirmar que la combinacion permanece tras recargar.
 
 ## Estado de una partida ideal
 

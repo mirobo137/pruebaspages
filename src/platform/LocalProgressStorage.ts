@@ -6,6 +6,10 @@ import type {
   TrackProgress,
 } from '../progression/ProgressionTypes';
 import { createEmptyProgressState } from '../progression/ProgressionTypes';
+import {
+  THEME_COMPONENT_SLOTS,
+  type ThemeComponentSlot,
+} from '../customization/ThemeComponents';
 
 interface StorageEnvelope {
   format: 1;
@@ -258,7 +262,22 @@ function sanitizeCustomization(
   const equippedThemeId = isSafeIdentifier(value.equippedThemeId)
     ? value.equippedThemeId
     : fallback.equippedThemeId;
-  return { unlockedThemeIds, unlockedCosmeticIds, equippedThemeId };
+  const customThemeValue = isRecord(value.customTheme) ? value.customTheme : null;
+  const componentValue = customThemeValue && isRecord(customThemeValue.componentThemeIds)
+    ? customThemeValue.componentThemeIds
+    : {};
+  const componentThemeIds = Object.fromEntries(THEME_COMPONENT_SLOTS.map((slot) => [
+    slot,
+    isSafeIdentifier(componentValue[slot])
+      ? componentValue[slot]
+      : fallback.customTheme.componentThemeIds[slot],
+  ])) as Record<ThemeComponentSlot, string>;
+  return {
+    unlockedThemeIds,
+    unlockedCosmeticIds,
+    equippedThemeId,
+    customTheme: { slotId: 'custom-1', componentThemeIds },
+  };
 }
 
 function sanitizeWeeklyEvent(value: unknown): ProgressState['weeklyEvent'] {

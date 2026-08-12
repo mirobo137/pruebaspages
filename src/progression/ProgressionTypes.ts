@@ -1,4 +1,5 @@
 import type { Difficulty } from '../game/difficulty/Difficulty';
+import type { CustomThemeSelection } from '../customization/ThemeComponents';
 
 export interface PerformanceRecord {
   stars: number;
@@ -25,6 +26,10 @@ export interface CustomizationProgress {
   unlockedThemeIds: string[];
   unlockedCosmeticIds: string[];
   equippedThemeId: string;
+  customTheme: {
+    slotId: 'custom-1';
+    componentThemeIds: CustomThemeSelection;
+  };
 }
 
 export interface WeeklyEventProgress {
@@ -75,6 +80,17 @@ export function createEmptyProgressState(): ProgressState {
       unlockedThemeIds: ['neon-pulse', 'cyber-sakura'],
       unlockedCosmeticIds: [],
       equippedThemeId: 'neon-pulse',
+      customTheme: {
+        slotId: 'custom-1',
+        componentThemeIds: {
+          'target-palette': 'neon-pulse',
+          'timing-ring': 'neon-pulse',
+          'drag-trail': 'neon-pulse',
+          'perfect-impact': 'neon-pulse',
+          'flow-background': 'neon-pulse',
+          'super-flow-background': 'neon-pulse',
+        },
+      },
     },
     weeklyEvent: {
       eventId: null,

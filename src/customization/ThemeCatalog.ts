@@ -26,18 +26,23 @@ export function getVisualTheme(themeId: string | null | undefined): VisualTheme 
 }
 
 export class ThemeSelection {
-  private selectedThemeId: string;
+  private selectedTheme: VisualTheme;
 
   constructor(themeId: string = DEFAULT_THEME_ID) {
-    this.selectedThemeId = getVisualTheme(themeId).id;
+    this.selectedTheme = getVisualTheme(themeId);
   }
 
   get current(): VisualTheme {
-    return getVisualTheme(this.selectedThemeId);
+    return this.selectedTheme;
   }
 
   select(themeId: string): VisualTheme {
-    this.selectedThemeId = getVisualTheme(themeId).id;
+    this.selectedTheme = getVisualTheme(themeId);
+    return this.current;
+  }
+
+  selectResolved(theme: VisualTheme): VisualTheme {
+    this.selectedTheme = theme;
     return this.current;
   }
 }
