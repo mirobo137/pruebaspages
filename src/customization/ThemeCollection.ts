@@ -4,6 +4,7 @@ import {
   composeCustomTheme,
   type CustomThemeSelection,
 } from './ThemeComponents';
+import { listRewardedThemeDefinitions } from './RewardedThemeCatalog';
 
 export interface ThemeCollectionItem {
   theme: VisualTheme;
@@ -20,6 +21,7 @@ interface ThemeCollectionDefinition {
   unlockDescription: string;
   requiredRuns: number;
   eventCampaignId?: string;
+  rewardedRotation?: boolean;
 }
 
 const DEFINITIONS: readonly ThemeCollectionDefinition[] = [
@@ -48,6 +50,13 @@ const DEFINITIONS: readonly ThemeCollectionDefinition[] = [
     requiredRuns: -1,
     eventCampaignId: 'neon-ascent-2026',
   },
+  ...listRewardedThemeDefinitions().map(({ theme }) => ({
+    themeId: theme.id,
+    origin: 'Rotacion diaria',
+    unlockDescription: 'Disponible cuando aparece como la skin del dia.',
+    requiredRuns: -1,
+    rewardedRotation: true,
+  })),
 ] as const;
 
 export function listThemeCollection(
@@ -55,6 +64,7 @@ export function listThemeCollection(
   unlockedThemeIds: readonly string[],
   unlockedCosmeticIds: readonly string[] = [],
   customThemeSelection?: CustomThemeSelection,
+  dailyOfferThemeId?: string,
 ): readonly ThemeCollectionItem[] {
   const themes = new Map(listVisualThemes().map((theme) => [theme.id, theme]));
   const safeRuns = Math.max(0, Math.floor(totalRuns));
@@ -70,6 +80,10 @@ export function listThemeCollection(
       unlocked,
       progressLabel: definition.eventCampaignId
         ? `${countEventComponents(definition.themeId, definition.eventCampaignId, unlockedCosmeticIds)}/7 COMPONENTES`
+        : definition.rewardedRotation
+          ? definition.themeId === dailyOfferThemeId
+            ? 'OFERTA DE HOY'
+            : 'VUELVE OTRO DIA'
         : definition.requiredRuns <= 0
         ? 'DISPONIBLE'
         : `${Math.min(safeRuns, definition.requiredRuns)}/${definition.requiredRuns} PARTIDAS`,

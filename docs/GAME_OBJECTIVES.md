@@ -191,6 +191,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [ ] Optimizar peso, carga y rendimiento.
 - [x] Crear contrato neutral y simulador seguro de anuncios recompensados.
 - [x] Integrar la primera oferta opcional para duplicar solo las monedas de una partida.
+- [x] Implementar segunda oportunidad segura desde el inicio de la fase con rollback sincronizado.
+- [x] Implementar tres skins basicas con oferta diaria, anuncio opcional, compra por monedas y desbloqueo permanente.
 - [ ] Crear icono, miniatura y textos de presentacion.
 - [ ] Revisar privacidad, audio y recursos con licencia.
 - [ ] Integrar el SDK del portal solo donde aporte valor.

@@ -6,12 +6,19 @@ import { MenuButton } from '../ui/MenuButton';
 import { ThemeList } from '../ui/ThemeList';
 import { ThemePreview } from '../ui/ThemePreview';
 import { CUSTOM_THEME_ID } from '../customization/ThemeComponents';
+import type { DailyRewardedThemeState } from '../customization/RewardedThemeCatalog';
+import type { DailyCosmeticUnlockResult } from '../monetization/DailyCosmeticUnlocker';
 
 export interface CollectionSceneOptions {
   items: readonly ThemeCollectionItem[];
   equippedThemeId: string;
   visualQuality: VisualQualityProfile;
+  dailyOffer: DailyRewardedThemeState;
+  rewardedAdsAvailable: boolean;
   onEquip: (themeId: string) => boolean;
+  onUnlockDailyWithAd: () => Promise<DailyCosmeticUnlockResult>;
+  onBuyDaily: () => boolean;
+  onDailyUnlocked: (themeId: string) => void;
   onCustomize: () => void;
   onBack: () => void;
 }
@@ -78,9 +85,16 @@ export class CollectionScene implements Scene {
   private readonly preview: ThemePreview;
   private readonly backButton: MenuButton;
   private readonly equipButton: MenuButton;
+  private readonly coinButton: MenuButton;
   private readonly onCustomize: CollectionSceneOptions['onCustomize'];
   private readonly items: readonly ThemeCollectionItem[];
   private readonly onEquip: CollectionSceneOptions['onEquip'];
+  private readonly dailyOffer: DailyRewardedThemeState;
+  private readonly rewardedAdsAvailable: boolean;
+  private readonly onUnlockDailyWithAd: CollectionSceneOptions['onUnlockDailyWithAd'];
+  private readonly onBuyDaily: CollectionSceneOptions['onBuyDaily'];
+  private readonly onDailyUnlocked: CollectionSceneOptions['onDailyUnlocked'];
+  private offerPending = false;
   private equippedThemeId: string;
   private selectedThemeId: string;
   private width: number;
@@ -91,6 +105,11 @@ export class CollectionScene implements Scene {
     this.height = height;
     this.items = options.items;
     this.onEquip = options.onEquip;
+    this.dailyOffer = options.dailyOffer;
+    this.rewardedAdsAvailable = options.rewardedAdsAvailable;
+    this.onUnlockDailyWithAd = options.onUnlockDailyWithAd;
+    this.onBuyDaily = options.onBuyDaily;
+    this.onDailyUnlocked = options.onDailyUnlocked;
     this.onCustomize = options.onCustomize;
     this.equippedThemeId = options.equippedThemeId;
     this.selectedThemeId = this.items.some(
@@ -102,6 +121,7 @@ export class CollectionScene implements Scene {
     this.preview = new ThemePreview(options.visualQuality);
     this.backButton = new MenuButton('‹', options.onBack, 0x17233e, 44);
     this.equipButton = new MenuButton('EQUIPAR', this.handleEquip, 0x3155a5, 54);
+    this.coinButton = new MenuButton('MONEDAS', this.handleCoinUnlock, 0x59427f, 54);
     this.root.addChild(
       this.background,
       this.title,
@@ -113,6 +133,7 @@ export class CollectionScene implements Scene {
       this.status,
       this.backButton,
       this.equipButton,
+      this.coinButton,
     );
   }
 
@@ -187,8 +208,7 @@ export class CollectionScene implements Scene {
     this.details.visible = !compact;
     this.status.anchor.set(0.5, 0);
     this.status.position.set(width / 2, Math.min(height - 92, detailsTop + (compact ? 29 : 75)));
-    this.equipButton.resize(contentWidth);
-    this.equipButton.position.set(contentX, height - 70);
+    this.layoutActionButtons(contentX, height - 70, contentWidth);
   }
 
   unmount(): void {}
@@ -205,6 +225,10 @@ export class CollectionScene implements Scene {
       this.onCustomize();
       return;
     }
+    if (item && this.isSelectedDailyOffer && !item.unlocked) {
+      void this.handleRewardedUnlock();
+      return;
+    }
     if (!item || !item.unlocked) {
       this.status.text = item?.unlockDescription ?? 'Tema no disponible.';
       return;
@@ -219,6 +243,36 @@ export class CollectionScene implements Scene {
     this.refreshSelection(false);
   };
 
+  private readonly handleRewardedUnlock = async (): Promise<void> => {
+    if (this.offerPending || !this.canWatchDailyOffer) return;
+    this.offerPending = true;
+    this.status.text = 'PREPARANDO ANUNCIO OPCIONAL...';
+    this.refreshSelection(false);
+    const result = await this.onUnlockDailyWithAd();
+    this.offerPending = false;
+    if (result === 'rewarded') {
+      this.onDailyUnlocked(this.dailyOffer.theme.id);
+      return;
+    }
+    this.status.text = result === 'cancelled'
+      ? 'ANUNCIO CANCELADO · NO SE CONSUMIO LA OFERTA'
+      : result === 'unavailable'
+        ? 'ANUNCIO NO DISPONIBLE · PUEDES USAR MONEDAS'
+        : result === 'already-granted'
+          ? 'ESTA OFERTA YA FUE RECLAMADA'
+          : 'NO SE PUDO COMPLETAR EL ANUNCIO';
+    this.refreshSelection(false);
+  };
+
+  private readonly handleCoinUnlock = (): void => {
+    if (this.offerPending || !this.canBuyDailyOffer) return;
+    if (!this.onBuyDaily()) {
+      this.status.text = 'NO SE PUDO COMPLETAR LA COMPRA';
+      return;
+    }
+    this.onDailyUnlocked(this.dailyOffer.theme.id);
+  };
+
   private refreshSelection(resetStatus = true): void {
     const item = this.selectedItem;
     if (!item) return;
@@ -227,19 +281,43 @@ export class CollectionScene implements Scene {
     this.themeName.style.fill = item.theme.background.phasePrimary[0];
     this.details.text = `${item.theme.description}\nORIGEN: ${item.origin.toUpperCase()}`;
     const equipped = item.theme.id === this.equippedThemeId;
-    this.equipButton.setText(equipped
-      ? item.theme.id === CUSTOM_THEME_ID ? 'EDITAR MI SKIN' : 'EQUIPADO'
-      : item.unlocked
-        ? item.theme.id === CUSTOM_THEME_ID ? 'EDITAR Y EQUIPAR' : 'EQUIPAR TEMA'
-        : 'BLOQUEADO');
-    this.equipButton.setEnabled(
-      item.theme.id === CUSTOM_THEME_ID || (item.unlocked && !equipped),
-    );
+    const offeredAndLocked = this.isSelectedDailyOffer && !item.unlocked;
+    if (offeredAndLocked) {
+      this.equipButton.setText(this.offerPending
+        ? 'PROCESANDO...'
+        : this.dailyOffer.claimedToday
+          ? 'OFERTA DIARIA UTILIZADA'
+          : this.rewardedAdsAvailable
+            ? 'DESBLOQUEAR · ANUNCIO'
+            : 'ANUNCIO NO DISPONIBLE');
+      this.equipButton.setEnabled(this.canWatchDailyOffer);
+      this.coinButton.setText(`${this.dailyOffer.coinPrice.toLocaleString('es-MX')} MONEDAS`);
+      this.coinButton.setEnabled(this.canBuyDailyOffer);
+      this.coinButton.visible = !this.dailyOffer.claimedToday;
+    } else {
+      this.equipButton.setText(equipped
+        ? item.theme.id === CUSTOM_THEME_ID ? 'EDITAR MI SKIN' : 'EQUIPADO'
+        : item.unlocked
+          ? item.theme.id === CUSTOM_THEME_ID ? 'EDITAR Y EQUIPAR' : 'EQUIPAR TEMA'
+          : 'BLOQUEADO');
+      this.equipButton.setEnabled(
+        item.theme.id === CUSTOM_THEME_ID || (item.unlocked && !equipped),
+      );
+      this.coinButton.visible = false;
+    }
     if (resetStatus) {
       this.status.text = equipped
         ? 'TEMA ACTIVO EN MENU Y GAMEPLAY'
         : item.unlocked
           ? 'DISPONIBLE PARA EQUIPAR'
+          : offeredAndLocked
+            ? this.dailyOffer.claimedToday
+              ? 'YA UTILIZASTE LA OFERTA COSMETICA DE HOY'
+              : this.rewardedAdsAvailable
+                ? 'SKIN PERMANENTE · 1 ANUNCIO OPCIONAL O MONEDAS'
+                : 'ANUNCIOS NO DISPONIBLES · ALTERNATIVA POR MONEDAS'
+            : item.origin === 'Rotacion diaria'
+              ? `OFERTA DE HOY: ${this.dailyOffer.theme.name.toUpperCase()}`
           : item.unlockDescription.toUpperCase();
     }
   }
@@ -259,14 +337,51 @@ export class CollectionScene implements Scene {
     this.preview.resize(rightWidth, previewHeight);
 
     const detailsTop = top + previewHeight + 8;
-    const buttonWidth = Math.min(210, rightWidth * 0.42);
+    const buttonWidth = Math.min(330, rightWidth * 0.52);
     this.themeName.position.set(rightX + 3, detailsTop);
     this.details.style.wordWrapWidth = Math.max(150, rightWidth - buttonWidth - 20);
     this.details.position.set(rightX + 3, detailsTop + 27);
     this.status.anchor.set(1, 0);
     this.status.position.set(rightX + rightWidth, detailsTop - 1);
+    this.layoutActionButtons(
+      rightX + rightWidth - buttonWidth,
+      height - 62,
+      buttonWidth,
+    );
+  }
+
+  private layoutActionButtons(x: number, y: number, width: number): void {
+    if (!this.coinButton.visible) {
+      this.equipButton.resize(width);
+      this.equipButton.position.set(x, y);
+      return;
+    }
+    const gap = 8;
+    const buttonWidth = (width - gap) / 2;
     this.equipButton.resize(buttonWidth);
-    this.equipButton.position.set(rightX + rightWidth - buttonWidth, height - 62);
+    this.equipButton.position.set(x, y);
+    this.coinButton.resize(buttonWidth);
+    this.coinButton.position.set(x + buttonWidth + gap, y);
+  }
+
+  private get isSelectedDailyOffer(): boolean {
+    return this.selectedThemeId === this.dailyOffer.theme.id;
+  }
+
+  private get canWatchDailyOffer(): boolean {
+    return this.isSelectedDailyOffer
+      && !this.dailyOffer.owned
+      && !this.dailyOffer.claimedToday
+      && this.rewardedAdsAvailable
+      && !this.offerPending;
+  }
+
+  private get canBuyDailyOffer(): boolean {
+    return this.isSelectedDailyOffer
+      && !this.dailyOffer.owned
+      && !this.dailyOffer.claimedToday
+      && this.dailyOffer.canAfford
+      && !this.offerPending;
   }
 
   private get selectedItem(): ThemeCollectionItem | undefined {

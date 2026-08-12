@@ -20,4 +20,9 @@ export class PhaseTransitionGuard {
   accepts(event: BeatEvent, activePhaseIndex: number): boolean {
     return event.phaseIndex === activePhaseIndex && event.time >= this.playableFrom;
   }
+
+  reset(): void {
+    this.transitionUntil = 0;
+    this.playableFrom = 0;
+  }
 }

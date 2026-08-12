@@ -31,6 +31,12 @@ import type {
 } from './ProgressionTypes';
 import { calculateStarRating, calculateWeightedAccuracy } from './StarRating';
 import { calculateCoinReward } from './Economy';
+import {
+  DAILY_COSMETIC_REWARD_ID,
+  getDailyRewardedThemeOffer,
+  isRewardedTheme,
+  type DailyRewardedThemeState,
+} from '../customization/RewardedThemeCatalog';
 
 export class ProgressionStore {
   private readonly storage: LocalProgressStorage;
@@ -209,6 +215,65 @@ export class ProgressionStore {
     return true;
   }
 
+  getDailyRewardedTheme(date: Date = new Date()): DailyRewardedThemeState {
+    const offer = getDailyRewardedThemeOffer(date);
+    if (this.syncRewardedDay(offer.dayKey)) this.save();
+    return {
+      ...offer,
+      owned: this.isThemeUnlocked(offer.theme.id),
+      claimedToday: this.state.rewardedLimits.usedRewardIds.includes(
+        DAILY_COSMETIC_REWARD_ID,
+      ),
+      canAfford: this.state.coins >= offer.coinPrice,
+    };
+  }
+
+  tryGrantDailyRewardedTheme(
+    themeId: string,
+    opportunityId: string,
+    date: Date = new Date(),
+  ): boolean {
+    const offer = getDailyRewardedThemeOffer(date);
+    this.syncRewardedDay(offer.dayKey);
+    if (
+      themeId !== offer.theme.id
+      || opportunityId !== offer.opportunityId
+      || !isRewardedTheme(themeId)
+      || this.isThemeUnlocked(themeId)
+      || this.state.rewardedLimits.usedRewardIds.includes(DAILY_COSMETIC_REWARD_ID)
+      || this.state.rewardedLimits.claimedOpportunityIds.includes(opportunityId)
+    ) return false;
+
+    this.state.customization.unlockedThemeIds.push(themeId);
+    this.state.rewardedLimits.usedRewardIds.push(DAILY_COSMETIC_REWARD_ID);
+    this.rememberRewardedOpportunity(opportunityId);
+    this.syncCustomization();
+    this.save();
+    return true;
+  }
+
+  tryBuyDailyRewardedTheme(
+    themeId: string,
+    date: Date = new Date(),
+  ): boolean {
+    const offer = getDailyRewardedThemeOffer(date);
+    this.syncRewardedDay(offer.dayKey);
+    if (
+      themeId !== offer.theme.id
+      || !isRewardedTheme(themeId)
+      || this.isThemeUnlocked(themeId)
+      || this.state.rewardedLimits.usedRewardIds.includes(DAILY_COSMETIC_REWARD_ID)
+      || this.state.coins < offer.coinPrice
+    ) return false;
+
+    this.state.coins -= offer.coinPrice;
+    this.state.customization.unlockedThemeIds.push(themeId);
+    this.state.rewardedLimits.usedRewardIds.push(DAILY_COSMETIC_REWARD_ID);
+    this.syncCustomization();
+    this.save();
+    return true;
+  }
+
   recordWeeklyEventRun(
     catalog: readonly WeeklyEventCampaign[],
     input: EventRunInput,
@@ -269,6 +334,19 @@ export class ProgressionStore {
 
   private save(): void {
     this.storage.save(this.state);
+  }
+
+  private syncRewardedDay(dayKey: string): boolean {
+    if (this.state.rewardedLimits.dayKey === dayKey) return false;
+    this.state.rewardedLimits.dayKey = dayKey;
+    this.state.rewardedLimits.usedRewardIds = [];
+    return true;
+  }
+
+  private rememberRewardedOpportunity(opportunityId: string): void {
+    const claimed = this.state.rewardedLimits.claimedOpportunityIds;
+    claimed.push(opportunityId);
+    if (claimed.length > 250) claimed.splice(0, claimed.length - 250);
   }
 
   private syncCustomization(): boolean {

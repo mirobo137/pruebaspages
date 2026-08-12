@@ -23,4 +23,16 @@ export class BeatmapPlayer {
 
     return dueEvents;
   }
+
+  seek(time: number): void {
+    const safeTime = Math.max(0, time);
+    let low = 0;
+    let high = this.beatmap.events.length;
+    while (low < high) {
+      const middle = Math.floor((low + high) / 2);
+      if (this.beatmap.events[middle].time < safeTime) low = middle + 1;
+      else high = middle;
+    }
+    this.nextEventIndex = low;
+  }
 }

@@ -400,13 +400,26 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - El juego debe continuar normalmente ante cancelacion, falta de anuncio, adblock o error del SDK.
 - `src/monetization/` contiene el contrato neutral, el simulador de desarrollo, el proveedor no disponible, bloqueo concurrente y guardia de entrega unica.
 - GitHub Pages siempre recibe `UnavailableAdsService`: no carga SDK, no inicia ciclos de pausa y no debe mostrar ofertas recompensadas.
-- En `npm run dev` se puede preparar una simulacion determinista con `?rewardedAd=rewarded`, `cancelled`, `unavailable` o `error`; todavia no existe una oferta visible hasta la fase 8.
+- En `npm run dev` se puede preparar una simulacion determinista con `?rewardedAd=rewarded`, `cancelled`, `unavailable` o `error`.
 - Los callbacks de ciclo se ejecutan solo si el proveedor confirma que el anuncio realmente comenzo. `unavailable` no pausa audio ni input; error tras inicio siempre ejecuta restauracion.
 - Cada oportunidad usa un ID estable y `RewardGrantGuard` reclama su clave antes de mutar la recompensa, impidiendo entregas duplicadas por callbacks o taps repetidos.
 - Resultado ofrece `DUPLICAR +N` junto a `CONTINUAR` solo cuando el servicio recompensado esta disponible; el valor mostrado es exactamente la recompensa de esa partida.
 - Duplicar nunca multiplica el saldo total. Tras `rewarded`, agrega una sola vez `rewardCoins`, guarda inmediatamente y conserva el ID de oportunidad aunque se recargue el almacenamiento.
 - Mientras la solicitud esta pendiente, ambas acciones de Resultado quedan bloqueadas. Cancelacion y error no cambian monedas; indisponibilidad oculta la oferta y mantiene `CONTINUAR`.
 - La build de GitHub Pages muestra solo `CONTINUAR`. La oferta puede probarse con `npm run dev` y los parametros `rewardedAd` documentados.
+- La Coleccion contiene una familia publicitaria basica separada: `Aqua Vector`, `Violet Drive` y `Ember Beat`. Son deliberadamente mas sencillas que la recompensa semanal `Neon Ascent`.
+- Una sola skin basica rota cada dia UTC mediante una seleccion determinista. La misma fecha siempre produce la misma oferta y no depende de una llamada remota.
+- La skin diaria es una recompensa permanente y completa: desbloquea tambien sus seis componentes para `MI SKIN`. No existen alquileres ni cadenas de varios anuncios.
+- Coleccion permite obtener la oferta con un anuncio opcional confirmado o comprarla por 1,200 monedas. La accion publicitaria se oculta como disponible si el adaptador no puede servir anuncios, pero la alternativa por monedas permanece.
+- Solo puede obtenerse una recompensa cosmetica rotativa por dia. El limite y la oportunidad reclamada se guardan inmediatamente; cancelacion, error e indisponibilidad no consumen la recompensa.
+- GitHub Pages muestra las skins rotativas y la alternativa por monedas, pero nunca presenta el boton publicitario como disponible porque usa `UnavailableAdsService`.
+- Al agotar vidas con proveedor disponible, la partida muestra `SEGUNDA OPORTUNIDAD` antes de Resultado. Rechazar, cancelar o fallar el anuncio conduce al resultado normal.
+- Lectura, Impulso y Climax guardan un checkpoint de score, estadisticas y activaciones al entrar. Revivir descarta todo lo obtenido dentro del intento fallido de esa fase, evitando duplicar Perfect, score o progreso semanal.
+- La reanimacion restaura 50% de la vida redondeada hacia arriba, con minimo de 2 vidas: Facil 3, Medio 2 y Dificil 2.
+- Combo, carga FLOW, FLOW y SUPER FLOW vuelven a estado neutral. Se conservan solo mejores combos y activaciones existentes antes del checkpoint.
+- Antes del nuevo `3-2-1` se eliminan targets, eventos pendientes, drag, buffer temprano y todos los pointer captures. Audio y beatmap reinician juntos desde el tiempo inicial de la fase.
+- Solo existe una oportunidad recompensada de gameplay por partida. Si el anuncio de revive comenzo, Resultado no ofrece despues duplicar monedas; `unavailable` no la marca como consumida, pero oculta las demas ofertas de esa partida por falta de proveedor.
+- Las partidas asistidas siguen guardando records locales durante el prototipo. Antes de rankings competitivos deberan marcarse como asistidas y separarse o excluirse de la tabla oficial.
 
 ## Proxima prioridad tecnica
 

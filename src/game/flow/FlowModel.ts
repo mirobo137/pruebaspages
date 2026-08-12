@@ -138,6 +138,15 @@ export class FlowModel {
     };
   }
 
+  restoreAfterRevive(checkpoint: FlowSnapshot): void {
+    this.charge = 0;
+    this.mode = 'charging';
+    this.remaining = 0;
+    this.activations = checkpoint.activations;
+    this.superPerfects = 0;
+    this.superActivations = checkpoint.superActivations;
+  }
+
   private extendFlow(seconds: number): void {
     this.remaining = Math.min(
       GAME_CONFIG.flowDuration,

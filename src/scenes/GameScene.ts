@@ -29,6 +29,9 @@ import { GameHud } from '../ui/GameHud';
 import { GameCountdown } from '../ui/GameCountdown';
 import { PauseButton } from '../ui/PauseButton';
 import { PauseOverlay } from '../ui/PauseOverlay';
+import { SecondChanceOverlay } from '../ui/SecondChanceOverlay';
+import type { RewardedAdStatus } from '../monetization/RewardTypes';
+import { RewardedGameplayPolicy } from '../game/checkpoint/RewardedGameplayPolicy';
 
 interface DragState {
   pointerId: number;
@@ -47,6 +50,13 @@ interface ActiveTarget {
   event: BeatEvent;
 }
 
+interface GameplayCheckpoint {
+  phaseIndex: number;
+  phaseStartTime: number;
+  score: ScoreSnapshot;
+  flow: FlowSnapshot;
+}
+
 const TARGET_SPAWN_LATE_TOLERANCE = 0.075;
 // Los beatmaps pueden colocar su ultima nota hasta 0.75 s antes del final.
 // Llegar vivo a esa zona cuenta como completar aunque el ultimo fallo agote la vida.
@@ -62,11 +72,15 @@ export interface GameSceneOptions {
   audioReady: Promise<void>;
   onRestart: () => void;
   onExit: () => void;
+  secondChanceAvailable: boolean;
+  onRequestSecondChance: (phaseIndex: number) => Promise<RewardedAdStatus>;
   onFinished: (
     snapshot: ScoreSnapshot,
     flow: FlowSnapshot,
     phaseReached: number,
     completed: boolean,
+    usedSecondChance: boolean,
+    rewardedProviderUnavailable: boolean,
   ) => void;
 }
 
@@ -82,6 +96,7 @@ export class GameScene implements Scene {
   private readonly countdown = new GameCountdown();
   private readonly pauseButton: PauseButton;
   private readonly pauseOverlay: PauseOverlay;
+  private readonly secondChanceOverlay: SecondChanceOverlay;
   private readonly score: ScoreModel;
   private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
@@ -98,10 +113,13 @@ export class GameScene implements Scene {
   private readonly pendingEvents: BeatEvent[] = [];
   private readonly onRestart: () => void;
   private readonly onExit: () => void;
+  private readonly secondChanceAvailable: boolean;
+  private readonly onRequestSecondChance: GameSceneOptions['onRequestSecondChance'];
   private readonly onFinished: GameSceneOptions['onFinished'];
   private readonly activeTargets: ActiveTarget[] = [];
   private dragState: DragState | null = null;
   private readonly bufferedTargets = new Set<ActiveTarget>();
+  private readonly capturedPointers = new Map<number, Element>();
   private width: number;
   private height: number;
   private musicStarted = false;
@@ -111,6 +129,10 @@ export class GameScene implements Scene {
   private pauseReady: Promise<void> = Promise.resolve();
   private mounted = false;
   private phaseIndex = -1;
+  private checkpoint: GameplayCheckpoint;
+  private musicTimelineStart = 0;
+  private awaitingSecondChance = false;
+  private readonly rewardedGameplay = new RewardedGameplayPolicy();
 
   constructor(width: number, height: number, options: GameSceneOptions) {
     this.width = width;
@@ -131,12 +153,24 @@ export class GameScene implements Scene {
     this.audioReady = options.audioReady;
     this.onRestart = options.onRestart;
     this.onExit = options.onExit;
+    this.secondChanceAvailable = options.secondChanceAvailable;
+    this.onRequestSecondChance = options.onRequestSecondChance;
     this.onFinished = options.onFinished;
+    this.checkpoint = {
+      phaseIndex: 0,
+      phaseStartTime: 0,
+      score: this.score.snapshot(),
+      flow: this.flow.snapshot(),
+    };
     this.pauseButton = new PauseButton(this.handlePause);
     this.pauseOverlay = new PauseOverlay({
       onContinue: this.handleContinue,
       onRestart: this.handleRestart,
       onExit: this.handleExit,
+    });
+    this.secondChanceOverlay = new SecondChanceOverlay({
+      onRevive: this.handleSecondChance,
+      onFinish: this.handleFinishAfterFailure,
     });
     this.playfield.addChild(this.targets);
     this.root.addChild(
@@ -147,6 +181,7 @@ export class GameScene implements Scene {
       this.pauseButton,
       this.countdown,
       this.pauseOverlay,
+      this.secondChanceOverlay,
     );
   }
 
@@ -278,6 +313,7 @@ export class GameScene implements Scene {
     this.countdown.resize(width, height);
     this.pauseButton.position.set(width - 58, 78);
     this.pauseOverlay.resize(width, height);
+    this.secondChanceOverlay.resize(width, height);
     this.touchTuning.resize(width, height);
   }
 
@@ -289,10 +325,7 @@ export class GameScene implements Scene {
     this.playfield.off('pointerup', this.handlePointerUp);
     this.playfield.off('pointerupoutside', this.handlePointerUp);
     this.playfield.off('pointercancel', this.handlePointerUp);
-    for (const target of this.activeTargets) target.node.destroy();
-    this.activeTargets.length = 0;
-    this.dragState = null;
-    this.bufferedTargets.clear();
+    this.clearLiveGameplayState();
     this.targets.position.set(0, 0);
     this.audioManager.stop();
   }
@@ -302,6 +335,10 @@ export class GameScene implements Scene {
     if (!this.isGameplayInteractive()) return;
 
     capturePointer(event);
+    const nativeTarget = event.nativeEvent.target;
+    if (nativeTarget instanceof Element) {
+      this.capturedPointers.set(event.pointerId, nativeTarget);
+    }
     this.effects.emitTouch(event.global.x, event.global.y);
 
     if (this.dragState?.pointerId === event.pointerId) return;
@@ -409,6 +446,7 @@ export class GameScene implements Scene {
 
   private readonly handlePointerUp = (event: FederatedPointerEvent): void => {
     releasePointer(event);
+    this.capturedPointers.delete(event.pointerId);
     if (!this.isGameplayInteractive()) {
       if (this.dragState?.pointerId === event.pointerId) {
         this.dragState.target.node.setPressed(false);
@@ -449,7 +487,9 @@ export class GameScene implements Scene {
     void this.audioManager.play(this.track, {
       loop: true,
       loopDuration: this.beatmap.loopDuration,
-      playbackDuration: this.beatmap.duration,
+      playbackDuration: this.beatmap.duration - this.musicTimelineStart,
+      startOffset: this.musicTimelineStart % this.beatmap.loopDuration,
+      timelineOffset: this.musicTimelineStart,
     }).then(() => {
       if (!this.mounted || this.gameEnded) return;
       this.musicStarted = true;
@@ -508,9 +548,10 @@ export class GameScene implements Scene {
     this.bufferedTargets.delete(activeTarget);
 
     if (this.score.isGameOver()) {
-      this.finishGame(
-        this.audioManager.currentTime >= this.beatmap.duration - SONG_COMPLETION_GRACE,
-      );
+      const completed = this.audioManager.currentTime
+        >= this.beatmap.duration - SONG_COMPLETION_GRACE;
+      if (completed) this.finishGame(true);
+      else this.handleRunFailure();
     }
   }
 
@@ -671,6 +712,101 @@ export class GameScene implements Scene {
     };
   }
 
+  private handleRunFailure(): void {
+    if (
+      this.awaitingSecondChance
+      || this.gameEnded
+      || !this.rewardedGameplay.canOffer(this.secondChanceAvailable)
+    ) {
+      this.finishGame(false);
+      return;
+    }
+    this.awaitingSecondChance = true;
+    this.paused = true;
+    this.audioManager.stop();
+    this.musicStarted = false;
+    this.musicStartRequested = false;
+    this.pauseButton.visible = false;
+    this.clearLiveGameplayState();
+    const phase = this.beatmap.phases[this.checkpoint.phaseIndex];
+    this.secondChanceOverlay.show(
+      phase?.name ?? `FASE ${this.checkpoint.phaseIndex + 1}`,
+      this.getRestoredLives(),
+    );
+  }
+
+  private readonly handleSecondChance = async (): Promise<void> => {
+    if (
+      !this.awaitingSecondChance
+      || !this.rewardedGameplay.beginRequest()
+    ) return;
+    this.secondChanceOverlay.setPending(true);
+    const result = await this.onRequestSecondChance(this.checkpoint.phaseIndex);
+    const revived = this.rewardedGameplay.resolve(result);
+    if (!this.mounted || this.gameEnded) return;
+    if (!revived) {
+      this.finishGame(false);
+      return;
+    }
+    this.restoreCheckpoint();
+  };
+
+  private readonly handleFinishAfterFailure = (): void => {
+    if (!this.rewardedGameplay.pending) this.finishGame(false);
+  };
+
+  private restoreCheckpoint(): void {
+    this.awaitingSecondChance = false;
+    this.paused = false;
+    this.clearLiveGameplayState();
+    this.score.restoreAfterRevive(this.checkpoint.score, this.getRestoredLives());
+    this.flow.restoreAfterRevive(this.checkpoint.flow);
+    this.hud.update(this.score.snapshot());
+    this.syncFlowState(this.flow.snapshot());
+    this.phaseTransition.reset();
+    this.beatmapPlayer.seek(this.checkpoint.phaseStartTime);
+    this.phaseIndex = this.checkpoint.phaseIndex;
+    this.musicTimelineStart = this.checkpoint.phaseStartTime;
+    this.musicStarted = false;
+    this.musicStartRequested = false;
+    const phase = this.beatmap.phases[this.phaseIndex];
+    this.background.setPhase(this.phaseIndex, false);
+    this.hud.updateRunProgress(
+      this.musicTimelineStart,
+      this.beatmap.duration,
+      this.phaseIndex,
+      phase?.name ?? `FASE ${this.phaseIndex + 1}`,
+    );
+    this.secondChanceOverlay.hide();
+    this.pauseButton.visible = false;
+    this.countdown.start(`REINICIANDO ${phase?.name?.toUpperCase() ?? 'FASE'}`);
+  }
+
+  private getRestoredLives(): number {
+    return Math.max(2, Math.ceil(this.difficultyProfile.maxLives * 0.5));
+  }
+
+  private clearLiveGameplayState(): void {
+    for (const [pointerId, element] of this.capturedPointers) {
+      try {
+        if (
+          'hasPointerCapture' in element
+          && 'releasePointerCapture' in element
+          && element.hasPointerCapture(pointerId)
+        ) element.releasePointerCapture(pointerId);
+      } catch {
+        // El navegador puede liberar el puntero al abrir el anuncio.
+      }
+    }
+    this.capturedPointers.clear();
+    for (const target of this.activeTargets) target.node.destroy();
+    this.activeTargets.length = 0;
+    this.pendingEvents.length = 0;
+    this.dragState = null;
+    this.bufferedTargets.clear();
+    this.targets.position.set(0, 0);
+  }
+
   private finishGame(completed: boolean): void {
     if (this.gameEnded) return;
 
@@ -681,6 +817,8 @@ export class GameScene implements Scene {
       this.flow.snapshot(),
       Math.max(1, this.phaseIndex + 1),
       completed,
+      this.rewardedGameplay.consumed,
+      this.rewardedGameplay.unavailable,
     );
   }
 
@@ -702,6 +840,12 @@ export class GameScene implements Scene {
 
     const isInitialPhase = this.phaseIndex < 0;
     this.phaseIndex = nextPhaseIndex;
+    this.checkpoint = {
+      phaseIndex: nextPhaseIndex,
+      phaseStartTime: phase.startTime,
+      score: this.score.snapshot(),
+      flow: this.flow.snapshot(),
+    };
     this.background.setPhase(nextPhaseIndex, !isInitialPhase);
     if (isInitialPhase) return;
 
@@ -750,6 +894,7 @@ export class GameScene implements Scene {
     return this.musicStarted
       && this.audioManager.isPlaying
       && !this.paused
+      && !this.awaitingSecondChance
       && currentTime < this.beatmap.duration
       && expectedPhaseIndex === this.phaseIndex
       && !this.phaseTransition.isActive(currentTime);
@@ -764,7 +909,7 @@ export class GameScene implements Scene {
   };
 
   private pauseGame(): void {
-    if (this.paused || this.gameEnded) return;
+    if (this.paused || this.gameEnded || this.awaitingSecondChance) return;
 
     this.paused = true;
     for (const target of this.activeTargets) target.node.resetInteraction();

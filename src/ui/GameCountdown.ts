@@ -54,14 +54,14 @@ export class GameCountdown extends Container {
     this.layout();
   }
 
-  start(): void {
+  start(label = 'PREPÁRATE'): void {
     this.state = 'counting';
     this.visible = true;
     this.elapsed = 0;
     this.displayedStep = '';
     this.completionReported = false;
     this.number.style.fontSize = 92;
-    this.subtitle.text = 'PREPÁRATE';
+    this.subtitle.text = label;
     this.updateStep('3');
     this.layout();
   }

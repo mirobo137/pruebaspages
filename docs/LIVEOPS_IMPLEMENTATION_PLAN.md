@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 8 - Validacion de duplicar monedas`
-- Siguiente accion: `Probar localmente los cuatro resultados y confirmar que GitHub Pages conserva solo Continuar`
+- Fase activa: `Fase 10 - Validacion movil de skin recompensada rotativa`
+- Siguiente accion: `Probar la oferta diaria en Coleccion con anuncio, monedas, recarga y cambio de dia UTC`
 - Ultima actualizacion: `2026-08-12`
 
 Estados permitidos:
@@ -256,13 +256,13 @@ fallo -> resultado de segunda oportunidad -> anuncio voluntario
       -> reiniciar la fase actual -> cuenta 3, 2, 1 -> gameplay
 ```
 
-- [ ] 9.1 Crear checkpoint seguro al inicio de Lectura, Impulso y Climax.
-- [ ] 9.2 Restaurar score y progreso acordados sin duplicar eventos ya premiados.
-- [ ] 9.3 Reiniciar combo y FLOW; recuperar una cantidad de vida balanceada.
-- [ ] 9.4 Limpiar targets, buffers de input y punteros capturados antes del conteo.
-- [ ] 9.5 Limitar a una segunda oportunidad por partida.
-- [ ] 9.6 No ofrecer duplicar monedas si la partida ya utilizo el anuncio de reanimacion.
-- [ ] 9.7 Definir politica futura para rankings de partidas asistidas.
+- [x] 9.1 Crear checkpoint seguro al inicio de Lectura, Impulso y Climax.
+- [x] 9.2 Restaurar score y progreso acordados sin duplicar eventos ya premiados.
+- [x] 9.3 Reiniciar combo y FLOW; recuperar una cantidad de vida balanceada.
+- [x] 9.4 Limpiar targets, buffers de input y punteros capturados antes del conteo.
+- [x] 9.5 Limitar a una segunda oportunidad por partida.
+- [x] 9.6 No ofrecer duplicar monedas si la partida ya utilizo el anuncio de reanimacion.
+- [x] 9.7 Definir politica futura para rankings de partidas asistidas.
 
 Compuerta especifica:
 
@@ -275,12 +275,12 @@ Compuerta especifica:
 
 Objetivo: ofrecer cosmeticos opcionales sin reducir el valor del evento semanal.
 
-- [ ] 10.1 Crear una seleccion separada de skins publicitarias basicas.
-- [ ] 10.2 Rotar una oferta diaria de forma determinista.
-- [ ] 10.3 Un anuncio concede una recompensa completa; nunca varios anuncios encadenados.
-- [ ] 10.4 Definir si la recompensa es permanente o una prueba de 24 horas antes de implementarla.
-- [ ] 10.5 Limitar la oferta publicitaria de Coleccion a una oportunidad diaria.
-- [ ] 10.6 Ofrecer alternativa por monedas cuando sea apropiado.
+- [x] 10.1 Crear una seleccion separada de skins publicitarias basicas.
+- [x] 10.2 Rotar una oferta diaria de forma determinista.
+- [x] 10.3 Un anuncio concede una recompensa completa; nunca varios anuncios encadenados.
+- [x] 10.4 Definir recompensa permanente por anuncio, sin alquiler de 24 horas.
+- [x] 10.5 Limitar la oferta publicitaria de Coleccion a una oportunidad diaria.
+- [x] 10.6 Ofrecer alternativa de 1,200 monedas para la misma skin del dia.
 
 Compuerta especifica:
 
@@ -380,12 +380,12 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-12 | Fase 7 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Exito, cancelacion, indisponibilidad, error, doble solicitud, inicio duplicado y entrega unica probados; produccion usa proveedor no disponible y no muestra ofertas |
 | 2026-08-12 | Fase 7 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma que el juego permanece normal sin SDK ni ofertas; se habilita Fase 8 |
 | 2026-08-12 | Fase 8 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Duplicacion exacta del premio de partida, ID persistente, bloqueo de taps, cuatro resultados y layout de Resultado en nueve viewports probados; falta validacion local/movil |
+| 2026-08-12 | Fase 8 | Desarrollo local / movil del usuario | Proveedor simulado | Aprobado | Usuario aprueba duplicacion de monedas y habilita Fase 9 |
+| 2026-08-12 | Fase 9 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Checkpoints de tres fases, rollback de score/eventos, vida parcial, FLOW limpio, seek de beatmap, offset de audio, punteros liberados y politica de un anuncio probados; falta validacion movil |
+| 2026-08-12 | Fase 10 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Tres skins basicas, rotacion diaria UTC, desbloqueo permanente por un anuncio, alternativa de 1,200 monedas, limite diario y persistencia protegida; falta validacion movil |
 
 ## Decisiones pendientes controladas
 
 Estas decisiones no bloquean las primeras fases y deben resolverse en el punto indicado:
 
-- Fase 9: cantidad exacta de vida recuperada al revivir.
-- Fase 9: tratamiento futuro de puntuaciones asistidas en rankings.
-- Fase 10: skin permanente o prueba temporal por anuncio.
 - Fase 11/12: primer portal que recibira una build publica con monetizacion.

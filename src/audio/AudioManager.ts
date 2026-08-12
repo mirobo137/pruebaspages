@@ -18,13 +18,18 @@ export class AudioManager {
   private readonly trackData = new Map<string, Promise<ArrayBuffer>>();
   private readonly decodedTracks = new Map<string, Promise<AudioBuffer>>();
   private startedAt = 0;
+  private timelineOffset = 0;
   private playing = false;
   private paused = false;
   private playbackToken = 0;
 
   get currentTime(): number {
     if (!this.playing || !this.context) return 0;
-    return Math.max(0, this.context.currentTime - this.startedAt);
+    return calculateAudioTimelineTime(
+      this.context.currentTime,
+      this.startedAt,
+      this.timelineOffset,
+    );
   }
 
   get isPlaying(): boolean {
@@ -60,6 +65,7 @@ export class AudioManager {
       playbackDuration?: number;
       startOffset?: number;
       clipDuration?: number;
+      timelineOffset?: number;
     } = {},
   ): Promise<void> {
     this.stop();
@@ -140,6 +146,7 @@ export class AudioManager {
     }
 
     this.startedAt = startAt;
+    this.timelineOffset = Math.max(0, options.timelineOffset ?? 0);
     this.playing = true;
     this.paused = false;
   }
@@ -176,6 +183,7 @@ export class AudioManager {
     }
     this.sources.length = 0;
     this.startedAt = 0;
+    this.timelineOffset = 0;
     this.playing = false;
     this.paused = false;
   }
@@ -279,4 +287,12 @@ export class AudioManager {
     }
     return curve;
   }
+}
+
+export function calculateAudioTimelineTime(
+  contextTime: number,
+  startedAt: number,
+  timelineOffset: number,
+): number {
+  return Math.max(0, timelineOffset) + Math.max(0, contextTime - startedAt);
 }

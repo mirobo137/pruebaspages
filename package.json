@@ -12,7 +12,9 @@
     "test:event": "node scripts/verify-weekly-event.mjs",
     "test:layout": "node scripts/verify-menu-layout.mjs",
     "test:ads": "node scripts/verify-rewarded-ads.mjs",
-    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads",
+    "test:revive": "node scripts/verify-phase-revive.mjs",
+    "test:daily-cosmetic": "node scripts/verify-daily-cosmetic.mjs",
+    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads && npm run test:revive && npm run test:daily-cosmetic",
     "dev": "npm run content:sync && vite",
     "build": "npm run content:sync && tsc -b && vite build",
     "preview": "vite preview"

@@ -37,6 +37,7 @@ import {
   readDevelopmentAdOutcome,
 } from '../monetization/RewardedAdsFactory';
 import { RunCoinDoubler } from '../monetization/RunCoinDoubler';
+import { DailyCosmeticUnlocker } from '../monetization/DailyCosmeticUnlocker';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -53,6 +54,7 @@ export class GameApplication {
   private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
   private tracks: TrackSelection[] = [];
   private weeklyEvents: WeeklyEventCampaign[] = [];
+  private gameSessionSequence = 0;
   private readonly tick = (ticker: Ticker): void => {
     this.sceneManager.update(ticker.deltaTime / 60);
   };
@@ -144,6 +146,20 @@ export class GameApplication {
   };
 
   private showCollection = (): void => {
+    const offerDate = new Date();
+    const dailyOffer = this.progression.getDailyRewardedTheme(offerDate);
+    const dailyUnlocker = new DailyCosmeticUnlocker(
+      this.rewardedAds,
+      (themeId, opportunityId) => this.progression.tryGrantDailyRewardedTheme(
+        themeId,
+        opportunityId,
+        offerDate,
+      ),
+      {
+        onStarted: () => this.menuAudio.stop(),
+        onFinished: () => this.menuAudio.start(),
+      },
+    );
     this.updateCanvasState('collection');
     this.sceneManager.switchTo(
       new CollectionScene(this.app.screen.width, this.app.screen.height, {
@@ -152,14 +168,30 @@ export class GameApplication {
           this.progression.unlockedThemeIds,
           this.progression.unlockedCosmeticIds,
           this.progression.customThemeSelection,
+          dailyOffer.theme.id,
         ),
         equippedThemeId: this.progression.equippedThemeId,
         visualQuality: this.visualQuality,
+        dailyOffer,
+        rewardedAdsAvailable: dailyUnlocker.available,
         onEquip: (themeId) => {
           if (!this.progression.equipTheme(themeId)) return false;
           this.themeSelection.selectResolved(this.progression.equippedVisualTheme);
           this.updateCanvasState('collection');
           return true;
+        },
+        onUnlockDailyWithAd: () => dailyUnlocker.unlock({
+          themeId: dailyOffer.theme.id,
+          opportunityId: dailyOffer.opportunityId,
+        }),
+        onBuyDaily: () => this.progression.tryBuyDailyRewardedTheme(
+          dailyOffer.theme.id,
+          offerDate,
+        ),
+        onDailyUnlocked: (themeId) => {
+          this.progression.equipTheme(themeId);
+          this.themeSelection.selectResolved(this.progression.equippedVisualTheme);
+          this.showCollection();
         },
         onCustomize: this.showCustomTheme,
         onBack: this.showMenu,
@@ -227,6 +259,7 @@ export class GameApplication {
     difficulty: Difficulty,
     selection: TrackSelection,
   ): void => {
+    const gameOpportunityId = `game:${++this.gameSessionSequence}:${Date.now().toString(36)}`;
     this.menuAudio.stop();
     this.updateCanvasState('game');
     const audioReady = this.audioManager.prepare(selection.track);
@@ -241,13 +274,29 @@ export class GameApplication {
         audioReady,
         onRestart: () => this.startGame(difficulty, selection),
         onExit: this.showMenu,
-        onFinished: (snapshot, flow, phaseReached, completed) => this.showResult(
+        secondChanceAvailable: this.rewardedAds.available,
+        onRequestSecondChance: async (phaseIndex) => (
+          await this.rewardedAds.showRewarded({
+            placement: 'second-chance',
+            opportunityId: `${gameOpportunityId}:phase:${phaseIndex}`,
+          })
+        ).status,
+        onFinished: (
+          snapshot,
+          flow,
+          phaseReached,
+          completed,
+          usedSecondChance,
+          rewardedProviderUnavailable,
+        ) => this.showResult(
           selection,
           difficulty,
           snapshot,
           flow,
           phaseReached,
           completed,
+          usedSecondChance,
+          rewardedProviderUnavailable,
         ),
       }),
     );
@@ -260,6 +309,8 @@ export class GameApplication {
     flow: FlowSnapshot,
     phaseReached: number,
     completed: boolean,
+    usedSecondChance: boolean,
+    rewardedProviderUnavailable: boolean,
   ): void => {
     this.updateCanvasState('result');
     const run = this.progression.recordRun(
@@ -306,7 +357,9 @@ export class GameApplication {
         earnedStars: run.earnedStars,
         previousStars: run.previousStars,
         isNewHighScore: run.isNewHighScore,
-        rewardedAdsAvailable: coinDoubler.available,
+        rewardedAdsAvailable: coinDoubler.available
+          && !usedSecondChance
+          && !rewardedProviderUnavailable,
         onDoubleCoins: () => coinDoubler.double({
           opportunityId: run.opportunityId,
           rewardCoins: run.rewardCoins,

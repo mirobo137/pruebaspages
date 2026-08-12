@@ -64,7 +64,15 @@ try {
   assert.equal(selection.current.id, DEFAULT_VISUAL_THEME.id);
   assert.deepEqual(
     listVisualThemes().map((theme) => theme.id),
-    ['neon-pulse', 'cyber-sakura', 'solar-flux', 'neon-ascent'],
+    [
+      'neon-pulse',
+      'cyber-sakura',
+      'solar-flux',
+      'neon-ascent',
+      'aqua-vector',
+      'violet-drive',
+      'ember-beat',
+    ],
   );
   assert.equal(selection.select('cyber-sakura').target.shape, 'segmented');
   assert.equal(selection.current.target.timingRingStyle, 'broken');
@@ -92,7 +100,7 @@ try {
 
   const newPlayerUnlocks = getAutomaticallyUnlockedThemeIds(0);
   const newPlayerCollection = listThemeCollection(0, newPlayerUnlocks);
-  assert.equal(newPlayerCollection.length, 4);
+  assert.equal(newPlayerCollection.length, 7);
   assert.equal(newPlayerUnlocks.includes('neon-pulse'), true);
   assert.equal(newPlayerUnlocks.includes('cyber-sakura'), true);
   assert.equal(newPlayerUnlocks.includes('solar-flux'), false);

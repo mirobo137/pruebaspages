@@ -4,12 +4,14 @@ import { CYBER_SAKURA_THEME } from './themes/cyberSakuraTheme';
 import { DEFAULT_VISUAL_THEME } from './themes/defaultTheme';
 import { SOLAR_FLUX_THEME } from './themes/solarFluxTheme';
 import { NEON_ASCENT_THEME } from './themes/neonAscentTheme';
+import { listRewardedVisualThemes } from './RewardedThemeCatalog';
 
 const THEMES = [
   resolveVisualTheme(DEFAULT_VISUAL_THEME),
   resolveVisualTheme(CYBER_SAKURA_THEME),
   resolveVisualTheme(SOLAR_FLUX_THEME),
   resolveVisualTheme(NEON_ASCENT_THEME),
+  ...listRewardedVisualThemes(),
 ] as const;
 const THEMES_BY_ID = new Map<string, VisualTheme>(
   THEMES.map((theme) => [theme.id, theme]),

@@ -66,4 +66,14 @@ export class ScoreModel {
       misses: this.misses,
     };
   }
+
+  restoreAfterRevive(checkpoint: ScoreSnapshot, restoredLives: number): void {
+    this.score = checkpoint.score;
+    this.combo = 0;
+    this.bestCombo = checkpoint.bestCombo;
+    this.lives = Math.max(1, Math.min(this.maxLives, Math.floor(restoredLives)));
+    this.perfects = checkpoint.perfects;
+    this.goods = checkpoint.goods;
+    this.misses = checkpoint.misses;
+  }
 }
