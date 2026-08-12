@@ -11,7 +11,8 @@
     "test:progress": "node scripts/verify-progress-migration.mjs",
     "test:event": "node scripts/verify-weekly-event.mjs",
     "test:layout": "node scripts/verify-menu-layout.mjs",
-    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout",
+    "test:ads": "node scripts/verify-rewarded-ads.mjs",
+    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads",
     "dev": "npm run content:sync && vite",
     "build": "npm run content:sync && tsc -b && vite build",
     "preview": "vite preview"

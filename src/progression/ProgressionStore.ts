@@ -182,17 +182,31 @@ export class ProgressionStore {
     this.state.records[trackId] ??= {};
     this.state.records[trackId][difficulty] = record;
     this.state.totalRuns += 1;
+    const opportunityId = `run:${this.state.totalRuns}:${Date.now().toString(36)}`;
     this.state.coins += rewardCoins;
     this.syncCustomization();
     this.save();
 
     return {
+      opportunityId,
       rewardCoins,
       earnedStars,
       previousStars,
       isNewHighScore,
       record,
     };
+  }
+
+  tryGrantRunCoinBonus(opportunityId: string, amount: number): boolean {
+    const safeAmount = Math.max(0, Math.floor(amount));
+    if (!isSafeRewardOpportunityId(opportunityId) || safeAmount <= 0) return false;
+    const claimed = this.state.rewardedLimits.claimedOpportunityIds;
+    if (claimed.includes(opportunityId)) return false;
+    claimed.push(opportunityId);
+    if (claimed.length > 250) claimed.splice(0, claimed.length - 250);
+    this.state.coins += safeAmount;
+    this.save();
+    return true;
   }
 
   recordWeeklyEventRun(
@@ -294,4 +308,10 @@ export class ProgressionStore {
     };
     return true;
   }
+}
+
+function isSafeRewardOpportunityId(value: string): boolean {
+  return value.length > 0
+    && value.length <= 160
+    && /^[a-zA-Z0-9:_-]+$/.test(value);
 }

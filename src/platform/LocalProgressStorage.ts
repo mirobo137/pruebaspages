@@ -304,6 +304,9 @@ function sanitizeRewardedLimits(value: unknown): ProgressState['rewardedLimits']
     usedRewardIds: isRecord(value)
       ? sanitizeIdentifiers(value.usedRewardIds, 50)
       : [],
+    claimedOpportunityIds: isRecord(value)
+      ? sanitizeIdentifiers(value.claimedOpportunityIds, 250)
+      : [],
   };
 }
 

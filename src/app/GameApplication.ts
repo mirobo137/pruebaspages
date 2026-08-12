@@ -32,6 +32,11 @@ import { loadWeeklyEventCatalog } from '../events/EventCatalog';
 import type { WeeklyEventCampaign } from '../events/EventTypes';
 import { getVisualTheme } from '../customization/ThemeCatalog';
 import { listAvailableThemeComponents } from '../customization/ThemeComponents';
+import {
+  createRewardedAdsService,
+  readDevelopmentAdOutcome,
+} from '../monetization/RewardedAdsFactory';
+import { RunCoinDoubler } from '../monetization/RunCoinDoubler';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -40,6 +45,10 @@ export class GameApplication {
   private readonly audioManager = new AudioManager();
   private readonly menuAudio = new MenuAudioController(this.audioManager);
   private readonly progression = new ProgressionStore();
+  private readonly rewardedAds = createRewardedAdsService({
+    development: import.meta.env.DEV,
+    simulationOutcome: readDevelopmentAdOutcome(window.location.search),
+  });
   private readonly themeSelection = new ThemeSelection(this.progression.equippedThemeId);
   private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
   private tracks: TrackSelection[] = [];
@@ -73,6 +82,9 @@ export class GameApplication {
         : detectVisualQuality(this.app.screen.width, this.app.screen.height);
 
     this.mountElement.appendChild(this.app.canvas);
+    this.app.canvas.dataset.rewardedAds = this.rewardedAds.available
+      ? 'development'
+      : 'unavailable';
     this.app.stage.addChild(this.sceneHost);
     [this.tracks, this.weeklyEvents] = await Promise.all([
       this.loadMusic(),
@@ -96,6 +108,7 @@ export class GameApplication {
     window.removeEventListener('resize', this.handleResize);
     this.app.ticker.remove(this.tick);
     this.sceneManager.destroy();
+    this.rewardedAds.destroy();
     this.menuAudio.destroy();
     this.audioManager.destroy();
     this.app.destroy(true);
@@ -263,6 +276,23 @@ export class GameApplication {
       flowActivations: flow.activations,
       superFlowActivations: flow.superActivations,
     });
+    let resumeAudioAfterAd = false;
+    const coinDoubler = new RunCoinDoubler(
+      this.rewardedAds,
+      (opportunityId, amount) => this.progression.tryGrantRunCoinBonus(
+        opportunityId,
+        amount,
+      ),
+      {
+        onStarted: async () => {
+          resumeAudioAfterAd = this.audioManager.isPlaying;
+          if (resumeAudioAfterAd) await this.audioManager.pause();
+        },
+        onFinished: async () => {
+          if (resumeAudioAfterAd) await this.audioManager.resume();
+        },
+      },
+    );
     this.sceneManager.switchTo(
       new ResultScene(this.app.screen.width, this.app.screen.height, {
         trackTitle: selection.track.title,
@@ -276,6 +306,11 @@ export class GameApplication {
         earnedStars: run.earnedStars,
         previousStars: run.previousStars,
         isNewHighScore: run.isNewHighScore,
+        rewardedAdsAvailable: coinDoubler.available,
+        onDoubleCoins: () => coinDoubler.double({
+          opportunityId: run.opportunityId,
+          rewardCoins: run.rewardCoins,
+        }),
         onBackToMenu: this.showMenu,
       }),
     );

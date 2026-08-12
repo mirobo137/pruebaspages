@@ -398,6 +398,15 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Reanudar tras un anuncio reinicia de forma segura la fase con cuenta regresiva; nunca devuelve al jugador a notas vencidas.
 - La integracion usa un contrato neutral con adaptadores de desarrollo, CrazyGames y Poki.
 - El juego debe continuar normalmente ante cancelacion, falta de anuncio, adblock o error del SDK.
+- `src/monetization/` contiene el contrato neutral, el simulador de desarrollo, el proveedor no disponible, bloqueo concurrente y guardia de entrega unica.
+- GitHub Pages siempre recibe `UnavailableAdsService`: no carga SDK, no inicia ciclos de pausa y no debe mostrar ofertas recompensadas.
+- En `npm run dev` se puede preparar una simulacion determinista con `?rewardedAd=rewarded`, `cancelled`, `unavailable` o `error`; todavia no existe una oferta visible hasta la fase 8.
+- Los callbacks de ciclo se ejecutan solo si el proveedor confirma que el anuncio realmente comenzo. `unavailable` no pausa audio ni input; error tras inicio siempre ejecuta restauracion.
+- Cada oportunidad usa un ID estable y `RewardGrantGuard` reclama su clave antes de mutar la recompensa, impidiendo entregas duplicadas por callbacks o taps repetidos.
+- Resultado ofrece `DUPLICAR +N` junto a `CONTINUAR` solo cuando el servicio recompensado esta disponible; el valor mostrado es exactamente la recompensa de esa partida.
+- Duplicar nunca multiplica el saldo total. Tras `rewarded`, agrega una sola vez `rewardCoins`, guarda inmediatamente y conserva el ID de oportunidad aunque se recargue el almacenamiento.
+- Mientras la solicitud esta pendiente, ambas acciones de Resultado quedan bloqueadas. Cancelacion y error no cambian monedas; indisponibilidad oculta la oferta y mantiene `CONTINUAR`.
+- La build de GitHub Pages muestra solo `CONTINUAR`. La oferta puede probarse con `npm run dev` y los parametros `rewardedAd` documentados.
 
 ## Proxima prioridad tecnica
 

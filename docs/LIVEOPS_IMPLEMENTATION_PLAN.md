@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 6 - Validacion movil de la interfaz del evento`
-- Siguiente accion: `Publicar, reclamar recompensas y comprobar la ruta semanal y Coleccion en movil`
+- Fase activa: `Fase 8 - Validacion de duplicar monedas`
+- Siguiente accion: `Probar localmente los cuatro resultados y confirmar que GitHub Pages conserva solo Continuar`
 - Ultima actualizacion: `2026-08-12`
 
 Estados permitidos:
@@ -214,12 +214,12 @@ src/monetization/
   UnavailableAdsService.ts
 ```
 
-- [ ] 7.1 Definir resultados `rewarded`, `cancelled`, `unavailable` y `error`.
-- [ ] 7.2 Crear adaptador de simulacion habilitado solo en desarrollo.
-- [ ] 7.3 Ocultar o sustituir ofertas cuando los anuncios no esten disponibles.
-- [ ] 7.4 Bloquear doble solicitud mientras una peticion este pendiente.
-- [ ] 7.5 Pausar input y audio solo cuando corresponda al ciclo del SDK.
-- [ ] 7.6 Entregar y guardar cada recompensa exactamente una vez.
+- [x] 7.1 Definir resultados `rewarded`, `cancelled`, `unavailable` y `error`.
+- [x] 7.2 Crear adaptador de simulacion habilitado solo en desarrollo.
+- [x] 7.3 Ocultar o sustituir ofertas cuando los anuncios no esten disponibles.
+- [x] 7.4 Bloquear doble solicitud mientras una peticion este pendiente.
+- [x] 7.5 Pausar input y audio solo cuando corresponda al ciclo del SDK.
+- [x] 7.6 Entregar y guardar cada recompensa exactamente una vez.
 
 Compuerta especifica:
 
@@ -231,12 +231,12 @@ Compuerta especifica:
 
 Objetivo: introducir el primer anuncio recompensado en el punto menos invasivo.
 
-- [ ] 8.1 Mostrar `Continuar` y `Duplicar monedas` con igual claridad visual.
-- [ ] 8.2 Explicar el valor exacto antes de solicitar el anuncio.
-- [ ] 8.3 Permitir una sola duplicacion por partida.
-- [ ] 8.4 Guardar las monedas extra inmediatamente despues del exito.
-- [ ] 8.5 Continuar normalmente si el anuncio falla o no esta disponible.
-- [ ] 8.6 Registrar si la partida ya utilizo una oportunidad recompensada.
+- [x] 8.1 Mostrar `Continuar` y `Duplicar monedas` con igual claridad visual.
+- [x] 8.2 Explicar el valor exacto antes de solicitar el anuncio.
+- [x] 8.3 Permitir una sola duplicacion por partida.
+- [x] 8.4 Guardar las monedas extra inmediatamente despues del exito.
+- [x] 8.5 Continuar normalmente si el anuncio falla o no esta disponible.
+- [x] 8.6 Registrar si la partida ya utilizo una oportunidad recompensada.
 
 Compuerta especifica:
 
@@ -376,12 +376,15 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-12 | Fase 6 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Pantalla semanal, scroll, cuenta UTC, indicador pendiente, reclamacion atomica, siete componentes y desbloqueo persistente de Neon Ascent probados; falta validacion movil fisica |
 | 2026-08-12 | Fase 6 | `npm run test:layout` | 9 viewports de 320x568 a 915x412 | Correccion responsive | Cabecera, navegacion, playlist, dificultad y JUGAR verificados sin superposicion ni salida del viewport; en alturas compactas se oculta solo informacion secundaria |
 | 2026-08-12 | Fase 6 | `npm test` + `npm run build` | Windows / Node 24 | Ampliacion correcta | Vitrina animada de recompensa final, piezas independientes, editor MI SKIN, composicion segura, slot unico y persistencia tras recarga verificados; falta aprobacion tactil y visual en movil |
+| 2026-08-12 | Fase 6 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario aprueba evento, preview final, piezas y MI SKIN; se habilita Fase 7 |
+| 2026-08-12 | Fase 7 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Exito, cancelacion, indisponibilidad, error, doble solicitud, inicio duplicado y entrega unica probados; produccion usa proveedor no disponible y no muestra ofertas |
+| 2026-08-12 | Fase 7 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma que el juego permanece normal sin SDK ni ofertas; se habilita Fase 8 |
+| 2026-08-12 | Fase 8 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Duplicacion exacta del premio de partida, ID persistente, bloqueo de taps, cuatro resultados y layout de Resultado en nueve viewports probados; falta validacion local/movil |
 
 ## Decisiones pendientes controladas
 
 Estas decisiones no bloquean las primeras fases y deben resolverse en el punto indicado:
 
-- Fase 6: nombre y primera identidad visual del evento semanal.
 - Fase 9: cantidad exacta de vida recuperada al revivir.
 - Fase 9: tratamiento futuro de puntuaciones asistidas en rankings.
 - Fase 10: skin permanente o prueba temporal por anuncio.

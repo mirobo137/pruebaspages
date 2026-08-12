@@ -105,6 +105,7 @@ try {
   assert.equal(migratedState.version, 3);
   assert.deepEqual(migratedState.weeklyEvent.missionProgress, {});
   assert.deepEqual(migratedState.rewardedLimits.usedRewardIds, []);
+  assert.deepEqual(migratedState.rewardedLimits.claimedOpportunityIds, []);
   assert.deepEqual(migratedState.customization.unlockedCosmeticIds, []);
   assert.equal(
     migratedState.customization.customTheme.componentThemeIds['drag-trail'],
@@ -162,6 +163,23 @@ try {
   assert.equal(reloadedCustom.customThemeSelection['target-palette'], 'cyber-sakura');
   assert.equal(reloadedCustom.customThemeSelection['flow-background'], 'solar-flux');
   assert.equal(reloadedCustom.equippedVisualTheme.id, 'custom-1');
+
+  const coinsBeforeBonus = reloadedCustom.coins;
+  assert.equal(
+    reloadedCustom.tryGrantRunCoinBonus('run:44:test:double-coins', 75),
+    true,
+  );
+  assert.equal(reloadedCustom.coins, coinsBeforeBonus + 75);
+  assert.equal(
+    reloadedCustom.tryGrantRunCoinBonus('run:44:test:double-coins', 75),
+    false,
+  );
+  const afterBonusReload = new ProgressionStore(new LocalProgressStorage(unlockStorage));
+  assert.equal(afterBonusReload.coins, coinsBeforeBonus + 75);
+  assert.equal(
+    afterBonusReload.tryGrantRunCoinBonus('run:44:test:double-coins', 75),
+    false,
+  );
 
   console.log('Progress v2 -> v3 migration and recovery: OK');
 } finally {

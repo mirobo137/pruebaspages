@@ -189,6 +189,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 ### Hito 3 — Preparacion para portal
 
 - [ ] Optimizar peso, carga y rendimiento.
+- [x] Crear contrato neutral y simulador seguro de anuncios recompensados.
+- [x] Integrar la primera oferta opcional para duplicar solo las monedas de una partida.
 - [ ] Crear icono, miniatura y textos de presentacion.
 - [ ] Revisar privacidad, audio y recursos con licencia.
 - [ ] Integrar el SDK del portal solo donde aporte valor.

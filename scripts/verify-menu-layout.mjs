@@ -11,6 +11,9 @@ try {
   const { calculateMenuLayout } = await server.ssrLoadModule(
     '/src/scenes/MenuLayout.ts',
   );
+  const { calculateResultLayout } = await server.ssrLoadModule(
+    '/src/scenes/ResultLayout.ts',
+  );
   const viewports = [
     [320, 568],
     [360, 640],
@@ -44,12 +47,22 @@ try {
         `${width}x${height}: playlist y dificultad se superponen`,
       );
     }
+
+    const resultLayout = calculateResultLayout(width, height);
+    assert.ok(resultLayout.cardX >= 0, `${width}x${height}: resultado fuera a la izquierda`);
+    assert.ok(
+      resultLayout.cardX + resultLayout.cardWidth <= width,
+      `${width}x${height}: resultado fuera a la derecha`,
+    );
+    assert.ok(resultLayout.buttonY >= resultLayout.cardY + resultLayout.cardHeight);
+    assert.ok(resultLayout.buttonY + 64 <= height, `${width}x${height}: botones de resultado fuera`);
+    assert.ok(resultLayout.totalButtonWidth <= width);
   }
 
   assert.equal(calculateMenuLayout(320, 568).showDetails, false);
   assert.equal(calculateMenuLayout(390, 844).showDetails, true);
   assert.equal(calculateMenuLayout(650, 360).compact, true);
-  console.log('Responsive menu layout across 9 mobile viewports: OK');
+  console.log('Responsive menu and rewarded result across 9 mobile viewports: OK');
 } finally {
   await server.close();
 }

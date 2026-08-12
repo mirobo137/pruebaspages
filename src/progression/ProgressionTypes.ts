@@ -43,6 +43,7 @@ export interface WeeklyEventProgress {
 export interface RewardedLimitsProgress {
   dayKey: string | null;
   usedRewardIds: string[];
+  claimedOpportunityIds: string[];
 }
 
 export interface ProgressState {
@@ -58,6 +59,7 @@ export interface ProgressState {
 }
 
 export interface RecordedRun {
+  opportunityId: string;
   rewardCoins: number;
   earnedStars: number;
   previousStars: number;
@@ -102,6 +104,7 @@ export function createEmptyProgressState(): ProgressState {
     rewardedLimits: {
       dayKey: null,
       usedRewardIds: [],
+      claimedOpportunityIds: [],
     },
   };
 }
