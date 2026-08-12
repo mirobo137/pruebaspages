@@ -287,7 +287,12 @@ export class ThemeList extends Container {
       } else if (item.theme.target.shape === 'segmented') {
         for (let segment = 0; segment < 6; segment += 1) {
           const start = segment * Math.PI / 3 + 0.08;
-          row.icon.arc(32, 44, 16, start, start + Math.PI / 3 - 0.16)
+          row.icon
+            .moveTo(
+              32 + Math.cos(start) * 16,
+              44 + Math.sin(start) * 16,
+            )
+            .arc(32, 44, 16, start, start + Math.PI / 3 - 0.16)
             .stroke({ color: primary, alpha: 0.95, width: 2 });
         }
       } else {
@@ -296,7 +301,10 @@ export class ThemeList extends Container {
       }
       if (!item.unlocked) {
         row.icon.rect(27, 41, 10, 9).stroke({ color: 0xffcf70, width: 1.4 });
-        row.icon.arc(32, 41, 4, Math.PI, 0).stroke({ color: 0xffcf70, width: 1.4 });
+        row.icon
+          .moveTo(28, 41)
+          .arc(32, 41, 4, Math.PI, 0)
+          .stroke({ color: 0xffcf70, width: 1.4 });
       }
 
       row.title.position.set(63, 10);
