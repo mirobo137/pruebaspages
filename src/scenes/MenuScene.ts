@@ -15,6 +15,7 @@ import { MenuButton } from '../ui/MenuButton';
 import { SongList } from '../ui/SongList';
 import { SongTierSelector } from '../ui/SongTierSelector';
 import { TrackProgressPanel } from '../ui/TrackProgressPanel';
+import { calculateMenuLayout } from './MenuLayout';
 
 export interface MenuSceneOptions {
   tracks: TrackSelection[];
@@ -189,8 +190,7 @@ export class MenuScene implements Scene {
   resize(width: number, height: number): void {
     this.width = width;
     this.height = height;
-    const landscape = width > height && width >= 650;
-    const titleY = landscape ? 31 : Math.max(43, height * 0.065);
+    const layout = calculateMenuLayout(width, height);
 
     this.background.clear().rect(0, 0, width, height).fill({
       color: this.visualTheme.background.backdrop,
@@ -202,53 +202,53 @@ export class MenuScene implements Scene {
       .circle(width * 0.94, height * 0.65, Math.max(width, height) * 0.25)
       .fill({ color: this.visualTheme.background.phaseSecondary[1], alpha: 0.028 });
     this.title.anchor.set(0.5);
-    this.title.position.set(width / 2, titleY);
+    this.title.style.fontSize = width < 350 ? 25 : layout.compact ? 27 : 30;
+    this.title.position.set(width / 2, layout.titleY);
     this.subtitle.anchor.set(0.5);
-    this.subtitle.position.set(width / 2, titleY + (landscape ? 30 : 36));
+    this.subtitle.position.set(width / 2, layout.subtitleY);
+    this.subtitle.visible = layout.showSubtitle;
     this.currency.anchor.set(1, 0);
-    this.currency.position.set(width - 14, 14);
-    const actionWidth = width < 360 ? 68 : 82;
-    this.collectionButton.resize(actionWidth);
-    this.eventButton.resize(actionWidth);
+    this.currency.style.fontSize = width < 350 ? 10 : 12;
+    this.collectionButton.resize(layout.actionWidth);
+    this.eventButton.resize(layout.actionWidth);
+    this.difficultyHint.visible = layout.showDetails;
+    this.progressPanel.visible = layout.showDetails;
 
-    if (landscape) {
+    if (layout.landscape) {
+      this.currency.position.set(width - 14, 14);
       this.collectionButton.position.set(14, 13);
-      this.eventButton.position.set(14 + actionWidth + 7, 13);
-      this.resizeLandscape(width, height);
+      this.eventButton.position.set(14 + layout.actionWidth + 7, 13);
+      this.resizeLandscape(width, height, layout);
       return;
     }
 
-    const actionGap = 8;
-    const actionStart = (width - actionWidth * 2 - actionGap) / 2;
-    this.collectionButton.position.set(actionStart, 92);
-    this.eventButton.position.set(actionStart + actionWidth + actionGap, 92);
+    const actionGap = 7;
+    this.collectionButton.position.set(14, layout.actionsY);
+    this.eventButton.position.set(14 + layout.actionWidth + actionGap, layout.actionsY);
+    this.currency.position.set(width - 14, layout.actionsY + 12);
 
-    const contentWidth = Math.min(500, Math.max(250, width - 28));
-    const contentX = (width - contentWidth) / 2;
-    const categoryTop = Math.max(148, height * 0.18);
-    const listTop = categoryTop + this.tierSelector.selectorHeight + 8;
-    const availableListHeight = height - listTop - 330;
-    const listHeight = Math.max(128, Math.min(246, availableListHeight));
+    this.songSection.position.set(layout.contentX + 4, layout.categoryTop - 16);
+    this.tierSelector.position.set(layout.contentX, layout.categoryTop);
+    this.tierSelector.resize(layout.contentWidth);
+    this.songList.position.set(layout.contentX, layout.listTop);
+    this.songList.resize(layout.contentWidth, layout.listHeight);
 
-    this.songSection.position.set(contentX + 4, categoryTop - 25);
-    this.tierSelector.position.set(contentX, categoryTop);
-    this.tierSelector.resize(contentWidth);
-    this.songList.position.set(contentX, listTop);
-    this.songList.resize(contentWidth, listHeight);
-
-    const difficultyTop = listTop + listHeight + 16;
-    this.difficultySection.position.set(contentX + 4, difficultyTop);
-    this.difficultySelector.position.set(contentX, difficultyTop + 24);
-    this.difficultySelector.resize(contentWidth);
+    this.difficultySection.visible = layout.showDetails;
+    this.difficultySection.position.set(layout.contentX + 4, layout.difficultyTop);
+    this.difficultySelector.position.set(
+      layout.contentX,
+      layout.difficultyTop + (layout.showDetails ? 24 : 0),
+    );
+    this.difficultySelector.resize(layout.contentWidth);
     this.difficultyHint.anchor.set(0.5, 0);
-    this.difficultyHint.position.set(width / 2, difficultyTop + 81);
+    this.difficultyHint.position.set(width / 2, layout.difficultyTop + 81);
 
-    this.progressPanel.position.set(contentX, difficultyTop + 103);
-    this.progressPanel.resize(contentWidth);
-    this.playButton.resize(contentWidth);
-    this.playButton.position.set(contentX, difficultyTop + 218);
+    this.progressPanel.position.set(layout.contentX, layout.difficultyTop + 103);
+    this.progressPanel.resize(layout.contentWidth);
+    this.playButton.resize(layout.contentWidth);
+    this.playButton.position.set(layout.contentX, layout.playTop);
     this.status.anchor.set(0.5, 0);
-    this.status.position.set(width / 2, Math.min(height - 18, difficultyTop + 287));
+    this.status.position.set(width / 2, Math.min(height - 17, layout.playTop + 68));
   }
 
   unmount(): void {}
@@ -408,15 +408,19 @@ export class MenuScene implements Scene {
     this.playButton.setEnabled(Boolean(selection));
   }
 
-  private resizeLandscape(width: number, height: number): void {
-    const contentWidth = Math.min(920, width - 32);
-    const contentX = (width - contentWidth) / 2;
+  private resizeLandscape(
+    width: number,
+    height: number,
+    layout: ReturnType<typeof calculateMenuLayout>,
+  ): void {
+    const contentWidth = layout.contentWidth;
+    const contentX = layout.contentX;
     const gap = 18;
     const leftWidth = contentWidth * 0.54;
     const rightWidth = contentWidth - leftWidth - gap;
-    const top = Math.max(105, height * 0.23);
-    const listTop = top + this.tierSelector.selectorHeight + 8;
-    const listHeight = Math.max(124, height - listTop - 18);
+    const top = layout.categoryTop;
+    const listTop = layout.listTop;
+    const listHeight = layout.listHeight;
     const rightX = contentX + leftWidth + gap;
 
     this.songSection.position.set(contentX + 4, top - 23);
@@ -426,6 +430,7 @@ export class MenuScene implements Scene {
     this.songList.resize(leftWidth, listHeight);
 
     this.difficultySection.position.set(rightX + 4, top - 23);
+    this.difficultySection.visible = true;
     this.difficultySelector.position.set(rightX, top);
     this.difficultySelector.resize(rightWidth);
     this.difficultyHint.anchor.set(0.5, 0);
@@ -433,8 +438,8 @@ export class MenuScene implements Scene {
     this.progressPanel.position.set(rightX, top + 80);
     this.progressPanel.resize(rightWidth);
     this.playButton.resize(rightWidth);
-    this.playButton.position.set(rightX, top + 195);
+    this.playButton.position.set(rightX, layout.playTop);
     this.status.anchor.set(0.5, 0);
-    this.status.position.set(rightX + rightWidth / 2, top + 264);
+    this.status.position.set(rightX + rightWidth / 2, Math.min(height - 16, layout.playTop + 68));
   }
 }

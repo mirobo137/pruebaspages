@@ -369,6 +369,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-12 | Fase 5 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Catálogo JSON, semana UTC, acumulacion, rollover, ausencia de evento y siete reclamaciones unicas/ordenadas probados; falta validacion tras partidas reales |
 | 2026-08-12 | Fase 5 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma el comportamiento del motor semanal; se habilita Fase 6 |
 | 2026-08-12 | Fase 6 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Pantalla semanal, scroll, cuenta UTC, indicador pendiente, reclamacion atomica, siete componentes y desbloqueo persistente de Neon Ascent probados; falta validacion movil fisica |
+| 2026-08-12 | Fase 6 | `npm run test:layout` | 9 viewports de 320x568 a 915x412 | Correccion responsive | Cabecera, navegacion, playlist, dificultad y JUGAR verificados sin superposicion ni salida del viewport; en alturas compactas se oculta solo informacion secundaria |
 
 ## Decisiones pendientes controladas
 

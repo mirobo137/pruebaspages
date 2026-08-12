@@ -383,6 +383,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - La campaña inicial `Neon Ascent` mide canciones completadas, Perfect acumulados y mejor combo; el motor también soporta FLOW y SUPER FLOW.
 - Las reclamaciones deben realizarse en orden y cada ID solo puede guardarse una vez.
 - El selector musical incluye un acceso `EVENTO`; un signo `!` indica que existe una recompensa lista para reclamar.
+- El selector musical usa layouts vertical normal, vertical compacto y horizontal compacto. En pantallas bajas conserva playlist, dificultad y `JUGAR`, y oculta solo subtitulo, ayuda y estadisticas secundarias.
 - La pantalla de evento muestra cuenta regresiva UTC, puntos, tres misiones y siete escalones desplazables sin interrumpir partidas.
 - Cada escalon reclamado se guarda inmediatamente como componente cosmetico permanente. El septimo desbloquea el tema procedural completo `Neon Ascent` en Coleccion.
 - Los componentes obtenidos sobreviven al cambio de semana; el progreso semanal se reinicia, pero el inventario no.

@@ -52,6 +52,7 @@ export class MenuButton extends Container {
   setText(text: string): void {
     this.textLabel.text = text;
     this.textLabel.position.set(this.buttonWidth / 2, this.buttonHeight / 2);
+    this.fitLabel();
   }
 
   setEnabled(enabled: boolean): void {
@@ -65,7 +66,16 @@ export class MenuButton extends Container {
     this.buttonWidth = width;
     this.hitArea = new Rectangle(0, 0, this.buttonWidth, this.buttonHeight);
     this.textLabel.position.set(this.buttonWidth / 2, this.buttonHeight / 2);
+    this.fitLabel();
     this.draw();
+  }
+
+  private fitLabel(): void {
+    this.textLabel.scale.set(1);
+    const maximumLabelWidth = Math.max(20, this.buttonWidth - 18);
+    if (this.textLabel.width > maximumLabelWidth) {
+      this.textLabel.scale.set(maximumLabelWidth / this.textLabel.width);
+    }
   }
 
   private readonly handlePress = (): void => {
