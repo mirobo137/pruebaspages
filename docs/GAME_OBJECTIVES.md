@@ -130,6 +130,7 @@ La implementacion paso a paso y sus pruebas obligatorias se controlan en `docs/L
 - [x] Coleccion de skins procedurales con preview animado, bloqueo y equipamiento persistente.
 - [x] Progreso version 3 con migracion automatica, checksum, respaldo e inventario cosmetico.
 - [ ] Evento semanal de siete escalones con desbloqueo progresivo de una coleccion visual.
+- [x] Motor semanal determinista con misiones acumulativas, rollover UTC y reclamaciones únicas.
 - [ ] Anuncio recompensado opcional para duplicar monedas al terminar.
 - [ ] Segunda oportunidad recompensada que reinicia la fase de forma segura.
 - [ ] Skin publicitaria rotativa sin encadenar anuncios.

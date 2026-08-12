@@ -5,6 +5,17 @@ import { LocalProgressStorage } from '../platform/LocalProgressStorage';
 import { DEFAULT_THEME_ID, listVisualThemes } from '../customization/ThemeCatalog';
 import { getAutomaticallyUnlockedThemeIds } from '../customization/ThemeCollection';
 import type {
+  EventClaimResult,
+  EventRunInput,
+  WeeklyEventCampaign,
+  WeeklyEventSnapshot,
+} from '../events/EventTypes';
+import {
+  claimWeeklyEventReward,
+  evaluateWeeklyEventRun,
+  getWeeklyEventSnapshot,
+} from '../events/WeeklyEventEngine';
+import type {
   PerformanceRecord,
   MenuPreferences,
   ProgressState,
@@ -141,6 +152,49 @@ export class ProgressionStore {
       isNewHighScore,
       record,
     };
+  }
+
+  recordWeeklyEventRun(
+    catalog: readonly WeeklyEventCampaign[],
+    input: EventRunInput,
+    date: Date = new Date(),
+  ): WeeklyEventSnapshot {
+    const snapshot = evaluateWeeklyEventRun(
+      catalog,
+      this.state.weeklyEvent,
+      input,
+      date,
+    );
+    if (snapshot.changed) {
+      this.state.weeklyEvent = snapshot.progress;
+      this.save();
+    }
+    return snapshot;
+  }
+
+  getWeeklyEvent(
+    catalog: readonly WeeklyEventCampaign[],
+    date: Date = new Date(),
+  ): WeeklyEventSnapshot {
+    return getWeeklyEventSnapshot(catalog, this.state.weeklyEvent, date);
+  }
+
+  claimWeeklyEventReward(
+    catalog: readonly WeeklyEventCampaign[],
+    rewardId: string,
+    date: Date = new Date(),
+  ): EventClaimResult {
+    const result = claimWeeklyEventReward(
+      catalog,
+      this.state.weeklyEvent,
+      rewardId,
+      date,
+    );
+    if (result.claimed) {
+      this.state.weeklyEvent = result.progress;
+      this.save();
+    }
+    return result;
   }
 
   private save(): void {

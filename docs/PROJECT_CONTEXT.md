@@ -89,6 +89,7 @@ src/
   audio/                     Reproduccion, desbloqueo y analisis de audio
   content/                   Catalogos y carga de JSON
   customization/             Temas visuales, coleccion, seleccion y validacion
+  events/                    Catalogo, reloj UTC, misiones y motor semanal
   input/                     Captura y utilidades de puntero/touch
   platform/                  Adaptadores para persistencia y portales
   progression/               Estrellas, records, monedas y desbloqueos locales
@@ -98,6 +99,7 @@ public/assets/
     selectas/                Canciones de 800 monedas
     premium/                 Canciones de 1,400 monedas
   beatmaps/                  Eventos sincronizados por cancion
+  events/                    Campañas semanales configuradas por JSON
 docs/
   PROJECT_CONTEXT.md         Este contrato de arquitectura
   GAME_OBJECTIVES.md         Vision viva y objetivos editables
@@ -375,6 +377,12 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Un ID cosmetico eliminado o invalido se descarta y el tema equipado vuelve de forma segura a `Neon Pulse`.
 - Una skin nunca modifica hitboxes, timing, posiciones logicas ni asistencia tactil.
 - El evento semanal desbloquea progresivamente componentes de una coleccion visual durante siete escalones.
+- El motor semanal usa semanas de lunes 00:00 UTC a lunes 00:00 UTC y genera un ID estable por campaña y fecha.
+- `public/assets/events/weekly-events.json` define vigencia, tema, tres misiones, puntos y siete recompensas; un archivo ausente o invalido equivale a no tener evento activo.
+- Las misiones se evalúan una vez al terminar una partida y acumulan entre canciones y dificultades; el cambio de semana crea progreso nuevo.
+- La campaña inicial `Neon Ascent` mide canciones completadas, Perfect acumulados y mejor combo; el motor también soporta FLOW y SUPER FLOW.
+- Las reclamaciones deben realizarse en orden y cada ID solo puede guardarse una vez.
+- Durante el prototipo se usa el reloj local del dispositivo. Puede manipularse y no debe sostener rankings ni recompensas con valor real sin backend/SDK de portal.
 - Los anuncios recompensados se ofrecen fuera del gameplay y siempre son opcionales.
 - Los primeros usos previstos son duplicar monedas, una segunda oportunidad segura por fase y una skin publicitaria rotativa.
 - Una partida solo puede consumir una oportunidad recompensada de gameplay: revivir o duplicar monedas, no ambas.

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "neon-ascent-2026",
+    "name": "Neon Ascent",
+    "themeId": "neon-ascent",
+    "startsAt": "2026-01-05T00:00:00.000Z",
+    "endsAt": "2027-01-04T00:00:00.000Z",
+    "missions": [
+      {
+        "id": "complete-seven",
+        "label": "Completa 7 canciones",
+        "kind": "complete_runs",
+        "target": 7,
+        "pointStep": 1,
+        "pointsPerStep": 10
+      },
+      {
+        "id": "perfect-three-hundred",
+        "label": "Consigue 300 Perfect",
+        "kind": "perfects",
+        "target": 300,
+        "pointStep": 25,
+        "pointsPerStep": 5
+      },
+      {
+        "id": "combo-eighty",
+        "label": "Alcanza combo 80",
+        "kind": "best_combo",
+        "target": 80,
+        "pointStep": 10,
+        "pointsPerStep": 5
+      }
+    ],
+    "rewards": [
+      { "id": "target-palette", "label": "Paleta Neon Ascent", "pointsRequired": 20, "cosmeticSlot": "target-palette" },
+      { "id": "timing-ring", "label": "Aro de ascenso", "pointsRequired": 40, "cosmeticSlot": "timing-ring" },
+      { "id": "drag-trail", "label": "Estela fotonica", "pointsRequired": 60, "cosmeticSlot": "drag-trail" },
+      { "id": "perfect-impact", "label": "Impacto estelar", "pointsRequired": 80, "cosmeticSlot": "perfect-impact" },
+      { "id": "flow-background", "label": "Fondo FLOW ascendente", "pointsRequired": 100, "cosmeticSlot": "flow-background" },
+      { "id": "super-flow-background", "label": "Fondo SUPER FLOW ascendente", "pointsRequired": 120, "cosmeticSlot": "super-flow-background" },
+      { "id": "complete-theme", "label": "Tema Neon Ascent completo", "pointsRequired": 140, "cosmeticSlot": "complete-theme" }
+    ]
+  }
+]

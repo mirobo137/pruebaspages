@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 4 - Validacion movil de migracion v3`
-- Siguiente accion: `Publicar, recargar el progreso existente y confirmar que todos los datos permanecen`
+- Fase activa: `Fase 5 - Validacion del motor semanal`
+- Siguiente accion: `Publicar y completar partidas en canciones/dificultades distintas antes de aprobar el motor`
 - Ultima actualizacion: `2026-08-12`
 
 Estados permitidos:
@@ -152,13 +152,13 @@ public/assets/events/
   weekly-events.json
 ```
 
-- [ ] 5.1 Definir ID, inicio, fin, tema, misiones, puntos y siete premios.
-- [ ] 5.2 Calcular la semana activa con una zona horaria documentada.
-- [ ] 5.3 Crear misiones basadas en datos existentes: completar, Perfect, combo, FLOW y SUPER FLOW.
-- [ ] 5.4 Evaluar progreso al terminar una partida, nunca durante callbacks visuales.
-- [ ] 5.5 Evitar reclamar dos veces el mismo escalon.
-- [ ] 5.6 Manejar cambio de semana y evento inexistente sin romper el juego.
-- [ ] 5.7 Documentar que el reloj local es manipulable y suficiente solo para prototipo.
+- [x] 5.1 Definir ID, inicio, fin, tema, misiones, puntos y siete premios.
+- [x] 5.2 Calcular la semana activa con lunes 00:00 UTC como limite estable.
+- [x] 5.3 Crear misiones basadas en datos existentes: completar, Perfect, combo, FLOW y SUPER FLOW.
+- [x] 5.4 Evaluar progreso al terminar una partida, nunca durante callbacks visuales.
+- [x] 5.5 Evitar reclamar dos veces el mismo escalon y exigir orden ascendente.
+- [x] 5.6 Manejar cambio de semana y evento inexistente o invalido sin romper el juego.
+- [x] 5.7 Documentar que el reloj local es manipulable y suficiente solo para prototipo.
 
 Compuerta especifica:
 
@@ -365,6 +365,8 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-11 | Fase 3 | `npm run test:theme` + `npm run build` | Windows / Node 24 y navegador 390x844 | Implementacion correcta | Navegacion, preview, scroll, bloqueo, equipamiento y recarga probados sin errores; falta aprobacion en movil fisico |
 | 2026-08-12 | Fase 3 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario aprueba Coleccion, preview, scroll y equipamiento; se habilita Fase 4 |
 | 2026-08-12 | Fase 4 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Migracion v2, seleccion provisional, backup corrupto, IDs retirados y persistencia v3 probados; navegador local no disponible en esta sesion, falta validacion movil fisica |
+| 2026-08-12 | Fase 4 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma que progreso, inventario y tema equipado se conservaron; se habilita Fase 5 |
+| 2026-08-12 | Fase 5 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Catálogo JSON, semana UTC, acumulacion, rollover, ausencia de evento y siete reclamaciones unicas/ordenadas probados; falta validacion tras partidas reales |
 
 ## Decisiones pendientes controladas
 

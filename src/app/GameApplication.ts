@@ -25,6 +25,8 @@ import { ResultScene } from '../scenes/ResultScene';
 import { TitleScene } from '../scenes/TitleScene';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
+import { loadWeeklyEventCatalog } from '../events/EventCatalog';
+import type { WeeklyEventCampaign } from '../events/EventTypes';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -36,6 +38,7 @@ export class GameApplication {
   private readonly themeSelection = new ThemeSelection(this.progression.equippedThemeId);
   private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
   private tracks: TrackSelection[] = [];
+  private weeklyEvents: WeeklyEventCampaign[] = [];
   private readonly tick = (ticker: Ticker): void => {
     this.sceneManager.update(ticker.deltaTime / 60);
   };
@@ -66,7 +69,10 @@ export class GameApplication {
 
     this.mountElement.appendChild(this.app.canvas);
     this.app.stage.addChild(this.sceneHost);
-    this.tracks = await this.loadMusic();
+    [this.tracks, this.weeklyEvents] = await Promise.all([
+      this.loadMusic(),
+      loadWeeklyEventCatalog(),
+    ]);
     const menuSelection = this.tracks.find(
       (selection) => selection.track.id === MENU_MUSIC_TRACK_ID,
     ) ?? this.tracks[0] ?? null;
@@ -181,6 +187,13 @@ export class GameApplication {
       flow,
       completed,
     );
+    this.progression.recordWeeklyEventRun(this.weeklyEvents, {
+      completed,
+      perfects: snapshot.perfects,
+      bestCombo: snapshot.bestCombo,
+      flowActivations: flow.activations,
+      superFlowActivations: flow.superActivations,
+    });
     this.sceneManager.switchTo(
       new ResultScene(this.app.screen.width, this.app.screen.height, {
         trackTitle: selection.track.title,
