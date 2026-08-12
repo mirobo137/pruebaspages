@@ -248,12 +248,17 @@ function sanitizeCustomization(
   value: unknown,
   fallback: ProgressState['customization'],
 ): ProgressState['customization'] {
-  if (!isRecord(value)) return { ...fallback, unlockedThemeIds: [...fallback.unlockedThemeIds] };
+  if (!isRecord(value)) return {
+    ...fallback,
+    unlockedThemeIds: [...fallback.unlockedThemeIds],
+    unlockedCosmeticIds: [...fallback.unlockedCosmeticIds],
+  };
   const unlockedThemeIds = sanitizeIdentifiers(value.unlockedThemeIds, 200);
+  const unlockedCosmeticIds = sanitizeIdentifiers(value.unlockedCosmeticIds, 500);
   const equippedThemeId = isSafeIdentifier(value.equippedThemeId)
     ? value.equippedThemeId
     : fallback.equippedThemeId;
-  return { unlockedThemeIds, equippedThemeId };
+  return { unlockedThemeIds, unlockedCosmeticIds, equippedThemeId };
 }
 
 function sanitizeWeeklyEvent(value: unknown): ProgressState['weeklyEvent'] {

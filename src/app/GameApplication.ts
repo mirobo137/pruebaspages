@@ -22,6 +22,7 @@ import { GameScene } from '../scenes/GameScene';
 import { CollectionScene } from '../scenes/CollectionScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { ResultScene } from '../scenes/ResultScene';
+import { EventScene } from '../scenes/EventScene';
 import { TitleScene } from '../scenes/TitleScene';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
@@ -104,6 +105,7 @@ export class GameApplication {
   }
 
   private showMenu = (): void => {
+    const eventSnapshot = this.progression.getWeeklyEvent(this.weeklyEvents);
     this.updateCanvasState('menu');
     this.sceneManager.switchTo(
       new MenuScene(this.app.screen.width, this.app.screen.height, {
@@ -111,6 +113,8 @@ export class GameApplication {
         progression: this.progression,
         visualTheme: this.themeSelection.current,
         onOpenCollection: this.showCollection,
+        onOpenEvent: this.showEvent,
+        eventRewardPending: eventSnapshot.claimableRewardIds.length > 0,
         onPreview: (selection) => this.menuAudio.preview(selection.track),
         onStopPreview: this.menuAudio.start.bind(this.menuAudio),
         onStart: this.startGame,
@@ -126,6 +130,7 @@ export class GameApplication {
         items: listThemeCollection(
           this.progression.totalRuns,
           this.progression.unlockedThemeIds,
+          this.progression.unlockedCosmeticIds,
         ),
         equippedThemeId: this.progression.equippedThemeId,
         visualQuality: this.visualQuality,
@@ -135,6 +140,21 @@ export class GameApplication {
           this.updateCanvasState('collection');
           return true;
         },
+        onBack: this.showMenu,
+      }),
+    );
+    this.menuAudio.start();
+  };
+
+  private showEvent = (): void => {
+    this.updateCanvasState('event');
+    this.sceneManager.switchTo(
+      new EventScene(this.app.screen.width, this.app.screen.height, {
+        getSnapshot: () => this.progression.getWeeklyEvent(this.weeklyEvents),
+        onClaim: (rewardId) => this.progression.claimWeeklyEventReward(
+          this.weeklyEvents,
+          rewardId,
+        ),
         onBack: this.showMenu,
       }),
     );

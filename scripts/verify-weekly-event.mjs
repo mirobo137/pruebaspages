@@ -24,6 +24,12 @@ try {
   const { createEmptyProgressState } = await server.ssrLoadModule(
     '/src/progression/ProgressionTypes.ts',
   );
+  const { LocalProgressStorage } = await server.ssrLoadModule(
+    '/src/platform/LocalProgressStorage.ts',
+  );
+  const { ProgressionStore } = await server.ssrLoadModule(
+    '/src/progression/ProgressionStore.ts',
+  );
 
   const rawCatalog = JSON.parse(await readFile(
     new URL('../public/assets/events/weekly-events.json', import.meta.url),
@@ -146,7 +152,31 @@ try {
   assert.equal(noEvent.changed, false);
   assert.deepEqual(noEvent.progress, progress);
 
-  console.log('Weekly event engine, rollover and claims: OK');
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+  };
+  const store = new ProgressionStore(new LocalProgressStorage(storage));
+  for (let run = 0; run < 7; run += 1) {
+    store.recordWeeklyEventRun(catalog, {
+      completed: true,
+      perfects: run === 0 ? 300 : 0,
+      bestCombo: run === 0 ? 80 : 0,
+      flowActivations: 0,
+      superFlowActivations: 0,
+    }, wednesday);
+  }
+  for (const reward of catalog[0].rewards) {
+    assert.equal(store.claimWeeklyEventReward(catalog, reward.id, wednesday).claimed, true);
+  }
+  assert.equal(store.unlockedCosmeticIds.length, 7);
+  assert.equal(store.isThemeUnlocked('neon-ascent'), true);
+  const reloadedStore = new ProgressionStore(new LocalProgressStorage(storage));
+  assert.equal(reloadedStore.unlockedCosmeticIds.length, 7);
+  assert.equal(reloadedStore.isThemeUnlocked('neon-ascent'), true);
+
+  console.log('Weekly event engine, rollover, inventory and claims: OK');
 } finally {
   await server.close();
 }

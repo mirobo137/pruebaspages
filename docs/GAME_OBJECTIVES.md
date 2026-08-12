@@ -179,6 +179,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Recompensa avanzada de precision: SUPER FLOW y multiplicador x4.
 - [x] Estructura de partida con crecimiento visual en tres fases.
 - [x] Juice de particulas, combo y fondo reactivo.
+- [x] Coleccion de temas procedurales con previsualizacion y equipamiento persistente.
+- [x] Evento semanal con misiones, siete recompensas y tema completo desbloqueable.
 - [ ] Feedback de audio corto para aciertos y combos.
 - [ ] Pruebas reales en movil y distintos tamanos de pantalla.
 
@@ -223,6 +225,10 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Registrar mejor puntuacion local por cancion y dificultad.
 - [ ] Confirmar que estrellas y records persisten despues de cerrar y volver a abrir el navegador.
 - [ ] Confirmar que Facil, Medio y Dificil muestran progreso independiente para la misma cancion.
+- [ ] Confirmar que `EVENTO !` aparece al alcanzar un escalon y desaparece al reclamarlo.
+- [ ] Probar scroll tactil de los siete premios en movil pequeno y orientacion horizontal.
+- [ ] Confirmar que cada premio aparece de inmediato en el progreso de Neon Ascent en Coleccion.
+- [ ] Reclamar el septimo escalon, equipar Neon Ascent y confirmar que permanece tras recargar.
 
 ## Estado de una partida ideal
 

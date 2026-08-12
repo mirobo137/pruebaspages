@@ -50,6 +50,10 @@ export class ProgressionStore {
     return [...this.state.customization.unlockedThemeIds];
   }
 
+  get unlockedCosmeticIds(): readonly string[] {
+    return [...this.state.customization.unlockedCosmeticIds];
+  }
+
   get equippedThemeId(): string {
     return this.state.customization.equippedThemeId;
   }
@@ -184,6 +188,7 @@ export class ProgressionStore {
     rewardId: string,
     date: Date = new Date(),
   ): EventClaimResult {
+    const snapshot = this.getWeeklyEvent(catalog, date);
     const result = claimWeeklyEventReward(
       catalog,
       this.state.weeklyEvent,
@@ -192,6 +197,20 @@ export class ProgressionStore {
     );
     if (result.claimed) {
       this.state.weeklyEvent = result.progress;
+      const campaign = snapshot.activeEvent?.campaign;
+      if (campaign && result.reward) {
+        const cosmeticId = `${campaign.id}:${result.reward.id}`;
+        if (!this.state.customization.unlockedCosmeticIds.includes(cosmeticId)) {
+          this.state.customization.unlockedCosmeticIds.push(cosmeticId);
+        }
+        if (
+          result.reward.cosmeticSlot === 'complete-theme'
+          && !this.state.customization.unlockedThemeIds.includes(campaign.themeId)
+        ) {
+          this.state.customization.unlockedThemeIds.push(campaign.themeId);
+        }
+      }
+      this.syncCustomization();
       this.save();
     }
     return result;
@@ -219,7 +238,11 @@ export class ProgressionStore {
     const equippedChanged = equippedThemeId !== this.state.customization.equippedThemeId;
 
     if (!unlocksChanged && !equippedChanged) return false;
-    this.state.customization = { unlockedThemeIds, equippedThemeId };
+    this.state.customization = {
+      unlockedThemeIds,
+      unlockedCosmeticIds: this.state.customization.unlockedCosmeticIds,
+      equippedThemeId,
+    };
     return true;
   }
 }

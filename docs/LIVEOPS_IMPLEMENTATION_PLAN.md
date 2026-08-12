@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 5 - Validacion del motor semanal`
-- Siguiente accion: `Publicar y completar partidas en canciones/dificultades distintas antes de aprobar el motor`
+- Fase activa: `Fase 6 - Validacion movil de la interfaz del evento`
+- Siguiente accion: `Publicar, reclamar recompensas y comprobar la ruta semanal y Coleccion en movil`
 - Ultima actualizacion: `2026-08-12`
 
 Estados permitidos:
@@ -181,12 +181,12 @@ Orden base de recompensas:
 6. Fondo SUPER FLOW.
 7. Conjunto completo e insignia.
 
-- [ ] 6.1 Crear acceso visible pero no invasivo desde el menu.
-- [ ] 6.2 Mostrar tiempo restante, progreso total y proxima recompensa.
-- [ ] 6.3 Mostrar tres misiones activas con progreso numerico.
-- [ ] 6.4 Crear animacion de reclamacion y equipamiento opcional.
-- [ ] 6.5 Añadir indicador cuando existe un premio pendiente.
-- [ ] 6.6 Confirmar que perder una semana no destruye recompensas ya obtenidas.
+- [x] 6.1 Crear acceso visible pero no invasivo desde el menu.
+- [x] 6.2 Mostrar tiempo restante, progreso total y proxima recompensa.
+- [x] 6.3 Mostrar tres misiones activas con progreso numerico.
+- [x] 6.4 Crear animacion de reclamacion y equipamiento opcional.
+- [x] 6.5 Añadir indicador cuando existe un premio pendiente.
+- [x] 6.6 Confirmar que perder una semana no destruye recompensas ya obtenidas.
 
 Compuerta especifica:
 
@@ -367,6 +367,8 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-12 | Fase 4 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Migracion v2, seleccion provisional, backup corrupto, IDs retirados y persistencia v3 probados; navegador local no disponible en esta sesion, falta validacion movil fisica |
 | 2026-08-12 | Fase 4 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma que progreso, inventario y tema equipado se conservaron; se habilita Fase 5 |
 | 2026-08-12 | Fase 5 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Catálogo JSON, semana UTC, acumulacion, rollover, ausencia de evento y siete reclamaciones unicas/ordenadas probados; falta validacion tras partidas reales |
+| 2026-08-12 | Fase 5 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario confirma el comportamiento del motor semanal; se habilita Fase 6 |
+| 2026-08-12 | Fase 6 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Pantalla semanal, scroll, cuenta UTC, indicador pendiente, reclamacion atomica, siete componentes y desbloqueo persistente de Neon Ascent probados; falta validacion movil fisica |
 
 ## Decisiones pendientes controladas
 

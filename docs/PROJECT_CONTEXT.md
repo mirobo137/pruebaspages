@@ -382,6 +382,10 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Las misiones se evalúan una vez al terminar una partida y acumulan entre canciones y dificultades; el cambio de semana crea progreso nuevo.
 - La campaña inicial `Neon Ascent` mide canciones completadas, Perfect acumulados y mejor combo; el motor también soporta FLOW y SUPER FLOW.
 - Las reclamaciones deben realizarse en orden y cada ID solo puede guardarse una vez.
+- El selector musical incluye un acceso `EVENTO`; un signo `!` indica que existe una recompensa lista para reclamar.
+- La pantalla de evento muestra cuenta regresiva UTC, puntos, tres misiones y siete escalones desplazables sin interrumpir partidas.
+- Cada escalon reclamado se guarda inmediatamente como componente cosmetico permanente. El septimo desbloquea el tema procedural completo `Neon Ascent` en Coleccion.
+- Los componentes obtenidos sobreviven al cambio de semana; el progreso semanal se reinicia, pero el inventario no.
 - Durante el prototipo se usa el reloj local del dispositivo. Puede manipularse y no debe sostener rankings ni recompensas con valor real sin backend/SDK de portal.
 - Los anuncios recompensados se ofrecen fuera del gameplay y siempre son opcionales.
 - Los primeros usos previstos son duplicar monedas, una segunda oportunidad segura por fase y una skin publicitaria rotativa.

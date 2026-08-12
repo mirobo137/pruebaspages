@@ -23,6 +23,7 @@ export interface MenuPreferences {
 
 export interface CustomizationProgress {
   unlockedThemeIds: string[];
+  unlockedCosmeticIds: string[];
   equippedThemeId: string;
 }
 
@@ -72,6 +73,7 @@ export function createEmptyProgressState(): ProgressState {
     },
     customization: {
       unlockedThemeIds: ['neon-pulse', 'cyber-sakura'],
+      unlockedCosmeticIds: [],
       equippedThemeId: 'neon-pulse',
     },
     weeklyEvent: {

@@ -15,6 +15,7 @@ interface ThemeCollectionDefinition {
   origin: string;
   unlockDescription: string;
   requiredRuns: number;
+  eventCampaignId?: string;
 }
 
 const DEFINITIONS: readonly ThemeCollectionDefinition[] = [
@@ -36,11 +37,19 @@ const DEFINITIONS: readonly ThemeCollectionDefinition[] = [
     unlockDescription: 'Juega 3 partidas para desbloquearlo.',
     requiredRuns: 3,
   },
+  {
+    themeId: 'neon-ascent',
+    origin: 'Evento semanal Neon Ascent',
+    unlockDescription: 'Completa y reclama los 7 escalones del evento semanal.',
+    requiredRuns: -1,
+    eventCampaignId: 'neon-ascent-2026',
+  },
 ] as const;
 
 export function listThemeCollection(
   totalRuns: number,
   unlockedThemeIds: readonly string[],
+  unlockedCosmeticIds: readonly string[] = [],
 ): readonly ThemeCollectionItem[] {
   const themes = new Map(listVisualThemes().map((theme) => [theme.id, theme]));
   const safeRuns = Math.max(0, Math.floor(totalRuns));
@@ -54,7 +63,9 @@ export function listThemeCollection(
       unlockDescription: definition.unlockDescription,
       requiredRuns: definition.requiredRuns,
       unlocked,
-      progressLabel: definition.requiredRuns <= 0
+      progressLabel: definition.eventCampaignId
+        ? `${unlockedCosmeticIds.filter((id) => id.startsWith(`${definition.eventCampaignId}:`)).length}/7 COMPONENTES`
+        : definition.requiredRuns <= 0
         ? 'DISPONIBLE'
         : `${Math.min(safeRuns, definition.requiredRuns)}/${definition.requiredRuns} PARTIDAS`,
     }];
@@ -64,6 +75,6 @@ export function listThemeCollection(
 export function getAutomaticallyUnlockedThemeIds(totalRuns: number): string[] {
   const safeRuns = Math.max(0, Math.floor(totalRuns));
   return DEFINITIONS
-    .filter((definition) => safeRuns >= definition.requiredRuns)
+    .filter((definition) => definition.requiredRuns >= 0 && safeRuns >= definition.requiredRuns)
     .map((definition) => definition.themeId);
 }

@@ -58,7 +58,7 @@ try {
   assert.equal(selection.current.id, DEFAULT_VISUAL_THEME.id);
   assert.deepEqual(
     listVisualThemes().map((theme) => theme.id),
-    ['neon-pulse', 'cyber-sakura', 'solar-flux'],
+    ['neon-pulse', 'cyber-sakura', 'solar-flux', 'neon-ascent'],
   );
   assert.equal(selection.select('cyber-sakura').target.shape, 'segmented');
   assert.equal(selection.current.target.timingRingStyle, 'broken');
@@ -72,6 +72,8 @@ try {
   assert.equal(selection.current.background.flowPattern, 'vortex');
   assert.equal(selection.current.background.superFlowPattern, 'hyperspace');
   assert.equal(selection.current.effects.particleStyle, 'spark');
+  assert.equal(selection.select('neon-ascent').drag.trailStyle, 'comet');
+  assert.equal(selection.current.background.superFlowPattern, 'prism');
   assert.equal(selection.select('missing-theme').id, DEFAULT_VISUAL_THEME.id);
   assert.equal(getVisualTheme('missing-theme').id, DEFAULT_VISUAL_THEME.id);
   assert.equal(FULL_VISUAL_QUALITY.particleMultiplier, 1);
@@ -84,11 +86,17 @@ try {
 
   const newPlayerUnlocks = getAutomaticallyUnlockedThemeIds(0);
   const newPlayerCollection = listThemeCollection(0, newPlayerUnlocks);
-  assert.equal(newPlayerCollection.length, 3);
+  assert.equal(newPlayerCollection.length, 4);
   assert.equal(newPlayerUnlocks.includes('neon-pulse'), true);
   assert.equal(newPlayerUnlocks.includes('cyber-sakura'), true);
   assert.equal(newPlayerUnlocks.includes('solar-flux'), false);
   assert.equal(getAutomaticallyUnlockedThemeIds(3).includes('solar-flux'), true);
+  assert.equal(getAutomaticallyUnlockedThemeIds(999).includes('neon-ascent'), false);
+  const eventCollection = listThemeCollection(0, newPlayerUnlocks, [
+    'neon-ascent-2026:target-palette',
+    'neon-ascent-2026:timing-ring',
+  ]);
+  assert.equal(eventCollection.find((item) => item.theme.id === 'neon-ascent')?.progressLabel, '2/7 COMPONENTES');
 
   console.log('Theme catalog, collection and visual quality: OK');
 } finally {

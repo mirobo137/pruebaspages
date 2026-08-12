@@ -105,11 +105,13 @@ try {
   assert.equal(migratedState.version, 3);
   assert.deepEqual(migratedState.weeklyEvent.missionProgress, {});
   assert.deepEqual(migratedState.rewardedLimits.usedRewardIds, []);
+  assert.deepEqual(migratedState.customization.unlockedCosmeticIds, []);
 
   const deletedThemeStorage = createMemoryStorage();
   const deletedThemeState = createEmptyProgressState();
   deletedThemeState.customization = {
     unlockedThemeIds: ['removed-theme'],
+    unlockedCosmeticIds: ['neon-ascent-2026:target-palette'],
     equippedThemeId: 'removed-theme',
   };
   new LocalProgressStorage(deletedThemeStorage).save(deletedThemeState);
@@ -117,6 +119,7 @@ try {
   assert.equal(repairedStore.equippedThemeId, 'neon-pulse');
   assert.equal(repairedStore.isThemeUnlocked('removed-theme'), false);
   assert.equal(repairedStore.isThemeUnlocked('cyber-sakura'), true);
+  assert.deepEqual(repairedStore.unlockedCosmeticIds, ['neon-ascent-2026:target-palette']);
 
   const backupStorage = createMemoryStorage();
   const backupService = new LocalProgressStorage(backupStorage);

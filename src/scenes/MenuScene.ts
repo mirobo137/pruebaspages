@@ -21,6 +21,8 @@ export interface MenuSceneOptions {
   progression: ProgressionStore;
   visualTheme: VisualTheme;
   onOpenCollection: () => void;
+  onOpenEvent: () => void;
+  eventRewardPending: boolean;
   onPreview: (selection: TrackSelection) => void;
   onStopPreview: () => void;
   onStart: (difficulty: Difficulty, selection: TrackSelection) => void;
@@ -85,6 +87,7 @@ export class MenuScene implements Scene {
   private readonly progressPanel = new TrackProgressPanel();
   private readonly playButton: MenuButton;
   private readonly collectionButton: MenuButton;
+  private readonly eventButton: MenuButton;
   private readonly tracks: TrackSelection[];
   private readonly progression: ProgressionStore;
   private readonly visualTheme: VisualTheme;
@@ -135,10 +138,20 @@ export class MenuScene implements Scene {
       0x17233e,
       42,
     );
+    this.eventButton = new MenuButton(
+      options.eventRewardPending ? 'EVENTO !' : 'EVENTO',
+      () => {
+        this.onStopPreview();
+        options.onOpenEvent();
+      },
+      options.eventRewardPending ? 0x297a58 : 0x173e39,
+      42,
+    );
 
     this.root.addChild(
       this.background,
       this.collectionButton,
+      this.eventButton,
       this.title,
       this.subtitle,
       this.currency,
@@ -194,17 +207,25 @@ export class MenuScene implements Scene {
     this.subtitle.position.set(width / 2, titleY + (landscape ? 30 : 36));
     this.currency.anchor.set(1, 0);
     this.currency.position.set(width - 14, 14);
-    this.collectionButton.resize(width < 360 ? 54 : 76);
-    this.collectionButton.position.set(width < 360 ? 8 : 14, 13);
+    const actionWidth = width < 360 ? 68 : 82;
+    this.collectionButton.resize(actionWidth);
+    this.eventButton.resize(actionWidth);
 
     if (landscape) {
+      this.collectionButton.position.set(14, 13);
+      this.eventButton.position.set(14 + actionWidth + 7, 13);
       this.resizeLandscape(width, height);
       return;
     }
 
+    const actionGap = 8;
+    const actionStart = (width - actionWidth * 2 - actionGap) / 2;
+    this.collectionButton.position.set(actionStart, 92);
+    this.eventButton.position.set(actionStart + actionWidth + actionGap, 92);
+
     const contentWidth = Math.min(500, Math.max(250, width - 28));
     const contentX = (width - contentWidth) / 2;
-    const categoryTop = Math.max(118, height * 0.15);
+    const categoryTop = Math.max(148, height * 0.18);
     const listTop = categoryTop + this.tierSelector.selectorHeight + 8;
     const availableListHeight = height - listTop - 330;
     const listHeight = Math.max(128, Math.min(246, availableListHeight));
