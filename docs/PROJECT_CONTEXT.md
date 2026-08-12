@@ -58,7 +58,11 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 - Perfil visual automatico `full`/`reduced`; puede forzarse durante pruebas con `?quality=full` o `?quality=reduced`.
 - Pantalla `Coleccion` accesible desde `SKIN` en la playlist, con lista tactil, origen y estado de cada tema.
 - Preview animado reutiliza objetivos, drag, particulas y fondos reales; alterna normal, FLOW y SUPER FLOW sin iniciar audio de gameplay.
-- El tema equipado se guarda provisionalmente en `superflow:visual-theme:v1`; la Fase 4 lo migrara al estado de progreso version 3.
+- El progreso principal usa `ProgressState` version 3 en `superflow:progress:v3`, con checksum y respaldo `superflow:progress:v3:backup`.
+- La migracion importa automaticamente monedas, canciones, records, estrellas, preferencias y total de partidas desde v2.
+- La seleccion provisional `superflow:visual-theme:v1` se incorpora al inventario v3 durante la migracion.
+- El inventario cosmetico y el tema equipado viven en `customization`; eventos y limites recompensados tienen estructuras reservadas y validadas.
+- Las claves v2 permanecen intactas como respaldo de compatibilidad durante esta fase.
 - `Solar Flux` se desbloquea al acumular 3 partidas; puede previsualizarse bloqueado, pero no equiparse.
 
 La build verificada es `npm run build`. No se deben subir `node_modules/` ni `dist/`; ambos son generados o ignorados por Git.
@@ -132,11 +136,13 @@ Reglas de modularidad:
 ## Persistencia local
 
 - `LocalProgressStorage` es el unico modulo que lee o escribe `localStorage`.
-- El formato actual es version 2 y usa la clave `superflow:progress:v2`.
+- El formato actual es version 3 y usa la clave `superflow:progress:v3`.
 - Los datos se codifican, incluyen checksum, se validan campo por campo y mantienen una copia anterior de respaldo.
 - Si el registro principal esta corrupto se intenta recuperar el respaldo.
-- La progresion antigua de `rhythm-circles:progression` migra automaticamente para conservar monedas y canciones desbloqueadas.
-- Las preferencias del menu guardan el ID estable de la ultima cancion y la dificultad; datos version 2 anteriores reciben valores predeterminados sin perder progreso.
+- El progreso v2 migra automaticamente conservando monedas, canciones, records, estrellas, preferencias y total de partidas.
+- La progresion antigua de `rhythm-circles:progression` tambien puede migrar para conservar monedas y canciones desbloqueadas.
+- Las preferencias del menu guardan el ID estable de la ultima cancion y la dificultad; campos ausentes reciben valores predeterminados sin perder el resto del progreso.
+- Personalizacion guarda inventario y tema equipado; IDs retirados regresan de forma segura al tema predeterminado.
 - Esta proteccion detecta corrupcion y manipulacion casual, pero no es seguridad criptografica: el navegador pertenece al jugador y un usuario experto puede modificar su almacenamiento.
 - Un portal con ranking competitivo necesitara validar las puntuaciones en un backend o mediante el SDK del portal.
 
@@ -366,6 +372,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - La primera familia incluye Neon Pulse (orbital), Cyber Sakura (segmentada) y Solar Flux (facetada).
 - El perfil visual reducido disminuye particulas y geometria ambiental, nunca notas ni respuesta tactil.
 - La Coleccion equipa temas completos; mezclar componentes queda reservado hasta validar que la interfaz siga siendo clara.
+- Un ID cosmetico eliminado o invalido se descarta y el tema equipado vuelve de forma segura a `Neon Pulse`.
 - Una skin nunca modifica hitboxes, timing, posiciones logicas ni asistencia tactil.
 - El evento semanal desbloquea progresivamente componentes de una coleccion visual durante siete escalones.
 - Los anuncios recompensados se ofrecen fuera del gameplay y siempre son opcionales.

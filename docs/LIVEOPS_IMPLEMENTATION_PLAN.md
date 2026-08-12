@@ -5,9 +5,9 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 3 - Validacion movil de Coleccion`
-- Siguiente accion: `Probar scroll, preview, bloqueo, equipamiento y persistencia en un movil fisico`
-- Ultima actualizacion: `2026-08-11`
+- Fase activa: `Fase 4 - Validacion movil de migracion v3`
+- Siguiente accion: `Publicar, recargar el progreso existente y confirmar que todos los datos permanecen`
+- Ultima actualizacion: `2026-08-12`
 
 Estados permitidos:
 
@@ -122,12 +122,12 @@ Compuerta especifica:
 
 Objetivo: guardar inventario, tema equipado y futuro progreso de eventos sin perder datos version 2.
 
-- [ ] 4.1 Diseñar `ProgressState` version 3.
-- [ ] 4.2 Guardar temas/componentes desbloqueados y seleccion equipada.
-- [ ] 4.3 Reservar estructura compacta para evento semanal y limites publicitarios.
-- [ ] 4.4 Migrar automaticamente version 2 a version 3.
-- [ ] 4.5 Validar datos corruptos, IDs eliminados y tema equipado inexistente.
-- [ ] 4.6 Mantener checksum y respaldo de recuperacion.
+- [x] 4.1 Diseñar `ProgressState` version 3.
+- [x] 4.2 Guardar temas/componentes desbloqueados y seleccion equipada.
+- [x] 4.3 Reservar estructura compacta para evento semanal y limites publicitarios.
+- [x] 4.4 Migrar automaticamente version 2 a version 3.
+- [x] 4.5 Validar datos corruptos, IDs eliminados y tema equipado inexistente.
+- [x] 4.6 Mantener checksum y respaldo de recuperacion.
 
 Compuerta especifica:
 
@@ -363,6 +363,8 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-11 | Fase 2 | `npm run test:theme` + `npm run build` | Windows / Node 24 y navegador 390x844 | Implementacion correcta | Tres temas y perfil reducido cargan sin errores; queda pendiente evaluar legibilidad, SUPER FLOW y fluidez tactil en movil fisico |
 | 2026-08-11 | Fase 2 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario aprueba diferencias visuales y rendimiento; se habilita Fase 3 |
 | 2026-08-11 | Fase 3 | `npm run test:theme` + `npm run build` | Windows / Node 24 y navegador 390x844 | Implementacion correcta | Navegacion, preview, scroll, bloqueo, equipamiento y recarga probados sin errores; falta aprobacion en movil fisico |
+| 2026-08-12 | Fase 3 | GitHub Pages actual | Movil fisico del usuario | Aprobado | Usuario aprueba Coleccion, preview, scroll y equipamiento; se habilita Fase 4 |
+| 2026-08-12 | Fase 4 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Migracion v2, seleccion provisional, backup corrupto, IDs retirados y persistencia v3 probados; navegador local no disponible en esta sesion, falta validacion movil fisica |
 
 ## Decisiones pendientes controladas
 

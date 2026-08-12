@@ -38,13 +38,16 @@ const DEFINITIONS: readonly ThemeCollectionDefinition[] = [
   },
 ] as const;
 
-export function listThemeCollection(totalRuns: number): readonly ThemeCollectionItem[] {
+export function listThemeCollection(
+  totalRuns: number,
+  unlockedThemeIds: readonly string[],
+): readonly ThemeCollectionItem[] {
   const themes = new Map(listVisualThemes().map((theme) => [theme.id, theme]));
   const safeRuns = Math.max(0, Math.floor(totalRuns));
   return DEFINITIONS.flatMap((definition) => {
     const theme = themes.get(definition.themeId);
     if (!theme) return [];
-    const unlocked = safeRuns >= definition.requiredRuns;
+    const unlocked = unlockedThemeIds.includes(definition.themeId);
     return [{
       theme,
       origin: definition.origin,
@@ -58,8 +61,9 @@ export function listThemeCollection(totalRuns: number): readonly ThemeCollection
   });
 }
 
-export function isThemeUnlocked(themeId: string, totalRuns: number): boolean {
-  return listThemeCollection(totalRuns).some(
-    (item) => item.theme.id === themeId && item.unlocked,
-  );
+export function getAutomaticallyUnlockedThemeIds(totalRuns: number): string[] {
+  const safeRuns = Math.max(0, Math.floor(totalRuns));
+  return DEFINITIONS
+    .filter((definition) => safeRuns >= definition.requiredRuns)
+    .map((definition) => definition.themeId);
 }

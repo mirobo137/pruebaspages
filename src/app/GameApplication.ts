@@ -8,7 +8,7 @@ import { loadMusicCatalog } from '../content/MusicCatalog';
 import { MENU_MUSIC_TRACK_ID } from '../content/MenuMusic';
 import { SceneManager } from '../core/scene/SceneManager';
 import { ThemeSelection } from '../customization/ThemeCatalog';
-import { isThemeUnlocked, listThemeCollection } from '../customization/ThemeCollection';
+import { listThemeCollection } from '../customization/ThemeCollection';
 import {
   detectVisualQuality,
   FULL_VISUAL_QUALITY,
@@ -33,7 +33,7 @@ export class GameApplication {
   private readonly audioManager = new AudioManager();
   private readonly menuAudio = new MenuAudioController(this.audioManager);
   private readonly progression = new ProgressionStore();
-  private readonly themeSelection = new ThemeSelection();
+  private readonly themeSelection = new ThemeSelection(this.progression.equippedThemeId);
   private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
   private tracks: TrackSelection[] = [];
   private readonly tick = (ticker: Ticker): void => {
@@ -56,7 +56,7 @@ export class GameApplication {
 
     const query = new URLSearchParams(window.location.search);
     const requestedTheme = query.get('theme');
-    if (requestedTheme) this.themeSelection.select(requestedTheme, false);
+    if (requestedTheme) this.themeSelection.select(requestedTheme);
     const requestedQuality = query.get('quality');
     this.visualQuality = requestedQuality === 'reduced'
       ? REDUCED_VISUAL_QUALITY
@@ -117,11 +117,14 @@ export class GameApplication {
     this.updateCanvasState('collection');
     this.sceneManager.switchTo(
       new CollectionScene(this.app.screen.width, this.app.screen.height, {
-        items: listThemeCollection(this.progression.totalRuns),
-        equippedThemeId: this.themeSelection.current.id,
+        items: listThemeCollection(
+          this.progression.totalRuns,
+          this.progression.unlockedThemeIds,
+        ),
+        equippedThemeId: this.progression.equippedThemeId,
         visualQuality: this.visualQuality,
         onEquip: (themeId) => {
-          if (!isThemeUnlocked(themeId, this.progression.totalRuns)) return false;
+          if (!this.progression.equipTheme(themeId)) return false;
           this.themeSelection.select(themeId);
           this.updateCanvasState('collection');
           return true;

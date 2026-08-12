@@ -14,16 +14,6 @@ const THEMES_BY_ID = new Map<string, VisualTheme>(
 );
 
 export const DEFAULT_THEME_ID = DEFAULT_VISUAL_THEME.id;
-const THEME_STORAGE_KEY = 'superflow:visual-theme:v1';
-type ThemeStorage = Pick<Storage, 'getItem' | 'setItem'>;
-
-function getBrowserStorage(): ThemeStorage | null {
-  try {
-    return typeof localStorage === 'undefined' ? null : localStorage;
-  } catch {
-    return null;
-  }
-}
 
 export function listVisualThemes(): readonly VisualTheme[] {
   return THEMES;
@@ -36,42 +26,16 @@ export function getVisualTheme(themeId: string | null | undefined): VisualTheme 
 export class ThemeSelection {
   private selectedThemeId: string;
 
-  constructor(private readonly storage: ThemeStorage | null = getBrowserStorage()) {
-    this.selectedThemeId = this.loadSelection();
+  constructor(themeId: string = DEFAULT_THEME_ID) {
+    this.selectedThemeId = getVisualTheme(themeId).id;
   }
 
   get current(): VisualTheme {
     return getVisualTheme(this.selectedThemeId);
   }
 
-  select(themeId: string, persist = true): VisualTheme {
+  select(themeId: string): VisualTheme {
     this.selectedThemeId = getVisualTheme(themeId).id;
-    if (persist) this.saveSelection();
     return this.current;
-  }
-
-  private loadSelection(): string {
-    try {
-      const stored = this.storage?.getItem(THEME_STORAGE_KEY);
-      if (!stored) return DEFAULT_THEME_ID;
-      const candidate = JSON.parse(stored) as { version?: unknown; themeId?: unknown };
-      if (candidate.version !== 1 || typeof candidate.themeId !== 'string') {
-        return DEFAULT_THEME_ID;
-      }
-      return getVisualTheme(candidate.themeId).id;
-    } catch {
-      return DEFAULT_THEME_ID;
-    }
-  }
-
-  private saveSelection(): void {
-    try {
-      this.storage?.setItem(THEME_STORAGE_KEY, JSON.stringify({
-        version: 1,
-        themeId: this.selectedThemeId,
-      }));
-    } catch {
-      // El modo privado o una cuota llena no deben bloquear el juego.
-    }
   }
 }

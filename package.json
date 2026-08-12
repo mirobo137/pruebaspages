@@ -8,6 +8,8 @@
     "music:beatmaps": "node scripts/generate-default-beatmaps.mjs",
     "content:sync": "npm run music:manifest && npm run music:beatmaps",
     "test:theme": "node scripts/verify-theme-resolution.mjs",
+    "test:progress": "node scripts/verify-progress-migration.mjs",
+    "test": "npm run test:theme && npm run test:progress",
     "dev": "npm run content:sync && vite",
     "build": "npm run content:sync && tsc -b && vite build",
     "preview": "vite preview"

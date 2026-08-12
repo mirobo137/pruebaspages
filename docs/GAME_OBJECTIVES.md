@@ -128,6 +128,7 @@ La implementacion paso a paso y sus pruebas obligatorias se controlan en `docs/L
 - [x] Tres skins iniciales diferenciadas para objetivos, drag, particulas, FLOW y SUPER FLOW.
 - [x] Perfil visual reducido automatico para moviles con recursos limitados.
 - [x] Coleccion de skins procedurales con preview animado, bloqueo y equipamiento persistente.
+- [x] Progreso version 3 con migracion automatica, checksum, respaldo e inventario cosmetico.
 - [ ] Evento semanal de siete escalones con desbloqueo progresivo de una coleccion visual.
 - [ ] Anuncio recompensado opcional para duplicar monedas al terminar.
 - [ ] Segunda oportunidad recompensada que reinicia la fase de forma segura.

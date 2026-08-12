@@ -2,6 +2,8 @@ import type { Difficulty } from '../game/difficulty/Difficulty';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { LocalProgressStorage } from '../platform/LocalProgressStorage';
+import { DEFAULT_THEME_ID, listVisualThemes } from '../customization/ThemeCatalog';
+import { getAutomaticallyUnlockedThemeIds } from '../customization/ThemeCollection';
 import type {
   PerformanceRecord,
   MenuPreferences,
@@ -12,11 +14,13 @@ import { calculateStarRating, calculateWeightedAccuracy } from './StarRating';
 import { calculateCoinReward } from './Economy';
 
 export class ProgressionStore {
-  private readonly storage = new LocalProgressStorage();
+  private readonly storage: LocalProgressStorage;
   private state: ProgressState;
 
-  constructor() {
+  constructor(storage: LocalProgressStorage = new LocalProgressStorage()) {
+    this.storage = storage;
     this.state = this.storage.load();
+    if (this.syncCustomization()) this.save();
   }
 
   get coins(): number {
@@ -29,6 +33,27 @@ export class ProgressionStore {
 
   get menuPreferences(): MenuPreferences {
     return { ...this.state.menuPreferences };
+  }
+
+  get unlockedThemeIds(): readonly string[] {
+    return [...this.state.customization.unlockedThemeIds];
+  }
+
+  get equippedThemeId(): string {
+    return this.state.customization.equippedThemeId;
+  }
+
+  isThemeUnlocked(themeId: string): boolean {
+    return this.state.customization.unlockedThemeIds.includes(themeId);
+  }
+
+  equipTheme(themeId: string): boolean {
+    if (!this.isThemeUnlocked(themeId)) return false;
+    if (!listVisualThemes().some((theme) => theme.id === themeId)) return false;
+    if (this.state.customization.equippedThemeId === themeId) return true;
+    this.state.customization.equippedThemeId = themeId;
+    this.save();
+    return true;
   }
 
   setMenuPreferences(selectedTrackId: string | null, difficulty: Difficulty): void {
@@ -106,6 +131,7 @@ export class ProgressionStore {
     this.state.records[trackId][difficulty] = record;
     this.state.totalRuns += 1;
     this.state.coins += rewardCoins;
+    this.syncCustomization();
     this.save();
 
     return {
@@ -119,5 +145,27 @@ export class ProgressionStore {
 
   private save(): void {
     this.storage.save(this.state);
+  }
+
+  private syncCustomization(): boolean {
+    const validThemeIds = new Set(listVisualThemes().map((theme) => theme.id));
+    const unlockedThemeIds = [...new Set([
+      ...this.state.customization.unlockedThemeIds,
+      ...getAutomaticallyUnlockedThemeIds(this.state.totalRuns),
+      DEFAULT_THEME_ID,
+    ])].filter((themeId) => validThemeIds.has(themeId));
+    const currentUnlocked = this.state.customization.unlockedThemeIds;
+    const unlocksChanged = unlockedThemeIds.length !== currentUnlocked.length
+      || unlockedThemeIds.some((themeId, index) => themeId !== currentUnlocked[index]);
+    const equippedIsValid = validThemeIds.has(this.state.customization.equippedThemeId)
+      && unlockedThemeIds.includes(this.state.customization.equippedThemeId);
+    const equippedThemeId = equippedIsValid
+      ? this.state.customization.equippedThemeId
+      : DEFAULT_THEME_ID;
+    const equippedChanged = equippedThemeId !== this.state.customization.equippedThemeId;
+
+    if (!unlocksChanged && !equippedChanged) return false;
+    this.state.customization = { unlockedThemeIds, equippedThemeId };
+    return true;
   }
 }

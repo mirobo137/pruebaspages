@@ -21,13 +21,34 @@ export interface MenuPreferences {
   difficulty: Difficulty;
 }
 
+export interface CustomizationProgress {
+  unlockedThemeIds: string[];
+  equippedThemeId: string;
+}
+
+export interface WeeklyEventProgress {
+  eventId: string | null;
+  weekKey: string | null;
+  points: number;
+  claimedRewardIds: string[];
+  missionProgress: Record<string, number>;
+}
+
+export interface RewardedLimitsProgress {
+  dayKey: string | null;
+  usedRewardIds: string[];
+}
+
 export interface ProgressState {
-  version: 2;
+  version: 3;
   coins: number;
   unlockedTrackIds: string[];
   records: Record<string, TrackProgress>;
   totalRuns: number;
   menuPreferences: MenuPreferences;
+  customization: CustomizationProgress;
+  weeklyEvent: WeeklyEventProgress;
+  rewardedLimits: RewardedLimitsProgress;
 }
 
 export interface RecordedRun {
@@ -40,7 +61,7 @@ export interface RecordedRun {
 
 export function createEmptyProgressState(): ProgressState {
   return {
-    version: 2,
+    version: 3,
     coins: 0,
     unlockedTrackIds: [],
     records: {},
@@ -48,6 +69,21 @@ export function createEmptyProgressState(): ProgressState {
     menuPreferences: {
       selectedTrackId: null,
       difficulty: 'medium',
+    },
+    customization: {
+      unlockedThemeIds: ['neon-pulse', 'cyber-sakura'],
+      equippedThemeId: 'neon-pulse',
+    },
+    weeklyEvent: {
+      eventId: null,
+      weekKey: null,
+      points: 0,
+      claimedRewardIds: [],
+      missionProgress: {},
+    },
+    rewardedLimits: {
+      dayKey: null,
+      usedRewardIds: [],
     },
   };
 }
