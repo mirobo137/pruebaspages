@@ -36,8 +36,14 @@ import {
   createRewardedAdsService,
   readDevelopmentAdOutcome,
 } from '../monetization/RewardedAdsFactory';
+import type { RewardedAdsService } from '../monetization/RewardedAdsService';
 import { RunCoinDoubler } from '../monetization/RunCoinDoubler';
 import { DailyCosmeticUnlocker } from '../monetization/DailyCosmeticUnlocker';
+import { createPlatformIntegration } from '../platform/PlatformIntegration';
+import {
+  NoopGamePlatformService,
+  type GamePlatformService,
+} from '../platform/GamePlatformService';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -46,10 +52,8 @@ export class GameApplication {
   private readonly audioManager = new AudioManager();
   private readonly menuAudio = new MenuAudioController(this.audioManager);
   private readonly progression = new ProgressionStore();
-  private readonly rewardedAds = createRewardedAdsService({
-    development: import.meta.env.DEV,
-    simulationOutcome: readDevelopmentAdOutcome(window.location.search),
-  });
+  private rewardedAds: RewardedAdsService = createRewardedAdsService({ development: false });
+  private gamePlatform: GamePlatformService = new NoopGamePlatformService();
   private readonly themeSelection = new ThemeSelection(this.progression.equippedThemeId);
   private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
   private tracks: TrackSelection[] = [];
@@ -73,6 +77,18 @@ export class GameApplication {
       resizeTo: window,
     });
 
+    const platform = await createPlatformIntegration({
+      development: import.meta.env.DEV,
+      hostname: window.location.hostname,
+      search: window.location.search,
+      simulationOutcome: readDevelopmentAdOutcome(window.location.search),
+      onMuteChanged: (muted) => this.audioManager.setPlatformMuted(muted),
+    });
+    this.rewardedAds.destroy();
+    this.rewardedAds = platform.rewardedAds;
+    this.gamePlatform = platform.game;
+    this.gamePlatform.loadingStart();
+
     const query = new URLSearchParams(window.location.search);
     const requestedTheme = query.get('theme');
     if (requestedTheme) this.themeSelection.select(requestedTheme);
@@ -85,8 +101,9 @@ export class GameApplication {
 
     this.mountElement.appendChild(this.app.canvas);
     this.app.canvas.dataset.rewardedAds = this.rewardedAds.available
-      ? 'development'
+      ? this.gamePlatform.environment
       : 'unavailable';
+    this.app.canvas.dataset.platform = this.gamePlatform.environment;
     this.app.stage.addChild(this.sceneHost);
     [this.tracks, this.weeklyEvents] = await Promise.all([
       this.loadMusic(),
@@ -101,6 +118,7 @@ export class GameApplication {
     this.menuAudio.setMenuTrack(menuSelection?.track ?? null);
     void this.audioManager.preload(this.tracks.map((selection) => selection.track));
     this.showTitle();
+    this.gamePlatform.loadingStop();
 
     this.app.ticker.add(this.tick);
     window.addEventListener('resize', this.handleResize);
@@ -110,6 +128,7 @@ export class GameApplication {
     window.removeEventListener('resize', this.handleResize);
     this.app.ticker.remove(this.tick);
     this.sceneManager.destroy();
+    this.gamePlatform.destroy();
     this.rewardedAds.destroy();
     this.menuAudio.destroy();
     this.audioManager.destroy();
@@ -127,6 +146,7 @@ export class GameApplication {
   }
 
   private showMenu = (): void => {
+    this.gamePlatform.gameplayStop();
     const eventSnapshot = this.progression.getWeeklyEvent(this.weeklyEvents);
     this.updateCanvasState('menu');
     this.sceneManager.switchTo(
@@ -173,7 +193,7 @@ export class GameApplication {
         equippedThemeId: this.progression.equippedThemeId,
         visualQuality: this.visualQuality,
         dailyOffer,
-        rewardedAdsAvailable: dailyUnlocker.available,
+        rewardedAdsAvailable: () => dailyUnlocker.available,
         onEquip: (themeId) => {
           if (!this.progression.equipTheme(themeId)) return false;
           this.themeSelection.selectResolved(this.progression.equippedVisualTheme);
@@ -261,6 +281,7 @@ export class GameApplication {
   ): void => {
     const gameOpportunityId = `game:${++this.gameSessionSequence}:${Date.now().toString(36)}`;
     this.menuAudio.stop();
+    this.gamePlatform.gameplayStop();
     this.updateCanvasState('game');
     const audioReady = this.audioManager.prepare(selection.track);
     this.sceneManager.switchTo(
@@ -281,6 +302,8 @@ export class GameApplication {
             opportunityId: `${gameOpportunityId}:phase:${phaseIndex}`,
           })
         ).status,
+        onGameplayStart: () => this.gamePlatform.gameplayStart(),
+        onGameplayStop: () => this.gamePlatform.gameplayStop(),
         onFinished: (
           snapshot,
           flow,
@@ -312,6 +335,7 @@ export class GameApplication {
     usedSecondChance: boolean,
     rewardedProviderUnavailable: boolean,
   ): void => {
+    this.gamePlatform.gameplayStop();
     this.updateCanvasState('result');
     const run = this.progression.recordRun(
       selection.track.id,

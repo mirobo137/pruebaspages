@@ -5,9 +5,9 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 10 - Validacion movil de skin recompensada rotativa`
-- Siguiente accion: `Probar la oferta diaria en Coleccion con anuncio, monedas, recarga y cambio de dia UTC`
-- Ultima actualizacion: `2026-08-12`
+- Fase activa: `Fase 11 - Validacion del adaptador CrazyGames`
+- Siguiente accion: `Probar SDK oficial en localhost y subir una build al Preview Tool de CrazyGames`
+- Ultima actualizacion: `2026-08-13`
 
 Estados permitidos:
 
@@ -292,13 +292,13 @@ Compuerta especifica:
 
 Objetivo: conectar recompensas y guardado con el SDK oficial sin afectar GitHub Pages.
 
-- [ ] 11.1 Detectar entorno local, CrazyGames y deshabilitado.
-- [ ] 11.2 Implementar rewarded ads y sus callbacks oficiales.
-- [ ] 11.3 Mutear y pausar correctamente durante el anuncio.
-- [ ] 11.4 Manejar `unfilled`, adblock, cooldown y errores.
-- [ ] 11.5 Ocultar ofertas durante Basic Launch si los anuncios estan deshabilitados.
-- [ ] 11.6 Preparar migracion de progreso al modulo Data cuando corresponda.
-- [ ] 11.7 Probar en localhost y en Preview de CrazyGames.
+- [x] 11.1 Detectar entorno local, CrazyGames y deshabilitado.
+- [x] 11.2 Implementar rewarded ads y sus callbacks oficiales.
+- [x] 11.3 Mutear y pausar correctamente durante el anuncio.
+- [x] 11.4 Manejar `unfilled`, adblock, cooldown y errores.
+- [x] 11.5 Ocultar ofertas cuando el SDK reporte `adsDisabledBasicLaunch`.
+- [x] 11.6 Preparar migracion de progreso al modulo Data cuando corresponda.
+- [~] 11.7 Probar en localhost y en Preview de CrazyGames.
 
 Compuerta especifica:
 
@@ -383,6 +383,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-12 | Fase 8 | Desarrollo local / movil del usuario | Proveedor simulado | Aprobado | Usuario aprueba duplicacion de monedas y habilita Fase 9 |
 | 2026-08-12 | Fase 9 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Checkpoints de tres fases, rollback de score/eventos, vida parcial, FLOW limpio, seek de beatmap, offset de audio, punteros liberados y politica de un anuncio probados; falta validacion movil |
 | 2026-08-12 | Fase 10 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Tres skins basicas, rotacion diaria UTC, desbloqueo permanente por un anuncio, alternativa de 1,200 monedas, limite diario y persistencia protegida; falta validacion movil |
+| 2026-08-13 | Fase 11 | `npm run test:crazygames` + TypeScript | Windows / Node 24 | Implementacion correcta | SDK v3 aislado por entorno, callbacks rewarded, muteAudio, eventos de carga/gameplay, Basic Launch, adblock, unfilled, cooldown, fallback y puente Data probados con SDK controlado; falta localhost oficial y Preview Tool |
 
 ## Decisiones pendientes controladas
 

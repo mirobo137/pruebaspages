@@ -74,6 +74,8 @@ export interface GameSceneOptions {
   onExit: () => void;
   secondChanceAvailable: boolean;
   onRequestSecondChance: (phaseIndex: number) => Promise<RewardedAdStatus>;
+  onGameplayStart: () => void;
+  onGameplayStop: () => void;
   onFinished: (
     snapshot: ScoreSnapshot,
     flow: FlowSnapshot,
@@ -116,6 +118,8 @@ export class GameScene implements Scene {
   private readonly secondChanceAvailable: boolean;
   private readonly onRequestSecondChance: GameSceneOptions['onRequestSecondChance'];
   private readonly onFinished: GameSceneOptions['onFinished'];
+  private readonly onGameplayStart: GameSceneOptions['onGameplayStart'];
+  private readonly onGameplayStop: GameSceneOptions['onGameplayStop'];
   private readonly activeTargets: ActiveTarget[] = [];
   private dragState: DragState | null = null;
   private readonly bufferedTargets = new Set<ActiveTarget>();
@@ -156,6 +160,8 @@ export class GameScene implements Scene {
     this.secondChanceAvailable = options.secondChanceAvailable;
     this.onRequestSecondChance = options.onRequestSecondChance;
     this.onFinished = options.onFinished;
+    this.onGameplayStart = options.onGameplayStart;
+    this.onGameplayStop = options.onGameplayStop;
     this.checkpoint = {
       phaseIndex: 0,
       phaseStartTime: 0,
@@ -318,6 +324,7 @@ export class GameScene implements Scene {
   }
 
   unmount(): void {
+    this.onGameplayStop();
     this.mounted = false;
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.playfield.off('pointerdown', this.handlePointerDown);
@@ -501,6 +508,7 @@ export class GameScene implements Scene {
       }
       this.countdown.hide();
       this.pauseButton.visible = true;
+      this.onGameplayStart();
     }).catch(
       (error: unknown) => {
         this.musicStartRequested = false;
@@ -723,6 +731,7 @@ export class GameScene implements Scene {
     }
     this.awaitingSecondChance = true;
     this.paused = true;
+    this.onGameplayStop();
     this.audioManager.stop();
     this.musicStarted = false;
     this.musicStartRequested = false;
@@ -811,6 +820,7 @@ export class GameScene implements Scene {
     if (this.gameEnded) return;
 
     this.gameEnded = true;
+    this.onGameplayStop();
     this.audioManager.stop();
     this.onFinished(
       this.score.snapshot(),
@@ -905,13 +915,14 @@ export class GameScene implements Scene {
   };
 
   private readonly handleVisibilityChange = (): void => {
-    if (document.hidden) this.pauseGame();
+    if (document.hidden) this.pauseGame(false);
   };
 
-  private pauseGame(): void {
+  private pauseGame(reportPlatform = true): void {
     if (this.paused || this.gameEnded || this.awaitingSecondChance) return;
 
     this.paused = true;
+    if (reportPlatform) this.onGameplayStop();
     for (const target of this.activeTargets) target.node.resetInteraction();
     this.dragState = null;
     this.bufferedTargets.clear();
@@ -932,6 +943,7 @@ export class GameScene implements Scene {
     void ready.then(() => {
       if (!this.mounted || this.gameEnded) return;
       this.paused = false;
+      if (this.musicStarted) this.onGameplayStart();
       this.pauseOverlay.hide();
       if (!this.musicStarted && !this.musicStartRequested) {
         this.countdown.start();
@@ -944,11 +956,13 @@ export class GameScene implements Scene {
   };
 
   private readonly handleRestart = (): void => {
+    this.onGameplayStop();
     this.audioManager.stop();
     this.onRestart();
   };
 
   private readonly handleExit = (): void => {
+    this.onGameplayStop();
     this.audioManager.stop();
     this.onExit();
   };

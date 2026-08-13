@@ -10,6 +10,7 @@ export interface AudioFrame {
 export class AudioManager {
   private context: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
+  private masterGain: GainNode | null = null;
   private readonly sources: Array<{
     source: AudioBufferSourceNode;
     gain: GainNode;
@@ -22,6 +23,7 @@ export class AudioManager {
   private playing = false;
   private paused = false;
   private playbackToken = 0;
+  private platformMuted = false;
 
   get currentTime(): number {
     if (!this.playing || !this.context) return 0;
@@ -34,6 +36,11 @@ export class AudioManager {
 
   get isPlaying(): boolean {
     return this.playing && !this.paused;
+  }
+
+  setPlatformMuted(muted: boolean): void {
+    this.platformMuted = muted;
+    if (this.masterGain) this.masterGain.gain.value = muted ? 0 : 1;
   }
 
   prepare(track: MusicTrack): Promise<void> {
@@ -212,8 +219,10 @@ export class AudioManager {
   destroy(): void {
     this.stop();
     this.analyser?.disconnect();
+    this.masterGain?.disconnect();
     void this.context?.close();
     this.analyser = null;
+    this.masterGain = null;
     this.context = null;
     this.frequencyData = new Uint8Array(0);
     this.trackData.clear();
@@ -225,10 +234,13 @@ export class AudioManager {
 
     this.context = new AudioContext({ latencyHint: 'interactive' });
     this.analyser = this.context.createAnalyser();
+    this.masterGain = this.context.createGain();
     this.analyser.fftSize = 512;
     this.analyser.smoothingTimeConstant = 0.75;
     this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
-    this.analyser.connect(this.context.destination);
+    this.masterGain.gain.value = this.platformMuted ? 0 : 1;
+    this.analyser.connect(this.masterGain);
+    this.masterGain.connect(this.context.destination);
   }
 
   private getTrackData(track: MusicTrack): Promise<ArrayBuffer> {

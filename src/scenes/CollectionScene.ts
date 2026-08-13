@@ -14,7 +14,7 @@ export interface CollectionSceneOptions {
   equippedThemeId: string;
   visualQuality: VisualQualityProfile;
   dailyOffer: DailyRewardedThemeState;
-  rewardedAdsAvailable: boolean;
+  rewardedAdsAvailable: () => boolean;
   onEquip: (themeId: string) => boolean;
   onUnlockDailyWithAd: () => Promise<DailyCosmeticUnlockResult>;
   onBuyDaily: () => boolean;
@@ -90,7 +90,7 @@ export class CollectionScene implements Scene {
   private readonly items: readonly ThemeCollectionItem[];
   private readonly onEquip: CollectionSceneOptions['onEquip'];
   private readonly dailyOffer: DailyRewardedThemeState;
-  private readonly rewardedAdsAvailable: boolean;
+  private readonly rewardedAdsAvailable: CollectionSceneOptions['rewardedAdsAvailable'];
   private readonly onUnlockDailyWithAd: CollectionSceneOptions['onUnlockDailyWithAd'];
   private readonly onBuyDaily: CollectionSceneOptions['onBuyDaily'];
   private readonly onDailyUnlocked: CollectionSceneOptions['onDailyUnlocked'];
@@ -287,7 +287,7 @@ export class CollectionScene implements Scene {
         ? 'PROCESANDO...'
         : this.dailyOffer.claimedToday
           ? 'OFERTA DIARIA UTILIZADA'
-          : this.rewardedAdsAvailable
+          : this.rewardedAdsAvailable()
             ? 'DESBLOQUEAR · ANUNCIO'
             : 'ANUNCIO NO DISPONIBLE');
       this.equipButton.setEnabled(this.canWatchDailyOffer);
@@ -313,7 +313,7 @@ export class CollectionScene implements Scene {
           : offeredAndLocked
             ? this.dailyOffer.claimedToday
               ? 'YA UTILIZASTE LA OFERTA COSMETICA DE HOY'
-              : this.rewardedAdsAvailable
+                : this.rewardedAdsAvailable()
                 ? 'SKIN PERMANENTE · 1 ANUNCIO OPCIONAL O MONEDAS'
                 : 'ANUNCIOS NO DISPONIBLES · ALTERNATIVA POR MONEDAS'
             : item.origin === 'Rotacion diaria'
@@ -372,7 +372,7 @@ export class CollectionScene implements Scene {
     return this.isSelectedDailyOffer
       && !this.dailyOffer.owned
       && !this.dailyOffer.claimedToday
-      && this.rewardedAdsAvailable
+      && this.rewardedAdsAvailable()
       && !this.offerPending;
   }
 

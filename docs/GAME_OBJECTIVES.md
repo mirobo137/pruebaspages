@@ -193,6 +193,8 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Integrar la primera oferta opcional para duplicar solo las monedas de una partida.
 - [x] Implementar segunda oportunidad segura desde el inicio de la fase con rollback sincronizado.
 - [x] Implementar tres skins basicas con oferta diaria, anuncio opcional, compra por monedas y desbloqueo permanente.
+- [x] Implementar adaptador CrazyGames v3 aislado con rewarded ads, eventos, mute y fallback seguro.
+- [ ] Validar la build con el SDK oficial en localhost y CrazyGames Preview Tool.
 - [ ] Crear icono, miniatura y textos de presentacion.
 - [ ] Revisar privacidad, audio y recursos con licencia.
 - [ ] Integrar el SDK del portal solo donde aporte valor.

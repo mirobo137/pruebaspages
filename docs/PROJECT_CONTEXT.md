@@ -421,6 +421,21 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Solo existe una oportunidad recompensada de gameplay por partida. Si el anuncio de revive comenzo, Resultado no ofrece despues duplicar monedas; `unavailable` no la marca como consumida, pero oculta las demas ofertas de esa partida por falta de proveedor.
 - Las partidas asistidas siguen guardando records locales durante el prototipo. Antes de rankings competitivos deberan marcarse como asistidas y separarse o excluirse de la tabla oficial.
 
+### Adaptador CrazyGames v3
+
+- El SDK oficial se carga dinamicamente solo en dominios de CrazyGames o cuando desarrollo solicita `portal=crazygames`/`useLocalSdk=true`. Nunca se carga en `*.github.io`, incluso si la URL intenta forzarlo.
+- El desarrollo normal conserva el simulador `rewardedAd`; produccion fuera de CrazyGames usa el proveedor no disponible.
+- `local`, `crazygames` y `disabled` se traducen a servicios de plataforma separados. Un fallo de carga o inicializacion desactiva anuncios sin impedir iniciar el juego.
+- Los rewarded usan `requestAd('rewarded')`. Solo `adFinished` concede el premio; `adError` nunca lo concede.
+- `unfilled` y `adCooldown` son indisponibilidades temporales. `adblock` y `adsDisabledBasicLaunch` desactivan las ofertas restantes de la sesion. `other` se trata como error recuperable.
+- Audio y gameplay solo se detienen cuando `adStarted` confirma que el anuncio comenzo. El callback final restaura el estado aun si el anuncio termina con error.
+- El SDK recibe `loadingStart/loadingStop` durante la carga inicial y eventos `gameplayStart/gameplayStop` sin duplicados al comenzar, pausar, reanudar, fallar o terminar una cancion.
+- Perder foco pausa localmente por seguridad, pero no emite `gameplayStop`, porque CrazyGames gestiona por su cuenta los cambios de foco.
+- `game.settings.muteAudio` controla una ganancia maestra independiente. Ninguna reproduccion posterior puede ignorar el mute impuesto por la plataforma.
+- No se implementan anuncios midgame en esta fase; un descanso recompensado nunca se combina con otro tipo de anuncio.
+- `CrazyGamesDataStorage` implementa el contrato de guardado y existe una migracion que copia solo claves locales ausentes en Data. No se activa hasta habilitar Progress Save en el portal y validar la migracion con una cuenta real.
+- Prueba local oficial: `npm run dev -- --host 0.0.0.0` y abrir `?portal=crazygames`; desde otro dispositivo/IP agregar `?useLocalSdk=true`. La validacion final se realiza subiendo `dist` al Preview Tool.
+
 ## Proxima prioridad tecnica
 
 1. Probar tacto y legibilidad en varios moviles reales.

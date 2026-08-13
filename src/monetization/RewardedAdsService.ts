@@ -52,8 +52,8 @@ export class SafeRewardedAdsService implements RewardedAdsService {
       const result = await this.provider.showRewarded(request, {
         onStarted: async () => {
           if (started) return;
-          await lifecycle.onStarted?.();
           started = true;
+          await lifecycle.onStarted?.();
         },
       });
       return normalizeResult(request, result);
