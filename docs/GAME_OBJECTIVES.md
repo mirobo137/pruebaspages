@@ -71,7 +71,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [~] Combo focal, hitos y anticipacion FLOW implementados sin tapar notas visibles; falta validacion perceptual en una partida fisica.
 - [~] Advertencia periferica al quedar una sola vida implementada; falta validacion visual fisica y confirmar el audio real de Miss.
 - [x] FLOW persistente basado en precision: nunca expira por tiempo sin un error del jugador.
-- [ ] Pantalla de derrota modular antes de revive/resultado con reintento y regreso claros.
+- [~] Pantalla de derrota modular con revive, reintento, playlist y resultado implementada; falta validacion fisica de las rutas completas.
 - [ ] Objetivos que se mueven con la musica.
 - [ ] Cadenas de varios objetivos y patrones reconocibles.
 - [ ] Objetivo hold, en el que hay que mantener presionado durante un intervalo.

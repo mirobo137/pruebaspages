@@ -17,6 +17,7 @@ import { RhythmBackground } from '../game/effects/RhythmBackground';
 import { FlowModel } from '../game/flow/FlowModel';
 import type { FlowChange, FlowSnapshot } from '../game/flow/FlowModel';
 import { ScoreModel } from '../game/score/ScoreModel';
+import { RunFinalizationGate } from '../game/results/RunFinalizationGate';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import { TargetNode } from '../game/targets/TargetNode';
 import type { TargetPoint } from '../game/targets/TargetNode';
@@ -35,7 +36,7 @@ import { GameHud } from '../ui/GameHud';
 import { GameCountdown } from '../ui/GameCountdown';
 import { PauseButton } from '../ui/PauseButton';
 import { PauseOverlay } from '../ui/PauseOverlay';
-import { SecondChanceOverlay } from '../ui/SecondChanceOverlay';
+import { DefeatOverlay } from '../ui/DefeatOverlay';
 import { GameplayPointer } from '../ui/GameplayPointer';
 import { ComboFocusPresenter, isComboMilestone } from '../ui/ComboFocusPresenter';
 import { DangerIndicator } from '../ui/DangerIndicator';
@@ -92,6 +93,7 @@ export interface GameSceneOptions {
     completed: boolean,
     usedSecondChance: boolean,
     rewardedProviderUnavailable: boolean,
+    destination: 'result' | 'restart' | 'menu',
   ) => void;
 }
 
@@ -107,7 +109,7 @@ export class GameScene implements Scene {
   private readonly countdown = new GameCountdown();
   private readonly pauseButton: PauseButton;
   private readonly pauseOverlay: PauseOverlay;
-  private readonly secondChanceOverlay: SecondChanceOverlay;
+  private readonly defeatOverlay: DefeatOverlay;
   private readonly score: ScoreModel;
   private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
@@ -151,6 +153,7 @@ export class GameScene implements Scene {
   private musicTimelineStart = 0;
   private awaitingSecondChance = false;
   private readonly rewardedGameplay = new RewardedGameplayPolicy();
+  private readonly runFinalization = new RunFinalizationGate();
 
   constructor(width: number, height: number, options: GameSceneOptions) {
     this.width = width;
@@ -206,9 +209,12 @@ export class GameScene implements Scene {
       onRestart: this.handleRestart,
       onExit: this.handleExit,
     });
-    this.secondChanceOverlay = new SecondChanceOverlay({
+    this.defeatOverlay = new DefeatOverlay({
+      onTransitionComplete: this.handleDefeatTransitionComplete,
       onRevive: this.handleSecondChance,
-      onFinish: this.handleFinishAfterFailure,
+      onRestart: this.handleRestartAfterFailure,
+      onExit: this.handleExitAfterFailure,
+      onResult: this.handleFinishAfterFailure,
     });
     this.playfield.addChild(this.targets);
     this.root.addChild(
@@ -222,7 +228,7 @@ export class GameScene implements Scene {
       this.pauseButton,
       this.countdown,
       this.pauseOverlay,
-      this.secondChanceOverlay,
+      this.defeatOverlay,
     );
   }
 
@@ -263,6 +269,7 @@ export class GameScene implements Scene {
   }
 
   update(deltaSeconds: number): void {
+    this.defeatOverlay.animate(deltaSeconds);
     if (this.gameEnded || this.paused) return;
 
     this.hud.animate(deltaSeconds);
@@ -358,7 +365,7 @@ export class GameScene implements Scene {
     this.countdown.resize(width, height);
     this.pauseButton.position.set(width - 58, 78);
     this.pauseOverlay.resize(width, height);
-    this.secondChanceOverlay.resize(width, height);
+    this.defeatOverlay.resize(width, height);
     this.touchTuning.resize(width, height);
     this.inputProfile.resize(width, height);
     this.inputTelemetry.setProfile(this.inputProfile.mode, width, height);
@@ -807,40 +814,44 @@ export class GameScene implements Scene {
   }
 
   private handleRunFailure(): void {
-    if (
-      this.awaitingSecondChance
-      || this.gameEnded
-      || !this.rewardedGameplay.canOffer(this.secondChanceAvailable)
-    ) {
-      this.finishGame(false);
-      return;
-    }
+    if (this.awaitingSecondChance || this.gameEnded) return;
     this.awaitingSecondChance = true;
     this.paused = true;
     this.onGameplayStop();
+    this.pauseButton.visible = false;
+    this.clearLiveGameplayState();
+    const currentTime = this.audioManager.currentTime;
+    const phase = this.beatmap.phases[this.phaseIndex];
+    this.defeatOverlay.begin({
+      phaseName: phase?.name ?? `FASE ${this.phaseIndex + 1}`,
+      phaseNumber: Math.max(1, this.phaseIndex + 1),
+      progressRatio: this.beatmap.duration > 0 ? currentTime / this.beatmap.duration : 0,
+      perfects: this.score.snapshot().perfects,
+      bestCombo: this.score.snapshot().bestCombo,
+      secondsRemaining: Math.max(0, this.beatmap.duration - currentTime),
+      restoredLives: this.getRestoredLives(),
+      reviveAvailable: this.rewardedGameplay.canOffer(this.secondChanceAvailable),
+    });
+  }
+
+  private readonly handleDefeatTransitionComplete = (): void => {
+    if (!this.awaitingSecondChance || this.gameEnded) return;
     this.audioManager.stop();
     this.musicStarted = false;
     this.musicStartRequested = false;
-    this.pauseButton.visible = false;
-    this.clearLiveGameplayState();
-    const phase = this.beatmap.phases[this.checkpoint.phaseIndex];
-    this.secondChanceOverlay.show(
-      phase?.name ?? `FASE ${this.checkpoint.phaseIndex + 1}`,
-      this.getRestoredLives(),
-    );
-  }
+  };
 
   private readonly handleSecondChance = async (): Promise<void> => {
     if (
       !this.awaitingSecondChance
       || !this.rewardedGameplay.beginRequest()
     ) return;
-    this.secondChanceOverlay.setPending(true);
+    this.defeatOverlay.setPending(true);
     const result = await this.onRequestSecondChance(this.checkpoint.phaseIndex);
     const revived = this.rewardedGameplay.resolve(result);
     if (!this.mounted || this.gameEnded) return;
     if (!revived) {
-      this.finishGame(false);
+      this.defeatOverlay.reportReviveFailure();
       return;
     }
     this.restoreCheckpoint();
@@ -848,6 +859,14 @@ export class GameScene implements Scene {
 
   private readonly handleFinishAfterFailure = (): void => {
     if (!this.rewardedGameplay.pending) this.finishGame(false);
+  };
+
+  private readonly handleRestartAfterFailure = (): void => {
+    if (!this.rewardedGameplay.pending) this.finishGame(false, 'restart');
+  };
+
+  private readonly handleExitAfterFailure = (): void => {
+    if (!this.rewardedGameplay.pending) this.finishGame(false, 'menu');
   };
 
   private restoreCheckpoint(): void {
@@ -873,7 +892,7 @@ export class GameScene implements Scene {
       this.phaseIndex,
       phase?.name ?? `FASE ${this.phaseIndex + 1}`,
     );
-    this.secondChanceOverlay.hide();
+    this.defeatOverlay.hide();
     this.pauseButton.visible = false;
     this.countdown.start(`REINICIANDO ${phase?.name?.toUpperCase() ?? 'FASE'}`);
   }
@@ -904,8 +923,11 @@ export class GameScene implements Scene {
     this.comboFocus.hide();
   }
 
-  private finishGame(completed: boolean): void {
-    if (this.gameEnded) return;
+  private finishGame(
+    completed: boolean,
+    destination: 'result' | 'restart' | 'menu' = 'result',
+  ): void {
+    if (!this.runFinalization.claim()) return;
 
     this.gameEnded = true;
     this.onGameplayStop();
@@ -917,6 +939,7 @@ export class GameScene implements Scene {
       completed,
       this.rewardedGameplay.consumed,
       this.rewardedGameplay.unavailable,
+      destination,
     );
   }
 

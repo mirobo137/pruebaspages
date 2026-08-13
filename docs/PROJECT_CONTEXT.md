@@ -298,6 +298,15 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 - Los campos temporales fueron retirados de `GAME_CONFIG`. HUD y combo focal ya no muestran segundos.
 - Monedas y estrellas se calculan por completado, dificultad y precision; FLOW persistente modifica score/records, no la economia.
 
+### Derrota implementada en 11.5F
+
+- El ultimo Miss congela reglas e input inmediatamente, pero deja 460 ms para que el impacto y `miss.mp3` puedan escucharse antes de detener la musica.
+- `DefeatOverlay` sustituye el dialogo aislado de segunda oportunidad: muestra fase, progreso, segundos restantes, Perfect y mejor combo.
+- Acciones: Revivir desde checkpoint, Reintentar, Playlist o Ver resultado. Cancelar/fallar un anuncio oculta la oferta pero conserva las otras decisiones.
+- Reintentar y Playlist finalizan primero la partida mediante la misma ruta de Resultado, por lo que intento, monedas y evento se guardan aunque se omita la pantalla final.
+- `RunFinalizationGate` permite una sola salida ganadora ante taps dobles o callbacks tardios. Revive no reclama ese guard y continua la misma partida.
+- En movil horizontal los botones usan dos columnas; en vertical se apilan. El panel fue calculado para 320x568 hasta 1920x1080.
+
 ## Flujo de trabajo
 
 ### Preparar otra PC

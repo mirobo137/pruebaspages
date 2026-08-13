@@ -19,7 +19,8 @@
     "test:combo-focus": "node scripts/verify-combo-focus.mjs",
     "test:reactive-audio": "node scripts/verify-reactive-audio.mjs",
     "test:danger-flow": "node scripts/verify-danger-flow.mjs",
-    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads && npm run test:revive && npm run test:daily-cosmetic && npm run test:crazygames && npm run test:input-profile && npm run test:combo-focus && npm run test:reactive-audio && npm run test:danger-flow",
+    "test:defeat": "node scripts/verify-defeat-flow.mjs",
+    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads && npm run test:revive && npm run test:daily-cosmetic && npm run test:crazygames && npm run test:input-profile && npm run test:combo-focus && npm run test:reactive-audio && npm run test:danger-flow && npm run test:defeat",
     "dev": "npm run content:sync && vite",
     "build": "npm run content:sync && tsc -b && vite build",
     "preview": "vite preview"

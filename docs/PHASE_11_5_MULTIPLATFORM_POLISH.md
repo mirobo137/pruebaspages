@@ -117,10 +117,12 @@ Validacion necesaria: dejar pasar tiempo/transiciones sin notas y confirmar que 
 
 ### Entrega 5 - Derrota
 
-- Crear `DefeatTransition` y `DefeatScene/Overlay` modular.
-- Resolver ownership de registro de partida y anuncios.
-- Integrar revive desde checkpoint sin repetir impacto o recompensa.
-- Agregar acciones accesibles con mouse y touch.
+- [x] Crear transicion y `DefeatOverlay` modular.
+- [x] Resolver ownership de registro de partida y anuncios mediante una sola finalizacion en `GameApplication`.
+- [x] Integrar revive desde checkpoint sin repetir impacto o recompensa.
+- [x] Agregar acciones accesibles con mouse y touch: revive, reintento, playlist y resultado.
+
+Estado: `IMPLEMENTADA / VALIDACION FISICA DIFERIDA`. Se verificaron seis viewports, politica de anuncio unico y guard de finalizacion; quedan recorridos manuales por fase, cancelacion real y revive real para 11.5G.
 
 Validacion necesaria: probar derrota en Lectura, Impulso y Climax, con y sin anuncio, y verificar una sola recompensa/estadistica.
 

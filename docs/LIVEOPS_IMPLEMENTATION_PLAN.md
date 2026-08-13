@@ -6,7 +6,7 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 
 - Estado general: `EN PROGRESO`
 - Fase activa: `Fase 11.5 - Experiencia multiplataforma y feedback de dominio`
-- Siguiente accion: `Confirmar miss.mp3 cuando este disponible e implementar 11.5F: derrota y regreso claro`
+- Siguiente accion: `Ejecutar 11.5G: balance, regresion y validaciones fisicas acumuladas`
 - Ultima actualizacion: `2026-08-13`
 
 Estados permitidos:
@@ -394,11 +394,13 @@ Compuerta E:
 
 ### 11.5F - Derrota y regreso claro
 
-- [ ] 11.5.25 Crear una transicion breve al perder la ultima vida: impacto, limpieza y ruptura musical.
-- [ ] 11.5.26 Crear pantalla de derrota con fase, progreso, Perfect, mejor combo y distancia a completar.
-- [ ] 11.5.27 Integrar Reintentar, Volver a playlist y Segunda oportunidad sin duplicar Resultado.
-- [ ] 11.5.28 Mantener ruta inmediata para quien no desea anuncio y evitar animaciones obligatorias largas.
-- [ ] 11.5.29 Confirmar que derrota, revive y resultado entregan monedas/evento exactamente una vez.
+- [x] 11.5.25 Crear una transicion de 460 ms al perder la ultima vida: impacto, limpieza de notas y corte musical posterior.
+- [x] 11.5.26 Crear pantalla de derrota con fase, porcentaje, segundos restantes, Perfect y mejor combo.
+- [x] 11.5.27 Integrar Reintentar, Playlist, Ver resultado y Segunda oportunidad sin duplicar Resultado.
+- [x] 11.5.28 Mantener rutas directas sin anuncio; la unica animacion obligatoria dura 460 ms.
+- [x] 11.5.29 Proteger la finalizacion con `RunFinalizationGate`; las tres salidas registran monedas/evento una sola vez y revive no registra antes de continuar.
+
+Estado de compuerta F: `IMPLEMENTADA / VALIDACION FISICA DIFERIDA`. Layout probado en seis viewports y guard de finalizacion probado para resultado/reintento/menu; falta recorrer manualmente derrota en las tres fases y el SDK real.
 
 Compuerta F:
 
@@ -505,6 +507,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-13 | Fase 11.5B | `npm run test:combo-focus` + `npm run build` | Windows / Node 24 + 4 viewports simulados | Implementada / validacion fisica diferida | Combo focal selecciona una zona libre frente a tres notas futuras, hitos 10/25/50 generan feedback propio y el progreso FLOW/SUPER aparece dentro del foco; falta prueba perceptual en cancion completa |
 | 2026-08-13 | Fase 11.5C | `npm test` + `npm run build` | Windows / Node 24 + prueba auditiva movil | Ajustada / pendiente confirmar | Buses separados y juicios sintetizados correctos; la distorsion fue rechazada por sonar averiada y se elimino por completo. Miss ahora usa tono descendente + ruido filtrado con duck limpio de 130 ms; combo 180 ms y derrota 320 ms |
 | 2026-08-13 | Fase 11.5D/E | `npm test` + `npm run build` | Windows / Node 24 + maquina de estados | Implementada / validacion fisica diferida | Danger deriva de una vida y usa marco/texto perifericos; FLOW ya no se actualiza desde el frame, sobrevive tiempo/transiciones y solo Perfect/Bien/Miss pueden sostener, degradar o romper |
+| 2026-08-13 | Fase 11.5F | `npm test` + `npm run build` | Windows / Node 24 + 6 viewports | Implementada / validacion fisica diferida | Transicion de 460 ms deja terminar el impacto, panel responsive ofrece revive/reintento/playlist/resultado, cancelacion de anuncio conserva decisiones y guard bloquea registros dobles |
 
 ## Decisiones pendientes controladas
 

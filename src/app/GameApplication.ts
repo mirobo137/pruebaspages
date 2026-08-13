@@ -311,6 +311,7 @@ export class GameApplication {
           completed,
           usedSecondChance,
           rewardedProviderUnavailable,
+          destination,
         ) => this.showResult(
           selection,
           difficulty,
@@ -320,6 +321,7 @@ export class GameApplication {
           completed,
           usedSecondChance,
           rewardedProviderUnavailable,
+          destination,
         ),
       }),
     );
@@ -334,6 +336,7 @@ export class GameApplication {
     completed: boolean,
     usedSecondChance: boolean,
     rewardedProviderUnavailable: boolean,
+    destination: 'result' | 'restart' | 'menu' = 'result',
   ): void => {
     this.gamePlatform.gameplayStop();
     this.updateCanvasState('result');
@@ -351,6 +354,14 @@ export class GameApplication {
       flowActivations: flow.activations,
       superFlowActivations: flow.superActivations,
     });
+    if (destination === 'restart') {
+      this.startGame(difficulty, selection);
+      return;
+    }
+    if (destination === 'menu') {
+      this.showMenu();
+      return;
+    }
     let resumeAudioAfterAd = false;
     const coinDoubler = new RunCoinDoubler(
       this.rewardedAds,
