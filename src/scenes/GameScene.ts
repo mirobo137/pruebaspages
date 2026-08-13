@@ -836,7 +836,7 @@ export class GameScene implements Scene {
 
   private readonly handleDefeatTransitionComplete = (): void => {
     if (!this.awaitingSecondChance || this.gameEnded) return;
-    this.audioManager.stop();
+    this.audioManager.stop(true);
     this.musicStarted = false;
     this.musicStartRequested = false;
   };

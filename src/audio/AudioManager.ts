@@ -197,9 +197,9 @@ export class AudioManager {
     this.paused = false;
   }
 
-  stop(): void {
+  stop(preserveFeedback = false): void {
     this.playbackToken += 1;
-    this.feedback?.reset();
+    if (!preserveFeedback) this.feedback?.reset();
     for (const entry of this.sources) {
       try {
         entry.source.stop();
@@ -307,7 +307,7 @@ export class AudioManager {
     if (this.missSamplePromise) return this.missSamplePromise;
     if (!this.context) return Promise.resolve(null);
     const context = this.context;
-    this.missSamplePromise = fetch(new URL('./assets/audio/sfx/miss.mp3', document.baseURI))
+    this.missSamplePromise = fetch(new URL('./assets/audio/sfx/miss.wav', document.baseURI))
       .then((response) => response.ok ? response.arrayBuffer() : null)
       .then((data) => data ? context.decodeAudioData(data.slice(0)) : null)
       .catch(() => null);

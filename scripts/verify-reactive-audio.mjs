@@ -53,11 +53,14 @@ try {
   assert.ok(defeatReaction.filterFrequency < breakReaction.filterFrequency);
 
   const feedbackSource = await readFile('src/audio/ReactiveAudioFeedback.ts', 'utf8');
+  const audioManagerSource = await readFile('src/audio/AudioManager.ts', 'utf8');
   assert.equal(feedbackSource.includes('playbackRate'), false);
   assert.equal(feedbackSource.includes('suspend()'), false);
   assert.equal(feedbackSource.includes('currentTime ='), false);
   assert.equal(feedbackSource.includes('WaveShaper'), false);
   assert.equal(feedbackSource.includes('distortion'), false);
+  assert.equal(audioManagerSource.includes("./assets/audio/sfx/miss.wav"), true);
+  assert.equal(audioManagerSource.includes("./assets/audio/sfx/miss.mp3"), false);
 
   console.log('Procedural cues, bounded miss reaction and clock isolation: OK');
 } finally {

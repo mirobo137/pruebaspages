@@ -286,7 +286,7 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 - La cadena reactiva nunca modifica `AudioBufferSourceNode.playbackRate`, `startedAt`, `timelineOffset` ni `AudioContext.currentTime`.
 - Pausa, mute de portal, anuncios, stop y destruccion restauran el filtro, eliminan voces y cancelan automatizaciones pendientes.
 - Todo se sintetiza con Web Audio: no agrega archivos, descargas ni licencias de efectos. Volumen y timbre finales quedan para validacion auditiva en 11.5G.
-- Si existe `public/assets/audio/sfx/miss.mp3`, se decodifica al preparar la partida y sustituye automaticamente el fallback procedural de Miss, combo roto y derrota. No participa en el manifest de canciones.
+- `public/assets/audio/sfx/miss.wav` se decodifica directamente al preparar la partida y sustituye automaticamente el fallback procedural de Miss, combo roto y derrota. No se convierte a MP3 ni participa en el manifest de canciones.
 
 ### Danger y FLOW semantico implementados en 11.5D/E
 
@@ -300,7 +300,7 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 
 ### Derrota implementada en 11.5F
 
-- El ultimo Miss congela reglas e input inmediatamente, pero deja 460 ms para que el impacto y `miss.mp3` puedan escucharse antes de detener la musica.
+- El ultimo Miss congela reglas e input inmediatamente. A los 460 ms se detiene solo la musica; `miss.wav` queda aislado en feedback y termina naturalmente (el archivo actual dura 644 ms).
 - `DefeatOverlay` sustituye el dialogo aislado de segunda oportunidad: muestra fase, progreso, segundos restantes, Perfect y mejor combo.
 - Acciones: Revivir desde checkpoint, Reintentar, Playlist o Ver resultado. Cancelar/fallar un anuncio oculta la oferta pero conserva las otras decisiones.
 - Reintentar y Playlist finalizan primero la partida mediante la misma ruta de Resultado, por lo que intento, monedas y evento se guardan aunque se omita la pantalla final.

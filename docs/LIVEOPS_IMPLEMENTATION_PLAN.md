@@ -6,7 +6,7 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 
 - Estado general: `EN PROGRESO`
 - Fase activa: `Fase 11.5 - Experiencia multiplataforma y feedback de dominio`
-- Siguiente accion: `Ejecutar 11.5G: balance, regresion y validaciones fisicas acumuladas`
+- Siguiente accion: `Confirmar miss.wav en movil y ejecutar 11.5G: balance, regresion y validaciones fisicas acumuladas`
 - Ultima actualizacion: `2026-08-13`
 
 Estados permitidos:
