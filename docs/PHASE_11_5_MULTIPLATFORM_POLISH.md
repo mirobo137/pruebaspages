@@ -97,10 +97,10 @@ Validacion necesaria: completar una cancion sin consultar el HUD y poder decir a
 
 - [x] Introducir buses `music`, `feedback` y `platform master`.
 - [x] Sintetizar Perfect/Bien/Miss, combo roto y ultima vida con Web Audio.
-- [x] Aplicar filtro/distorsion mediante automatizaciones con retorno garantizado.
+- [x] Aplicar duck/filtro mediante automatizaciones con retorno garantizado; retirar distorsion tras prueba fisica negativa y reforzar un sonido de error propio.
 - [x] Limpiar voces y automatizaciones en pausa, mute, anuncio, stop y cambio de cancion.
 
-Estado: `IMPLEMENTADA / VALIDACION AUDITIVA DIFERIDA`. Las pruebas garantizan duraciones acotadas y aislamiento del reloj; queda comparar timbre, mezcla y fatiga con altavoz y audifonos reales.
+Estado: `IMPLEMENTADA / AJUSTE AUDITIVO EN CURSO`. La primera escucha detecto que distorsionar la musica parecia un problema tecnico. La ruta WaveShaper fue eliminada; queda confirmar el nuevo golpe descendente con ruido filtrado y duck sutil.
 
 Validacion necesaria: reconocer juicios con ojos cerrados sin que la musica pierda tempo o resulte molesta.
 

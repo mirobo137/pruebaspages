@@ -15,7 +15,12 @@ export interface MusicReactionPlan {
   duration: number;
   filterFrequency: number;
   dryGain: number;
-  wetGain: number;
+}
+
+export interface ErrorNoisePlan {
+  duration: number;
+  gain: number;
+  highpassFrequency: number;
 }
 
 export function createFeedbackVoicePlan(cue: GameplayAudioCue): FeedbackVoicePlan[] {
@@ -36,8 +41,15 @@ export function createFeedbackVoicePlan(cue: GameplayAudioCue): FeedbackVoicePla
     { type: 'square', startFrequency: 92, endFrequency: 54, delay: 0.025, duration: 0.19, gain: 0.035 },
   ];
   return [
-    { type: 'sawtooth', startFrequency: 190, endFrequency: 92, delay: 0, duration: 0.16, gain: 0.052 },
+    { type: 'sawtooth', startFrequency: 210, endFrequency: 86, delay: 0, duration: 0.15, gain: 0.068 },
   ];
+}
+
+export function createErrorNoisePlan(cue: GameplayAudioCue): ErrorNoisePlan | null {
+  if (cue === 'defeat') return { duration: 0.14, gain: 0.075, highpassFrequency: 520 };
+  if (cue === 'combo-break') return { duration: 0.085, gain: 0.062, highpassFrequency: 900 };
+  if (cue === 'miss') return { duration: 0.055, gain: 0.05, highpassFrequency: 1450 };
+  return null;
 }
 
 export function createMusicReactionPlan(
@@ -45,11 +57,11 @@ export function createMusicReactionPlan(
   fatal = false,
 ): MusicReactionPlan {
   if (fatal) {
-    return { duration: 0.46, filterFrequency: 620, dryGain: 0.52, wetGain: 0.32 };
+    return { duration: 0.32, filterFrequency: 2600, dryGain: 0.68 };
   }
   return comboBroken
-    ? { duration: 0.28, filterFrequency: 1050, dryGain: 0.68, wetGain: 0.24 }
-    : { duration: 0.19, filterFrequency: 1750, dryGain: 0.78, wetGain: 0.16 };
+    ? { duration: 0.18, filterFrequency: 4200, dryGain: 0.78 }
+    : { duration: 0.13, filterFrequency: 6200, dryGain: 0.86 };
 }
 
 export class ReactiveAudioFeedback {
@@ -57,30 +69,23 @@ export class ReactiveAudioFeedback {
   private readonly feedbackBus: GainNode;
   private readonly filter: BiquadFilterNode;
   private readonly dryMusic: GainNode;
-  private readonly wetMusic: GainNode;
-  private readonly distortion: WaveShaperNode;
   private readonly voices = new Set<OscillatorNode>();
+  private readonly noises = new Set<AudioBufferSourceNode>();
+  private readonly noiseBuffer: AudioBuffer;
 
   constructor(private readonly context: AudioContext, destination: AudioNode) {
     this.musicInput = context.createGain();
     this.feedbackBus = context.createGain();
     this.filter = context.createBiquadFilter();
     this.dryMusic = context.createGain();
-    this.wetMusic = context.createGain();
-    this.distortion = context.createWaveShaper();
+    this.noiseBuffer = createNoiseBuffer(context, 0.16);
     this.filter.type = 'lowpass';
     this.filter.frequency.value = 22000;
     this.filter.Q.value = 0.7;
     this.dryMusic.gain.value = 1;
-    this.wetMusic.gain.value = 0;
-    this.distortion.curve = createDistortionCurve(18);
-    this.distortion.oversample = '2x';
     this.musicInput.connect(this.filter);
     this.filter.connect(this.dryMusic);
-    this.filter.connect(this.distortion);
-    this.distortion.connect(this.wetMusic);
     this.dryMusic.connect(destination);
-    this.wetMusic.connect(destination);
     this.feedbackBus.connect(destination);
   }
 
@@ -91,6 +96,8 @@ export class ReactiveAudioFeedback {
         ? 'combo-break'
         : grade;
     for (const voice of createFeedbackVoicePlan(cue)) this.playVoice(voice);
+    const noise = createErrorNoisePlan(cue);
+    if (noise) this.playNoise(noise);
     if (grade === 'miss') this.reactMusic(createMusicReactionPlan(comboBroken, fatal));
   }
 
@@ -102,6 +109,11 @@ export class ReactiveAudioFeedback {
       voice.disconnect();
     }
     this.voices.clear();
+    for (const noise of this.noises) {
+      try { noise.stop(); } catch { /* The noise may already have ended. */ }
+      noise.disconnect();
+    }
+    this.noises.clear();
   }
 
   destroy(): void {
@@ -110,8 +122,31 @@ export class ReactiveAudioFeedback {
     this.feedbackBus.disconnect();
     this.filter.disconnect();
     this.dryMusic.disconnect();
-    this.wetMusic.disconnect();
-    this.distortion.disconnect();
+  }
+
+  private playNoise(plan: ErrorNoisePlan): void {
+    if (this.context.state !== 'running') return;
+    const now = this.context.currentTime;
+    const source = this.context.createBufferSource();
+    const filter = this.context.createBiquadFilter();
+    const envelope = this.context.createGain();
+    source.buffer = this.noiseBuffer;
+    filter.type = 'highpass';
+    filter.frequency.value = plan.highpassFrequency;
+    filter.Q.value = 0.8;
+    envelope.gain.setValueAtTime(plan.gain, now);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, now + plan.duration);
+    source.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(this.feedbackBus);
+    source.start(now, 0, plan.duration);
+    this.noises.add(source);
+    source.onended = () => {
+      this.noises.delete(source);
+      source.disconnect();
+      filter.disconnect();
+      envelope.disconnect();
+    };
   }
 
   private playVoice(plan: FeedbackVoicePlan): void {
@@ -144,14 +179,12 @@ export class ReactiveAudioFeedback {
     this.holdCurrentValues(now);
     this.filter.frequency.exponentialRampToValueAtTime(plan.filterFrequency, attackEnd);
     this.dryMusic.gain.linearRampToValueAtTime(plan.dryGain, attackEnd);
-    this.wetMusic.gain.linearRampToValueAtTime(plan.wetGain, attackEnd);
     this.filter.frequency.exponentialRampToValueAtTime(22000, releaseEnd);
     this.dryMusic.gain.linearRampToValueAtTime(1, releaseEnd);
-    this.wetMusic.gain.linearRampToValueAtTime(0, releaseEnd);
   }
 
   private holdCurrentValues(now: number): void {
-    for (const parameter of [this.filter.frequency, this.dryMusic.gain, this.wetMusic.gain]) {
+    for (const parameter of [this.filter.frequency, this.dryMusic.gain]) {
       parameter.cancelScheduledValues(now);
       parameter.setValueAtTime(Math.max(0.0001, parameter.value), now);
     }
@@ -160,18 +193,16 @@ export class ReactiveAudioFeedback {
   private restoreMusicAt(now: number): void {
     this.filter.frequency.cancelScheduledValues(now);
     this.dryMusic.gain.cancelScheduledValues(now);
-    this.wetMusic.gain.cancelScheduledValues(now);
     this.filter.frequency.setValueAtTime(22000, now);
     this.dryMusic.gain.setValueAtTime(1, now);
-    this.wetMusic.gain.setValueAtTime(0, now);
   }
 }
 
-function createDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
-  const curve = new Float32Array(256);
-  for (let index = 0; index < curve.length; index += 1) {
-    const x = index * 2 / (curve.length - 1) - 1;
-    curve[index] = (3 + amount) * x * 20 * Math.PI / (Math.PI + amount * Math.abs(x));
+function createNoiseBuffer(context: AudioContext, duration: number): AudioBuffer {
+  const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * duration), context.sampleRate);
+  const channel = buffer.getChannelData(0);
+  for (let index = 0; index < channel.length; index += 1) {
+    channel[index] = Math.random() * 2 - 1;
   }
-  return curve;
+  return buffer;
 }

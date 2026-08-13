@@ -348,12 +348,12 @@ Compuerta B:
 ### 11.5C - Lenguaje sonoro de precision y error
 
 - [x] 11.5.10 Crear sonidos procedurales distintos para Perfect, Bien, Miss y combo roto.
-- [x] 11.5.11 Insertar una cadena Web Audio de duck, filtro y distorsion breve para Miss.
+- [x] 11.5.11 Insertar duck/filtro breve para abrir espacio al Miss; la distorsion se retiro tras prueba fisica porque parecia un fallo tecnico del audio.
 - [x] 11.5.12 Crear una ruptura final mas intensa al perder la ultima vida.
 - [x] 11.5.13 Garantizar que ningun efecto cambie playbackRate, reloj musical o sincronizacion del beatmap.
 - [x] 11.5.14 Respetar pausa, mute del portal y anuncios; limitar cada juicio a un maximo de tres voces breves sin assets para mantener seguro el perfil reducido.
 
-Estado de compuerta C: `IMPLEMENTADA / VALIDACION AUDITIVA DIFERIDA`. Las rutas, envolventes, limites y aislamiento del reloj estan probados; volumen, timbre y fatiga requieren una escucha fisica con canciones completas antes de 11.5G.
+Estado de compuerta C: `IMPLEMENTADA / AJUSTE AUDITIVO EN CURSO`. La prueba fisica rechazo la distorsion y se sustituyo por un error dedicado de tono descendente mas ruido filtrado. Las rutas, envolventes, limites y aislamiento del reloj estan probados; falta confirmar el nuevo timbre en una cancion completa.
 
 Compuerta C:
 
@@ -499,7 +499,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-13 | Fase 11.5 | Documentacion | Movil aprobado + critica externa de PC | Plan activo | Se divide pulido en desktop, combo focal, audio reactivo, ultima vida, FLOW semantico, derrota y regresion; CrazyGames Preview se pospone hasta aprobar PC y movil |
 | 2026-08-13 | Fase 11.5A | `npm test` + `npm run build` | Windows / Node 24 + viewports simulados | Implementada / validacion fisica diferida | Perfil por ultimo puntero activo, campo mouse centrado, cursor/estela procedural, telemetria solo desarrollo, tres variantes de alcance y regresion completa correctas; falta comparar sensacion en PC fisico |
 | 2026-08-13 | Fase 11.5B | `npm run test:combo-focus` + `npm run build` | Windows / Node 24 + 4 viewports simulados | Implementada / validacion fisica diferida | Combo focal selecciona una zona libre frente a tres notas futuras, hitos 10/25/50 generan feedback propio y el progreso FLOW/SUPER aparece dentro del foco; falta prueba perceptual en cancion completa |
-| 2026-08-13 | Fase 11.5C | `npm test` + `npm run build` | Windows / Node 24 + planes Web Audio verificados | Implementada / validacion auditiva diferida | Buses separados de musica/feedback/master, cuatro juicios sintetizados, reaccion filtrada/distorsionada de 190-280 ms y ruptura final de 460 ms; pausa/mute limpian automatizaciones y ningun efecto accede al playbackRate o reloj |
+| 2026-08-13 | Fase 11.5C | `npm test` + `npm run build` | Windows / Node 24 + prueba auditiva movil | Ajustada / pendiente confirmar | Buses separados y juicios sintetizados correctos; la distorsion fue rechazada por sonar averiada y se elimino por completo. Miss ahora usa tono descendente + ruido filtrado con duck limpio de 130 ms; combo 180 ms y derrota 320 ms |
 
 ## Decisiones pendientes controladas
 
