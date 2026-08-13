@@ -66,7 +66,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Riesgo de romper FLOW inmediatamente al fallar.
 - [x] SUPER FLOW x4 desbloqueado solo con cuatro Perfect consecutivos dentro de FLOW.
 - [x] Bien degrada SUPER FLOW a FLOW x2; Miss rompe todo el estado.
-- [ ] Feedback sonoro distinto para Perfect, Bien y Miss.
+- [~] Feedback procedural distinto para Perfect, Bien, Miss, combo roto y derrota implementado; falta balance auditivo fisico.
 - [~] Perfil desktop separado, campo centrado y cursor procedural implementados; falta validar fisicamente que mouse sea tan satisfactorio como touch.
 - [~] Combo focal, hitos y anticipacion FLOW implementados sin tapar notas visibles; falta validacion perceptual en una partida fisica.
 - [ ] Advertencia audiovisual accesible al quedar una sola vida.

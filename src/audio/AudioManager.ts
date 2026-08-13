@@ -1,4 +1,6 @@
 import type { MusicTrack } from '../content/MusicCatalog';
+import type { TimingGrade } from '../game/timing/TimingGrade';
+import { ReactiveAudioFeedback } from './ReactiveAudioFeedback';
 
 export interface AudioFrame {
   volume: number;
@@ -11,6 +13,7 @@ export class AudioManager {
   private context: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
   private masterGain: GainNode | null = null;
+  private feedback: ReactiveAudioFeedback | null = null;
   private readonly sources: Array<{
     source: AudioBufferSourceNode;
     gain: GainNode;
@@ -41,6 +44,16 @@ export class AudioManager {
   setPlatformMuted(muted: boolean): void {
     this.platformMuted = muted;
     if (this.masterGain) this.masterGain.gain.value = muted ? 0 : 1;
+    if (muted) this.feedback?.reset();
+  }
+
+  emitGameplayJudgement(
+    grade: TimingGrade,
+    comboBroken: boolean,
+    fatal = false,
+  ): void {
+    if (this.platformMuted || this.paused || !this.playing) return;
+    this.feedback?.emitJudgement(grade, comboBroken, fatal);
   }
 
   prepare(track: MusicTrack): Promise<void> {
@@ -110,7 +123,7 @@ export class AudioManager {
         source.buffer = buffer;
         source.playbackRate.value = buffer.duration / renderedCycleDuration;
         source.connect(gain);
-        gain.connect(this.analyser!);
+        gain.connect(this.feedback!.musicInput);
 
         gain.gain.setValueAtTime(cycle === 0 ? 1 : 0, cycleStart);
         if (cycle > 0) {
@@ -139,7 +152,7 @@ export class AudioManager {
         source.playbackRate.value = buffer.duration / options.loopDuration;
       }
       source.connect(gain);
-      gain.connect(this.analyser!);
+      gain.connect(this.feedback!.musicInput);
       const startOffset = Math.max(
         0,
         Math.min(options.startOffset ?? 0, Math.max(0, buffer.duration - 0.01)),
@@ -162,6 +175,7 @@ export class AudioManager {
     if (!this.playing || this.paused || !this.context) return;
 
     this.paused = true;
+    this.feedback?.reset();
     try {
       await this.context.suspend();
     } catch (error) {
@@ -179,6 +193,7 @@ export class AudioManager {
 
   stop(): void {
     this.playbackToken += 1;
+    this.feedback?.reset();
     for (const entry of this.sources) {
       try {
         entry.source.stop();
@@ -218,11 +233,13 @@ export class AudioManager {
 
   destroy(): void {
     this.stop();
+    this.feedback?.destroy();
     this.analyser?.disconnect();
     this.masterGain?.disconnect();
     void this.context?.close();
     this.analyser = null;
     this.masterGain = null;
+    this.feedback = null;
     this.context = null;
     this.frequencyData = new Uint8Array(0);
     this.trackData.clear();
@@ -239,6 +256,7 @@ export class AudioManager {
     this.analyser.smoothingTimeConstant = 0.75;
     this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
     this.masterGain.gain.value = this.platformMuted ? 0 : 1;
+    this.feedback = new ReactiveAudioFeedback(this.context, this.analyser);
     this.analyser.connect(this.masterGain);
     this.masterGain.connect(this.context.destination);
   }

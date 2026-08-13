@@ -95,10 +95,12 @@ Validacion necesaria: completar una cancion sin consultar el HUD y poder decir a
 
 ### Entrega 3 - Audio reactivo
 
-- Introducir buses `music`, `feedback` y `platform master`.
-- Sintetizar Perfect/Bien/Miss con Web Audio.
-- Aplicar filtro/distorsion mediante automatizaciones con retorno garantizado.
-- Probar spam de Miss, pausa durante efecto, anuncio y cambio de cancion.
+- [x] Introducir buses `music`, `feedback` y `platform master`.
+- [x] Sintetizar Perfect/Bien/Miss, combo roto y ultima vida con Web Audio.
+- [x] Aplicar filtro/distorsion mediante automatizaciones con retorno garantizado.
+- [x] Limpiar voces y automatizaciones en pausa, mute, anuncio, stop y cambio de cancion.
+
+Estado: `IMPLEMENTADA / VALIDACION AUDITIVA DIFERIDA`. Las pruebas garantizan duraciones acotadas y aislamiento del reloj; queda comparar timbre, mezcla y fatiga con altavoz y audifonos reales.
 
 Validacion necesaria: reconocer juicios con ojos cerrados sin que la musica pierda tempo o resulte molesta.
 

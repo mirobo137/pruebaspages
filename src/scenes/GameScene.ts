@@ -598,11 +598,17 @@ export class GameScene implements Scene {
     if (targetIndex < 0) return;
 
     const feedbackPoint = activeTarget.node.getFeedbackPoint();
+    const scoreBeforeJudgement = this.score.snapshot();
     this.inputTelemetry.recordResult(grade);
     const flowChange = this.flow.register(grade);
     const flowTransitionHandled = this.applyFlowChange(flowChange);
     this.score.register(grade, flowChange.snapshot.multiplier);
     const scoreSnapshot = this.score.snapshot();
+    this.audioManager.emitGameplayJudgement(
+      grade,
+      grade === 'miss' && scoreBeforeJudgement.combo > 0,
+      grade === 'miss' && scoreBeforeJudgement.lives <= 1,
+    );
     this.hud.update(scoreSnapshot);
     this.hud.showTiming(grade);
     this.effects.emitImpact(feedbackPoint.x, feedbackPoint.y, grade);

@@ -17,7 +17,8 @@
     "test:crazygames": "node scripts/verify-crazygames-adapter.mjs",
     "test:input-profile": "node scripts/verify-input-gameplay-profile.mjs",
     "test:combo-focus": "node scripts/verify-combo-focus.mjs",
-    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads && npm run test:revive && npm run test:daily-cosmetic && npm run test:crazygames && npm run test:input-profile && npm run test:combo-focus",
+    "test:reactive-audio": "node scripts/verify-reactive-audio.mjs",
+    "test": "npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads && npm run test:revive && npm run test:daily-cosmetic && npm run test:crazygames && npm run test:input-profile && npm run test:combo-focus && npm run test:reactive-audio",
     "dev": "npm run content:sync && vite",
     "build": "npm run content:sync && tsc -b && vite build",
     "preview": "vite preview"

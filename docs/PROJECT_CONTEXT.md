@@ -277,6 +277,15 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 - Los hitos son 10, 25 y cada multiplo de 50 desde 50. Combinan escala, aros, particulas y flash sin cambiar score ni timing.
 - El `GameHud` permanece como fuente numerica exacta; el presentador focal es comunicacion periferica y puede ocultarse en pausa, transicion o limpieza de partida.
 
+### Audio reactivo implementado en 11.5C
+
+- `ReactiveAudioFeedback` crea tres rutas: entrada de musica, bus de feedback sintetizado y master controlado por la plataforma.
+- Perfect usa un ascenso limpio de dos tonos; Bien un pulso corto medio; Miss una caida grave; romper combo agrega una segunda capa y perder la ultima vida usa una ruptura de tres voces.
+- Miss mezcla temporalmente una ruta filtrada/distorsionada con la musica. La reaccion dura 190 ms, 280 ms al romper combo y 460 ms en derrota; siempre automatiza de regreso a musica limpia.
+- La cadena reactiva nunca modifica `AudioBufferSourceNode.playbackRate`, `startedAt`, `timelineOffset` ni `AudioContext.currentTime`.
+- Pausa, mute de portal, anuncios, stop y destruccion restauran el filtro, eliminan voces y cancelan automatizaciones pendientes.
+- Todo se sintetiza con Web Audio: no agrega archivos, descargas ni licencias de efectos. Volumen y timbre finales quedan para validacion auditiva en 11.5G.
+
 ## Flujo de trabajo
 
 ### Preparar otra PC
