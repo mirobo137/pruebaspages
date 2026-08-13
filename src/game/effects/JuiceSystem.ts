@@ -219,6 +219,40 @@ export class JuiceSystem extends Container {
     this.redrawFlash();
   }
 
+  emitComboMilestone(x: number, y: number, combo: number): void {
+    const color = this.superFlowActive
+      ? this.visualTheme.superPrimary
+      : this.flowActive
+        ? this.visualTheme.flowPrimary
+        : this.visualTheme.highlight;
+    const particleCount = Math.max(
+      10,
+      Math.round((combo >= 50 ? 24 : combo >= 25 ? 18 : 14)
+        * this.quality.particleMultiplier),
+    );
+    for (let index = 0; index < particleCount; index += 1) {
+      const angle = index * Math.PI * 2 / particleCount;
+      const speed = 95 + (index % 4) * 18;
+      this.createParticle(
+        x,
+        y,
+        index % 2 === 0 ? color : this.visualTheme.highlight,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        index % 3 === 0 ? 4 : 2.5,
+        0.58,
+        20,
+        index % 3 === 0 ? 'streak' : 'dot',
+      );
+    }
+    this.createRing(x, y, color, 48, 0.72, 3.5);
+    this.createRing(x, y, this.visualTheme.highlight, 72, 0.82, 1.5);
+    this.flashColor = color;
+    this.flashStrength = Math.max(this.flashStrength, combo >= 50 ? 0.18 : 0.11);
+    this.shakeStrength = Math.max(this.shakeStrength, combo >= 50 ? 7 : 4.5);
+    this.redrawFlash();
+  }
+
   setFlowState(active: boolean, superActive = false): void {
     this.flowActive = active;
     this.superFlowActive = superActive;

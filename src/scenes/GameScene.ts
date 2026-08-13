@@ -22,6 +22,12 @@ import { TargetNode } from '../game/targets/TargetNode';
 import type { TargetPoint } from '../game/targets/TargetNode';
 import type { TimingGrade } from '../game/timing/TimingGrade';
 import { capturePointer, releasePointer } from '../input/PointerCapture';
+import {
+  detectInitialPointerMode,
+  InputGameplayProfile,
+  resolveDesktopReachVariant,
+} from '../input/InputGameplayProfile';
+import { GameplayInputTelemetry } from '../input/GameplayInputTelemetry';
 import { TouchTuning } from '../input/TouchTuning';
 import type { PointerTuning } from '../input/TouchTuning';
 import { HapticsService } from '../platform/HapticsService';
@@ -30,6 +36,8 @@ import { GameCountdown } from '../ui/GameCountdown';
 import { PauseButton } from '../ui/PauseButton';
 import { PauseOverlay } from '../ui/PauseOverlay';
 import { SecondChanceOverlay } from '../ui/SecondChanceOverlay';
+import { GameplayPointer } from '../ui/GameplayPointer';
+import { ComboFocusPresenter, isComboMilestone } from '../ui/ComboFocusPresenter';
 import type { RewardedAdStatus } from '../monetization/RewardTypes';
 import { RewardedGameplayPolicy } from '../game/checkpoint/RewardedGameplayPolicy';
 
@@ -103,6 +111,10 @@ export class GameScene implements Scene {
   private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
   private readonly touchTuning = new TouchTuning();
+  private readonly inputProfile: InputGameplayProfile;
+  private readonly inputTelemetry: GameplayInputTelemetry;
+  private readonly gameplayPointer: GameplayPointer;
+  private readonly comboFocus: ComboFocusPresenter;
   private readonly audioManager: AudioManager;
   private readonly track: MusicTrack;
   private readonly difficulty: Difficulty;
@@ -145,6 +157,23 @@ export class GameScene implements Scene {
     this.track = options.track;
     this.difficulty = options.difficulty;
     this.visualTheme = options.visualTheme;
+    const initialPointerMode = detectInitialPointerMode({
+      maxTouchPoints: navigator.maxTouchPoints,
+      coarsePointer: window.matchMedia('(pointer: coarse)').matches,
+      finePointer: window.matchMedia('(pointer: fine)').matches,
+    });
+    this.inputProfile = new InputGameplayProfile(
+      width,
+      height,
+      initialPointerMode,
+      resolveDesktopReachVariant(window.location.search),
+    );
+    this.inputTelemetry = new GameplayInputTelemetry(initialPointerMode, width, height);
+    this.gameplayPointer = new GameplayPointer(
+      this.visualTheme.effects.touch,
+      this.visualTheme.target.highlight,
+    );
+    this.comboFocus = new ComboFocusPresenter(this.visualTheme.effects);
     this.background = new RhythmBackground(
       this.visualTheme.background,
       options.visualQuality,
@@ -183,6 +212,8 @@ export class GameScene implements Scene {
       this.background,
       this.playfield,
       this.effects,
+      this.gameplayPointer,
+      this.comboFocus,
       this.hud,
       this.pauseButton,
       this.countdown,
@@ -199,6 +230,8 @@ export class GameScene implements Scene {
     this.playfield.on('pointerup', this.handlePointerUp);
     this.playfield.on('pointerupoutside', this.handlePointerUp);
     this.playfield.on('pointercancel', this.handlePointerUp);
+    this.playfield.on('pointerover', this.handlePointerOver);
+    this.playfield.on('pointerout', this.handlePointerOut);
     this.hud.setDifficulty(this.difficulty);
     this.hud.update(this.score.snapshot());
     this.hud.updateRunProgress(
@@ -230,6 +263,8 @@ export class GameScene implements Scene {
     this.hud.animate(deltaSeconds);
     this.background.updateBackground(deltaSeconds);
     this.effects.updateEffects(deltaSeconds);
+    this.gameplayPointer.animate(deltaSeconds);
+    this.comboFocus.animate(deltaSeconds);
     for (const target of this.activeTargets) target.node.animate(deltaSeconds);
     const shake = this.effects.getShakeOffset();
     this.targets.position.set(shake.x, shake.y);
@@ -321,6 +356,10 @@ export class GameScene implements Scene {
     this.pauseOverlay.resize(width, height);
     this.secondChanceOverlay.resize(width, height);
     this.touchTuning.resize(width, height);
+    this.inputProfile.resize(width, height);
+    this.inputTelemetry.setProfile(this.inputProfile.mode, width, height);
+    this.comboFocus.resize(width, height);
+    this.syncInputPresentation();
   }
 
   unmount(): void {
@@ -332,6 +371,9 @@ export class GameScene implements Scene {
     this.playfield.off('pointerup', this.handlePointerUp);
     this.playfield.off('pointerupoutside', this.handlePointerUp);
     this.playfield.off('pointercancel', this.handlePointerUp);
+    this.playfield.off('pointerover', this.handlePointerOver);
+    this.playfield.off('pointerout', this.handlePointerOut);
+    this.inputTelemetry.report();
     this.clearLiveGameplayState();
     this.targets.position.set(0, 0);
     this.audioManager.stop();
@@ -339,6 +381,9 @@ export class GameScene implements Scene {
 
   private readonly handlePointerDown = (event: FederatedPointerEvent): void => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+    this.registerActivePointer(event);
+    this.gameplayPointer.moveTo(event.global.x, event.global.y);
+    this.gameplayPointer.press();
     if (!this.isGameplayInteractive()) return;
 
     capturePointer(event);
@@ -403,6 +448,9 @@ export class GameScene implements Scene {
   };
 
   private readonly handlePointerMove = (event: FederatedPointerEvent): void => {
+    this.registerActivePointer(event);
+    this.gameplayPointer.moveTo(event.global.x, event.global.y);
+    this.inputTelemetry.recordPointer(event.global.x, event.global.y);
     if (!this.isGameplayInteractive()) return;
     if (
       !this.dragState
@@ -487,6 +535,16 @@ export class GameScene implements Scene {
     this.resolveTarget(activeTarget, 'miss');
   };
 
+  private readonly handlePointerOver = (event: FederatedPointerEvent): void => {
+    this.registerActivePointer(event);
+    this.gameplayPointer.setInside(true);
+    this.gameplayPointer.moveTo(event.global.x, event.global.y);
+  };
+
+  private readonly handlePointerOut = (): void => {
+    this.gameplayPointer.setInside(false);
+  };
+
   private startMusic(): void {
     if (this.musicStartRequested || this.gameEnded) return;
 
@@ -540,12 +598,29 @@ export class GameScene implements Scene {
     if (targetIndex < 0) return;
 
     const feedbackPoint = activeTarget.node.getFeedbackPoint();
+    this.inputTelemetry.recordResult(grade);
     const flowChange = this.flow.register(grade);
     const flowTransitionHandled = this.applyFlowChange(flowChange);
     this.score.register(grade, flowChange.snapshot.multiplier);
-    this.hud.update(this.score.snapshot());
+    const scoreSnapshot = this.score.snapshot();
+    this.hud.update(scoreSnapshot);
     this.hud.showTiming(grade);
     this.effects.emitImpact(feedbackPoint.x, feedbackPoint.y, grade);
+    const upcomingPoints = this.activeTargets
+      .filter((target) => target !== activeTarget)
+      .sort((left, right) => left.event.time - right.event.time)
+      .slice(0, 3)
+      .map((target) => target.node.getFeedbackPoint());
+    this.comboFocus.showResult(
+      feedbackPoint,
+      grade,
+      scoreSnapshot,
+      flowChange.snapshot,
+      upcomingPoints,
+    );
+    if (grade !== 'miss' && isComboMilestone(scoreSnapshot.combo)) {
+      this.effects.emitComboMilestone(feedbackPoint.x, feedbackPoint.y, scoreSnapshot.combo);
+    }
     this.background.pulse(grade === 'perfect' ? 1 : grade === 'good' ? 0.65 : 0.8);
     if (!flowTransitionHandled) {
       this.haptics.feedback(grade);
@@ -634,18 +709,19 @@ export class GameScene implements Scene {
     )) % 3;
     const direction = variant === 1 ? -1 : 1;
     const curveDepth = Math.min(105, Math.max(44, distance * 0.3));
+    const bounds = this.inputProfile.bounds;
     const createControl = (progress: number, depth: number): TargetPoint => ({
       x: Math.max(
-        GAME_CONFIG.targetSideMargin,
+        bounds.left,
         Math.min(
-          this.width - GAME_CONFIG.targetSideMargin,
+          bounds.right,
           start.x + deltaX * progress - deltaY / distance * depth,
         ),
       ),
       y: Math.max(
-        GAME_CONFIG.targetSpawnTop,
+        bounds.top,
         Math.min(
-          this.height - GAME_CONFIG.targetSideMargin,
+          bounds.bottom,
           start.y + deltaY * progress + deltaX / distance * depth,
         ),
       ),
@@ -679,45 +755,43 @@ export class GameScene implements Scene {
   }
 
   private randomStartPoint(): TargetPoint {
+    const bounds = this.inputProfile.bounds;
     return {
-      x: randomBetween(GAME_CONFIG.targetSideMargin, this.width - GAME_CONFIG.targetSideMargin),
-      y: randomBetween(
-        GAME_CONFIG.targetSpawnTop,
-        Math.max(
-          GAME_CONFIG.targetSpawnTop + GAME_CONFIG.targetSideMargin,
-          this.height - GAME_CONFIG.targetSideMargin,
-        ),
-      ),
+      x: randomBetween(bounds.left, bounds.right),
+      y: randomBetween(bounds.top, bounds.bottom),
     };
   }
 
   private createRandomDragEnd(start: TargetPoint): TargetPoint {
     const angle = randomBetween(0, Math.PI * 2);
     const distance = GAME_CONFIG.dragDistance + 30;
+    const bounds = this.inputProfile.bounds;
     return {
       x: Math.max(
-        GAME_CONFIG.targetSideMargin,
-        Math.min(this.width - GAME_CONFIG.targetSideMargin, start.x + Math.cos(angle) * distance),
+        bounds.left,
+        Math.min(bounds.right, start.x + Math.cos(angle) * distance),
       ),
       y: Math.max(
-        GAME_CONFIG.targetSpawnTop,
-        Math.min(this.height - GAME_CONFIG.targetSideMargin, start.y + Math.sin(angle) * distance),
+        bounds.top,
+        Math.min(bounds.bottom, start.y + Math.sin(angle) * distance),
       ),
     };
   }
 
   private fromNormalizedPoint(point: { x: number; y: number }): TargetPoint {
-    return {
-      x: GAME_CONFIG.targetSideMargin
-        + Math.max(0, Math.min(1, point.x))
-        * Math.max(0, this.width - GAME_CONFIG.targetSideMargin * 2),
-      y: GAME_CONFIG.targetSpawnTop
-        + Math.max(0, Math.min(1, point.y))
-        * Math.max(
-          0,
-          this.height - GAME_CONFIG.targetSpawnTop - GAME_CONFIG.targetSideMargin,
-        ),
-    };
+    return this.inputProfile.map(point);
+  }
+
+  private registerActivePointer(event: FederatedPointerEvent): void {
+    if (!this.inputProfile.registerPointer(event.pointerType)) return;
+    this.inputTelemetry.setProfile(this.inputProfile.mode, this.width, this.height);
+    this.syncInputPresentation();
+  }
+
+  private syncInputPresentation(): void {
+    const usesCursor = this.inputProfile.usesGameplayCursor;
+    this.playfield.cursor = usesCursor ? 'none' : 'default';
+    this.gameplayPointer.setEnabled(usesCursor);
   }
 
   private handleRunFailure(): void {
@@ -814,6 +888,7 @@ export class GameScene implements Scene {
     this.dragState = null;
     this.bufferedTargets.clear();
     this.targets.position.set(0, 0);
+    this.comboFocus.hide();
   }
 
   private finishGame(completed: boolean): void {
@@ -883,6 +958,7 @@ export class GameScene implements Scene {
     }
     this.dragState = null;
     this.bufferedTargets.clear();
+    this.comboFocus.hide();
 
     for (let index = this.pendingEvents.length - 1; index >= 0; index -= 1) {
       const event = this.pendingEvents[index];
@@ -926,6 +1002,7 @@ export class GameScene implements Scene {
     for (const target of this.activeTargets) target.node.resetInteraction();
     this.dragState = null;
     this.bufferedTargets.clear();
+    this.comboFocus.hide();
     this.pauseButton.visible = false;
     this.pauseOverlay.setMessage('La música y el tiempo están detenidos');
     this.pauseReady = this.audioManager.pause().catch((error: unknown) => {

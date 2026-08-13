@@ -5,8 +5,8 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 ## Estado de ejecucion
 
 - Estado general: `EN PROGRESO`
-- Fase activa: `Fase 11 - Validacion del adaptador CrazyGames`
-- Siguiente accion: `Probar SDK oficial en localhost y subir una build al Preview Tool de CrazyGames`
+- Fase activa: `Fase 11.5 - Experiencia multiplataforma y feedback de dominio`
+- Siguiente accion: `Implementar 11.5C: lenguaje sonoro de precision y error`
 - Ultima actualizacion: `2026-08-13`
 
 Estados permitidos:
@@ -298,13 +298,123 @@ Objetivo: conectar recompensas y guardado con el SDK oficial sin afectar GitHub 
 - [x] 11.4 Manejar `unfilled`, adblock, cooldown y errores.
 - [x] 11.5 Ocultar ofertas cuando el SDK reporte `adsDisabledBasicLaunch`.
 - [x] 11.6 Preparar migracion de progreso al modulo Data cuando corresponda.
-- [~] 11.7 Probar en localhost y en Preview de CrazyGames.
+- [ ] 11.7 Probar en localhost y en Preview de CrazyGames despues de aprobar la Fase 11.5.
 
 Compuerta especifica:
 
 - Cumple las reglas vigentes de anuncios de CrazyGames.
 - El juego siempre puede jugarse con adblock o sin inventario publicitario.
 - No se combinan midgame y rewarded en el mismo descanso.
+
+## Fase 11.5 - Experiencia multiplataforma y feedback de dominio
+
+Objetivo: lograr que SUPERFLOW sea legible, emocionante y justo tanto con mouse como con touch antes de presentarlo a un segundo portal o iniciar una prueba publica.
+
+Esta no es una fase rapida ni una sola entrega. Se ejecuta y aprueba por bloques segun la hoja detallada [`PHASE_11_5_MULTIPLATFORM_POLISH.md`](PHASE_11_5_MULTIPLATFORM_POLISH.md). Un bloque puede ajustar sus valores despues de prueba humana, pero no puede invadir las responsabilidades del siguiente.
+
+Excepcion operativa acordada: la ausencia temporal de acceso a un PC fisico no detiene las entregas 11.5A-F. Cada bloque puede avanzar con pruebas automatizadas, viewports simulados, perfiles conservadores y comparacion estructural. Las observaciones humanas de PC se acumulan como validacion diferida y solo bloquean la compuerta final 11.5G, CrazyGames Preview y el lanzamiento; no bloquean la implementacion de los bloques siguientes.
+
+### 11.5A - Linea base y perfiles de entrada
+
+- [x] 11.5.1 Registrar en desarrollo puntero, viewport, recorrido acumulado y resultados por separado.
+- [x] 11.5.2 Crear perfiles explicitos de gameplay para desktop y movil sin duplicar reglas de score.
+- [x] 11.5.3 Detectar el tipo de puntero real y permitir que el ultimo dispositivo activo gobierne la asistencia.
+- [x] 11.5.4 Limitar el campo util de desktop para evitar distancias vacias en pantallas anchas.
+- [x] 11.5.5 Ajustar densidad espacial, recorrido y cursor para mouse sin endurecer touch; conservar por ahora el tamano visual compartido evita una hitbox distinta de lo mostrado.
+
+Estado de compuerta A: `IMPLEMENTADA / VALIDACION FISICA DIFERIDA`. La arquitectura y regresion automatizada estan aprobadas. La sensacion humana de mouse y la eleccion final entre `?mouseReach=compact`, `balanced` y `expansive` se acumulan para 11.5G y no bloquean 11.5B.
+
+Compuerta A:
+
+- Desktop se siente ritmico, no como perseguir objetivos por una pantalla vacia.
+- Movil conserva la sensacion tactil aprobada y no pierde asistencia.
+- Cambiar mouse/touch durante una sesion no produce saltos, dobles inputs ni hitboxes distintas a lo mostrado.
+- Si no hay PC fisico disponible, esta compuerta puede quedar `IMPLEMENTADA / VALIDACION DIFERIDA` y no impide comenzar 11.5B.
+
+### 11.5B - Combo dentro del foco visual
+
+- [x] 11.5.6 Mostrar el combo cerca del ultimo objetivo resuelto sin cubrir notas futuras.
+- [x] 11.5.7 Comunicar hitos 10/25/50 mediante escala, aros, flash y particulas perifericas.
+- [x] 11.5.8 Hacer visible la cercania a FLOW/SUPER FLOW sin obligar a mirar el HUD superior.
+- [x] 11.5.9 Mantener el HUD como dato exacto, no como unica fuente de informacion.
+
+Estado de compuerta B: `IMPLEMENTADA / VALIDACION FISICA DIFERIDA`. El posicionamiento se verifico en cuatro relaciones de aspecto y evita hasta tres notas visibles futuras; queda pendiente confirmar durante una cancion fisica que el texto se percibe perifericamente sin distraer.
+
+Compuerta B:
+
+- Un jugador puede estimar si su cadena crece o se rompio sin apartar la mirada del playfield.
+- El feedback no tapa el siguiente objetivo ni reduce FPS en movil modesto.
+
+### 11.5C - Lenguaje sonoro de precision y error
+
+- [ ] 11.5.10 Crear sonidos procedurales distintos para Perfect, Bien, Miss y combo roto.
+- [ ] 11.5.11 Insertar una cadena Web Audio de duck, filtro y distorsion breve para Miss.
+- [ ] 11.5.12 Crear una ruptura final mas intensa al perder la ultima vida.
+- [ ] 11.5.13 Garantizar que ningun efecto cambie playbackRate, reloj musical o sincronizacion del beatmap.
+- [ ] 11.5.14 Respetar pausa, mute del portal, anuncios y perfil visual/reducido.
+
+Compuerta C:
+
+- Cada juicio se reconoce por sonido sin mirar texto.
+- La musica se recupera suavemente y permanece sincronizada despues de muchos fallos seguidos.
+- El feedback no se vuelve doloroso, estridente ni ensucia canciones suaves.
+
+### 11.5D - Peligro de ultima vida
+
+- [ ] 11.5.15 Activar advertencia al entrar en el estado `un fallo mas termina la partida`.
+- [ ] 11.5.16 Combinar borde/pulso periferico, icono de vida y tension sonora sutil sincronizada al pulso.
+- [ ] 11.5.17 Retirar inmediatamente la advertencia si el jugador recupera vida.
+- [ ] 11.5.18 Evitar flashes agresivos, color como unica senal o elementos sobre la zona tactil.
+
+Compuerta D:
+
+- El riesgo se comprende sin mirar el contador de vidas.
+- La advertencia aumenta tension sin parecer un Miss ni ocultar objetivos.
+
+### 11.5E - FLOW basado en precision, no en tiempo
+
+- [ ] 11.5.19 Eliminar la expiracion autonoma de FLOW y SUPER FLOW.
+- [ ] 11.5.20 Permitir cambios de estado solo al evaluar una nota: Perfect sostiene/progresa, Bien sostiene FLOW y degrada SUPER FLOW, Miss rompe ambos.
+- [ ] 11.5.21 Mantener FLOW congelado durante pausas, anuncios, cuentas y transiciones; el tiempo por si solo nunca lo modifica.
+- [ ] 11.5.22 Diferenciar visual y sonoramente `SUPER FLOW -> FLOW` de `FLOW roto por Miss`.
+- [ ] 11.5.23 Rebalancear carga, multiplicadores y economia para que un FLOW persistente no infle score o monedas.
+- [ ] 11.5.24 Actualizar checkpoint/revive para restaurar el nuevo estado sin duplicar premios.
+
+Compuerta E:
+
+- Ningun jugador interpreta que se equivoco cuando no existio una nota fallada.
+- FLOW termina solo por Miss; SUPER FLOW solo baja por Bien o termina por Miss.
+- Score, estrellas, eventos y records siguen siendo comparables despues del rebalance.
+
+### 11.5F - Derrota y regreso claro
+
+- [ ] 11.5.25 Crear una transicion breve al perder la ultima vida: impacto, limpieza y ruptura musical.
+- [ ] 11.5.26 Crear pantalla de derrota con fase, progreso, Perfect, mejor combo y distancia a completar.
+- [ ] 11.5.27 Integrar Reintentar, Volver a playlist y Segunda oportunidad sin duplicar Resultado.
+- [ ] 11.5.28 Mantener ruta inmediata para quien no desea anuncio y evitar animaciones obligatorias largas.
+- [ ] 11.5.29 Confirmar que derrota, revive y resultado entregan monedas/evento exactamente una vez.
+
+Compuerta F:
+
+- Perder tiene peso audiovisual y explica que ocurrio.
+- Ninguna salida atrapa al jugador, duplica recompensas o reinicia con input residual.
+
+### 11.5G - Validacion cruzada y salida
+
+- [ ] 11.5.30 Probar Facil/Medio/Dificil completos con mouse y touch.
+- [ ] 11.5.31 Probar viewport desktop 16:9, ultrawide, movil vertical pequeno/grande y rotacion.
+- [ ] 11.5.32 Comparar conversion a primer acierto, misses, combo, FLOW, derrota y reintento entre dispositivos.
+- [ ] 11.5.33 Ejecutar pruebas de audio acumulativo, pausa, anuncio, revive y cambio de fase.
+- [ ] 11.5.34 Aprobar primero sensacion desktop y despues confirmar ausencia de regresion movil.
+- [ ] 11.5.35 Solo entonces completar CrazyGames Preview y comenzar Fase 12.
+
+Compuerta final 11.5:
+
+- Mouse y touch tienen perfiles propios, pero producen reglas de juicio comprensibles y comparables.
+- Combo, peligro, precision, FLOW y derrota pueden entenderse sin abandonar el foco del playfield.
+- No hay desincronizacion de audio, regresion tactil, recompensa duplicada ni caida significativa de rendimiento.
+- Existe aprobacion humana explicita en al menos un PC y un movil fisico.
+- La aprobacion humana puede realizarse al final de todas las entregas, pero sigue siendo obligatoria antes de Preview/publicacion.
 
 ## Fase 12 - Adaptador Poki
 
@@ -384,9 +494,14 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-12 | Fase 9 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Checkpoints de tres fases, rollback de score/eventos, vida parcial, FLOW limpio, seek de beatmap, offset de audio, punteros liberados y politica de un anuncio probados; falta validacion movil |
 | 2026-08-12 | Fase 10 | `npm test` + `npm run build` | Windows / Node 24 | Implementacion correcta | Tres skins basicas, rotacion diaria UTC, desbloqueo permanente por un anuncio, alternativa de 1,200 monedas, limite diario y persistencia protegida; falta validacion movil |
 | 2026-08-13 | Fase 11 | `npm run test:crazygames` + TypeScript | Windows / Node 24 | Implementacion correcta | SDK v3 aislado por entorno, callbacks rewarded, muteAudio, eventos de carga/gameplay, Basic Launch, adblock, unfilled, cooldown, fallback y puente Data probados con SDK controlado; falta localhost oficial y Preview Tool |
+| 2026-08-13 | Fase 11.5 | Documentacion | Movil aprobado + critica externa de PC | Plan activo | Se divide pulido en desktop, combo focal, audio reactivo, ultima vida, FLOW semantico, derrota y regresion; CrazyGames Preview se pospone hasta aprobar PC y movil |
+| 2026-08-13 | Fase 11.5A | `npm test` + `npm run build` | Windows / Node 24 + viewports simulados | Implementada / validacion fisica diferida | Perfil por ultimo puntero activo, campo mouse centrado, cursor/estela procedural, telemetria solo desarrollo, tres variantes de alcance y regresion completa correctas; falta comparar sensacion en PC fisico |
+| 2026-08-13 | Fase 11.5B | `npm run test:combo-focus` + `npm run build` | Windows / Node 24 + 4 viewports simulados | Implementada / validacion fisica diferida | Combo focal selecciona una zona libre frente a tres notas futuras, hitos 10/25/50 generan feedback propio y el progreso FLOW/SUPER aparece dentro del foco; falta prueba perceptual en cancion completa |
 
 ## Decisiones pendientes controladas
 
 Estas decisiones no bloquean las primeras fases y deben resolverse en el punto indicado:
 
-- Fase 11/12: primer portal que recibira una build publica con monetizacion.
+- Fase 11.5A/11.5G: `balanced` es el alcance desktop provisional; la comparacion humana de `compact`, `balanced` y `expansive` decide el valor final.
+- Fase 11.5E: carga y multiplicadores definitivos de FLOW se deciden despues de medir partidas completas sin temporizador.
+- Portal de primera validacion publica: CrazyGames; Poki se mantiene como segundo objetivo despues de la Fase 11.5.

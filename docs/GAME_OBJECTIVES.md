@@ -67,6 +67,11 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] SUPER FLOW x4 desbloqueado solo con cuatro Perfect consecutivos dentro de FLOW.
 - [x] Bien degrada SUPER FLOW a FLOW x2; Miss rompe todo el estado.
 - [ ] Feedback sonoro distinto para Perfect, Bien y Miss.
+- [~] Perfil desktop separado, campo centrado y cursor procedural implementados; falta validar fisicamente que mouse sea tan satisfactorio como touch.
+- [~] Combo focal, hitos y anticipacion FLOW implementados sin tapar notas visibles; falta validacion perceptual en una partida fisica.
+- [ ] Advertencia audiovisual accesible al quedar una sola vida.
+- [ ] FLOW persistente basado en precision: nunca expira por tiempo sin un error del jugador.
+- [ ] Pantalla de derrota modular antes de revive/resultado con reintento y regreso claros.
 - [ ] Objetivos que se mueven con la musica.
 - [ ] Cadenas de varios objetivos y patrones reconocibles.
 - [ ] Objetivo hold, en el que hay que mantener presionado durante un intervalo.

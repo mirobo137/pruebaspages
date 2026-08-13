@@ -249,6 +249,34 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 - Un fallo rompe FLOW de inmediato. Al expirar, el medidor vuelve a cero.
 - Los valores viven en `src/game/config.ts` para balancearlos tras pruebas reales.
 
+### Rediseño acordado para Fase 11.5
+
+- La expiracion temporal actual produce una falsa sensacion de error y sera retirada antes del lanzamiento a portales.
+- FLOW no terminara por tiempo: Perfect y Bien lo sostienen; solo Miss lo rompe.
+- SUPER FLOW se sostiene con Perfect, un Bien lo degrada claramente a FLOW y un Miss rompe ambos.
+- Pausas, anuncios, transiciones y espacios sin notas no cambian FLOW.
+- Activacion, degradacion y ruptura tendran eventos audiovisuales distintos; nunca se reutilizara el efecto de Miss para una transicion neutral.
+- El cambio exige rebalancear score, records, misiones y revive, por lo que se implementara como bloque propio y no como ajuste aislado.
+- La especificacion completa y sus entregas viven en `docs/PHASE_11_5_MULTIPLATFORM_POLISH.md`.
+- Las pruebas humanas de PC pueden diferirse y acumularse sin detener las entregas 11.5A-F. Tests automatizados y simulacion desktop gobiernan el avance provisional; la validacion fisica PC/movil sigue siendo obligatoria solamente para cerrar 11.5G y publicar.
+
+### Perfil de entrada implementado en 11.5A
+
+- `InputGameplayProfile` separa el espacio de objetivos de `TouchTuning`: el primero gobierna layout y presentacion; el segundo conserva asistencia y compensacion por evento.
+- El ultimo puntero real (`mouse`, `touch` o `pen`) gobierna el perfil, incluso en equipos hibridos; no se infiere movil solamente por ancho.
+- Touch y pen conservan todo el ancho aprobado. Mouse usa un campo centrado limitado por la altura para que 16:9 y ultrawide no generen barridos vacios.
+- El cursor nativo se sustituye durante gameplay con una mira y estela PixiJS procedurales; touch no las renderiza.
+- En desarrollo se acumulan viewport, puntero, recorrido y juicios, sin persistir ni enviar datos.
+- `?mouseReach=compact`, `?mouseReach=balanced` y `?mouseReach=expansive` permiten comparar tres alcances sin bifurcar beatmaps. `balanced` es provisional hasta la validacion fisica de 11.5G.
+
+### Combo focal implementado en 11.5B
+
+- `ComboFocusPresenter` es una capa visual unica y reutilizable; nunca crea un HUD o ticker por nota.
+- Se ancla al ultimo impacto y elige entre cinco posiciones, penalizando proximidad con las tres notas visibles siguientes y respetando margenes de HUD/flow.
+- Cada acierto muestra combo; Miss muestra ruptura. FLOW solo aparece focalmente desde 75% de carga, mientras FLOW activo muestra el progreso exacto de Perfect hacia SUPER.
+- Los hitos son 10, 25 y cada multiplo de 50 desde 50. Combinan escala, aros, particulas y flash sin cambiar score ni timing.
+- El `GameHud` permanece como fuente numerica exacta; el presentador focal es comunicacion periferica y puede ocultarse en pausa, transicion o limpieza de partida.
+
 ## Flujo de trabajo
 
 ### Preparar otra PC
