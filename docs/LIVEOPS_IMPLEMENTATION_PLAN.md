@@ -4,9 +4,10 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 
 ## Estado de ejecucion
 
-- Estado general: `EN PROGRESO`
-- Fase activa: `Fase 11.5 - Experiencia multiplataforma y feedback de dominio`
-- Siguiente accion: `Confirmar miss.wav en movil y ejecutar 11.5G: balance, regresion y validaciones fisicas acumuladas`
+- Estado general: `IMPLEMENTACION TECNICA CONCLUIDA PARCIALMENTE / VALIDACION EXTERNA PENDIENTE`
+- Fase activa: `Ninguna de desarrollo; compuerta integral acumulada`
+- Siguiente accion: `Probar el juego completo, CrazyGames Preview, Poki Inspector y despues observar un lanzamiento controlado`
+- Cierre de esta hoja: `Completar tambien Fase 12 (Poki) y Fase 13 (balance, telemetria y lanzamiento controlado)`
 - Ultima actualizacion: `2026-08-13`
 
 Estados permitidos:
@@ -409,12 +410,12 @@ Compuerta F:
 
 ### 11.5G - Validacion cruzada y salida
 
-- [ ] 11.5.30 Probar Facil/Medio/Dificil completos con mouse y touch.
-- [ ] 11.5.31 Probar viewport desktop 16:9, ultrawide, movil vertical pequeno/grande y rotacion.
-- [ ] 11.5.32 Comparar conversion a primer acierto, misses, combo, FLOW, derrota y reintento entre dispositivos.
-- [ ] 11.5.33 Ejecutar pruebas de audio acumulativo, pausa, anuncio, revive y cambio de fase.
+- [~] 11.5.30 Reglas de Facil/Medio/Dificil verificadas automaticamente; faltan partidas completas fisicas con mouse y touch.
+- [~] 11.5.31 Ocho viewports calculados (16:9, ultrawide, movil vertical/horizontal); falta inspeccion visual fisica y rotacion real.
+- [ ] 11.5.32 Comparar primer acierto, misses, combo, FLOW, derrota y reintento entre dispositivos mediante el checklist fisico.
+- [~] 11.5.33 Audio, pausa, anuncio, revive y fases cubiertos por regresion; faltan SDK/escucha reales y `miss.wav` en movil.
 - [ ] 11.5.34 Aprobar primero sensacion desktop y despues confirmar ausencia de regresion movil.
-- [ ] 11.5.35 Solo entonces completar CrazyGames Preview y comenzar Fase 12.
+- [x] 11.5.35 Regresion automatica suficiente para continuar con Fase 12; CrazyGames Preview y aprobacion fisica se conservan para la validacion integral final.
 
 Compuerta final 11.5:
 
@@ -424,15 +425,17 @@ Compuerta final 11.5:
 - Existe aprobacion humana explicita en al menos un PC y un movil fisico.
 - La aprobacion humana puede realizarse al final de todas las entregas, pero sigue siendo obligatoria antes de Preview/publicacion.
 
+Estado 11.5G: `REGRESION AUTOMATICA APROBADA / VALIDACION FISICA PENDIENTE`. La ejecucion manual vive en [`PHASE_11_5_VALIDATION_CHECKLIST.md`](PHASE_11_5_VALIDATION_CHECKLIST.md). El navegador integrado no estuvo disponible en esta sesion, por lo que tampoco se declara inspeccion visual local.
+
 ## Fase 12 - Adaptador Poki
 
 Objetivo: implementar el mismo contrato mediante `rewardedBreak` y eventos de gameplay.
 
-- [ ] 12.1 Implementar deteccion y carga segura del SDK de Poki.
-- [ ] 12.2 Mapear `rewardedBreak` al resultado neutral.
-- [ ] 12.3 Emitir `gameplayStop` y `gameplayStart` solo en los puntos correctos.
-- [ ] 12.4 Probar revive, duplicacion y skin en Poki Inspector.
-- [ ] 12.5 Confirmar que la build sin Poki sigue funcionando.
+- [x] 12.1 Implementar deteccion y carga segura del SDK de Poki.
+- [x] 12.2 Mapear `rewardedBreak` al resultado neutral.
+- [x] 12.3 Emitir `gameplayStop` y `gameplayStart` solo en los puntos correctos.
+- [~] 12.4 Revive, duplicacion y skin cubiertos por el contrato automatizado; falta recorrerlos en Poki Inspector.
+- [x] 12.5 Confirmar que la build sin Poki sigue funcionando.
 
 Compuerta especifica:
 
@@ -440,15 +443,19 @@ Compuerta especifica:
 - Audio, input y partida no avanzan mientras el anuncio esta activo.
 - Una respuesta sin recompensa no entrega contenido.
 
+Estado Fase 12: `IMPLEMENTADA / POKI INSPECTOR PENDIENTE`. La integracion usa el
+SDK HTML5 v2 sin claves, carga dinamica exclusiva de Poki, fallback seguro y el
+mismo contrato recompensado de CrazyGames. GitHub Pages permanece deshabilitado.
+
 ## Fase 13 - Balance, telemetria y lanzamiento controlado
 
 Objetivo: comprobar que eventos y anuncios mejoran retorno sin dañar la experiencia.
 
-- [ ] 13.1 Medir inicio de sesion, cancion iniciada/completada y regreso diario.
-- [ ] 13.2 Medir apertura, participacion y finalizacion del evento semanal.
-- [ ] 13.3 Medir ofertas mostradas, aceptadas, completadas y no disponibles.
-- [ ] 13.4 Revisar frecuencia de revive y duplicacion antes de aumentarla.
-- [ ] 13.5 Mantener anuncios desactivables por configuracion de plataforma.
+- [~] 13.1 Sesion, cancion iniciada/completada y regreso diario instrumentados; faltan datos de jugadores reales.
+- [~] 13.2 Apertura, progreso, reclamaciones y finalizacion semanal instrumentados; falta observar una semana real.
+- [~] 13.3 Visibilidad, interaccion y resultado local de ofertas instrumentados; Poki recibe solo `visible`/`interact` para no duplicar resultados automaticos del SDK.
+- [~] 13.4 Frecuencia de revive y duplicacion ya puede medirse; falta una muestra real antes de ajustar balance.
+- [x] 13.5 Mantener anuncios desactivables por configuracion de plataforma.
 - [ ] 13.6 Publicar primero a un grupo o entorno de prueba.
 
 Compuerta especifica:
@@ -456,6 +463,13 @@ Compuerta especifica:
 - No hay aumento significativo de abandonos en resultado o pantalla de derrota.
 - El juego conserva una ruta clara para quien nunca quiera ver anuncios.
 - Las metricas permiten distinguir retencion, participacion y monetizacion.
+
+Estado Fase 13: `INFRAESTRUCTURA IMPLEMENTADA / DATOS REALES PENDIENTES`.
+La cola local conserva como maximo 200 eventos sin datos personales bajo una
+clave `poki_ignore`, y los interruptores de QA permiten apagar globalmente o por
+separado revive, duplicacion y skin. CrazyGames conserva sus metricas nativas;
+Poki recibe checkpoints mediante `measure()` sin duplicar reproduccion o resultado
+de anuncios, que el SDK registra automaticamente.
 
 ## Matriz minima de pruebas
 
@@ -508,6 +522,9 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-13 | Fase 11.5C | `npm test` + `npm run build` | Windows / Node 24 + prueba auditiva movil | Ajustada / pendiente confirmar | Buses separados y juicios sintetizados correctos; la distorsion fue rechazada por sonar averiada y se elimino por completo. Miss ahora usa tono descendente + ruido filtrado con duck limpio de 130 ms; combo 180 ms y derrota 320 ms |
 | 2026-08-13 | Fase 11.5D/E | `npm test` + `npm run build` | Windows / Node 24 + maquina de estados | Implementada / validacion fisica diferida | Danger deriva de una vida y usa marco/texto perifericos; FLOW ya no se actualiza desde el frame, sobrevive tiempo/transiciones y solo Perfect/Bien/Miss pueden sostener, degradar o romper |
 | 2026-08-13 | Fase 11.5F | `npm test` + `npm run build` | Windows / Node 24 + 6 viewports | Implementada / validacion fisica diferida | Transicion de 460 ms deja terminar el impacto, panel responsive ofrece revive/reintento/playlist/resultado, cancelacion de anuncio conserva decisiones y guard bloquea registros dobles |
+| 2026-08-13 | Fase 11.5G | `npm run test:regression` + Preview HTTP | Windows / Node 24 | Regresion automatica aprobada | 8 viewports, 3 dificultades, 24 canciones, 72 beatmaps y WAV validados; build sirve index 200 y miss.wav como audio/wav RIFF de 170426 bytes. Navegador visual no disponible; PC/movil y SDK real siguen pendientes |
+| 2026-08-13 | Fase 12 | `npm test` + `npm run build` | Windows / Node 24 | Implementada / Inspector pendiente | Poki SDK v2 aislado por entorno; init, gameLoadingFinished, gameplayStart/Stop, rewarded true/false/error, lifecycle y bloqueo en GitHub Pages verificados. No habia navegador conectado; falta subir dist al Poki Inspector |
+| 2026-08-13 | Fase 13 | `npm test` + `npm run build` | Windows / Node 24 | Infraestructura aprobada / datos pendientes | Cola local limitada, retorno diario, canciones, evento y ofertas instrumentados; Poki measure y kill switches probados. Faltan jugadores reales, Preview/Inspector y lanzamiento controlado |
 
 ## Decisiones pendientes controladas
 

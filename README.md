@@ -73,3 +73,44 @@ https://TU_USUARIO.github.io/NOMBRE_DEL_REPOSITORIO/
 ```
 
 En el repositorio, revisa `Settings > Pages` y confirma que la fuente sea `GitHub Actions` si GitHub no la selecciona automáticamente.
+
+## Prueba del adaptador Poki
+
+Poki no requiere guardar una clave de SDK en el proyecto. Para cargar su SDK HTML5
+durante desarrollo:
+
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+Abre la URL local agregando `?portal=poki`, por ejemplo
+`http://localhost:5173/?portal=poki`. GitHub Pages ignora este parámetro y nunca
+carga el SDK publicitario.
+
+La validación oficial se realiza así:
+
+1. Ejecuta `npm run build`.
+2. Abre [Poki Inspector](https://inspector.poki.dev/).
+3. Carga la carpeta `dist` generada.
+4. Revisa `gameLoadingFinished`, `gameplayStart`, `gameplayStop` y
+   `rewardedBreak` en Event Log.
+5. Prueba revivir, duplicar monedas y obtener la skin diaria.
+6. Cambia a Mobile Mode y escanea el QR para repetir la prueba en el móvil.
+
+## Telemetría de prueba y controles de lanzamiento
+
+El juego conserva un máximo de 200 eventos técnicos en
+`poki_ignore:superflow:telemetry:v1`. No registra información personal y un fallo
+de almacenamiento o analítica nunca bloquea la partida.
+
+En desarrollo o Preview se pueden probar los interruptores agregándolos a la URL:
+
+```text
+?rewardedAds=off
+?rewardedRevive=off
+?rewardedCoinDouble=off
+?rewardedDailyCosmetic=off
+```
+
+Los parámetros pueden combinarse con `&`. No tienen efecto como overrides en los
+canales de producción y GitHub Pages mantiene todos los anuncios deshabilitados.

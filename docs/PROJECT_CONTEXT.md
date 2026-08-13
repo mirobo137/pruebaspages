@@ -307,6 +307,13 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 - `RunFinalizationGate` permite una sola salida ganadora ante taps dobles o callbacks tardios. Revive no reclama ese guard y continua la misma partida.
 - En movil horizontal los botones usan dos columnas; en vertical se apilan. El panel fue calculado para 320x568 hasta 1920x1080.
 
+### Estado de validacion 11.5G
+
+- `npm run test:regression` cubre ocho viewports, mouse/touch/pen, tres dificultades, 24 canciones, 72 beatmaps, FLOW persistente, Danger, derrota y la firma RIFF de `miss.wav`.
+- Vite Preview sirve la build y `assets/audio/sfx/miss.wav` con estado 200, MIME `audio/wav`, 170426 bytes y firma RIFF.
+- La inspeccion visual automatizada no se realizo porque el navegador integrado no estuvo disponible en la sesion.
+- La fase permanece abierta hasta aprobar el checklist fisico en PC y movil: `docs/PHASE_11_5_VALIDATION_CHECKLIST.md`.
+
 ## Flujo de trabajo
 
 ### Preparar otra PC
@@ -493,6 +500,30 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - No se implementan anuncios midgame en esta fase; un descanso recompensado nunca se combina con otro tipo de anuncio.
 - `CrazyGamesDataStorage` implementa el contrato de guardado y existe una migracion que copia solo claves locales ausentes en Data. No se activa hasta habilitar Progress Save en el portal y validar la migracion con una cuenta real.
 - Prueba local oficial: `npm run dev -- --host 0.0.0.0` y abrir `?portal=crazygames`; desde otro dispositivo/IP agregar `?useLocalSdk=true`. La validacion final se realiza subiendo `dist` al Preview Tool.
+
+### Adaptador Poki HTML5 v2
+
+- El SDK se carga dinamicamente solo en dominios Poki/Poki Inspector o cuando desarrollo solicita `?portal=poki`/`?useLocalPokiSdk=true`. Nunca se carga en `*.github.io`, aunque la URL intente forzarlo.
+- Poki no requiere una clave dentro del cliente. `init()` se ejecuta antes de exponer anuncios; si carga o inicializacion fallan, el juego continua con anuncios deshabilitados.
+- `gameLoadingFinished()` se emite una vez cuando catalogo, eventos y primera escena estan listos. `gameplayStart()` y `gameplayStop()` se deduplican en el adaptador.
+- Los rewarded usan `rewardedBreak({ size, onStart })`: solo un resultado `true` concede la recompensa; `false` se traduce a cancelacion y una excepcion a error.
+- `onStart` es la unica señal para detener audio/input. El ciclo de restauracion se ejecuta despues si el anuncio realmente comenzo, incluso cuando termina sin recompensa o con error.
+- Revive, duplicacion de monedas y skin diaria reutilizan exactamente las mismas guardas de entrega unica y limites del contrato neutral.
+- Desarrollo local: ejecutar `npm run dev -- --host 0.0.0.0` y abrir `?portal=poki`; desde otro dispositivo tambien puede usarse `?useLocalPokiSdk=true`.
+- Validacion oficial: ejecutar `npm run build`, cargar la carpeta `dist` en Poki Inspector y revisar QA Modules, Event Log, anuncios, desktop, QR movil, escalado y warnings.
+
+### Telemetria y lanzamiento controlado
+
+- `src/analytics/` define eventos de dominio y sinks independientes. Las escenas no conocen Poki ni futuros proveedores.
+- Se registran sesion, regreso UTC diario, inicio/resultado de cancion, progreso semanal, reclamaciones y embudo de cada oferta recompensada.
+- La cola local se limita a 200 eventos y usa `poki_ignore:superflow:telemetry:v1`; no contiene nombre, correo, IP, identificadores publicitarios ni audio del jugador.
+- `poki_ignore:superflow:telemetry-session:v1` conserva solo el ultimo dia UTC visto para detectar regreso local sin sincronizar ese diagnostico como progreso.
+- Poki recibe `song start/complete/fail`, evento visible/abierto/reclamado y oferta recompensada visible/interactuada mediante `measure()`.
+- No se envian a Poki impresiones ni resultados manuales de anuncios porque `rewardedBreak()` ya los registra automaticamente.
+- CrazyGames usa por ahora sus metricas nativas de jugadores, conversion, tiempo, retencion e ingresos. No se agrega ByteBrew ni otro tercero antes de decidir privacidad y consentimiento.
+- `ReleaseConfig` distingue desarrollo, preview, produccion y deshabilitado. En desarrollo/preview acepta `rewardedAds=off`, `rewardedRevive=off`, `rewardedCoinDouble=off` y `rewardedDailyCosmetic=off`.
+- Los parametros de QA no pueden apagar funciones en produccion mediante URL. GitHub Pages permanece en canal deshabilitado.
+- La instrumentacion permite medir; no demuestra por si sola retencion ni balance. Esas conclusiones requieren Preview/Inspector y una muestra real de jugadores.
 
 ## Proxima prioridad tecnica
 

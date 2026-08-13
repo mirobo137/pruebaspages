@@ -2,6 +2,8 @@ export type GamePlatformEnvironment =
   | 'development'
   | 'crazygames-local'
   | 'crazygames'
+  | 'poki-local'
+  | 'poki'
   | 'disabled';
 
 export interface GamePlatformService {
@@ -26,4 +28,3 @@ export class NoopGamePlatformService implements GamePlatformService {
   gameplayStop(): void {}
   destroy(): void {}
 }
-

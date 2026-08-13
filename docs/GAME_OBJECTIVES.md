@@ -199,7 +199,13 @@ No implementar todavia. Cuando el juego tenga retencion basica, evaluar:
 - [x] Implementar segunda oportunidad segura desde el inicio de la fase con rollback sincronizado.
 - [x] Implementar tres skins basicas con oferta diaria, anuncio opcional, compra por monedas y desbloqueo permanente.
 - [x] Implementar adaptador CrazyGames v3 aislado con rewarded ads, eventos, mute y fallback seguro.
+- [x] Implementar adaptador Poki HTML5 v2 aislado con rewardedBreak, eventos y fallback seguro.
 - [ ] Validar la build con el SDK oficial en localhost y CrazyGames Preview Tool.
+- [ ] Validar revive, duplicacion y skin en Poki Inspector para escritorio y movil.
+- [x] Instrumentar localmente sesiones, canciones, evento semanal y embudos recompensados sin datos personales.
+- [x] Enviar a Poki checkpoints compatibles con `measure()` sin duplicar resultados automaticos de anuncios.
+- [x] Añadir interruptores de lanzamiento para anuncios, revive, duplicacion y skin.
+- [ ] Evaluar retencion, abandono y frecuencia de anuncios con jugadores reales antes de rebalancear.
 - [ ] Crear icono, miniatura y textos de presentacion.
 - [ ] Revisar privacidad, audio y recursos con licencia.
 - [ ] Integrar el SDK del portal solo donde aporte valor.

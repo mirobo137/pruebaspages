@@ -1,5 +1,7 @@
 import { Application, Container } from 'pixi.js';
 import type { Ticker } from 'pixi.js';
+import { LocalTelemetrySink } from '../analytics/LocalTelemetrySink';
+import { TelemetryService } from '../analytics/TelemetryService';
 import { AudioManager } from '../audio/AudioManager';
 import { MenuAudioController } from '../audio/MenuAudioController';
 import { loadBeatmap } from '../content/Beatmap';
@@ -44,6 +46,7 @@ import {
   NoopGamePlatformService,
   type GamePlatformService,
 } from '../platform/GamePlatformService';
+import { resolveReleaseConfig, type ReleaseConfig } from '../platform/ReleaseConfig';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -54,6 +57,8 @@ export class GameApplication {
   private readonly progression = new ProgressionStore();
   private rewardedAds: RewardedAdsService = createRewardedAdsService({ development: false });
   private gamePlatform: GamePlatformService = new NoopGamePlatformService();
+  private releaseConfig: ReleaseConfig = resolveReleaseConfig('disabled', '');
+  private telemetry: TelemetryService | null = null;
   private readonly themeSelection = new ThemeSelection(this.progression.equippedThemeId);
   private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
   private tracks: TrackSelection[] = [];
@@ -87,6 +92,15 @@ export class GameApplication {
     this.rewardedAds.destroy();
     this.rewardedAds = platform.rewardedAds;
     this.gamePlatform = platform.game;
+    this.releaseConfig = resolveReleaseConfig(
+      this.gamePlatform.environment,
+      window.location.search,
+    );
+    this.telemetry = new TelemetryService([
+      new LocalTelemetrySink(window.localStorage),
+      platform.telemetry,
+    ], window.localStorage);
+    this.telemetry.startSession();
     this.gamePlatform.loadingStart();
 
     const query = new URLSearchParams(window.location.search);
@@ -101,9 +115,11 @@ export class GameApplication {
 
     this.mountElement.appendChild(this.app.canvas);
     this.app.canvas.dataset.rewardedAds = this.rewardedAds.available
+      && this.releaseConfig.rewardedAds
       ? this.gamePlatform.environment
       : 'unavailable';
     this.app.canvas.dataset.platform = this.gamePlatform.environment;
+    this.app.canvas.dataset.releaseChannel = this.releaseConfig.channel;
     this.app.stage.addChild(this.sceneHost);
     [this.tracks, this.weeklyEvents] = await Promise.all([
       this.loadMusic(),
@@ -148,6 +164,13 @@ export class GameApplication {
   private showMenu = (): void => {
     this.gamePlatform.gameplayStop();
     const eventSnapshot = this.progression.getWeeklyEvent(this.weeklyEvents);
+    const activeEventId = eventSnapshot.activeEvent?.id;
+    if (activeEventId) {
+      this.telemetry?.trackOnce(`weekly-event-visible:${activeEventId}`, {
+        type: 'weekly_event_visible',
+        eventId: activeEventId,
+      });
+    }
     this.updateCanvasState('menu');
     this.sceneManager.switchTo(
       new MenuScene(this.app.screen.width, this.app.screen.height, {
@@ -180,6 +203,15 @@ export class GameApplication {
         onFinished: () => this.menuAudio.start(),
       },
     );
+    const dailyRewardAvailable = this.releaseConfig.rewardedAds
+      && this.releaseConfig.rewardedDailyCosmetic
+      && dailyUnlocker.available;
+    if (dailyRewardAvailable && !dailyOffer.owned && !dailyOffer.claimedToday) {
+      this.telemetry?.trackOnce(`reward-visible:${dailyOffer.opportunityId}`, {
+        type: 'rewarded_offer_visible',
+        placement: 'daily-cosmetic',
+      });
+    }
     this.updateCanvasState('collection');
     this.sceneManager.switchTo(
       new CollectionScene(this.app.screen.width, this.app.screen.height, {
@@ -193,17 +225,29 @@ export class GameApplication {
         equippedThemeId: this.progression.equippedThemeId,
         visualQuality: this.visualQuality,
         dailyOffer,
-        rewardedAdsAvailable: () => dailyUnlocker.available,
+        rewardedAdsAvailable: () => dailyRewardAvailable,
         onEquip: (themeId) => {
           if (!this.progression.equipTheme(themeId)) return false;
           this.themeSelection.selectResolved(this.progression.equippedVisualTheme);
           this.updateCanvasState('collection');
           return true;
         },
-        onUnlockDailyWithAd: () => dailyUnlocker.unlock({
-          themeId: dailyOffer.theme.id,
-          opportunityId: dailyOffer.opportunityId,
-        }),
+        onUnlockDailyWithAd: async () => {
+          this.telemetry?.track({
+            type: 'rewarded_offer_interacted',
+            placement: 'daily-cosmetic',
+          });
+          const outcome = await dailyUnlocker.unlock({
+            themeId: dailyOffer.theme.id,
+            opportunityId: dailyOffer.opportunityId,
+          });
+          this.telemetry?.track({
+            type: 'rewarded_offer_outcome',
+            placement: 'daily-cosmetic',
+            outcome,
+          });
+          return outcome;
+        },
         onBuyDaily: () => this.progression.tryBuyDailyRewardedTheme(
           dailyOffer.theme.id,
           offerDate,
@@ -221,14 +265,29 @@ export class GameApplication {
   };
 
   private showEvent = (): void => {
+    const eventId = this.progression.getWeeklyEvent(this.weeklyEvents).activeEvent?.id;
+    if (eventId) this.telemetry?.track({ type: 'weekly_event_opened', eventId });
     this.updateCanvasState('event');
     this.sceneManager.switchTo(
       new EventScene(this.app.screen.width, this.app.screen.height, {
         getSnapshot: () => this.progression.getWeeklyEvent(this.weeklyEvents),
-        onClaim: (rewardId) => this.progression.claimWeeklyEventReward(
-          this.weeklyEvents,
-          rewardId,
-        ),
+        onClaim: (rewardId) => {
+          const before = this.progression.getWeeklyEvent(this.weeklyEvents);
+          const result = this.progression.claimWeeklyEventReward(
+            this.weeklyEvents,
+            rewardId,
+          );
+          const campaign = before.activeEvent?.campaign;
+          if (result.claimed && campaign && before.activeEvent) {
+            this.telemetry?.track({
+              type: 'weekly_reward_claimed',
+              eventId: before.activeEvent.id,
+              rewardId,
+              completed: result.progress.claimedRewardIds.length >= campaign.rewards.length,
+            });
+          }
+          return result;
+        },
         onPreviewReward: this.showEventRewardPreview,
         onBack: this.showMenu,
       }),
@@ -282,6 +341,11 @@ export class GameApplication {
     const gameOpportunityId = `game:${++this.gameSessionSequence}:${Date.now().toString(36)}`;
     this.menuAudio.stop();
     this.gamePlatform.gameplayStop();
+    this.telemetry?.track({
+      type: 'song_started',
+      trackId: selection.track.id,
+      difficulty,
+    });
     this.updateCanvasState('game');
     const audioReady = this.audioManager.prepare(selection.track);
     this.sceneManager.switchTo(
@@ -295,13 +359,31 @@ export class GameApplication {
         audioReady,
         onRestart: () => this.startGame(difficulty, selection),
         onExit: this.showMenu,
-        secondChanceAvailable: this.rewardedAds.available,
-        onRequestSecondChance: async (phaseIndex) => (
-          await this.rewardedAds.showRewarded({
+        secondChanceAvailable: this.releaseConfig.rewardedAds
+          && this.releaseConfig.rewardedRevive
+          && this.rewardedAds.available,
+        onSecondChanceOffered: (phaseIndex) => {
+          this.telemetry?.trackOnce(`${gameOpportunityId}:revive:${phaseIndex}:visible`, {
+            type: 'rewarded_offer_visible',
+            placement: 'second-chance',
+          });
+        },
+        onRequestSecondChance: async (phaseIndex) => {
+          this.telemetry?.track({
+            type: 'rewarded_offer_interacted',
+            placement: 'second-chance',
+          });
+          const result = await this.rewardedAds.showRewarded({
             placement: 'second-chance',
             opportunityId: `${gameOpportunityId}:phase:${phaseIndex}`,
-          })
-        ).status,
+          });
+          this.telemetry?.track({
+            type: 'rewarded_offer_outcome',
+            placement: 'second-chance',
+            outcome: result.status,
+          });
+          return result.status;
+        },
         onGameplayStart: () => this.gamePlatform.gameplayStart(),
         onGameplayStop: () => this.gamePlatform.gameplayStop(),
         onFinished: (
@@ -347,13 +429,28 @@ export class GameApplication {
       flow,
       completed,
     );
-    this.progression.recordWeeklyEventRun(this.weeklyEvents, {
+    this.telemetry?.track({
+      type: 'song_finished',
+      trackId: selection.track.id,
+      difficulty,
+      completed,
+      stars: run.earnedStars,
+      score: snapshot.score,
+    });
+    const weeklySnapshot = this.progression.recordWeeklyEventRun(this.weeklyEvents, {
       completed,
       perfects: snapshot.perfects,
       bestCombo: snapshot.bestCombo,
       flowActivations: flow.activations,
       superFlowActivations: flow.superActivations,
     });
+    if (weeklySnapshot.activeEvent) {
+      this.telemetry?.track({
+        type: 'weekly_event_progressed',
+        eventId: weeklySnapshot.activeEvent.id,
+        points: weeklySnapshot.progress.points,
+      });
+    }
     if (destination === 'restart') {
       this.startGame(difficulty, selection);
       return;
@@ -379,6 +476,17 @@ export class GameApplication {
         },
       },
     );
+    const coinDoubleAvailable = coinDoubler.available
+      && this.releaseConfig.rewardedAds
+      && this.releaseConfig.rewardedCoinDouble
+      && !usedSecondChance
+      && !rewardedProviderUnavailable;
+    if (coinDoubleAvailable) {
+      this.telemetry?.trackOnce(`reward-visible:${run.opportunityId}:double-coins`, {
+        type: 'rewarded_offer_visible',
+        placement: 'double-run-coins',
+      });
+    }
     this.sceneManager.switchTo(
       new ResultScene(this.app.screen.width, this.app.screen.height, {
         trackTitle: selection.track.title,
@@ -392,13 +500,23 @@ export class GameApplication {
         earnedStars: run.earnedStars,
         previousStars: run.previousStars,
         isNewHighScore: run.isNewHighScore,
-        rewardedAdsAvailable: coinDoubler.available
-          && !usedSecondChance
-          && !rewardedProviderUnavailable,
-        onDoubleCoins: () => coinDoubler.double({
-          opportunityId: run.opportunityId,
-          rewardCoins: run.rewardCoins,
-        }),
+        rewardedAdsAvailable: coinDoubleAvailable,
+        onDoubleCoins: async () => {
+          this.telemetry?.track({
+            type: 'rewarded_offer_interacted',
+            placement: 'double-run-coins',
+          });
+          const outcome = await coinDoubler.double({
+            opportunityId: run.opportunityId,
+            rewardCoins: run.rewardCoins,
+          });
+          this.telemetry?.track({
+            type: 'rewarded_offer_outcome',
+            placement: 'double-run-coins',
+            outcome,
+          });
+          return outcome;
+        },
         onBackToMenu: this.showMenu,
       }),
     );

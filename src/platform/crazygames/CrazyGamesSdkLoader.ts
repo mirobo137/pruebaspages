@@ -1,31 +1,9 @@
 import type { CrazyGamesSdk } from './CrazyGamesTypes';
 
-export type PortalTarget = 'development' | 'crazygames' | 'disabled';
-
-export interface PortalTargetInput {
-  hostname: string;
-  search: string;
-  development: boolean;
-}
+export { detectPortalTarget } from '../PortalTarget';
 
 const CRAZYGAMES_SCRIPT_ID = 'crazygames-sdk-v3';
 const CRAZYGAMES_SCRIPT_URL = 'https://sdk.crazygames.com/crazygames-sdk-v3.js';
-
-export function detectPortalTarget(input: PortalTargetInput): PortalTarget {
-  const hostname = input.hostname.toLowerCase();
-  if (hostname.endsWith('.github.io')) return 'disabled';
-
-  const query = new URLSearchParams(input.search);
-  const requestedPortal = query.get('portal');
-  if (requestedPortal === 'disabled') return 'disabled';
-  if (requestedPortal === 'crazygames' || query.get('useLocalSdk') === 'true') {
-    return 'crazygames';
-  }
-  if (hostname === 'crazygames.com' || hostname.endsWith('.crazygames.com')) {
-    return 'crazygames';
-  }
-  return input.development ? 'development' : 'disabled';
-}
 
 export async function loadCrazyGamesSdk(
   documentRef: Document = document,
@@ -52,4 +30,3 @@ export async function loadCrazyGamesSdk(
   if (!sdk) throw new Error('crazygames-sdk-missing');
   return sdk;
 }
-

@@ -128,10 +128,12 @@ Validacion necesaria: probar derrota en Lectura, Impulso y Climax, con y sin anu
 
 ### Entrega 6 - Balance y regresion
 
-- Ejecutar matriz completa mouse/touch y tres dificultades.
-- Comparar build anterior y nueva en movil para proteger la sensacion aprobada.
-- Medir FPS, latencia percibida, misses, combo maximo, uso de FLOW y reintentos.
-- Ajustar valores, no arquitectura, durante esta entrega.
+- [~] Ejecutar matriz mouse/touch/pen y tres dificultades: reglas aprobadas, partidas fisicas pendientes.
+- [ ] Comparar build anterior y nueva en movil para proteger la sensacion aprobada.
+- [ ] Medir FPS, latencia percibida, misses, combo maximo, uso de FLOW y reintentos fisicamente.
+- [x] Congelar arquitectura; cualquier cambio restante de 11.5G sera balance de valores o correccion demostrada.
+
+Estado: `REGRESION AUTOMATICA APROBADA / VALIDACION FISICA PENDIENTE`. Ocho viewports, 24 canciones, 72 beatmaps, tres dificultades, FLOW, Danger, derrota y WAV pasaron. La inspeccion visual por navegador no estuvo disponible. Seguir [`PHASE_11_5_VALIDATION_CHECKLIST.md`](PHASE_11_5_VALIDATION_CHECKLIST.md) antes de cerrar 11.5.
 
 ## Evidencia que pediremos a los probadores
 

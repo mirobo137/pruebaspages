@@ -83,6 +83,7 @@ export interface GameSceneOptions {
   onRestart: () => void;
   onExit: () => void;
   secondChanceAvailable: boolean;
+  onSecondChanceOffered: (phaseIndex: number) => void;
   onRequestSecondChance: (phaseIndex: number) => Promise<RewardedAdStatus>;
   onGameplayStart: () => void;
   onGameplayStop: () => void;
@@ -132,6 +133,7 @@ export class GameScene implements Scene {
   private readonly onRestart: () => void;
   private readonly onExit: () => void;
   private readonly secondChanceAvailable: boolean;
+  private readonly onSecondChanceOffered: GameSceneOptions['onSecondChanceOffered'];
   private readonly onRequestSecondChance: GameSceneOptions['onRequestSecondChance'];
   private readonly onFinished: GameSceneOptions['onFinished'];
   private readonly onGameplayStart: GameSceneOptions['onGameplayStart'];
@@ -193,6 +195,7 @@ export class GameScene implements Scene {
     this.onRestart = options.onRestart;
     this.onExit = options.onExit;
     this.secondChanceAvailable = options.secondChanceAvailable;
+    this.onSecondChanceOffered = options.onSecondChanceOffered;
     this.onRequestSecondChance = options.onRequestSecondChance;
     this.onFinished = options.onFinished;
     this.onGameplayStart = options.onGameplayStart;
@@ -822,6 +825,7 @@ export class GameScene implements Scene {
     this.clearLiveGameplayState();
     const currentTime = this.audioManager.currentTime;
     const phase = this.beatmap.phases[this.phaseIndex];
+    const reviveAvailable = this.rewardedGameplay.canOffer(this.secondChanceAvailable);
     this.defeatOverlay.begin({
       phaseName: phase?.name ?? `FASE ${this.phaseIndex + 1}`,
       phaseNumber: Math.max(1, this.phaseIndex + 1),
@@ -830,8 +834,9 @@ export class GameScene implements Scene {
       bestCombo: this.score.snapshot().bestCombo,
       secondsRemaining: Math.max(0, this.beatmap.duration - currentTime),
       restoredLives: this.getRestoredLives(),
-      reviveAvailable: this.rewardedGameplay.canOffer(this.secondChanceAvailable),
+      reviveAvailable,
     });
+    if (reviveAvailable) this.onSecondChanceOffered(this.checkpoint.phaseIndex);
   }
 
   private readonly handleDefeatTransitionComplete = (): void => {
