@@ -69,8 +69,8 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [~] Feedback procedural distinto para Perfect, Bien, Miss, combo roto y derrota implementado; falta balance auditivo fisico.
 - [~] Perfil desktop separado, campo centrado y cursor procedural implementados; falta validar fisicamente que mouse sea tan satisfactorio como touch.
 - [~] Combo focal, hitos y anticipacion FLOW implementados sin tapar notas visibles; falta validacion perceptual en una partida fisica.
-- [ ] Advertencia audiovisual accesible al quedar una sola vida.
-- [ ] FLOW persistente basado en precision: nunca expira por tiempo sin un error del jugador.
+- [~] Advertencia periferica al quedar una sola vida implementada; falta validacion visual fisica y confirmar el audio real de Miss.
+- [x] FLOW persistente basado en precision: nunca expira por tiempo sin un error del jugador.
 - [ ] Pantalla de derrota modular antes de revive/resultado con reintento y regreso claros.
 - [ ] Objetivos que se mueven con la musica.
 - [ ] Cadenas de varios objetivos y patrones reconocibles.

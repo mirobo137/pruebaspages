@@ -71,7 +71,9 @@ export class ReactiveAudioFeedback {
   private readonly dryMusic: GainNode;
   private readonly voices = new Set<OscillatorNode>();
   private readonly noises = new Set<AudioBufferSourceNode>();
+  private readonly samples = new Set<AudioBufferSourceNode>();
   private readonly noiseBuffer: AudioBuffer;
+  private missSample: AudioBuffer | null = null;
 
   constructor(private readonly context: AudioContext, destination: AudioNode) {
     this.musicInput = context.createGain();
@@ -95,10 +97,18 @@ export class ReactiveAudioFeedback {
       : grade === 'miss' && comboBroken
         ? 'combo-break'
         : grade;
-    for (const voice of createFeedbackVoicePlan(cue)) this.playVoice(voice);
-    const noise = createErrorNoisePlan(cue);
-    if (noise) this.playNoise(noise);
+    if (grade === 'miss' && this.missSample) {
+      this.playMissSample(fatal ? 1 : comboBroken ? 0.88 : 0.76);
+    } else {
+      for (const voice of createFeedbackVoicePlan(cue)) this.playVoice(voice);
+      const noise = createErrorNoisePlan(cue);
+      if (noise) this.playNoise(noise);
+    }
     if (grade === 'miss') this.reactMusic(createMusicReactionPlan(comboBroken, fatal));
+  }
+
+  setMissSample(buffer: AudioBuffer | null): void {
+    this.missSample = buffer;
   }
 
   reset(): void {
@@ -114,6 +124,11 @@ export class ReactiveAudioFeedback {
       noise.disconnect();
     }
     this.noises.clear();
+    for (const sample of this.samples) {
+      try { sample.stop(); } catch { /* The sample may already have ended. */ }
+      sample.disconnect();
+    }
+    this.samples.clear();
   }
 
   destroy(): void {
@@ -146,6 +161,23 @@ export class ReactiveAudioFeedback {
       source.disconnect();
       filter.disconnect();
       envelope.disconnect();
+    };
+  }
+
+  private playMissSample(gainValue: number): void {
+    if (this.context.state !== 'running' || !this.missSample) return;
+    const source = this.context.createBufferSource();
+    const gain = this.context.createGain();
+    source.buffer = this.missSample;
+    gain.gain.value = gainValue;
+    source.connect(gain);
+    gain.connect(this.feedbackBus);
+    source.start();
+    this.samples.add(source);
+    source.onended = () => {
+      this.samples.delete(source);
+      source.disconnect();
+      gain.disconnect();
     };
   }
 

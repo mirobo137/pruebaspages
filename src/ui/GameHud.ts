@@ -159,16 +159,15 @@ export class GameHud extends Container {
     const previousMode = this.flowMode;
     this.flowMode = snapshot.mode;
     this.targetFlowRatio = snapshot.mode === 'super'
-      ? snapshot.remaining / snapshot.duration
+      ? 1
       : snapshot.mode === 'flow'
         ? snapshot.superPerfects / snapshot.superPerfectRequirement
         : snapshot.charge / snapshot.maxCharge;
     this.flowLabel.text = snapshot.mode === 'super'
-      ? 'SUPER FLOW x' + snapshot.multiplier + '  ' + snapshot.remaining.toFixed(1) + 's'
+      ? 'SUPER FLOW x' + snapshot.multiplier + '  ·  PERFECT MANTIENE'
       : snapshot.mode === 'flow'
         ? 'FLOW x' + snapshot.multiplier + '  ·  SUPER '
           + snapshot.superPerfects + '/' + snapshot.superPerfectRequirement
-          + '  ·  ' + snapshot.remaining.toFixed(1) + 's'
         : 'FLOW ' + Math.round(this.targetFlowRatio * 100) + '%';
     this.flowLabel.style.fill = snapshot.mode === 'super'
       ? '#8ffaff'

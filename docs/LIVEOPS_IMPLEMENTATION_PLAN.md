@@ -6,7 +6,7 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 
 - Estado general: `EN PROGRESO`
 - Fase activa: `Fase 11.5 - Experiencia multiplataforma y feedback de dominio`
-- Siguiente accion: `Implementar 11.5D y 11.5E: peligro de ultima vida y FLOW semantico`
+- Siguiente accion: `Confirmar miss.mp3 cuando este disponible e implementar 11.5F: derrota y regreso claro`
 - Ultima actualizacion: `2026-08-13`
 
 Estados permitidos:
@@ -363,10 +363,12 @@ Compuerta C:
 
 ### 11.5D - Peligro de ultima vida
 
-- [ ] 11.5.15 Activar advertencia al entrar en el estado `un fallo mas termina la partida`.
-- [ ] 11.5.16 Combinar borde/pulso periferico, icono de vida y tension sonora sutil sincronizada al pulso.
-- [ ] 11.5.17 Retirar inmediatamente la advertencia si el jugador recupera vida.
-- [ ] 11.5.18 Evitar flashes agresivos, color como unica senal o elementos sobre la zona tactil.
+- [x] 11.5.15 Activar advertencia solo en el estado derivado `lives === 1`.
+- [x] 11.5.16 Combinar borde respirando, esquinas, texto `ULTIMA VIDA`, contador e impacto del Miss que produjo el estado.
+- [x] 11.5.17 Retirar inmediatamente la advertencia si Perfect recupera vida, revive o la vida llega a cero.
+- [x] 11.5.18 Evitar flashes agresivos y elementos interactivos; durante SUPER FLOW la intensidad baja a 48%.
+
+Estado de compuerta D: `IMPLEMENTADA / VALIDACION VISUAL DIFERIDA`. El estado se deriva de ScoreModel y se probo para 2, 1 y 0 vidas; falta confirmar contraste y comodidad en movil fisico.
 
 Compuerta D:
 
@@ -375,12 +377,14 @@ Compuerta D:
 
 ### 11.5E - FLOW basado en precision, no en tiempo
 
-- [ ] 11.5.19 Eliminar la expiracion autonoma de FLOW y SUPER FLOW.
-- [ ] 11.5.20 Permitir cambios de estado solo al evaluar una nota: Perfect sostiene/progresa, Bien sostiene FLOW y degrada SUPER FLOW, Miss rompe ambos.
-- [ ] 11.5.21 Mantener FLOW congelado durante pausas, anuncios, cuentas y transiciones; el tiempo por si solo nunca lo modifica.
-- [ ] 11.5.22 Diferenciar visual y sonoramente `SUPER FLOW -> FLOW` de `FLOW roto por Miss`.
-- [ ] 11.5.23 Rebalancear carga, multiplicadores y economia para que un FLOW persistente no infle score o monedas.
-- [ ] 11.5.24 Actualizar checkpoint/revive para restaurar el nuevo estado sin duplicar premios.
+- [x] 11.5.19 Eliminar la expiracion autonoma de FLOW y SUPER FLOW, incluidos valores temporales muertos.
+- [x] 11.5.20 Permitir cambios solo en `register`: Perfect sostiene/progresa, Bien sostiene FLOW y degrada SUPER, Miss rompe ambos.
+- [x] 11.5.21 Mantener FLOW congelado durante pausas, anuncios, cuentas, transiciones y cualquier tiempo sin notas.
+- [x] 11.5.22 Diferenciar `SUPER -> FLOW` mediante degradacion y `FLOW -> charging` mediante ruptura exclusiva de Miss.
+- [x] 11.5.23 Conservar x2/x4 provisionalmente; monedas y estrellas dependen de completar/precision, no del score.
+- [x] 11.5.24 Revive conserva contadores historicos pero reinicia FLOW, combo y carga sin duplicar premios.
+
+Estado de compuerta E: `IMPLEMENTADA / BALANCE FISICO DIFERIDO`. Una prueba deja pasar horas y confirma que no cambia ningun estado; la frecuencia real de x2/x4 se medira en 11.5G.
 
 Compuerta E:
 
@@ -500,6 +504,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-13 | Fase 11.5A | `npm test` + `npm run build` | Windows / Node 24 + viewports simulados | Implementada / validacion fisica diferida | Perfil por ultimo puntero activo, campo mouse centrado, cursor/estela procedural, telemetria solo desarrollo, tres variantes de alcance y regresion completa correctas; falta comparar sensacion en PC fisico |
 | 2026-08-13 | Fase 11.5B | `npm run test:combo-focus` + `npm run build` | Windows / Node 24 + 4 viewports simulados | Implementada / validacion fisica diferida | Combo focal selecciona una zona libre frente a tres notas futuras, hitos 10/25/50 generan feedback propio y el progreso FLOW/SUPER aparece dentro del foco; falta prueba perceptual en cancion completa |
 | 2026-08-13 | Fase 11.5C | `npm test` + `npm run build` | Windows / Node 24 + prueba auditiva movil | Ajustada / pendiente confirmar | Buses separados y juicios sintetizados correctos; la distorsion fue rechazada por sonar averiada y se elimino por completo. Miss ahora usa tono descendente + ruido filtrado con duck limpio de 130 ms; combo 180 ms y derrota 320 ms |
+| 2026-08-13 | Fase 11.5D/E | `npm test` + `npm run build` | Windows / Node 24 + maquina de estados | Implementada / validacion fisica diferida | Danger deriva de una vida y usa marco/texto perifericos; FLOW ya no se actualiza desde el frame, sobrevive tiempo/transiciones y solo Perfect/Bien/Miss pueden sostener, degradar o romper |
 
 ## Decisiones pendientes controladas
 

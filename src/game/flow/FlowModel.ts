@@ -29,26 +29,17 @@ export interface FlowChange {
 export class FlowModel {
   private charge = 0;
   private mode: FlowMode = 'charging';
-  private remaining = 0;
   private activations = 0;
   private superPerfects = 0;
   private superActivations = 0;
 
-  update(deltaSeconds: number): FlowChange {
-    let ended = false;
-
-    if (this.mode !== 'charging') {
-      this.remaining = Math.max(0, this.remaining - deltaSeconds);
-      if (this.remaining <= 0) {
-        this.endFlow();
-        ended = true;
-      }
-    }
-
+  update(_deltaSeconds: number): FlowChange {
+    // Compatibility hook for the scene loop. Time, pauses and phase changes
+    // intentionally cannot mutate FLOW; only register() evaluates a note.
     return {
       snapshot: this.snapshot(),
       activated: false,
-      ended,
+      ended: false,
       superActivated: false,
       superDemoted: false,
     };
@@ -67,13 +58,7 @@ export class FlowModel {
       } else if (grade === 'good') {
         this.mode = 'flow';
         this.superPerfects = 0;
-        this.remaining = Math.max(
-          this.remaining,
-          GAME_CONFIG.superFlowFallbackTime,
-        );
         superDemoted = true;
-      } else {
-        this.extendFlow(GAME_CONFIG.superFlowPerfectTimeBonus);
       }
     } else if (this.mode === 'flow') {
       if (grade === 'miss') {
@@ -83,7 +68,6 @@ export class FlowModel {
         this.superPerfects = 0;
       } else {
         this.superPerfects += 1;
-        this.extendFlow(GAME_CONFIG.flowPerfectTimeBonus);
         if (this.superPerfects >= GAME_CONFIG.superFlowPerfectRequirement) {
           this.mode = 'super';
           this.superPerfects = GAME_CONFIG.superFlowPerfectRequirement;
@@ -102,7 +86,6 @@ export class FlowModel {
     this.charge = Math.max(0, Math.min(GAME_CONFIG.flowMax, this.charge));
     if (this.mode === 'charging' && grade !== 'miss' && this.charge >= GAME_CONFIG.flowMax) {
       this.mode = 'flow';
-      this.remaining = GAME_CONFIG.flowDuration;
       this.superPerfects = 0;
       this.activations += 1;
       activated = true;
@@ -122,8 +105,9 @@ export class FlowModel {
       charge: this.charge,
       maxCharge: GAME_CONFIG.flowMax,
       active: this.mode !== 'charging',
-      remaining: this.remaining,
-      duration: GAME_CONFIG.flowDuration,
+      // Retained for save/API compatibility. Active FLOW no longer has time.
+      remaining: 0,
+      duration: 0,
       multiplier: this.mode === 'super'
         ? GAME_CONFIG.superFlowScoreMultiplier
         : this.mode === 'flow'
@@ -141,22 +125,13 @@ export class FlowModel {
   restoreAfterRevive(checkpoint: FlowSnapshot): void {
     this.charge = 0;
     this.mode = 'charging';
-    this.remaining = 0;
     this.activations = checkpoint.activations;
     this.superPerfects = 0;
     this.superActivations = checkpoint.superActivations;
   }
 
-  private extendFlow(seconds: number): void {
-    this.remaining = Math.min(
-      GAME_CONFIG.flowDuration,
-      this.remaining + seconds,
-    );
-  }
-
   private endFlow(): void {
     this.mode = 'charging';
-    this.remaining = 0;
     this.charge = 0;
     this.superPerfects = 0;
   }

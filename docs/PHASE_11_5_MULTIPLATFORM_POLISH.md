@@ -106,10 +106,12 @@ Validacion necesaria: reconocer juicios con ojos cerrados sin que la musica pier
 
 ### Entrega 4 - Danger y FLOW semantico
 
-- Añadir estado Danger derivado de vidas, no duplicado en UI.
-- Reescribir `FlowModel` sin expiracion temporal.
-- Crear eventos distintos para degradacion, ruptura y activacion.
-- Recalibrar score, records y misiones con partidas completas.
+- [x] Añadir estado Danger derivado de vidas, no duplicado en el modelo.
+- [x] Reescribir `FlowModel` sin expiracion temporal ni actualizacion desde el frame.
+- [x] Mantener eventos distintos para degradacion, ruptura y activacion.
+- [x] Confirmar que monedas/estrellas usan precision y no score; diferir medicion de records y frecuencia FLOW a partidas completas.
+
+Estado: `IMPLEMENTADA / VALIDACION FISICA DIFERIDA`. La maquina de estados y Danger estan probados; contraste, fatiga y balance x2/x4 se acumulan para 11.5G.
 
 Validacion necesaria: dejar pasar tiempo/transiciones sin notas y confirmar que FLOW no cambia; Bien y Miss deben producir respuestas inequivocamente distintas.
 

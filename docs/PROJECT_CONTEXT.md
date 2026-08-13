@@ -286,6 +286,17 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 - La cadena reactiva nunca modifica `AudioBufferSourceNode.playbackRate`, `startedAt`, `timelineOffset` ni `AudioContext.currentTime`.
 - Pausa, mute de portal, anuncios, stop y destruccion restauran el filtro, eliminan voces y cancelan automatizaciones pendientes.
 - Todo se sintetiza con Web Audio: no agrega archivos, descargas ni licencias de efectos. Volumen y timbre finales quedan para validacion auditiva en 11.5G.
+- Si existe `public/assets/audio/sfx/miss.mp3`, se decodifica al preparar la partida y sustituye automaticamente el fallback procedural de Miss, combo roto y derrota. No participa en el manifest de canciones.
+
+### Danger y FLOW semantico implementados en 11.5D/E
+
+- `DangerIndicator` no guarda vidas: deriva su visibilidad exclusivamente de `ScoreSnapshot.lives === 1` y desaparece con 0 o al recuperar a 2+.
+- Danger usa marco fino, esquinas, texto y respiracion periferica sin capturar input. Reduce su fuerza durante SUPER FLOW.
+- `FlowModel.update()` es compatible pero totalmente neutro. GameScene ya no lo invoca para cambiar estado durante frames.
+- Solo `FlowModel.register(grade)` cambia FLOW: Bien sostiene FLOW, Bien degrada SUPER, Perfect progresa/sostiene y Miss rompe.
+- `remaining` y `duration` permanecen en snapshots con valor 0 solo por compatibilidad estructural; no representan un temporizador.
+- Los campos temporales fueron retirados de `GAME_CONFIG`. HUD y combo focal ya no muestran segundos.
+- Monedas y estrellas se calculan por completado, dificultad y precision; FLOW persistente modifica score/records, no la economia.
 
 ## Flujo de trabajo
 

@@ -12,11 +12,7 @@ export const GAME_CONFIG = {
   flowPerfectGain: 25,
   flowGoodGain: 12,
   flowMissPenalty: 30,
-  flowDuration: 8,
   flowScoreMultiplier: 2,
-  flowPerfectTimeBonus: 0.65,
   superFlowPerfectRequirement: 4,
   superFlowScoreMultiplier: 4,
-  superFlowPerfectTimeBonus: 0.85,
-  superFlowFallbackTime: 3.5,
 } as const;

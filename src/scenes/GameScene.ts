@@ -38,6 +38,7 @@ import { PauseOverlay } from '../ui/PauseOverlay';
 import { SecondChanceOverlay } from '../ui/SecondChanceOverlay';
 import { GameplayPointer } from '../ui/GameplayPointer';
 import { ComboFocusPresenter, isComboMilestone } from '../ui/ComboFocusPresenter';
+import { DangerIndicator } from '../ui/DangerIndicator';
 import type { RewardedAdStatus } from '../monetization/RewardTypes';
 import { RewardedGameplayPolicy } from '../game/checkpoint/RewardedGameplayPolicy';
 
@@ -115,6 +116,7 @@ export class GameScene implements Scene {
   private readonly inputTelemetry: GameplayInputTelemetry;
   private readonly gameplayPointer: GameplayPointer;
   private readonly comboFocus: ComboFocusPresenter;
+  private readonly dangerIndicator: DangerIndicator;
   private readonly audioManager: AudioManager;
   private readonly track: MusicTrack;
   private readonly difficulty: Difficulty;
@@ -174,6 +176,7 @@ export class GameScene implements Scene {
       this.visualTheme.target.highlight,
     );
     this.comboFocus = new ComboFocusPresenter(this.visualTheme.effects);
+    this.dangerIndicator = new DangerIndicator(this.visualTheme.effects);
     this.background = new RhythmBackground(
       this.visualTheme.background,
       options.visualQuality,
@@ -214,6 +217,7 @@ export class GameScene implements Scene {
       this.effects,
       this.gameplayPointer,
       this.comboFocus,
+      this.dangerIndicator,
       this.hud,
       this.pauseButton,
       this.countdown,
@@ -234,6 +238,7 @@ export class GameScene implements Scene {
     this.playfield.on('pointerout', this.handlePointerOut);
     this.hud.setDifficulty(this.difficulty);
     this.hud.update(this.score.snapshot());
+    this.dangerIndicator.setScore(this.score.snapshot());
     this.hud.updateRunProgress(
       0,
       this.beatmap.duration,
@@ -265,6 +270,7 @@ export class GameScene implements Scene {
     this.effects.updateEffects(deltaSeconds);
     this.gameplayPointer.animate(deltaSeconds);
     this.comboFocus.animate(deltaSeconds);
+    this.dangerIndicator.animate(deltaSeconds);
     for (const target of this.activeTargets) target.node.animate(deltaSeconds);
     const shake = this.effects.getShakeOffset();
     this.targets.position.set(shake.x, shake.y);
@@ -280,8 +286,6 @@ export class GameScene implements Scene {
     const currentTime = this.audioManager.currentTime;
     this.updatePhase(currentTime);
     const phaseTransitionActive = this.phaseTransition.isActive(currentTime);
-    const flowChange = this.flow.update(phaseTransitionActive ? 0 : deltaSeconds);
-    this.applyFlowChange(flowChange);
 
     if (currentTime >= this.beatmap.duration) {
       this.finishGame(true);
@@ -359,6 +363,7 @@ export class GameScene implements Scene {
     this.inputProfile.resize(width, height);
     this.inputTelemetry.setProfile(this.inputProfile.mode, width, height);
     this.comboFocus.resize(width, height);
+    this.dangerIndicator.resize(width, height);
     this.syncInputPresentation();
   }
 
@@ -610,6 +615,7 @@ export class GameScene implements Scene {
       grade === 'miss' && scoreBeforeJudgement.lives <= 1,
     );
     this.hud.update(scoreSnapshot);
+    this.dangerIndicator.setScore(scoreSnapshot);
     this.hud.showTiming(grade);
     this.effects.emitImpact(feedbackPoint.x, feedbackPoint.y, grade);
     const upcomingPoints = this.activeTargets
@@ -851,6 +857,7 @@ export class GameScene implements Scene {
     this.score.restoreAfterRevive(this.checkpoint.score, this.getRestoredLives());
     this.flow.restoreAfterRevive(this.checkpoint.flow);
     this.hud.update(this.score.snapshot());
+    this.dangerIndicator.setScore(this.score.snapshot());
     this.syncFlowState(this.flow.snapshot());
     this.phaseTransition.reset();
     this.beatmapPlayer.seek(this.checkpoint.phaseStartTime);
@@ -1054,6 +1061,7 @@ export class GameScene implements Scene {
     this.hud.updateFlow(snapshot);
     this.effects.setFlowState(snapshot.active, snapshot.superActive);
     this.background.setFlowState(snapshot.active, snapshot.superActive);
+    this.dangerIndicator.setFlowState(snapshot.superActive);
     for (const target of this.activeTargets) {
       target.node.setFlowState(snapshot.active, snapshot.superActive);
     }

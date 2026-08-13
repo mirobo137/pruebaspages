@@ -21,6 +21,7 @@ export class AudioManager {
   private frequencyData = new Uint8Array(0);
   private readonly trackData = new Map<string, Promise<ArrayBuffer>>();
   private readonly decodedTracks = new Map<string, Promise<AudioBuffer>>();
+  private missSamplePromise: Promise<AudioBuffer | null> | null = null;
   private startedAt = 0;
   private timelineOffset = 0;
   private playing = false;
@@ -64,7 +65,12 @@ export class AudioManager {
     // on mobile while leaving the actual song start for the countdown.
     const resumePromise = context.resume();
     const decodePromise = this.getDecodedTrack(track);
-    return Promise.all([resumePromise, decodePromise]).then(() => undefined);
+    const missSamplePromise = this.loadOptionalMissSample();
+    return Promise.all([resumePromise, decodePromise, missSamplePromise]).then(
+      ([, , missSample]) => {
+        this.feedback?.setMissSample(missSample);
+      },
+    );
   }
 
   async preload(tracks: MusicTrack[]): Promise<void> {
@@ -244,6 +250,7 @@ export class AudioManager {
     this.frequencyData = new Uint8Array(0);
     this.trackData.clear();
     this.decodedTracks.clear();
+    this.missSamplePromise = null;
   }
 
   private ensureAudioContext(): void {
@@ -294,6 +301,17 @@ export class AudioManager {
       });
     this.decodedTracks.set(track.id, request);
     return request;
+  }
+
+  private loadOptionalMissSample(): Promise<AudioBuffer | null> {
+    if (this.missSamplePromise) return this.missSamplePromise;
+    if (!this.context) return Promise.resolve(null);
+    const context = this.context;
+    this.missSamplePromise = fetch(new URL('./assets/audio/sfx/miss.mp3', document.baseURI))
+      .then((response) => response.ok ? response.arrayBuffer() : null)
+      .then((data) => data ? context.decodeAudioData(data.slice(0)) : null)
+      .catch(() => null);
+    return this.missSamplePromise;
   }
 
   private average(start: number, end: number): number {
