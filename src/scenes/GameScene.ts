@@ -6,10 +6,8 @@ import type { MusicTrack } from '../content/MusicCatalog';
 import type { VisualTheme } from '../customization/ThemeTypes';
 import type { VisualQualityProfile } from '../customization/VisualQuality';
 import type { Scene } from '../core/scene/Scene';
-import { randomBetween } from '../core/utils/random';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
 import { PhaseTransitionGuard } from '../game/beatmap/PhaseTransitionGuard';
-import { GAME_CONFIG } from '../game/config';
 import type { Difficulty, DifficultyProfile } from '../game/difficulty/Difficulty';
 import { DIFFICULTY_PROFILES } from '../game/difficulty/Difficulty';
 import { JuiceSystem } from '../game/effects/JuiceSystem';
@@ -29,8 +27,14 @@ import {
   resolveDesktopReachVariant,
 } from '../input/InputGameplayProfile';
 import { GameplayInputTelemetry } from '../input/GameplayInputTelemetry';
-import { TouchTuning } from '../input/TouchTuning';
-import type { PointerTuning } from '../input/TouchTuning';
+import type { GameplayMissReason } from '../input/GameplayInputTelemetry';
+import type { GameplayTechnicalResult } from '../input/GameplayInputTelemetry';
+import { DragInteractionController } from '../input/drag/DragInteractionController';
+import type { DragInteractionState } from '../input/drag/DragInteractionController';
+import { getDragInteractionPolicy } from '../input/drag/DragPolicyCatalog';
+import { PointerAssistance } from '../input/PointerAssistance';
+import type { PointerTuning } from '../input/GameplayInteractionProfile';
+import { deterministicNormalizedPoint, TravelBudget } from '../input/TravelBudget';
 import { HapticsService } from '../platform/HapticsService';
 import { GameHud } from '../ui/GameHud';
 import { GameCountdown } from '../ui/GameCountdown';
@@ -42,18 +46,6 @@ import { ComboFocusPresenter, isComboMilestone } from '../ui/ComboFocusPresenter
 import { DangerIndicator } from '../ui/DangerIndicator';
 import type { RewardedAdStatus } from '../monetization/RewardTypes';
 import { RewardedGameplayPolicy } from '../game/checkpoint/RewardedGameplayPolicy';
-
-interface DragState {
-  pointerId: number;
-  target: ActiveTarget;
-  grade: Exclude<TimingGrade, 'miss'>;
-  deadline: number;
-  completed: boolean;
-  released: boolean;
-  lastSparkX: number;
-  lastSparkY: number;
-  tuning: PointerTuning;
-}
 
 interface ActiveTarget {
   node: TargetNode;
@@ -94,6 +86,7 @@ export interface GameSceneOptions {
     completed: boolean,
     usedSecondChance: boolean,
     rewardedProviderUnavailable: boolean,
+    technicalResult: GameplayTechnicalResult,
     destination: 'result' | 'restart' | 'menu',
   ) => void;
 }
@@ -114,9 +107,10 @@ export class GameScene implements Scene {
   private readonly score: ScoreModel;
   private readonly flow = new FlowModel();
   private readonly haptics = new HapticsService();
-  private readonly touchTuning = new TouchTuning();
+  private readonly pointerAssistance = new PointerAssistance();
   private readonly inputProfile: InputGameplayProfile;
   private readonly inputTelemetry: GameplayInputTelemetry;
+  private readonly travelBudget: TravelBudget;
   private readonly gameplayPointer: GameplayPointer;
   private readonly comboFocus: ComboFocusPresenter;
   private readonly dangerIndicator: DangerIndicator;
@@ -139,7 +133,7 @@ export class GameScene implements Scene {
   private readonly onGameplayStart: GameSceneOptions['onGameplayStart'];
   private readonly onGameplayStop: GameSceneOptions['onGameplayStop'];
   private readonly activeTargets: ActiveTarget[] = [];
-  private dragState: DragState | null = null;
+  private readonly dragController = new DragInteractionController<ActiveTarget>();
   private readonly bufferedTargets = new Set<ActiveTarget>();
   private readonly capturedPointers = new Map<number, Element>();
   private width: number;
@@ -157,12 +151,17 @@ export class GameScene implements Scene {
   private readonly rewardedGameplay = new RewardedGameplayPolicy();
   private readonly runFinalization = new RunFinalizationGate();
 
+  private get dragState(): DragInteractionState<ActiveTarget> | null {
+    return this.dragController.active;
+  }
+
   constructor(width: number, height: number, options: GameSceneOptions) {
     this.width = width;
     this.height = height;
     this.audioManager = options.audioManager;
     this.track = options.track;
     this.difficulty = options.difficulty;
+    this.travelBudget = new TravelBudget(options.difficulty);
     this.visualTheme = options.visualTheme;
     const initialPointerMode = detectInitialPointerMode({
       maxTouchPoints: navigator.maxTouchPoints,
@@ -175,7 +174,12 @@ export class GameScene implements Scene {
       initialPointerMode,
       resolveDesktopReachVariant(window.location.search),
     );
-    this.inputTelemetry = new GameplayInputTelemetry(initialPointerMode, width, height);
+    this.inputTelemetry = new GameplayInputTelemetry(
+      initialPointerMode,
+      width,
+      height,
+      this.inputProfile.bounds,
+    );
     this.gameplayPointer = new GameplayPointer(
       this.visualTheme.effects.touch,
       this.visualTheme.target.highlight,
@@ -233,6 +237,11 @@ export class GameScene implements Scene {
       this.pauseOverlay,
       this.defeatOverlay,
     );
+  }
+
+  setVisualQuality(quality: VisualQualityProfile): void {
+    this.background.setVisualQuality(quality);
+    this.effects.setVisualQuality(quality);
   }
 
   mount(): void {
@@ -293,6 +302,8 @@ export class GameScene implements Scene {
 
     if (!this.audioManager.isPlaying) return;
 
+    this.inputTelemetry.recordFrame(this.flow.snapshot().mode);
+
     const currentTime = this.audioManager.currentTime;
     this.updatePhase(currentTime);
     const phaseTransitionActive = this.phaseTransition.isActive(currentTime);
@@ -343,16 +354,25 @@ export class GameScene implements Scene {
     for (const target of [...this.activeTargets]) {
       if (!this.activeTargets.includes(target)) continue;
       if (this.dragState?.target === target) {
-        if (currentTime > this.dragState.deadline) {
-          this.resolveTarget(target, 'miss');
+        if (!this.dragState.completed && currentTime > this.dragState.deadline) {
+          this.resolveTarget(
+            target,
+            'miss',
+            'drag-deadline',
+          );
         } else if (
           this.dragState.completed
+          && this.dragState.policy.resolvesOnDestination
           && currentTime >= target.event.time - this.difficultyProfile.goodWindow
         ) {
           this.resolveTarget(target, this.dragState.grade);
         }
       } else if (currentTime - target.event.time > this.difficultyProfile.goodWindow) {
-        this.resolveTarget(target, 'miss');
+        this.resolveTarget(
+          target,
+          'miss',
+          target.event.kind === 'drag' ? 'drag-head-timeout' : 'tap-timeout',
+        );
       }
       if (this.gameEnded) return;
     }
@@ -369,9 +389,14 @@ export class GameScene implements Scene {
     this.pauseButton.position.set(width - 58, 78);
     this.pauseOverlay.resize(width, height);
     this.defeatOverlay.resize(width, height);
-    this.touchTuning.resize(width, height);
+    this.pointerAssistance.resize(width, height);
     this.inputProfile.resize(width, height);
-    this.inputTelemetry.setProfile(this.inputProfile.mode, width, height);
+    this.inputTelemetry.setProfile(
+      this.inputProfile.mode,
+      width,
+      height,
+      this.inputProfile.bounds,
+    );
     this.comboFocus.resize(width, height);
     this.dangerIndicator.resize(width, height);
     this.syncInputPresentation();
@@ -410,7 +435,7 @@ export class GameScene implements Scene {
 
     if (this.dragState?.pointerId === event.pointerId) return;
 
-    const tuning = this.touchTuning.forPointer(event.pointerType);
+    const tuning = this.pointerAssistance.forPointer(event.pointerType, this.difficulty);
     const inputTime = this.getCompensatedInputTime(event, tuning);
     const activeTarget = this.findTargetAt(
       event.global.x,
@@ -418,7 +443,10 @@ export class GameScene implements Scene {
       tuning.hitRadiusBonus,
       inputTime,
     );
-    if (!activeTarget) return;
+    if (!activeTarget) {
+      this.inputTelemetry.recordEmptyPress();
+      return;
+    }
 
     const target = activeTarget.node;
     const beatEvent = activeTarget.event;
@@ -432,30 +460,46 @@ export class GameScene implements Scene {
 
     if (target.kind === 'drag') {
       if (grade === 'miss') {
-        this.resolveTarget(activeTarget, 'miss');
+        this.resolveTarget(activeTarget, 'miss', 'drag-late-press');
         return;
       }
 
+      if (this.dragState) {
+        this.dragState.target.node.setPressed(false);
+        this.clearDragGesture();
+      }
       target.setPressed(true);
       target.beginDrag(event.global.x, event.global.y);
       this.haptics.dragStart();
-      this.dragState = {
+      const dragPolicy = getDragInteractionPolicy(
+        this.inputProfile.interaction.dragPolicyId,
+      );
+      const traversalDeadline = Math.max(inputTime, beatEvent.time)
+        + this.difficultyProfile.dragCompletionTime;
+      target.setDragTrackingMode(dragPolicy.trackingMode);
+      this.dragController.start({
         pointerId: event.pointerId,
         target: activeTarget,
         grade: grade === 'perfect' ? 'perfect' : 'good',
-        deadline: Math.max(inputTime, beatEvent.time)
-          + this.difficultyProfile.dragCompletionTime,
+        deadline: traversalDeadline,
         completed: false,
         released: false,
+        progress: 0,
+        checkpointsPassed: 0,
         lastSparkX: event.global.x,
         lastSparkY: event.global.y,
         tuning,
-      };
+      }, dragPolicy);
+      this.inputProfile.lockGesture(event.pointerId, event.pointerType);
       return;
     }
 
     if (grade) {
-      this.resolveTarget(activeTarget, grade);
+      this.resolveTarget(
+        activeTarget,
+        grade,
+        grade === 'miss' ? 'tap-late-press' : undefined,
+      );
     } else {
       this.bufferedTargets.add(activeTarget);
       target.setPressed(true);
@@ -483,7 +527,10 @@ export class GameScene implements Scene {
       event.global.y,
       this.dragState.tuning.dragToleranceBonus,
       this.dragState.tuning.dragCompletionThreshold,
+      this.dragState.policy.trackingMode,
     );
+    this.dragState.progress = dragResult.progress;
+    this.dragState.checkpointsPassed += dragResult.checkpointsPassed;
     target.setPressed(dragResult.valid);
     const sparkDistance = Math.hypot(
       event.global.x - this.dragState.lastSparkX,
@@ -503,6 +550,8 @@ export class GameScene implements Scene {
       this.dragState.completed = true;
       const inputTime = this.getCompensatedInputTime(event, this.dragState.tuning);
       if (
+        this.dragState.policy.resolvesOnDestination
+        &&
         inputTime - activeTarget.event.time
           >= -this.difficultyProfile.goodWindow
       ) {
@@ -520,7 +569,7 @@ export class GameScene implements Scene {
     if (!this.isGameplayInteractive()) {
       if (this.dragState?.pointerId === event.pointerId) {
         this.dragState.target.node.setPressed(false);
-        this.dragState = null;
+        this.clearDragGesture();
       }
       return;
     }
@@ -528,15 +577,12 @@ export class GameScene implements Scene {
 
     const activeTarget = this.dragState.target;
     if (!this.activeTargets.includes(activeTarget)) {
-      this.dragState = null;
+      this.clearDragGesture();
       return;
     }
 
-    if (
-      event.type !== 'pointercancel'
-      && this.dragState.completed
-    ) {
-      const inputTime = this.getCompensatedInputTime(event, this.dragState.tuning);
+    const inputTime = this.getCompensatedInputTime(event, this.dragState.tuning);
+    if (event.type !== 'pointercancel' && this.dragState.completed) {
       if (inputTime < activeTarget.event.time - this.difficultyProfile.goodWindow) {
         this.dragState.released = true;
       } else {
@@ -545,9 +591,14 @@ export class GameScene implements Scene {
       return;
     }
 
+    const missReason: GameplayMissReason = event.type === 'pointercancel'
+      ? 'drag-pointer-cancel'
+      : this.dragState.checkpointsPassed >= 3
+        ? 'drag-release-outside-destination'
+        : 'drag-release-early';
     activeTarget.node.setPressed(false);
-    this.dragState = null;
-    this.resolveTarget(activeTarget, 'miss');
+    this.clearDragGesture();
+    this.resolveTarget(activeTarget, 'miss', missReason);
   };
 
   private readonly handlePointerOver = (event: FederatedPointerEvent): void => {
@@ -608,22 +659,30 @@ export class GameScene implements Scene {
     return null;
   }
 
-  private resolveTarget(activeTarget: ActiveTarget, grade: TimingGrade): void {
+  private resolveTarget(
+    activeTarget: ActiveTarget,
+    grade: TimingGrade,
+    missReason?: GameplayMissReason,
+  ): void {
     const targetIndex = this.activeTargets.indexOf(activeTarget);
     if (targetIndex < 0) return;
 
     const feedbackPoint = activeTarget.node.getFeedbackPoint();
     const scoreBeforeJudgement = this.score.snapshot();
-    this.inputTelemetry.recordResult(grade);
+    this.inputTelemetry.recordResult(grade, activeTarget.event.kind, missReason);
     const flowChange = this.flow.register(grade);
     const flowTransitionHandled = this.applyFlowChange(flowChange);
     this.score.register(grade, flowChange.snapshot.multiplier);
     const scoreSnapshot = this.score.snapshot();
-    this.audioManager.emitGameplayJudgement(
-      grade,
-      grade === 'miss' && scoreBeforeJudgement.combo > 0,
-      grade === 'miss' && scoreBeforeJudgement.lives <= 1,
-    );
+    const flowActivationReplacesJudgement = flowChange.activated
+      || flowChange.superActivated;
+    if (!flowActivationReplacesJudgement) {
+      this.audioManager.emitGameplayJudgement(
+        grade,
+        grade === 'miss' && scoreBeforeJudgement.combo > 0,
+        grade === 'miss' && scoreBeforeJudgement.lives <= 1,
+      );
+    }
     this.hud.update(scoreSnapshot);
     this.dangerIndicator.setScore(scoreSnapshot);
     this.hud.showTiming(grade);
@@ -649,7 +708,7 @@ export class GameScene implements Scene {
     }
     activeTarget.node.destroy();
     this.activeTargets.splice(targetIndex, 1);
-    if (this.dragState?.target === activeTarget) this.dragState = null;
+    if (this.dragState?.target === activeTarget) this.clearDragGesture();
     this.bufferedTargets.delete(activeTarget);
 
     if (this.score.isGameOver()) {
@@ -674,17 +733,41 @@ export class GameScene implements Scene {
   }
 
   private spawnTarget(event: BeatEvent): void {
-    const start = event.start
+    const previousTravelAnchor = this.travelBudget.expectedPointerAnchor;
+    const desiredStart = event.start
       ? this.fromNormalizedPoint(event.start)
-      : this.randomStartPoint();
-    const end = event.kind === 'drag'
+      : this.deterministicStartPoint(event);
+    const start = this.travelBudget.projectHead(
+      desiredStart,
+      event.time,
+      this.inputProfile.bounds,
+      this.inputProfile.mode,
+    );
+    const desiredEnd = event.kind === 'drag'
       ? event.end
         ? this.fromNormalizedPoint(event.end)
-        : this.createRandomDragEnd(start)
+        : this.deterministicDragEnd(event)
+      : null;
+    const end = desiredEnd
+      ? this.travelBudget.projectDragEnd(
+          start,
+          desiredEnd,
+          this.inputProfile.bounds,
+          this.inputProfile.mode,
+        )
       : null;
     const dragAnchors = end
-      ? this.createDragAnchors(start, end, event)
+      ? this.travelBudget.limitDragAnchors(
+          this.createDragAnchors(start, end, event),
+          this.inputProfile.mode,
+        )
       : null;
+
+    this.inputTelemetry.recordTargetTravel(previousTravelAnchor, {
+      x: start.x,
+      y: start.y,
+      time: event.time,
+    });
 
     const target = new TargetNode(event.kind, dragAnchors, {
       hitRadius: event.kind === 'drag'
@@ -692,6 +775,33 @@ export class GameScene implements Scene {
         : this.difficultyProfile.targetHitRadius,
       dragPathTolerance: this.difficultyProfile.dragPathTolerance,
     }, this.visualTheme.target, this.visualTheme.drag);
+    if (event.kind === 'drag') {
+      target.setDragTrackingMode(
+        getDragInteractionPolicy(this.inputProfile.interaction.dragPolicyId).trackingMode,
+      );
+    }
+    if (event.kind === 'drag') {
+      this.inputTelemetry.recordDragDemand(
+        target.requiredDragDistance,
+        this.difficultyProfile.dragCompletionTime,
+      );
+    }
+    const finalDragAnchor = dragAnchors?.at(-1);
+    this.travelBudget.commit(
+      event.time,
+      start,
+      this.inputProfile.mode,
+      finalDragAnchor
+        ? {
+            end: {
+              x: start.x + finalDragAnchor.x,
+              y: start.y + finalDragAnchor.y,
+            },
+            length: target.requiredDragDistance,
+            completionTimeSeconds: this.difficultyProfile.dragCompletionTime,
+          }
+        : undefined,
+    );
     target.position.set(start.x, start.y);
     const flowSnapshot = this.flow.snapshot();
     target.setFlowState(flowSnapshot.active, flowSnapshot.superActive);
@@ -776,28 +886,16 @@ export class GameScene implements Scene {
     return candidates[0] ?? null;
   }
 
-  private randomStartPoint(): TargetPoint {
-    const bounds = this.inputProfile.bounds;
-    return {
-      x: randomBetween(bounds.left, bounds.right),
-      y: randomBetween(bounds.top, bounds.bottom),
-    };
+  private deterministicStartPoint(event: BeatEvent): TargetPoint {
+    return this.fromNormalizedPoint(
+      deterministicNormalizedPoint(event.time, event.phaseIndex),
+    );
   }
 
-  private createRandomDragEnd(start: TargetPoint): TargetPoint {
-    const angle = randomBetween(0, Math.PI * 2);
-    const distance = GAME_CONFIG.dragDistance + 30;
-    const bounds = this.inputProfile.bounds;
-    return {
-      x: Math.max(
-        bounds.left,
-        Math.min(bounds.right, start.x + Math.cos(angle) * distance),
-      ),
-      y: Math.max(
-        bounds.top,
-        Math.min(bounds.bottom, start.y + Math.sin(angle) * distance),
-      ),
-    };
+  private deterministicDragEnd(event: BeatEvent): TargetPoint {
+    return this.fromNormalizedPoint(
+      deterministicNormalizedPoint(event.time, event.phaseIndex, 1),
+    );
   }
 
   private fromNormalizedPoint(point: { x: number; y: number }): TargetPoint {
@@ -806,7 +904,32 @@ export class GameScene implements Scene {
 
   private registerActivePointer(event: FederatedPointerEvent): void {
     if (!this.inputProfile.registerPointer(event.pointerType)) return;
-    this.inputTelemetry.setProfile(this.inputProfile.mode, this.width, this.height);
+    const trackingMode = getDragInteractionPolicy(
+      this.inputProfile.interaction.dragPolicyId,
+    ).trackingMode;
+    for (const target of this.activeTargets) {
+      if (target.node.kind === 'drag' && target !== this.dragState?.target) {
+        target.node.setDragTrackingMode(trackingMode);
+      }
+    }
+    this.inputTelemetry.setProfile(
+      this.inputProfile.mode,
+      this.width,
+      this.height,
+      this.inputProfile.bounds,
+    );
+    this.syncInputPresentation();
+  }
+
+  private clearDragGesture(): void {
+    const previous = this.dragController.clear();
+    if (!previous || !this.inputProfile.releaseGesture(previous.pointerId)) return;
+    this.inputTelemetry.setProfile(
+      this.inputProfile.mode,
+      this.width,
+      this.height,
+      this.inputProfile.bounds,
+    );
     this.syncInputPresentation();
   }
 
@@ -820,6 +943,7 @@ export class GameScene implements Scene {
     if (this.awaitingSecondChance || this.gameEnded) return;
     this.awaitingSecondChance = true;
     this.paused = true;
+    this.inputTelemetry.resetFrameClock();
     this.onGameplayStop();
     this.pauseButton.visible = false;
     this.clearLiveGameplayState();
@@ -922,7 +1046,8 @@ export class GameScene implements Scene {
     for (const target of this.activeTargets) target.node.destroy();
     this.activeTargets.length = 0;
     this.pendingEvents.length = 0;
-    this.dragState = null;
+    this.clearDragGesture();
+    this.travelBudget.reset();
     this.bufferedTargets.clear();
     this.targets.position.set(0, 0);
     this.comboFocus.hide();
@@ -944,6 +1069,7 @@ export class GameScene implements Scene {
       completed,
       this.rewardedGameplay.consumed,
       this.rewardedGameplay.unavailable,
+      this.inputTelemetry.technicalResult(),
       destination,
     );
   }
@@ -997,7 +1123,7 @@ export class GameScene implements Scene {
         this.activeTargets.splice(index, 1);
       }
     }
-    this.dragState = null;
+    this.clearDragGesture();
     this.bufferedTargets.clear();
     this.comboFocus.hide();
 
@@ -1041,7 +1167,7 @@ export class GameScene implements Scene {
     this.paused = true;
     if (reportPlatform) this.onGameplayStop();
     for (const target of this.activeTargets) target.node.resetInteraction();
-    this.dragState = null;
+    this.clearDragGesture();
     this.bufferedTargets.clear();
     this.comboFocus.hide();
     this.pauseButton.visible = false;
@@ -1060,6 +1186,7 @@ export class GameScene implements Scene {
       : this.audioManager.prepare(this.track));
     void ready.then(() => {
       if (!this.mounted || this.gameEnded) return;
+      this.inputTelemetry.resetFrameClock();
       this.paused = false;
       if (this.musicStarted) this.onGameplayStart();
       this.pauseOverlay.hide();
@@ -1099,6 +1226,7 @@ export class GameScene implements Scene {
     this.syncFlowState(change.snapshot);
 
     if (change.superActivated) {
+      this.audioManager.emitFlowTransition(true);
       this.effects.emitSuperFlowActivation();
       this.hud.showSuperFlowActivation();
       this.haptics.superFlowActivation();
@@ -1113,6 +1241,7 @@ export class GameScene implements Scene {
     }
 
     if (change.activated) {
+      this.audioManager.emitFlowTransition(false);
       this.effects.emitFlowActivation();
       this.hud.showFlowActivation();
       this.haptics.flowActivation();
@@ -1143,7 +1272,7 @@ export class GameScene implements Scene {
     event: FederatedPointerEvent,
     tuning: PointerTuning,
   ): number {
-    return this.touchTuning.compensateAudioTime(
+    return this.pointerAssistance.compensateAudioTime(
       this.audioManager.currentTime,
       event.timeStamp,
       tuning,

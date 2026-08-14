@@ -4,9 +4,9 @@ Este documento es el plan ejecutable para incorporar personalizacion, evento sem
 
 ## Estado de ejecucion
 
-- Estado general: `IMPLEMENTACION TECNICA CONCLUIDA PARCIALMENTE / VALIDACION EXTERNA PENDIENTE`
-- Fase activa: `Ninguna de desarrollo; compuerta integral acumulada`
-- Siguiente accion: `Probar el juego completo, CrazyGames Preview, Poki Inspector y despues observar un lanzamiento controlado`
+- Estado general: `IMPLEMENTACION TECNICA AVANZADA / REMEDIACION DESKTOP Y VALIDACION EXTERNA PENDIENTES`
+- Fase activa: `Ninguna; siguiente entrega independiente D0 del perfil PC`
+- Siguiente accion: `Ejecutar D0-D7, cerrar 11.5, CrazyGames Preview, Poki Inspector y lanzamiento controlado`
 - Cierre de esta hoja: `Completar tambien Fase 12 (Poki) y Fase 13 (balance, telemetria y lanzamiento controlado)`
 - Ultima actualizacion: `2026-08-13`
 
@@ -313,6 +313,11 @@ Objetivo: lograr que SUPERFLOW sea legible, emocionante y justo tanto con mouse 
 
 Esta no es una fase rapida ni una sola entrega. Se ejecuta y aprueba por bloques segun la hoja detallada [`PHASE_11_5_MULTIPLATFORM_POLISH.md`](PHASE_11_5_MULTIPLATFORM_POLISH.md). Un bloque puede ajustar sus valores despues de prueba humana, pero no puede invadir las responsabilidades del siguiente.
 
+La primera validacion fisica en PC demostro que limitar solo el ancho no resuelve
+alcance, drag ni rendimiento en pantallas grandes. La remediacion modular D0-D7
+vive en [`DESKTOP_INPUT_PROFILE_PLAN.md`](DESKTOP_INPUT_PROFILE_PLAN.md). Sus cambios
+forman parte del cierre de 11.5G y deben terminar antes de Music Intelligence M0.
+
 Excepcion operativa acordada: la ausencia temporal de acceso a un PC fisico no detiene las entregas 11.5A-F. Cada bloque puede avanzar con pruebas automatizadas, viewports simulados, perfiles conservadores y comparacion estructural. Las observaciones humanas de PC se acumulan como validacion diferida y solo bloquean la compuerta final 11.5G, CrazyGames Preview y el lanzamiento; no bloquean la implementacion de los bloques siguientes.
 
 ### 11.5A - Linea base y perfiles de entrada
@@ -425,7 +430,16 @@ Compuerta final 11.5:
 - Existe aprobacion humana explicita en al menos un PC y un movil fisico.
 - La aprobacion humana puede realizarse al final de todas las entregas, pero sigue siendo obligatoria antes de Preview/publicacion.
 
-Estado 11.5G: `REGRESION AUTOMATICA APROBADA / VALIDACION FISICA PENDIENTE`. La ejecucion manual vive en [`PHASE_11_5_VALIDATION_CHECKLIST.md`](PHASE_11_5_VALIDATION_CHECKLIST.md). El navegador integrado no estuvo disponible en esta sesion, por lo que tampoco se declara inspeccion visual local.
+Estado 11.5G: `REGRESION AUTOMATICA APROBADA / VALIDACION FISICA EN CURSO`. Mouse
+balanced, asistencia de drag, rendimiento acelerado/fallback y regresion movil ya
+fueron aprobados. La deuda restante vive en
+[`PHASE_11_5_VALIDATION_CHECKLIST.md`](PHASE_11_5_VALIDATION_CHECKLIST.md): matriz
+completa por dificultad, audio/Danger, derrota/revive y salida de puntero.
+
+Actualizacion de validacion fisica: touch conserva una sensacion aprobada, pero mouse
+resulta demasiado exigente y la pantalla grande presenta problemas de rendimiento.
+11.5G permanece abierta mientras se ejecuta el plan D0-D7; al aprobar D7 se completa
+el checklist fisico, se registran los valores finales y se puede cerrar 11.5.
 
 ## Fase 12 - Adaptador Poki
 
@@ -523,6 +537,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 | 2026-08-13 | Fase 11.5D/E | `npm test` + `npm run build` | Windows / Node 24 + maquina de estados | Implementada / validacion fisica diferida | Danger deriva de una vida y usa marco/texto perifericos; FLOW ya no se actualiza desde el frame, sobrevive tiempo/transiciones y solo Perfect/Bien/Miss pueden sostener, degradar o romper |
 | 2026-08-13 | Fase 11.5F | `npm test` + `npm run build` | Windows / Node 24 + 6 viewports | Implementada / validacion fisica diferida | Transicion de 460 ms deja terminar el impacto, panel responsive ofrece revive/reintento/playlist/resultado, cancelacion de anuncio conserva decisiones y guard bloquea registros dobles |
 | 2026-08-13 | Fase 11.5G | `npm run test:regression` + Preview HTTP | Windows / Node 24 | Regresion automatica aprobada | 8 viewports, 3 dificultades, 24 canciones, 72 beatmaps y WAV validados; build sirve index 200 y miss.wav como audio/wav RIFF de 170426 bytes. Navegador visual no disponible; PC/movil y SDK real siguen pendientes |
+| 2026-08-13 | Perfil PC D0-D7 | Primera validacion fisica | PC real + movil previamente aprobado | Remediacion planificada | Mouse confirma alcance excesivo, drag estricto y lag en pantalla grande; `DESKTOP_INPUT_PROFILE_PLAN.md` define arquitectura, compuertas y cierre de 11.5G sin alterar touch |
 | 2026-08-13 | Fase 12 | `npm test` + `npm run build` | Windows / Node 24 | Implementada / Inspector pendiente | Poki SDK v2 aislado por entorno; init, gameLoadingFinished, gameplayStart/Stop, rewarded true/false/error, lifecycle y bloqueo en GitHub Pages verificados. No habia navegador conectado; falta subir dist al Poki Inspector |
 | 2026-08-13 | Fase 13 | `npm test` + `npm run build` | Windows / Node 24 | Infraestructura aprobada / datos pendientes | Cola local limitada, retorno diario, canciones, evento y ofertas instrumentados; Poki measure y kill switches probados. Faltan jugadores reales, Preview/Inspector y lanzamiento controlado |
 
@@ -530,6 +545,7 @@ Agregar una fila al completar o bloquear una fase. No borrar entradas anteriores
 
 Estas decisiones no bloquean las primeras fases y deben resolverse en el punto indicado:
 
-- Fase 11.5A/11.5G: `balanced` es el alcance desktop provisional; la comparacion humana de `compact`, `balanced` y `expansive` decide el valor final.
+- Perfil PC D3/D7: `balanced` es solo una linea base; campo bidimensional,
+  presupuesto de recorrido y validacion humana deciden los valores finales.
 - Fase 11.5E: carga y multiplicadores definitivos de FLOW se deciden despues de medir partidas completas sin temporizador.
 - Portal de primera validacion publica: CrazyGames; Poki se mantiene como segundo objetivo despues de la Fase 11.5.

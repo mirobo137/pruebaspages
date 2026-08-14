@@ -17,7 +17,11 @@ try {
   const { getVisualTheme, listVisualThemes, ThemeSelection } = await server.ssrLoadModule(
     '/src/customization/ThemeCatalog.ts',
   );
-  const { FULL_VISUAL_QUALITY, REDUCED_VISUAL_QUALITY } = await server.ssrLoadModule(
+  const {
+    FULL_VISUAL_QUALITY,
+    MINIMAL_VISUAL_QUALITY,
+    REDUCED_VISUAL_QUALITY,
+  } = await server.ssrLoadModule(
     '/src/customization/VisualQuality.ts',
   );
   const { getAutomaticallyUnlockedThemeIds, listThemeCollection } = await server.ssrLoadModule(
@@ -93,6 +97,9 @@ try {
   assert.equal(FULL_VISUAL_QUALITY.particleMultiplier, 1);
   assert.ok(REDUCED_VISUAL_QUALITY.particleMultiplier < 1);
   assert.ok(REDUCED_VISUAL_QUALITY.ambientOrbCount < FULL_VISUAL_QUALITY.ambientOrbCount);
+  assert.equal(MINIMAL_VISUAL_QUALITY.particleMultiplier, 0);
+  assert.equal(MINIMAL_VISUAL_QUALITY.ambientOrbCount, 0);
+  assert.ok(MINIMAL_VISUAL_QUALITY.geometryDetail < REDUCED_VISUAL_QUALITY.geometryDetail);
 
   const directSelection = new ThemeSelection('cyber-sakura');
   assert.equal(directSelection.current.id, 'cyber-sakura');

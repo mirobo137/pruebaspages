@@ -20,11 +20,15 @@ try {
   const miss = createFeedbackVoicePlan('miss');
   const comboBreak = createFeedbackVoicePlan('combo-break');
   const defeat = createFeedbackVoicePlan('defeat');
+  const flowActivation = createFeedbackVoicePlan('flow-activation');
+  const superFlowActivation = createFeedbackVoicePlan('super-flow-activation');
   assert.equal(perfect.length, 2);
   assert.equal(good.length, 1);
   assert.equal(miss.length, 1);
   assert.equal(comboBreak.length, 2);
   assert.equal(defeat.length, 3);
+  assert.equal(flowActivation.length, 3);
+  assert.equal(superFlowActivation.length, 4);
   assert.ok(perfect[0].startFrequency > good[0].startFrequency);
   assert.ok(good[0].startFrequency > miss[0].startFrequency);
   assert.ok(comboBreak[0].duration > miss[0].duration);
@@ -33,10 +37,23 @@ try {
   assert.ok(createErrorNoisePlan('miss').duration < createErrorNoisePlan('combo-break').duration);
   assert.ok(createErrorNoisePlan('combo-break').duration < createErrorNoisePlan('defeat').duration);
 
-  for (const cue of ['perfect', 'good', 'miss', 'combo-break', 'defeat']) {
+  assert.ok(perfect[0].gain >= 0.17);
+  assert.ok(good[0].gain >= 0.14);
+  assert.ok(flowActivation[0].gain > perfect[0].gain);
+  assert.ok(superFlowActivation[0].gain > flowActivation[0].gain);
+  assert.ok(superFlowActivation.at(-1).endFrequency > flowActivation.at(-1).endFrequency);
+  for (const cue of [
+    'perfect',
+    'good',
+    'miss',
+    'combo-break',
+    'defeat',
+    'flow-activation',
+    'super-flow-activation',
+  ]) {
     for (const voice of createFeedbackVoicePlan(cue)) {
       assert.ok(voice.duration > 0 && voice.duration <= 0.45);
-      assert.ok(voice.gain > 0 && voice.gain < 0.1);
+      assert.ok(voice.gain > 0 && voice.gain <= 0.22);
       assert.ok(voice.startFrequency > 0 && voice.endFrequency > 0);
     }
   }

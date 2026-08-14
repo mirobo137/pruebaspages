@@ -3,6 +3,51 @@
 Esta lista cierra la deuda humana de 11.5. No repite pruebas automaticas. Se ejecuta
 una vez en PC con mouse y una vez en movil tactil antes de CrazyGames Preview.
 
+## Estado acumulado - 2026-08-13
+
+Evidencia aprobada:
+
+- [x] PC mouse `balanced`, 1335x1032: asistencia direccional descrita como mucho
+  mejor y Dificil jugable; 19 drags con cero fallos de recorrido/release.
+- [x] PC acelerada: 60 FPS en charging, FLOW y SUPER FLOW.
+- [x] Fullscreen y ventana normal: playfield mouse permanece centrado en 820x680.
+- [x] Backend por software: calidad minimal se activa; al recuperar RTX se restaura.
+- [x] Movil por LAN: regresion tactil funcional y sensacion original aprobadas.
+- [x] FLOW y SUPER FLOW alcanzados en partida real sin degradacion de frames.
+- [x] Suite completa, build, 24 canciones y 72 beatmaps aprobados.
+- [x] Resultado tecnico versionado por perfil/modelo y progreso compartido comprobados.
+- [x] Mouse Medio `balanced`: 2 partidas completas, 78.8% de precision media,
+  combo medio 29, 10.5 activaciones FLOW, 5 SUPER y 60,135 px de recorrido.
+- [x] Mouse Facil `balanced`: 1 partida completa, 89.3% de precision, combo 45,
+  2 misses, 2 FLOW, 3 SUPER y velocidad maxima exigida de 388 px/s.
+- [~] Mouse Dificil `balanced`: 2 intentos no completados, 47.8% de precision,
+  combo medio 4.5 y velocidad maxima 1,071.4 px/s dentro del presupuesto 1,100;
+  4 `tap-timeout` coinciden con 4 pulsaciones vacias. Se aplica +10 px solo a la
+  adquisicion de cabeza mouse+Dificil; pendiente repetir.
+- [~] Mouse Dificil tras +10 px: 52/61 aciertos, SUPER alcanzado y 60 FPS; 8 de 9
+  misses fueron `tap-timeout` y coinciden con 8 pulsaciones vacias. La tasa espacial
+  mejora, pero aun impide completar. Se calibra bonus final +20 px y se versiona v3.
+- [~] Mouse Dificil v3 +20 px: 60/69 aciertos, 38 Perfect, 22 Bien, SUPER y 60 FPS.
+  Los 9 misses se dividen en 4 timeout, 4 pulsaciones tardias y 1 drag temprano;
+  el usuario lo considera mucho mas alcanzable y capaz de completar con esfuerzo.
+  Balance aprobado; falta una finalizacion completa para cerrar la ruta formal.
+- [x] Mouse Dificil v3: 7 intentos, 1 finalizacion completa, 73.5% de precision
+  media, combo medio 26.9, 6 FLOW y 3 SUPER. Exigente pero completable.
+- [x] Danger, ruptura y panel de derrota descritos como correctos tanto en PC como
+  en movil antes del ultimo ajuste de volumen.
+- [x] Aciertos elevados y firmas distintas FLOW/SUPER aprobados fisicamente tras
+  reforzar presencia; son notorios sin modificar MISS ni el volumen de la musica.
+
+Pendiente para cierre formal:
+
+- [x] Completar Facil, Medio y Dificil con mouse; Dificil conserva una tasa de
+  finalizacion baja pero tiene evidencia real de una partida completa.
+- [ ] Repetir las tres dificultades touch y registrar vertical/horizontal.
+- [ ] Ejecutar las rutas auditivas de Danger/FLOW descritas abajo.
+- [ ] Ejecutar derrota en las tres fases y revive exitoso/cancelado/no disponible.
+- [ ] Sacar y liberar el puntero fuera del canvas/iframe durante un drag.
+- [ ] Ejecutar CrazyGames Preview y Poki Inspector despues de cerrar 11.5G.
+
 ## Datos de cada sesion
 
 - Dispositivo, navegador y resolucion/orientacion.

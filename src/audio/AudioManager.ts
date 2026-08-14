@@ -57,6 +57,11 @@ export class AudioManager {
     this.feedback?.emitJudgement(grade, comboBroken, fatal);
   }
 
+  emitFlowTransition(superFlow = false): void {
+    if (this.platformMuted || this.paused || !this.playing) return;
+    this.feedback?.emitFlowTransition(superFlow);
+  }
+
   prepare(track: MusicTrack): Promise<void> {
     this.ensureAudioContext();
     const context = this.context!;

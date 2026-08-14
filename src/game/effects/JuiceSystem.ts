@@ -84,7 +84,7 @@ export class JuiceSystem extends Container {
 
   constructor(
     private readonly visualTheme: EffectsVisualTheme = DEFAULT_VISUAL_THEME.effects,
-    private readonly quality: VisualQualityProfile = FULL_VISUAL_QUALITY,
+    private quality: VisualQualityProfile = FULL_VISUAL_QUALITY,
   ) {
     super();
     this.flashColor = visualTheme.highlight;
@@ -92,6 +92,18 @@ export class JuiceSystem extends Container {
     this.flash.blendMode = 'add';
     this.superFrame.blendMode = 'add';
     this.addChild(this.flash, this.superFrame);
+    this.setVisualQuality(quality);
+  }
+
+  setVisualQuality(quality: VisualQualityProfile): void {
+    this.quality = quality;
+    const enabled = quality.id !== 'minimal';
+    this.flash.visible = enabled;
+    this.superFrame.visible = enabled;
+    if (!enabled) {
+      while (this.particles.length > 0) this.particles.pop()?.node.destroy();
+      while (this.rings.length > 0) this.rings.pop()?.node.destroy();
+    }
   }
 
   resize(width: number, height: number): void {
@@ -485,6 +497,7 @@ export class JuiceSystem extends Container {
     shape: ParticleShape = 'dot',
     rotationSpeed = 0,
   ): void {
+    if (this.quality.id === 'minimal') return;
     while (this.particles.length >= MAX_PARTICLES) {
       const oldest = this.particles.shift();
       oldest?.node.destroy();
@@ -531,6 +544,7 @@ export class JuiceSystem extends Container {
     duration: number,
     width: number,
   ): void {
+    if (this.quality.id === 'minimal') return;
     while (this.rings.length >= MAX_RINGS) {
       const oldest = this.rings.shift();
       oldest?.node.destroy();
@@ -552,6 +566,7 @@ export class JuiceSystem extends Container {
     width: number,
     rotationSpeed: number,
   ): void {
+    if (this.quality.id === 'minimal') return;
     while (this.rings.length >= MAX_RINGS) {
       const oldest = this.rings.shift();
       oldest?.node.destroy();

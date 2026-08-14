@@ -1,6 +1,10 @@
 import type { TimingGrade } from '../game/timing/TimingGrade';
 
-export type GameplayAudioCue = TimingGrade | 'combo-break' | 'defeat';
+export type GameplayAudioCue = TimingGrade
+  | 'combo-break'
+  | 'defeat'
+  | 'flow-activation'
+  | 'super-flow-activation';
 
 export interface FeedbackVoicePlan {
   type: OscillatorType;
@@ -25,11 +29,22 @@ export interface ErrorNoisePlan {
 
 export function createFeedbackVoicePlan(cue: GameplayAudioCue): FeedbackVoicePlan[] {
   if (cue === 'perfect') return [
-    { type: 'sine', startFrequency: 880, endFrequency: 1320, delay: 0, duration: 0.12, gain: 0.085 },
-    { type: 'sine', startFrequency: 1320, endFrequency: 1760, delay: 0.035, duration: 0.13, gain: 0.055 },
+    { type: 'triangle', startFrequency: 880, endFrequency: 1320, delay: 0, duration: 0.115, gain: 0.17 },
+    { type: 'sine', startFrequency: 1320, endFrequency: 1760, delay: 0.03, duration: 0.125, gain: 0.11 },
   ];
   if (cue === 'good') return [
-    { type: 'triangle', startFrequency: 510, endFrequency: 610, delay: 0, duration: 0.105, gain: 0.06 },
+    { type: 'triangle', startFrequency: 587, endFrequency: 740, delay: 0, duration: 0.11, gain: 0.14 },
+  ];
+  if (cue === 'flow-activation') return [
+    { type: 'triangle', startFrequency: 659, endFrequency: 880, delay: 0, duration: 0.18, gain: 0.2 },
+    { type: 'triangle', startFrequency: 880, endFrequency: 1175, delay: 0.07, duration: 0.22, gain: 0.16 },
+    { type: 'sine', startFrequency: 1175, endFrequency: 1568, delay: 0.14, duration: 0.2, gain: 0.1 },
+  ];
+  if (cue === 'super-flow-activation') return [
+    { type: 'triangle', startFrequency: 784, endFrequency: 1047, delay: 0, duration: 0.19, gain: 0.22 },
+    { type: 'triangle', startFrequency: 1047, endFrequency: 1397, delay: 0.065, duration: 0.23, gain: 0.18 },
+    { type: 'triangle', startFrequency: 1397, endFrequency: 2093, delay: 0.13, duration: 0.27, gain: 0.14 },
+    { type: 'sine', startFrequency: 2093, endFrequency: 2637, delay: 0.205, duration: 0.24, gain: 0.085 },
   ];
   if (cue === 'defeat') return [
     { type: 'sawtooth', startFrequency: 145, endFrequency: 42, delay: 0, duration: 0.38, gain: 0.082 },
@@ -105,6 +120,13 @@ export class ReactiveAudioFeedback {
       if (noise) this.playNoise(noise);
     }
     if (grade === 'miss') this.reactMusic(createMusicReactionPlan(comboBroken, fatal));
+  }
+
+  emitFlowTransition(superFlow: boolean): void {
+    const cue: GameplayAudioCue = superFlow
+      ? 'super-flow-activation'
+      : 'flow-activation';
+    for (const voice of createFeedbackVoicePlan(cue)) this.playVoice(voice);
   }
 
   setMissSample(buffer: AudioBuffer | null): void {

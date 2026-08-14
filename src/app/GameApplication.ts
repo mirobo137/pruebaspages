@@ -1,6 +1,7 @@
 import { Application, Container } from 'pixi.js';
 import type { Ticker } from 'pixi.js';
 import { LocalTelemetrySink } from '../analytics/LocalTelemetrySink';
+import { summarizeInputProfiles } from '../analytics/InputProfileComparison';
 import { TelemetryService } from '../analytics/TelemetryService';
 import { AudioManager } from '../audio/AudioManager';
 import { MenuAudioController } from '../audio/MenuAudioController';
@@ -14,6 +15,7 @@ import { listThemeCollection } from '../customization/ThemeCollection';
 import {
   detectVisualQuality,
   FULL_VISUAL_QUALITY,
+  MINIMAL_VISUAL_QUALITY,
   REDUCED_VISUAL_QUALITY,
   type VisualQualityProfile,
 } from '../customization/VisualQuality';
@@ -30,6 +32,8 @@ import { CustomThemeScene } from '../scenes/CustomThemeScene';
 import { TitleScene } from '../scenes/TitleScene';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
+import type { GameplayTechnicalResult } from '../input/GameplayInputTelemetry';
+import { calculateWeightedAccuracy } from '../progression/StarRating';
 import { loadWeeklyEventCatalog } from '../events/EventCatalog';
 import type { WeeklyEventCampaign } from '../events/EventTypes';
 import { getVisualTheme } from '../customization/ThemeCatalog';
@@ -47,6 +51,16 @@ import {
   type GamePlatformService,
 } from '../platform/GamePlatformService';
 import { resolveReleaseConfig, type ReleaseConfig } from '../platform/ReleaseConfig';
+import { AdaptivePerformanceController } from '../rendering/AdaptivePerformanceController';
+import type { AdaptivePerformanceAdjustment } from '../rendering/AdaptivePerformanceController';
+import {
+  isSoftwareRendererLabel,
+  readWebGlRendererLabel,
+} from '../rendering/GraphicsCapability';
+import {
+  MIN_RENDER_RESOLUTION,
+  resolveRenderResolution,
+} from '../rendering/RenderResolutionPolicy';
 
 export class GameApplication {
   private readonly app = new Application();
@@ -59,28 +73,54 @@ export class GameApplication {
   private gamePlatform: GamePlatformService = new NoopGamePlatformService();
   private releaseConfig: ReleaseConfig = resolveReleaseConfig('disabled', '');
   private telemetry: TelemetryService | null = null;
+  private localTelemetry: LocalTelemetrySink | null = null;
   private readonly themeSelection = new ThemeSelection(this.progression.equippedThemeId);
   private visualQuality: VisualQualityProfile = FULL_VISUAL_QUALITY;
+  private automaticVisualQuality = true;
+  private adaptiveVisualQualityLocked = false;
+  private readonly adaptivePerformance = new AdaptivePerformanceController();
+  private adaptiveResolutionScale = 1;
+  private performanceNotice: HTMLDivElement | null = null;
+  private performanceNoticeTimeout: number | null = null;
   private tracks: TrackSelection[] = [];
   private weeklyEvents: WeeklyEventCampaign[] = [];
   private gameSessionSequence = 0;
   private readonly tick = (ticker: Ticker): void => {
+    if (this.app.canvas.dataset.scene === 'game' && document.visibilityState === 'visible') {
+      const adjustment = this.adaptivePerformance.recordFrame(
+        ticker.deltaMS,
+        this.visualQuality.id,
+        this.adaptiveResolutionScale,
+      );
+      if (adjustment) this.applyAdaptivePerformance(adjustment);
+    } else {
+      this.adaptivePerformance.resetSamples();
+    }
     this.sceneManager.update(ticker.deltaTime / 60);
   };
   private readonly handleResize = (): void => {
+    this.applyRenderResolution();
+    this.updateAutomaticVisualQuality();
     this.sceneManager.resize(this.app.screen.width, this.app.screen.height);
   };
 
   constructor(private readonly mountElement: HTMLElement) {}
 
   async start(): Promise<void> {
+    const initialRenderResolution = resolveRenderResolution(
+      window.innerWidth,
+      window.innerHeight,
+      window.devicePixelRatio,
+    );
     await this.app.init({
       antialias: true,
       autoDensity: true,
       backgroundColor: 0x0b1022,
-      resolution: Math.min(window.devicePixelRatio, 2),
+      resolution: initialRenderResolution.resolution,
       resizeTo: window,
     });
+    const graphicsRendererLabel = readWebGlRendererLabel(this.app.canvas);
+    const softwareRenderer = isSoftwareRendererLabel(graphicsRendererLabel);
 
     const platform = await createPlatformIntegration({
       development: import.meta.env.DEV,
@@ -96,22 +136,34 @@ export class GameApplication {
       this.gamePlatform.environment,
       window.location.search,
     );
+    this.localTelemetry = new LocalTelemetrySink(window.localStorage);
     this.telemetry = new TelemetryService([
-      new LocalTelemetrySink(window.localStorage),
+      this.localTelemetry,
       platform.telemetry,
     ], window.localStorage);
     this.telemetry.startSession();
+    this.publishInputProfileComparison();
     this.gamePlatform.loadingStart();
 
     const query = new URLSearchParams(window.location.search);
     const requestedTheme = query.get('theme');
     if (requestedTheme) this.themeSelection.select(requestedTheme);
     const requestedQuality = query.get('quality');
+    this.automaticVisualQuality = requestedQuality !== 'reduced'
+      && requestedQuality !== 'full'
+      && requestedQuality !== 'minimal';
     this.visualQuality = requestedQuality === 'reduced'
       ? REDUCED_VISUAL_QUALITY
       : requestedQuality === 'full'
         ? FULL_VISUAL_QUALITY
+        : requestedQuality === 'minimal'
+          ? MINIMAL_VISUAL_QUALITY
         : detectVisualQuality(this.app.screen.width, this.app.screen.height);
+    if (softwareRenderer) {
+      this.visualQuality = MINIMAL_VISUAL_QUALITY;
+      this.adaptiveVisualQualityLocked = true;
+      this.adaptiveResolutionScale = 0.5;
+    }
 
     this.mountElement.appendChild(this.app.canvas);
     this.app.canvas.dataset.rewardedAds = this.rewardedAds.available
@@ -120,6 +172,17 @@ export class GameApplication {
       : 'unavailable';
     this.app.canvas.dataset.platform = this.gamePlatform.environment;
     this.app.canvas.dataset.releaseChannel = this.releaseConfig.channel;
+    if (softwareRenderer) {
+      this.applyRenderResolution();
+      this.app.canvas.dataset.adaptivePerformance = 'software-renderer';
+      this.app.canvas.dataset.graphicsAcceleration = 'software';
+      this.showPerformanceNotice(true);
+    } else {
+      this.updateRenderDataset(initialRenderResolution);
+      this.app.canvas.dataset.graphicsAcceleration = graphicsRendererLabel
+        ? 'hardware'
+        : 'unknown';
+    }
     this.app.stage.addChild(this.sceneHost);
     [this.tracks, this.weeklyEvents] = await Promise.all([
       this.loadMusic(),
@@ -148,6 +211,10 @@ export class GameApplication {
     this.rewardedAds.destroy();
     this.menuAudio.destroy();
     this.audioManager.destroy();
+    if (this.performanceNoticeTimeout !== null) {
+      window.clearTimeout(this.performanceNoticeTimeout);
+    }
+    this.performanceNotice?.remove();
     this.app.destroy(true);
   }
 
@@ -393,6 +460,7 @@ export class GameApplication {
           completed,
           usedSecondChance,
           rewardedProviderUnavailable,
+          technicalResult,
           destination,
         ) => this.showResult(
           selection,
@@ -403,6 +471,7 @@ export class GameApplication {
           completed,
           usedSecondChance,
           rewardedProviderUnavailable,
+          technicalResult,
           destination,
         ),
       }),
@@ -418,6 +487,7 @@ export class GameApplication {
     completed: boolean,
     usedSecondChance: boolean,
     rewardedProviderUnavailable: boolean,
+    technicalResult: GameplayTechnicalResult,
     destination: 'result' | 'restart' | 'menu' = 'result',
   ): void => {
     this.gamePlatform.gameplayStop();
@@ -436,7 +506,21 @@ export class GameApplication {
       completed,
       stars: run.earnedStars,
       score: snapshot.score,
+      inputProfileId: technicalResult.inputProfileId,
+      spatialModelVersion: technicalResult.spatialModelVersion,
+      accuracy: calculateWeightedAccuracy(snapshot),
+      bestCombo: snapshot.bestCombo,
+      misses: snapshot.misses,
+      missReasons: technicalResult.missReasons,
+      flowActivations: flow.activations,
+      superFlowActivations: flow.superActivations,
+      pointerDistance: technicalResult.pointerDistance,
+      emptyPresses: technicalResult.emptyPresses,
+      averageTravelDistance: technicalResult.travel.averageDistance,
+      maximumRequiredSpeed: technicalResult.travel.maximumRequiredSpeed,
+      averageDragLength: technicalResult.drags.averageLength,
     });
+    this.publishInputProfileComparison();
     const weeklySnapshot = this.progression.recordWeeklyEventRun(this.weeklyEvents, {
       completed,
       perfects: snapshot.perfects,
@@ -522,6 +606,16 @@ export class GameApplication {
     );
   };
 
+  private publishInputProfileComparison(): void {
+    if (!import.meta.env.DEV || !this.localTelemetry) return;
+    const target = globalThis as typeof globalThis & {
+      __superflowInputComparison?: ReturnType<typeof summarizeInputProfiles>;
+    };
+    target.__superflowInputComparison = summarizeInputProfiles(
+      this.localTelemetry.snapshot(),
+    );
+  }
+
   private async loadMusic(): Promise<TrackSelection[]> {
     try {
       const catalog = await loadMusicCatalog();
@@ -553,5 +647,109 @@ export class GameApplication {
     this.app.canvas.dataset.scene = scene;
     this.app.canvas.dataset.theme = this.themeSelection.current.id;
     this.app.canvas.dataset.visualQuality = this.visualQuality.id;
+  }
+
+  private applyRenderResolution(): void {
+    const baseDecision = resolveRenderResolution(
+      window.innerWidth,
+      window.innerHeight,
+      window.devicePixelRatio,
+    );
+    const resolution = Math.max(
+      MIN_RENDER_RESOLUTION,
+      baseDecision.resolution * this.adaptiveResolutionScale,
+    );
+    const renderedPixels = Math.round(
+      window.innerWidth * window.innerHeight * resolution ** 2,
+    );
+    const decision = {
+      ...baseDecision,
+      resolution,
+      renderedPixels,
+      constrained: resolution < baseDecision.requestedResolution,
+      budgetExceeded: renderedPixels > baseDecision.pixelBudget,
+    };
+    this.app.renderer.resize(
+      window.innerWidth,
+      window.innerHeight,
+      decision.resolution,
+    );
+    this.updateRenderDataset(decision);
+  }
+
+  private updateRenderDataset(decision: ReturnType<typeof resolveRenderResolution>): void {
+    this.app.canvas.dataset.renderResolution = decision.resolution.toString();
+    this.app.canvas.dataset.renderPixels = decision.renderedPixels.toString();
+    this.app.canvas.dataset.renderConstrained = decision.constrained ? 'true' : 'false';
+    this.app.canvas.dataset.renderBudgetExceeded = decision.budgetExceeded ? 'true' : 'false';
+    this.app.canvas.dataset.adaptiveResolutionScale = this.adaptiveResolutionScale.toString();
+  }
+
+  private updateAutomaticVisualQuality(): void {
+    if (!this.automaticVisualQuality || this.adaptiveVisualQualityLocked) return;
+    const nextQuality = detectVisualQuality(
+      this.app.screen.width,
+      this.app.screen.height,
+    );
+    if (nextQuality.id === this.visualQuality.id) return;
+    this.visualQuality = nextQuality;
+    this.app.canvas.dataset.visualQuality = nextQuality.id;
+    this.sceneManager.setVisualQuality(nextQuality);
+  }
+
+  private applyAdaptivePerformance(
+    adjustment: AdaptivePerformanceAdjustment,
+  ): void {
+    if (adjustment.qualityId) {
+      this.visualQuality = adjustment.qualityId === 'minimal'
+        ? MINIMAL_VISUAL_QUALITY
+        : adjustment.qualityId === 'reduced'
+          ? REDUCED_VISUAL_QUALITY
+          : FULL_VISUAL_QUALITY;
+      this.adaptiveVisualQualityLocked = true;
+      this.app.canvas.dataset.visualQuality = this.visualQuality.id;
+      this.sceneManager.setVisualQuality(this.visualQuality);
+    }
+    if (adjustment.resolutionScale !== this.adaptiveResolutionScale) {
+      this.adaptiveResolutionScale = adjustment.resolutionScale;
+      this.applyRenderResolution();
+    }
+    this.app.canvas.dataset.adaptivePerformance = adjustment.reason;
+    this.app.canvas.dataset.adaptiveP95Ms = adjustment.p95Ms.toString();
+    this.showPerformanceNotice(this.adaptiveResolutionScale < 1);
+  }
+
+  private showPerformanceNotice(compatibilityMode: boolean): void {
+    if (!this.performanceNotice) {
+      const notice = document.createElement('div');
+      notice.setAttribute('role', 'status');
+      Object.assign(notice.style, {
+        position: 'fixed',
+        zIndex: '20',
+        top: '12px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '8px 14px',
+        border: '1px solid rgba(126, 249, 255, 0.65)',
+        borderRadius: '999px',
+        background: 'rgba(5, 8, 23, 0.9)',
+        color: '#e9fdff',
+        font: '700 12px system-ui, sans-serif',
+        letterSpacing: '0.08em',
+        pointerEvents: 'none',
+      });
+      this.mountElement.appendChild(notice);
+      this.performanceNotice = notice;
+    }
+    this.performanceNotice.textContent = compatibilityMode
+      ? 'MODO COMPATIBILIDAD · ACTIVA LA ACELERACION GRAFICA PARA MAYOR NITIDEZ'
+      : 'MODO RENDIMIENTO ACTIVADO';
+    this.performanceNotice.hidden = false;
+    if (this.performanceNoticeTimeout !== null) {
+      window.clearTimeout(this.performanceNoticeTimeout);
+    }
+    this.performanceNoticeTimeout = window.setTimeout(() => {
+      if (this.performanceNotice) this.performanceNotice.hidden = true;
+    }, 8_000);
   }
 }

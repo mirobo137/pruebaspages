@@ -3,6 +3,8 @@ import type { DragVisualTheme, TargetVisualTheme } from '../../customization/The
 import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
 import { GAME_CONFIG } from '../config';
 import type { NoteKind } from '../notes/NoteKind';
+import type { DragTrackingMode } from '../../input/GameplayInteractionProfile';
+import { resolveDirectionalDragProgress } from '../../input/drag/DirectionalDragAssistance';
 import { DragPath, distanceToSegment } from './DragPath';
 
 export interface TargetPoint {
@@ -45,6 +47,7 @@ export class TargetNode extends Container {
   private timingState: 'approach' | 'good' | 'perfect' = 'approach';
   private readonly dragPath: DragPath | null;
   private readonly checkpointProgress = [0.33, 0.66, 1];
+  private dragTrackingMode: DragTrackingMode = 'trace';
 
   constructor(
     readonly kind: NoteKind,
@@ -113,7 +116,7 @@ export class TargetNode extends Container {
     this.destination.alpha = this.kind === 'drag'
       ? 0.5 + Math.sin(this.ageSeconds * 6) * 0.16
       : 0;
-    this.checkpoints.alpha = this.kind === 'drag'
+    this.checkpoints.alpha = this.kind === 'drag' && this.dragTrackingMode === 'trace'
       ? 0.72 + Math.sin(this.ageSeconds * 4.5) * 0.12
       : 0;
   }
@@ -189,11 +192,17 @@ export class TargetNode extends Container {
     this.lastDragPointer = this.toLocal({ x: globalX, y: globalY });
   }
 
+  setDragTrackingMode(mode: DragTrackingMode): void {
+    this.dragTrackingMode = mode;
+    this.checkpoints.visible = mode === 'trace';
+  }
+
   updateDragFromPointer(
     globalX: number,
     globalY: number,
     toleranceBonus = 0,
     completionThreshold = 0.985,
+    trackingMode: DragTrackingMode = 'trace',
   ): DragPointerResult {
     if (this.kind !== 'drag' || !this.dragPath) {
       return {
@@ -207,40 +216,69 @@ export class TargetNode extends Container {
     const pointer = this.toLocal({ x: globalX, y: globalY });
     const projection = this.dragPath.project(pointer);
     const corridor = this.interaction.dragPathTolerance + toleranceBonus;
-    const valid = projection.distance <= corridor
-      && projection.progress >= this.dragProgress - 0.16;
+    const movementStart = this.lastDragPointer ?? { x: 0, y: 0 };
+    const movementX = pointer.x - movementStart.x;
+    const movementY = pointer.y - movementStart.y;
+    const movementDistance = Math.hypot(movementX, movementY);
+    const tangent = this.dragPath.tangentAt(
+      (this.dragProgress + Math.max(this.dragProgress, projection.progress)) * 0.5,
+    );
+    const tangentLength = Math.max(0.0001, Math.hypot(tangent.x, tangent.y));
+    const directionAlignment = movementDistance > 0.001
+      ? (movementX * tangent.x + movementY * tangent.y)
+        / (movementDistance * tangentLength)
+      : -1;
+    const assistedResult = trackingMode === 'directional-assisted'
+      ? resolveDirectionalDragProgress({
+          currentProgress: this.dragProgress,
+          projectedProgress: projection.progress,
+          distanceFromPath: projection.distance,
+          corridor,
+          movementDistance,
+          directionAlignment,
+          pathLength: this.dragPath.length,
+        })
+      : null;
+    const valid = assistedResult?.valid ?? (
+      projection.distance <= corridor
+      && projection.progress >= this.dragProgress - 0.16
+    );
     let checkpointsPassed = 0;
 
     if (valid) {
-      const movementStart = this.lastDragPointer ?? { x: 0, y: 0 };
-      const checkpointRadius = Math.min(46, Math.max(34, corridor * 0.55));
-      while (this.nextCheckpointIndex < this.checkpointProgress.length) {
-        const checkpoint = this.dragPath.pointAt(
-          this.checkpointProgress[this.nextCheckpointIndex],
-        );
-        const checkpointDistance = distanceToSegment(
-          checkpoint,
-          movementStart,
-          pointer,
-        );
-        if (checkpointDistance > checkpointRadius) break;
-        this.nextCheckpointIndex += 1;
-        checkpointsPassed += 1;
-      }
+      if (trackingMode === 'directional-assisted') {
+        this.setDragProgress(assistedResult?.progress ?? this.dragProgress);
+      } else {
+        const checkpointRadius = Math.min(46, Math.max(34, corridor * 0.55));
+        while (this.nextCheckpointIndex < this.checkpointProgress.length) {
+          const checkpoint = this.dragPath.pointAt(
+            this.checkpointProgress[this.nextCheckpointIndex],
+          );
+          const checkpointDistance = distanceToSegment(
+            checkpoint,
+            movementStart,
+            pointer,
+          );
+          if (checkpointDistance > checkpointRadius) break;
+          this.nextCheckpointIndex += 1;
+          checkpointsPassed += 1;
+        }
 
-      const nextLimit = this.checkpointProgress[this.nextCheckpointIndex] ?? 1;
-      this.setDragProgress(Math.max(
-        this.dragProgress,
-        Math.min(projection.progress, nextLimit),
-      ));
-      if (checkpointsPassed > 0) this.drawCheckpoints();
+        const nextLimit = this.checkpointProgress[this.nextCheckpointIndex] ?? 1;
+        this.setDragProgress(Math.max(
+          this.dragProgress,
+          Math.min(projection.progress, nextLimit),
+        ));
+        if (checkpointsPassed > 0) this.drawCheckpoints();
+      }
     }
     this.lastDragPointer = pointer;
 
     return {
       progress: this.dragProgress,
       valid,
-      completed: this.nextCheckpointIndex >= this.checkpointProgress.length
+      completed: (trackingMode === 'directional-assisted'
+        || this.nextCheckpointIndex >= this.checkpointProgress.length)
         && this.dragProgress >= completionThreshold,
       checkpointsPassed,
     };

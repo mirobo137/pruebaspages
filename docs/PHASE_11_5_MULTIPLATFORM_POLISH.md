@@ -2,6 +2,11 @@
 
 Esta hoja convierte las criticas de PC y claridad de gameplay en un proceso verificable. No se implementa como un paquete unico: cada bloque genera una build jugable, recibe observaciones y se estabiliza antes de avanzar.
 
+La validacion fisica posterior confirmo una brecha real de mouse, drag y rendimiento
+en pantallas grandes. La remediacion que conserva touch y extrae perfiles modulares
+se ejecuta en [`DESKTOP_INPUT_PROFILE_PLAN.md`](DESKTOP_INPUT_PROFILE_PLAN.md). Esa
+hoja extiende la salida 11.5G; no reemplaza las entregas A-F ya implementadas.
+
 ## Politica de avance sin PC fisico
 
 La implementacion no se detiene si temporalmente el usuario y sus probadores no pueden acceder a un PC. En ese caso:
@@ -97,10 +102,12 @@ Validacion necesaria: completar una cancion sin consultar el HUD y poder decir a
 
 - [x] Introducir buses `music`, `feedback` y `platform master`.
 - [x] Sintetizar Perfect/Bien/Miss, combo roto y ultima vida con Web Audio.
+- [x] Elevar Perfect/Bien y añadir firmas ascendentes exclusivas para FLOW y SUPER;
+  cada activacion sustituye el juicio normal para limitar la mezcla a tres voces.
 - [x] Aplicar duck/filtro mediante automatizaciones con retorno garantizado; retirar distorsion tras prueba fisica negativa y reforzar un sonido de error propio.
 - [x] Limpiar voces y automatizaciones en pausa, mute, anuncio, stop y cambio de cancion.
 
-Estado: `IMPLEMENTADA / AJUSTE AUDITIVO EN CURSO`. La primera escucha detecto que distorsionar la musica parecia un problema tecnico. La ruta WaveShaper fue eliminada; queda confirmar el nuevo golpe descendente con ruido filtrado y duck sutil.
+Estado: `IMPLEMENTADA / AJUSTE AUDITIVO EN CURSO`. La primera escucha detecto que distorsionar la musica parecia un problema tecnico y se elimino WaveShaper. Danger/Miss ya fueron aprobados en PC y movil; queda confirmar el nuevo nivel de aciertos y las firmas FLOW/SUPER.
 
 Validacion necesaria: reconocer juicios con ojos cerrados sin que la musica pierda tempo o resulte molesta.
 

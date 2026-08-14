@@ -5,11 +5,16 @@ fijos hacia canciones completas con beatmaps determinados por la musica. Es un
 ciclo posterior e independiente de la hoja de skins, eventos, anuncios,
 multiplataforma y lanzamiento, que concluye en sus Fases 12 y 13.
 
+La ergonomia multiplataforma que habilita este ciclo vive en
+[`DESKTOP_INPUT_PROFILE_PLAN.md`](DESKTOP_INPUT_PROFILE_PLAN.md). Music Intelligence
+consume sus perfiles y validadores; no vuelve a implementar input ni genera un mapa
+distinto para cada dispositivo.
+
 ## Estado
 
 - Estado general: `NO INICIADO`
 - Fase activa: `Ninguna`
-- Siguiente accion: `Concluir Fases 12 y 13 del plan actual y aprobar el juego completo`
+- Siguiente accion: `Completar D0-D7 del perfil PC, cerrar 11.5 y guardar la linea base`
 - Implementacion: una fase por vez; ninguna fase siguiente comienza sin aprobar
   la compuerta de la anterior.
 
@@ -19,7 +24,9 @@ Antes de M0:
 
 - completar la implementacion tecnica de las Fases 12 y 13; sus validaciones de
   portal y datos reales permanecen como compuertas de publicacion en la hoja original;
-- completar despues la prueba integral acumulada mediante
+- completar D0-D7 de [`DESKTOP_INPUT_PROFILE_PLAN.md`](DESKTOP_INPUT_PROFILE_PLAN.md),
+  incluida la separacion entre dificultad ritmica y ergonomia de entrada;
+- completar la prueba integral acumulada mediante
   [`PHASE_11_5_VALIDATION_CHECKLIST.md`](PHASE_11_5_VALIDATION_CHECKLIST.md)
   en al menos un movil y un PC;
 - corregir las regresiones demostradas por esa validacion;
@@ -37,6 +44,14 @@ pendientes continúan bloqueando publicacion, no el desarrollo musical.
 
 - El analisis ocurre offline; el movil nunca genera beatmaps.
 - Todos los jugadores reciben el mismo JSON definitivo.
+- El JSON guarda tiempo e intencion espacial canonica normalizada; nunca pixeles,
+  DPR, tamaño de iframe ni una variante `desktop/mobile`.
+- La proyeccion espacial ocurre mediante perfiles versionados y deterministas. Un
+  mismo mapa puede producir geometria ergonomica diferente sin cambiar sus notas.
+- Tiempo, orden, tipo de nota, ventanas, vidas, score y FLOW son compartidos. Solo
+  pueden variar campo, alcance, asistencia fisica, recorrido y contrato del drag.
+- El juicio `Perfect/Bien` de un drag se fija en su cabeza. Touch y mouse pueden
+  completar fisicamente el gesto de forma distinta sin crear un tipo de nota nuevo.
 - Ningun mapa exige multitouch y todo mapa es completable con un mouse.
 - `beats[]` detectados prevalecen sobre reconstruir toda la cancion con BPM.
 - BPM y beatOffset sirven para cuantizar, reparar y actuar como fallback.
@@ -66,7 +81,8 @@ validador de jugabilidad
 audio comprimido + beatmaps → juego
 
 durante la partida:
-beatmap JSON → reglas y timing
+beatmap JSON canonico → reglas y timing compartidos
+                      → proyector espacial + perfil activo → geometria jugable
 FFT Web Audio → microefectos visuales exclusivamente
 ```
 
@@ -79,14 +95,24 @@ Objetivo: definir formatos y proteger el juego existente antes de cambiar playba
 - [ ] M0.3 Añadir metadata por `trackId`: BPM/offset overrides, modo de audio,
   secciones sugeridas y procedencia/licencia sin publicar documentos privados.
 - [ ] M0.4 Añadir `generatorVersion`, hash del analisis y bandera `locked`.
-- [ ] M0.5 Crear comandos por cancion y `--force`; un mapa `locked` nunca se pisa.
-- [ ] M0.6 Medir build estable: tamaño, carga inicial, tests, 24 canciones y 72 mapas.
+- [ ] M0.5 Definir coordenadas como intencion canonica normalizada y documentar
+  cabeza, controles, checkpoints y destino del `drag` sin semantica por dispositivo.
+- [ ] M0.6 Añadir `spatialModelVersion` y `interactionContractVersion` al contexto
+  reproducible sin acoplar el JSON a valores runtime de un perfil.
+  `spatialModelVersion` ya nace en D6 y actualmente usa
+  `spatial-v3-hard-mouse-acquisition`; M0 solo
+  debe incorporarlo al artefacto musical junto con `interactionContractVersion`.
+- [ ] M0.7 Crear comandos por cancion y `--force`; un mapa `locked` nunca se pisa.
+- [ ] M0.8 Medir build estable: tamaño, carga inicial, tests, 24 canciones y 72 mapas,
+  incluyendo resultados de la linea base mouse/touch aprobada en D7.
 
 Compuerta M0:
 
 - los formatos son validados automáticamente;
 - `npm run build` no analiza audio ni requiere Python;
 - no cambia el comportamiento de ninguna canción existente;
+- un schema rechaza pixeles, ramas por dispositivo y contratos de drag ambiguos;
+- esta definido como reproducir una proyeccion con mapa, perfil y versiones dadas;
 - está definido cómo demostrar derechos comerciales de cada canción sin guardar
   información sensible dentro del bundle web.
 
@@ -100,13 +126,15 @@ Objetivo: reproducir una canción completa una sola vez, con fases de duración 
 - [ ] M1.4 Reproducir `single` sin loop, crossfade ni cambio de `playbackRate`.
 - [ ] M1.5 Mantener revive/seek, transiciones seguras, resultado y derrota.
 - [ ] M1.6 Crear una canción piloto completa de 90-120 segundos con mapa manual mínimo.
+- [ ] M1.7 Ejecutar la cancion piloto con mouse y touch usando el mismo Beatmap v2.
 
 Compuerta M1:
 
 - los loops v1 siguen sonando y jugando igual;
 - la canción piloto termina exactamente con su audio y no se repite ni estira;
 - Lectura, Impulso y Climax pueden tener longitudes distintas;
-- pausa, revive y derrota conservan sincronización.
+- pausa, revive y derrota conservan sincronización;
+- resize, fullscreen o cambio de perfil entre notas no alteran el reloj musical.
 
 ## M2 - Metadata BPM y dificultad musical
 
@@ -114,10 +142,15 @@ Objetivo: abandonar los intervalos globales sin depender todavía del analizador
 
 - [ ] M2.1 Consumir BPM, beatOffset y overrides desde metadata.
 - [ ] M2.2 Calcular negras, corcheas y semicorcheas por canción como fallback.
-- [ ] M2.3 Crear presupuestos de densidad, distancia/tiempo, giro y drag por dificultad.
+- [ ] M2.3 Crear presupuestos canonicos de densidad, distancia/tiempo, giro y drag
+  por dificultad, consumiendo `TravelBudget` en vez de duplicar sus formulas.
 - [ ] M2.4 Prohibir simultaneidad obligatoria y validar separación mínima por tipo de nota.
 - [ ] M2.5 Hacer Easy subconjunto estructural de Medium y Hard.
 - [ ] M2.6 Garantizar semilla determinista y cero posiciones aleatorias en mapas finales.
+- [ ] M2.7 Proyectar cada candidato con mouse, touch y pen y rechazar el mapa si un
+  perfil excede alcance, giro, corredor, plazo o descanso despues de drag.
+- [ ] M2.8 Conservar exactamente los mismos tiempos, tipos y cantidad de notas en
+  todos los perfiles; solo la geometria final puede variar.
 
 Separaciones iniciales para calibrar, no contratos definitivos:
 
@@ -132,6 +165,9 @@ Compuerta M2:
 - canciones de 90, 105, 120, 128, 140 y 174 BPM pueden producir mapas válidos;
 - ningún mapa depende de dos acciones simultáneas;
 - mouse y touch completan las mismas notas con perfiles espaciales propios;
+- un drag de mouse `presionar-seguir-soltar` y su equivalente touch resuelven la
+  misma cabeza, checkpoints, destino y juicio musical;
+- las proyecciones son deterministas y el validador informa el perfil que fallo;
 - 70-100 ms permanece fuera hasta una fase futura con pruebas específicas.
 
 ## M3 - Analizador offline
@@ -164,15 +200,19 @@ Objetivo: usar la música para el cuándo y los patrones para el cómo.
 - [ ] M4.4 Evolucionar patrones actuales en motivos, inversiones y call/response.
 - [ ] M4.5 Mapear low a acentos, mid a dirección y high a detalle opcional en Hard.
 - [ ] M4.6 Generar drags por contexto/espacio; no inferir sustain científico todavía.
-- [ ] M4.7 Crear validador de ventanas solapadas, velocidad espacial, bordes, drag y fases.
+- [ ] M4.7 Crear validador multiperfil de ventanas solapadas, velocidad espacial,
+  bordes, drag, release de mouse, descanso y fases.
 - [ ] M4.8 Permitir generación por pista, dificultad, preview y diff antes de sobrescribir.
+- [ ] M4.9 Incluir en preview/diff las proyecciones mouse y touch sin guardar dos mapas.
 
 Compuerta M4:
 
 - los mapas siguen golpes y cambios de intensidad mejor que la cuadrícula anterior;
 - no convierten cada onset en una nota;
 - partes tranquilas respiran y clímax aumenta reto sin volverse imposible;
-- los JSON son legibles, reproducibles, editables y bloqueables.
+- los JSON son legibles, reproducibles, editables y bloqueables;
+- ninguna correccion ergonomica runtime oculta un error estructural del generador;
+- aprobar un mapa exige que sus proyecciones soportadas pasen el mismo validador.
 
 ## M5 - Visuales FFT en tiempo real
 
@@ -183,12 +223,15 @@ Objetivo: añadir microreacción visual sin permitir que el FFT afecte reglas.
 - [ ] M5.3 Usar low para pulsación, volumen para glow y high para partículas sutiles.
 - [ ] M5.4 Combinar intensidad offline macro con FFT micro, sin flashes duplicados.
 - [ ] M5.5 Reducir muestras/efectos bajo el perfil visual reducido.
+- [ ] M5.6 Respetar `RenderResolutionPolicy`; calidad grafica nunca selecciona ni
+  modifica el perfil de interaccion.
 
 Compuerta M5:
 
 - desactivar FFT no cambia notas, score, timing ni resultados;
 - no existe caída significativa de FPS en el móvil objetivo;
-- visuales acompañan la música sin ocultar objetivos ni competir con Danger/FLOW.
+- visuales acompañan la música sin ocultar objetivos ni competir con Danger/FLOW;
+- cambiar presupuesto de pixeles no cambia ninguna posicion o resultado jugable.
 
 ## M6 - Curación, automatización y salida
 
@@ -201,12 +244,16 @@ Objetivo: convertir el pipeline en el flujo normal para mantener contenido.
 - [ ] M6.5 Validar peso web, memoria, precarga, primer inicio y cambio de canción.
 - [ ] M6.6 Probar PC, móvil, GitHub Pages y portal objetivo.
 - [ ] M6.7 Decidir con evidencia si hace falta un editor visual sencillo.
+- [ ] M6.8 Comparar por `inputProfileId` precision, combo, fallos de drag y FLOW
+  antes de decidir si rankings pueden mezclar perfiles.
 
 Compuerta M6:
 
 - añadir una canción nueva es un proceso repetible y con validaciones claras;
 - cada dificultad se siente musicalmente relacionada y sustancialmente diferente;
-- rankings pueden comparar jugadores sobre mapas definitivos;
+- rankings pueden comparar jugadores sobre mapas definitivos y conservan el perfil
+  y la version espacial usados hasta demostrar equivalencia competitiva;
+- progreso, estrellas y economia son portables entre dispositivos;
 - no se necesita Python, WAV fuente ni análisis durante la partida o deployment;
 - solo se propone editor si la corrección manual recurrente justifica su coste.
 
@@ -232,4 +279,4 @@ el analizador M3 no debe ser requisito para demostrar playback y Beatmap v2.
 
 | Fecha | Fase | Estado | Evidencia |
 |---|---|---|---|
-| 2026-08-13 | Planificación | No iniciado | Arquitectura y compuertas M0-M6 definidas; espera aceptación física 11.5G |
+| 2026-08-13 | Planificación | No iniciado | M0-M6 adaptadas a Beatmap canonico, perfiles espaciales versionados y validacion mouse/touch; espera D0-D7 y cierre 11.5G |

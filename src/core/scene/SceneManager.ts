@@ -1,5 +1,6 @@
 import type { Container } from 'pixi.js';
 import type { Scene } from './Scene';
+import type { VisualQualityProfile } from '../../customization/VisualQuality';
 
 export class SceneManager {
   private activeScene: Scene | null = null;
@@ -26,6 +27,10 @@ export class SceneManager {
 
   resize(width: number, height: number): void {
     this.activeScene?.resize(width, height);
+  }
+
+  setVisualQuality(quality: VisualQualityProfile): void {
+    this.activeScene?.setVisualQuality?.(quality);
   }
 
   destroy(): void {

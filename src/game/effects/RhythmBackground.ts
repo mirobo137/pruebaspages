@@ -38,7 +38,7 @@ export class RhythmBackground extends Container {
 
   constructor(
     private readonly visualTheme: BackgroundVisualTheme = DEFAULT_VISUAL_THEME.background,
-    private readonly quality: VisualQualityProfile = FULL_VISUAL_QUALITY,
+    private quality: VisualQualityProfile = FULL_VISUAL_QUALITY,
   ) {
     super();
     this.eventMode = 'none';
@@ -61,24 +61,23 @@ export class RhythmBackground extends Container {
     );
 
     for (let index = 0; index < this.quality.ambientOrbCount; index += 1) {
-      const node = new Graphics();
-      const size = 2 + (index % 4);
-      node.circle(0, 0, size).fill({
-        color: index % 2 === 0
-          ? this.visualTheme.orbPrimary
-          : this.visualTheme.orbSecondary,
-      });
-      node.blendMode = 'add';
-      this.orbs.push({
-        node,
-        normalizedX: ((index * 37) % 100) / 100,
-        normalizedY: ((index * 61 + 17) % 100) / 100,
-        phase: index * 0.73,
-        size,
-      });
-      this.addChild(node);
+      this.addAmbientOrb(index);
     }
     this.addChild(this.vignette);
+    this.applyQualityVisibility();
+  }
+
+  setVisualQuality(quality: VisualQualityProfile): void {
+    if (quality.id === this.quality.id) return;
+    this.quality = quality;
+    while (this.orbs.length > quality.ambientOrbCount) {
+      this.orbs.pop()?.node.destroy();
+    }
+    while (this.orbs.length < quality.ambientOrbCount) {
+      this.addAmbientOrb(this.orbs.length);
+    }
+    this.applyQualityVisibility();
+    this.resize(this.viewportWidth, this.viewportHeight);
   }
 
   resize(width: number, height: number): void {
@@ -115,11 +114,13 @@ export class RhythmBackground extends Container {
 
     const shortestSide = Math.min(width, height);
     this.flowGeometry.clear();
-    this.drawFlowPattern(width, height, shortestSide);
+    if (this.quality.id !== 'minimal') {
+      this.drawFlowPattern(width, height, shortestSide);
+    }
     this.flowGeometry.position.set(width / 2, height / 2);
 
     this.superTunnel.clear();
-    this.drawSuperFlowPattern(shortestSide);
+    if (this.quality.id !== 'minimal') this.drawSuperFlowPattern(shortestSide);
     this.superTunnel.position.set(width / 2, height / 2);
 
     this.grid.clear();
@@ -217,6 +218,7 @@ export class RhythmBackground extends Container {
       : this.flowIntensity > 0.1
         ? this.visualTheme.flowGrid
         : phaseColor;
+    if (this.quality.id === 'minimal') return;
     this.flowOverlay.alpha = this.flowIntensity
       * (0.055 + this.superFlowIntensity * 0.055 + Math.sin(this.elapsed * 8) * 0.018);
     this.flowOverlay.tint = this.superFlowIntensity > 0.1
@@ -299,6 +301,34 @@ export class RhythmBackground extends Container {
     }
   }
 
+  private addAmbientOrb(index: number): void {
+    const node = new Graphics();
+    const size = 2 + (index % 4);
+    node.circle(0, 0, size).fill({
+      color: index % 2 === 0
+        ? this.visualTheme.orbPrimary
+        : this.visualTheme.orbSecondary,
+    });
+    node.blendMode = 'add';
+    this.orbs.push({
+      node,
+      normalizedX: ((index * 37) % 100) / 100,
+      normalizedY: ((index * 61 + 17) % 100) / 100,
+      phase: index * 0.73,
+      size,
+    });
+    this.addChildAt(node, Math.max(0, this.children.indexOf(this.vignette)));
+  }
+
+  private applyQualityVisibility(): void {
+    const detailed = this.quality.id !== 'minimal';
+    this.nebulaA.visible = detailed;
+    this.nebulaB.visible = detailed;
+    this.flowRays.visible = detailed;
+    this.flowGeometry.visible = detailed;
+    this.superTunnel.visible = detailed;
+  }
+
   private drawFlowPattern(width: number, height: number, shortestSide: number): void {
     if (this.visualTheme.flowPattern === 'waves') {
       const samples = Math.max(18, Math.round(34 * this.quality.geometryDetail));
@@ -321,7 +351,7 @@ export class RhythmBackground extends Container {
     }
 
     if (this.visualTheme.flowPattern === 'vortex') {
-      const arms = this.quality.id === 'reduced' ? 4 : 6;
+      const arms = this.quality.id === 'full' ? 6 : 4;
       const samples = Math.max(20, Math.round(42 * this.quality.geometryDetail));
       for (let arm = 0; arm < arms; arm += 1) {
         for (let sample = 0; sample <= samples; sample += 1) {
@@ -370,7 +400,7 @@ export class RhythmBackground extends Container {
 
   private drawSuperFlowPattern(shortestSide: number): void {
     if (this.visualTheme.superFlowPattern === 'hyperspace') {
-      const streaks = this.quality.id === 'reduced' ? 18 : 28;
+      const streaks = this.quality.id === 'full' ? 28 : 18;
       for (let streak = 0; streak < streaks; streak += 1) {
         const angle = streak / streaks * Math.PI * 2;
         const inner = shortestSide * (0.08 + (streak % 3) * 0.018);
@@ -393,7 +423,7 @@ export class RhythmBackground extends Container {
     }
 
     if (this.visualTheme.superFlowPattern === 'prism') {
-      const ringCount = this.quality.id === 'reduced' ? 4 : 6;
+      const ringCount = this.quality.id === 'full' ? 6 : 4;
       for (let ring = 1; ring <= ringCount; ring += 1) {
         this.drawPolygonRing(
           this.superTunnel,
@@ -409,7 +439,7 @@ export class RhythmBackground extends Container {
       return;
     }
 
-    const ringCount = this.quality.id === 'reduced' ? 4 : 5;
+    const ringCount = this.quality.id === 'full' ? 5 : 4;
     for (let ring = 1; ring <= ringCount; ring += 1) {
       this.superTunnel.circle(0, 0, shortestSide * (0.1 + ring * 0.085)).stroke({
         color: ring % 2 === 0

@@ -60,13 +60,15 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Trayectoria drag fina con puntos guia y destino profesional.
 - [x] Curvas Bezier procedurales y puntos de control opcionales desde el beatmap.
 - [x] Cabeza, corredor y tiempo de finalizacion propios por dificultad.
-- [x] Dos checkpoints con feedback visual y tactil antes del destino.
+- [x] Touch conserva checkpoints con feedback; mouse usa asistencia direccional sin
+  checkpoints obligatorios.
 - [x] Medidor FLOW cargado mediante precision.
 - [x] Estado FLOW temporal con puntuacion x2 y transformacion audiovisual.
 - [x] Riesgo de romper FLOW inmediatamente al fallar.
 - [x] SUPER FLOW x4 desbloqueado solo con cuatro Perfect consecutivos dentro de FLOW.
 - [x] Bien degrada SUPER FLOW a FLOW x2; Miss rompe todo el estado.
-- [~] Feedback procedural distinto para Perfect, Bien, Miss, combo roto y derrota implementado; falta balance auditivo fisico.
+- [~] Feedback procedural distinto para Perfect, Bien, FLOW, SUPER, Miss, combo roto
+  y derrota implementado; falta aprobar fisicamente el ultimo ajuste de volumen.
 - [~] Perfil desktop separado, campo centrado y cursor procedural implementados; falta validar fisicamente que mouse sea tan satisfactorio como touch.
 - [~] Combo focal, hitos y anticipacion FLOW implementados sin tapar notas visibles; falta validacion perceptual en una partida fisica.
 - [~] Advertencia periferica al quedar una sola vida implementada; falta validacion visual fisica y confirmar el audio real de Miss.

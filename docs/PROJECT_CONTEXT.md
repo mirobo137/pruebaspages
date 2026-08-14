@@ -267,7 +267,30 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 - Touch y pen conservan todo el ancho aprobado. Mouse usa un campo centrado limitado por la altura para que 16:9 y ultrawide no generen barridos vacios.
 - El cursor nativo se sustituye durante gameplay con una mira y estela PixiJS procedurales; touch no las renderiza.
 - En desarrollo se acumulan viewport, puntero, recorrido y juicios, sin persistir ni enviar datos.
+- D0 amplia ese diagnostico con resolucion/DPR, pixeles renderizados, frame promedio,
+  p95/p99 por estado FLOW, distancia/tiempo entre cabezas, demanda de cada drag,
+  pulsaciones vacias y causa observable de Miss. El snapshot vive solo en memoria
+  bajo `window.__superflowDiagnostics` durante desarrollo y se limpia al recargar.
 - `?mouseReach=compact`, `?mouseReach=balanced` y `?mouseReach=expansive` permiten comparar tres alcances sin bifurcar beatmaps. `balanced` es provisional hasta la validacion fisica de 11.5G.
+
+### Remediacion desktop acordada tras la primera prueba fisica
+
+- La prueba en una PC real confirmo que touch conserva una buena sensacion, mientras
+  mouse exige recorridos excesivos, el drag resulta demasiado estricto y una ventana
+  grande puede reducir la fluidez.
+- No se modifica touch para compensar PC. Se implementan perfiles declarativos sobre
+  las mismas reglas de timing, score, vidas, FLOW, progresion y beatmap.
+- El campo mouse se limita en ancho y alto; canvas, fondo y HUD pueden seguir usando
+  todo el iframe del portal.
+- Resolucion de render y perfil de interaccion son independientes. Un presupuesto de
+  pixeles nunca cambia hitboxes, posiciones logicas o resultados.
+- Mouse usa un drag `presionar-seguir-soltar`: el juicio musical se fija en la cabeza
+  y el release dentro del destino confirma la finalizacion fisica. Touch conserva su
+  comportamiento actual. Ambos siguen siendo la nota semantica `drag`.
+- Beatmaps presentes y futuros guardan una sola intencion espacial normalizada. Un
+  proyector determinista aplica campo, alcance y presupuesto de recorrido por perfil.
+- El plan ejecutable D0-D7 vive en `docs/DESKTOP_INPUT_PROFILE_PLAN.md`; debe aprobarse
+  para cerrar 11.5G y antes de iniciar Music Intelligence M0.
 
 ### Combo focal implementado en 11.5B
 
@@ -280,12 +303,17 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 ### Audio reactivo implementado en 11.5C
 
 - `ReactiveAudioFeedback` crea tres rutas: entrada de musica, bus de feedback sintetizado y master controlado por la plataforma.
-- Perfect usa un ascenso limpio de dos tonos; Bien un pulso corto medio; Miss una caida grave; romper combo agrega una segunda capa y perder la ultima vida usa una ruptura de tres voces.
+- Perfect usa un ascenso limpio de dos tonos; Bien un pulso corto medio; Miss una caida grave; romper combo agrega una segunda capa y perder la ultima vida usa una ruptura de tres voces. Perfect y Bien son osciladores Web Audio, no archivos externos.
+- Tras validacion fisica, los aciertos suben moderadamente de nivel. Entrar a FLOW usa
+  un ascenso de dos tonos y SUPER FLOW uno de tres tonos mas brillante; estas firmas
+  sustituyen el acierto normal de esa nota para no apilar mas de tres voces.
 - Miss reproduce un tono grave descendente y un chasquido de ruido filtrado dedicados. La musica solo recibe duck/filtro limpio: 130 ms en Miss, 180 ms al romper combo y 320 ms al perder.
 - No se usa `WaveShaper` ni distorsion musical: la primera prueba fisica demostro que se interpretaba como audio defectuoso.
 - La cadena reactiva nunca modifica `AudioBufferSourceNode.playbackRate`, `startedAt`, `timelineOffset` ni `AudioContext.currentTime`.
 - Pausa, mute de portal, anuncios, stop y destruccion restauran el filtro, eliminan voces y cancelan automatizaciones pendientes.
-- Todo se sintetiza con Web Audio: no agrega archivos, descargas ni licencias de efectos. Volumen y timbre finales quedan para validacion auditiva en 11.5G.
+- Todos los aciertos y transiciones FLOW se sintetizan con Web Audio: no agregan
+  archivos, descargas ni licencias de efectos. Sus nuevos niveles quedan pendientes
+  de una ultima escucha PC/movil en 11.5G.
 - `public/assets/audio/sfx/miss.wav` se decodifica directamente al preparar la partida y sustituye automaticamente el fallback procedural de Miss, combo roto y derrota. No se convierte a MP3 ni participa en el manifest de canciones.
 
 ### Danger y FLOW semantico implementados en 11.5D/E
@@ -485,6 +513,13 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Antes del nuevo `3-2-1` se eliminan targets, eventos pendientes, drag, buffer temprano y todos los pointer captures. Audio y beatmap reinician juntos desde el tiempo inicial de la fase.
 - Solo existe una oportunidad recompensada de gameplay por partida. Si el anuncio de revive comenzo, Resultado no ofrece despues duplicar monedas; `unavailable` no la marca como consumida, pero oculta las demas ofertas de esa partida por falta de proveedor.
 - Las partidas asistidas siguen guardando records locales durante el prototipo. Antes de rankings competitivos deberan marcarse como asistidas y separarse o excluirse de la tabla oficial.
+- La version espacial vigente es `spatial-v3-hard-mouse-acquisition`. Cada resultado tecnico
+  registra `inputProfileId` (`mouse`, `touch`, `pen` o `hybrid`) y esta version.
+- Monedas, estrellas, eventos, desbloqueos y records locales permanecen compartidos.
+  Un ranking competitivo futuro separa perfil y version hasta demostrar equivalencia.
+- En desarrollo, `window.__superflowInputComparison` resume partidas locales por
+  perfil, version y dificultad con precision, combo, misses, FLOW, recorrido y
+  demanda espacial.
 
 ### Adaptador CrazyGames v3
 

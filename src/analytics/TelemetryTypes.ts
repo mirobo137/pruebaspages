@@ -1,5 +1,7 @@
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import type { RewardedAdStatus, RewardedPlacement } from '../monetization/RewardTypes';
+import type { GameplayMissReason } from '../input/GameplayInputTelemetry';
+import type { GameplayInputProfileId } from '../input/GameplayResultContext';
 
 export type TelemetryRewardOutcome = RewardedAdStatus | 'already-granted';
 
@@ -14,6 +16,19 @@ export type TelemetryEvent =
     completed: boolean;
     stars: number;
     score: number;
+    inputProfileId: GameplayInputProfileId;
+    spatialModelVersion: string;
+    accuracy: number;
+    bestCombo: number;
+    misses: number;
+    missReasons: Partial<Record<GameplayMissReason, number>>;
+    flowActivations: number;
+    superFlowActivations: number;
+    pointerDistance: number;
+    emptyPresses: number;
+    averageTravelDistance: number;
+    maximumRequiredSpeed: number;
+    averageDragLength: number;
   }
   | { type: 'weekly_event_visible'; eventId: string }
   | { type: 'weekly_event_opened'; eventId: string }
