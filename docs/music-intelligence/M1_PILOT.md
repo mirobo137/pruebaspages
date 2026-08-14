@@ -4,7 +4,7 @@
 
 - Nombre visible: `Suno Pilot 01`.
 - `trackId`: `untitled-0f61f35777`.
-- Categoria: Selectas, 800 monedas.
+- Categoria: Selectas, gratuita temporalmente mediante `testingPriceOverride: 0`.
 - Audio: MP3, 2.89 MiB.
 - Duracion medida desde 5,203 tramas MP3: 124.872 segundos.
 - Modo: `single`; se reproduce una vez sin loop, crossfade ni cambio de velocidad.
@@ -47,3 +47,5 @@ analizador offline a M3.
 7. Confirmar que el resultado aparece al terminar el audio completo.
 
 La compuerta M1 solo se aprueba después de esta prueba. Hasta entonces M2 no inicia.
+Al terminar las pruebas, eliminar `testingPriceOverride` restaura automáticamente
+el precio normal de 800 monedas de la categoria Selectas.

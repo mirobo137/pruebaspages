@@ -25,6 +25,7 @@
     "webAudioPath": { "type": "string", "pattern": "^\\./assets/audio/" },
     "audioHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "testingPriceOverride": { "type": "integer", "minimum": 0 },
     "loopDuration": { "type": "number", "exclusiveMinimum": 0 },
     "rhythm": { "$ref": "#/$defs/rhythm" },
     "suggestedSections": {

@@ -454,7 +454,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Al terminar el preview vuelve automaticamente la musica del menu.
 - Volver desde una partida o recargar conserva la cancion y dificultad seleccionadas y deja esa fila visible.
 - Las cuatro categorias filtran la playlist sin abrir pantallas adicionales.
-- Las 24 canciones v1 gratuitas se pueden jugar sin desbloqueo. `Suno Pilot 01` aparece en Selectas por 800 monedas; las otras 22 candidatas no aparecen antes de su activacion.
+- Las 24 canciones v1 y `Suno Pilot 01` se pueden jugar sin desbloqueo durante M1. El piloto permanece visualmente en Selectas, pero `testingPriceOverride: 0` elimina temporalmente su coste; las otras 22 candidatas no aparecen.
 - Una cancion nueva aparece en la categoria y con el precio correspondiente a su carpeta.
 - Completar cerca del final otorga al menos una estrella; 70% de precision ponderada entrega dos y 90% entrega tres.
 - Recargar la pagina conserva monedas, desbloqueos y records.

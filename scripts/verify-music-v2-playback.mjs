@@ -100,7 +100,7 @@ try {
   const pilotTrack = manifest.find((track) => track.id === pilotId);
   assert.equal(pilotTrack.title, 'Suno Pilot 01');
   assert.equal(pilotTrack.priceTier, 'select');
-  assert.equal(pilotTrack.price, 800);
+  assert.equal(pilotTrack.price, 0);
 
   console.log(
     `Beatmap v2 single: ${pilotDuration}s, fases 34/82, revive, `

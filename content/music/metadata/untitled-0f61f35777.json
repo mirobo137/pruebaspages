@@ -7,6 +7,7 @@
   "webAudioPath": "./assets/audio/selectas/untitled-0f61f35777.mp3",
   "audioHash": "0f61f357773f759e63bad15e930acc60b815236a783a7003d88e247f137eb8b2",
   "durationSeconds": 124.872,
+  "testingPriceOverride": 0,
   "rhythm": {
     "tempoHint": null,
     "bpmOverride": null,

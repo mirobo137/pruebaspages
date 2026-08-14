@@ -135,6 +135,7 @@ for (const { category, fileName, categoryDirectory } of discoveredTracks) {
   const fileInfo = await stat(filePath);
   const id = createId(fileName);
   let title = createTitle(fileName);
+  let testingPriceOverride = null;
   try {
     const metadata = JSON.parse(await readFile(
       path.join(metadataDirectory, `${id}.json`),
@@ -143,6 +144,11 @@ for (const { category, fileName, categoryDirectory } of discoveredTracks) {
     if (metadata?.trackId === id && typeof metadata.title === 'string') {
       title = metadata.title;
     }
+    if (
+      metadata?.trackId === id
+      && Number.isSafeInteger(metadata.testingPriceOverride)
+      && metadata.testingPriceOverride >= 0
+    ) testingPriceOverride = metadata.testingPriceOverride;
   } catch (error) {
     if (error?.code !== 'ENOENT') throw error;
   }
@@ -155,7 +161,7 @@ for (const { category, fileName, categoryDirectory } of discoveredTracks) {
     title,
     audioPath: `./assets/audio/${relativeAudioPath}`,
     priceTier: category.id,
-    price: category.price,
+    price: testingPriceOverride ?? category.price,
     beatmapPaths: {
       easy: `./assets/beatmaps/${id}/easy.json`,
       medium: `./assets/beatmaps/${id}/medium.json`,
@@ -166,7 +172,7 @@ for (const { category, fileName, categoryDirectory } of discoveredTracks) {
   const sizeInKiB = Math.round(fileInfo.size / 1024);
   const mobileWarning = fileInfo.size > 20 * 1024 * 1024 ? ' - supera 20 MiB' : '';
   console.log(
-    `- [${category.label} / ${category.price} monedas] ${relativeAudioPath}`
+    `- [${category.label} / ${testingPriceOverride ?? category.price} monedas] ${relativeAudioPath}`
       + ` (${sizeInKiB} KiB)${mobileWarning}`,
   );
 }

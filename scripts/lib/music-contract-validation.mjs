@@ -157,11 +157,11 @@ export function validateAnalysisV1(document) {
 
 export function validateTrackMetadataV1(document) {
   const path = 'metadata';
-  const keys = ['schemaVersion', 'trackId', 'title', 'status', 'audioMode', 'webAudioPath', 'audioHash', 'durationSeconds', 'loopDuration', 'rhythm', 'suggestedSections', 'provenance'];
+  const keys = ['schemaVersion', 'trackId', 'title', 'status', 'audioMode', 'webAudioPath', 'audioHash', 'durationSeconds', 'testingPriceOverride', 'loopDuration', 'rhythm', 'suggestedSections', 'provenance'];
   exactKeys(document, keys, path);
   required(
     document,
-    keys.filter((key) => key !== 'loopDuration' && key !== 'durationSeconds'),
+    keys.filter((key) => !['loopDuration', 'durationSeconds', 'testingPriceOverride'].includes(key)),
     path,
   );
   if (document.schemaVersion !== 1) fail(path, 'schemaVersion debe ser 1');
@@ -172,6 +172,10 @@ export function validateTrackMetadataV1(document) {
   if (typeof document.webAudioPath !== 'string' || !document.webAudioPath.startsWith('./assets/audio/')) fail(path, 'webAudioPath invalido');
   if (!HASH_PATTERN.test(document.audioHash)) fail(path, 'audioHash invalido');
   if ('durationSeconds' in document) number(document.durationSeconds, `${path}.durationSeconds`, Number.EPSILON);
+  if (
+    'testingPriceOverride' in document
+    && (!Number.isSafeInteger(document.testingPriceOverride) || document.testingPriceOverride < 0)
+  ) fail(path, 'testingPriceOverride debe ser entero no negativo');
   if (document.audioMode === 'loop') number(document.loopDuration, `${path}.loopDuration`, Number.EPSILON);
   if (document.audioMode === 'single' && 'loopDuration' in document) fail(path, 'single no admite loopDuration');
   exactKeys(document.rhythm, ['tempoHint', 'bpmOverride', 'beatOffsetOverride'], `${path}.rhythm`);
