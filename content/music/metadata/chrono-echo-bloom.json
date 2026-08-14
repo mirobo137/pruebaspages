@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "chrono-echo-bloom",
+  "title": "Chrono Echo Bloom",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/chrono-echo_bloom.mp3",
+  "audioHash": "1352a2aba1593e692c9993251bc82bfde0c8c2464c7cf4cb886efe027b6fbb5d",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

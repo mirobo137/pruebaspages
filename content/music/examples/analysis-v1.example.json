@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "trackId": "music-intelligence-pilot",
+  "audioHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "analyzerVersion": "manual-example-v1",
+  "duration": 120,
+  "bpm": 120,
+  "beatOffset": 0.5,
+  "beats": [0.5, 1, 1.5, 2],
+  "onsets": [
+    { "time": 0.5, "strength": 0.9 },
+    { "time": 1, "strength": 0.65 }
+  ],
+  "energyFrames": [
+    { "time": 0.5, "volume": 0.58, "low": 0.8, "mid": 0.42, "high": 0.3 },
+    { "time": 1, "volume": 0.62, "low": 0.55, "mid": 0.7, "high": 0.45 }
+  ]
+}

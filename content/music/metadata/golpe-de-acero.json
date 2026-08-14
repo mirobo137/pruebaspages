@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "golpe-de-acero",
+  "title": "Golpe De Acero",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/golpe_de_acero.mp3",
+  "audioHash": "0848778409f99b5e2ab5a9ae857c70eb83653bf4e744d022a6b6adc9bde77672",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

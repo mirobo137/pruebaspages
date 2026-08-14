@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "velvet-storm-4a8e9700b5",
+  "title": "Velvet Storm",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/velvet-storm-4a8e9700b5.mp3",
+  "audioHash": "4a8e9700b53ef0811c8c957b4e64b193bc2dde0192772bcc0c0a6cfb838c7b2d",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

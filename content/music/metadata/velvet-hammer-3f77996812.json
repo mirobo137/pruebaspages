@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "velvet-hammer-3f77996812",
+  "title": "Velvet Hammer",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/velvet-hammer-3f77996812.mp3",
+  "audioHash": "3f77996812a8c35b1a0647d03c93be9c676c7e775bfe7ca3edd7304d93e2a2c1",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

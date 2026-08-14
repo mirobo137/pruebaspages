@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "untitled-8f279d878d",
+  "title": "Untitled",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/untitled-8f279d878d.mp3",
+  "audioHash": "8f279d878dd826b55c49e6b31955fd2c20bfe10070eacbe4a1b47e502d61921b",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

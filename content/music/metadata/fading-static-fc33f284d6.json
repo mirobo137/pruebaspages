@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "fading-static-fc33f284d6",
+  "title": "Fading Static",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/premium/fading-static-fc33f284d6.mp3",
+  "audioHash": "fc33f284d6d340fab235e01a64f78b26a49e59273f8c93d506602ae341b07887",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

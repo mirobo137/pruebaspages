@@ -12,9 +12,10 @@ distinto para cada dispositivo.
 
 ## Estado
 
-- Estado general: `NO INICIADO`
-- Fase activa: `Ninguna`
-- Siguiente accion: `Completar D0-D7 del perfil PC, cerrar 11.5 y guardar la linea base`
+- Estado general: `EN EJECUCION`
+- Fase activa: `M1 IMPLEMENTADA / VALIDACION FISICA PENDIENTE`
+- Preparacion: `Ingestion Suno, auditoria mouse y contratos offline completados sin cambiar gameplay`
+- Siguiente accion: `Probar Suno Pilot 01 completa en mouse y touch; no iniciar M2 antes de aprobarla`
 - Implementacion: una fase por vez; ninguna fase siguiente comienza sin aprobar
   la compuerta de la anterior.
 
@@ -90,20 +91,20 @@ FFT Web Audio → microefectos visuales exclusivamente
 
 Objetivo: definir formatos y proteger el juego existente antes de cambiar playback.
 
-- [ ] M0.1 Documentar Beatmap v2, Analysis v1 y metadata lateral con schemas claros.
-- [ ] M0.2 Separar audio fuente, audio web, analisis, metadata y beatmaps definitivos.
-- [ ] M0.3 Añadir metadata por `trackId`: BPM/offset overrides, modo de audio,
+- [x] M0.1 Documentar Beatmap v2, Analysis v1 y metadata lateral con schemas claros.
+- [x] M0.2 Separar audio fuente, audio web, analisis, metadata y beatmaps definitivos.
+- [x] M0.3 Añadir metadata por `trackId`: BPM/offset overrides, modo de audio,
   secciones sugeridas y procedencia/licencia sin publicar documentos privados.
-- [ ] M0.4 Añadir `generatorVersion`, hash del analisis y bandera `locked`.
-- [ ] M0.5 Definir coordenadas como intencion canonica normalizada y documentar
+- [x] M0.4 Añadir `generatorVersion`, hash del analisis y bandera `locked`.
+- [x] M0.5 Definir coordenadas como intencion canonica normalizada y documentar
   cabeza, controles, checkpoints y destino del `drag` sin semantica por dispositivo.
-- [ ] M0.6 Añadir `spatialModelVersion` y `interactionContractVersion` al contexto
+- [x] M0.6 Añadir `spatialModelVersion` y `interactionContractVersion` al contexto
   reproducible sin acoplar el JSON a valores runtime de un perfil.
   `spatialModelVersion` ya nace en D6 y actualmente usa
   `spatial-v3-hard-mouse-acquisition`; M0 solo
   debe incorporarlo al artefacto musical junto con `interactionContractVersion`.
-- [ ] M0.7 Crear comandos por cancion y `--force`; un mapa `locked` nunca se pisa.
-- [ ] M0.8 Medir build estable: tamaño, carga inicial, tests, 24 canciones y 72 mapas,
+- [x] M0.7 Crear comandos por cancion y `--force`; un mapa `locked` nunca se pisa.
+- [x] M0.8 Medir build estable: tamaño, carga inicial, tests, 24 canciones y 72 mapas,
   incluyendo resultados de la linea base mouse/touch aprobada en D7.
 
 Compuerta M0:
@@ -120,13 +121,15 @@ Compuerta M0:
 
 Objetivo: reproducir una canción completa una sola vez, con fases de duración variable.
 
-- [ ] M1.1 Cargar Beatmap v1 y v2 mediante adaptadores separados.
-- [ ] M1.2 Añadir `duration`, `audioMode: single|loop` y fases con `startTime/endTime`.
-- [ ] M1.3 Reemplazar cálculo de fase por división uniforme con búsqueda por límites.
-- [ ] M1.4 Reproducir `single` sin loop, crossfade ni cambio de `playbackRate`.
-- [ ] M1.5 Mantener revive/seek, transiciones seguras, resultado y derrota.
-- [ ] M1.6 Crear una canción piloto completa de 90-120 segundos con mapa manual mínimo.
-- [ ] M1.7 Ejecutar la cancion piloto con mouse y touch usando el mismo Beatmap v2.
+- [x] M1.1 Cargar Beatmap v1 y v2 mediante adaptadores separados.
+- [x] M1.2 Añadir `duration`, `audioMode: single|loop` y fases con `startTime/endTime`.
+- [x] M1.3 Reemplazar cálculo de fase por división uniforme con búsqueda por límites.
+- [x] M1.4 Reproducir `single` sin loop, crossfade ni cambio de `playbackRate`.
+- [x] M1.5 Mantener revive/seek, transiciones seguras, resultado y derrota.
+- [x] M1.6 Crear una canción piloto completa de 124.872 segundos con mapa técnico mínimo;
+  se acepta la desviacion de 4.872 s porque ninguna candidata existente cae en 90-120 s.
+- [~] M1.7 Proyectar la cancion piloto con mouse, touch y pen usando el mismo Beatmap v2;
+  validacion automatica aprobada, partidas fisicas pendientes.
 
 Compuerta M1:
 
@@ -279,4 +282,7 @@ el analizador M3 no debe ser requisito para demostrar playback y Beatmap v2.
 
 | Fecha | Fase | Estado | Evidencia |
 |---|---|---|---|
+| 2026-08-14 | M1 | Implementada / prueba fisica pendiente | Suno Pilot 01 de 124.872 s, audio single, fases 0/34/82, revive desde limites, 38/62/90 notas; 25 pistas/75 mapas, npm test/build y presupuesto mouse-touch correctos |
+| 2026-08-14 | M0 | Completada tecnicamente | 3 schemas, 47 metadata verificadas por SHA-256, version espacial/contrato centralizados, politica locked y comandos por pista; npm test/build correctos, chunk principal 477.33 kB |
+| 2026-08-14 | Preparacion M0 | Completada | 23 MP3 Suno renombrados por hash y distribuidos como candidatas; quedan fuera del manifest v1 para proteger playback, memoria movil y la linea base de 24 canciones/72 mapas |
 | 2026-08-13 | Planificación | No iniciado | M0-M6 adaptadas a Beatmap canonico, perfiles espaciales versionados y validacion mouse/touch; espera D0-D7 y cierre 11.5G |

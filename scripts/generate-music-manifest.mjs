@@ -11,6 +11,13 @@ const categoriesPath = path.join(
   'content',
   'song-categories.json',
 );
+const sunoRegistryPath = path.join(
+  projectRoot,
+  'content',
+  'music',
+  'suno-candidates.json',
+);
+const metadataDirectory = path.join(projectRoot, 'content', 'music', 'metadata');
 const supportedExtensions = new Set(['.mp3', '.ogg', '.wav']);
 
 function createId(fileName) {
@@ -65,6 +72,21 @@ const categories = JSON.parse(await readFile(categoriesPath, 'utf8'));
 validateCategories(categories);
 await mkdir(audioDirectory, { recursive: true });
 
+let candidateAudioPaths = new Set();
+try {
+  const registry = JSON.parse(await readFile(sunoRegistryPath, 'utf8'));
+  if (registry?.version !== 1 || !Array.isArray(registry.tracks)) {
+    throw new Error('content/music/suno-candidates.json tiene formato invalido.');
+  }
+  candidateAudioPaths = new Set(
+    registry.tracks
+      .filter((track) => track?.status === 'candidate')
+      .map((track) => track.relativeAudioPath),
+  );
+} catch (error) {
+  if (error?.code !== 'ENOENT') throw error;
+}
+
 const discoveredTracks = [];
 for (const category of categories) {
   const categoryDirectory = category.folder
@@ -80,6 +102,10 @@ for (const category of categories) {
     .sort((left, right) => left.localeCompare(right));
 
   for (const fileName of files) {
+    const relativeAudioPath = category.folder
+      ? toUrlPath(category.folder, fileName)
+      : fileName;
+    if (candidateAudioPaths.has(relativeAudioPath)) continue;
     discoveredTracks.push({ category, fileName, categoryDirectory });
   }
 }
@@ -108,13 +134,25 @@ for (const { category, fileName, categoryDirectory } of discoveredTracks) {
   const filePath = path.join(categoryDirectory, fileName);
   const fileInfo = await stat(filePath);
   const id = createId(fileName);
+  let title = createTitle(fileName);
+  try {
+    const metadata = JSON.parse(await readFile(
+      path.join(metadataDirectory, `${id}.json`),
+      'utf8',
+    ));
+    if (metadata?.trackId === id && typeof metadata.title === 'string') {
+      title = metadata.title;
+    }
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error;
+  }
   const relativeAudioPath = category.folder
     ? toUrlPath(category.folder, fileName)
     : fileName;
 
   tracks.push({
     id,
-    title: createTitle(fileName),
+    title,
     audioPath: `./assets/audio/${relativeAudioPath}`,
     priceTier: category.id,
     price: category.price,
@@ -135,3 +173,6 @@ for (const { category, fileName, categoryDirectory } of discoveredTracks) {
 
 await writeFile(manifestPath, `${JSON.stringify(tracks, null, 2)}\n`, 'utf8');
 console.log(`Catalogo musical generado: ${tracks.length} cancion(es)`);
+if (candidateAudioPaths.size > 0) {
+  console.log(`Candidatas Suno reservadas para Beatmap v2: ${candidateAudioPaths.size}`);
+}

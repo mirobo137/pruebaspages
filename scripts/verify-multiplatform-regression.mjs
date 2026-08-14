@@ -105,13 +105,24 @@ try {
       assert.equal(document.trackId, track.id);
       assert.equal(document.difficulty, difficulty);
       assert.equal(document.phases.length, 3);
-      assert.ok(document.grid >= 0.05);
-      for (const phase of document.phases) {
-        assert.ok(phase.pattern.length > 0);
-        for (const event of phase.pattern) {
+      if (document.schemaVersion === 2) {
+        assert.equal(document.audioMode, 'single');
+        assert.ok(document.duration > 0);
+        assert.ok(document.events.length > 0);
+        for (const event of document.events) {
           assert.ok(event.kind === 'tap' || event.kind === 'drag');
           assert.ok(event.start.x >= 0 && event.start.x <= 1);
           assert.ok(event.start.y >= 0 && event.start.y <= 1);
+        }
+      } else {
+        assert.ok(document.grid >= 0.05);
+        for (const phase of document.phases) {
+          assert.ok(phase.pattern.length > 0);
+          for (const event of phase.pattern) {
+            assert.ok(event.kind === 'tap' || event.kind === 'drag');
+            assert.ok(event.start.x >= 0 && event.start.x <= 1);
+            assert.ok(event.start.y >= 0 && event.start.y <= 1);
+          }
         }
       }
       beatmapCount += 1;

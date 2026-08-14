@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "velvet-strings-e6afdd865e",
+  "title": "Velvet Strings",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/velvet-strings-e6afdd865e.mp3",
+  "audioHash": "e6afdd865ee891b0e4edf57db4bd670bf75a5ba1b6decfff91d2d76e6e14ee13",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

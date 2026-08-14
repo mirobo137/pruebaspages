@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "midnight-shift",
+  "title": "Midnight Shift",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/midnight_shift.mp3",
+  "audioHash": "37eded37e837a334565ad62f45e129a6105ed62c2d3c901728985e8d58b09b99",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

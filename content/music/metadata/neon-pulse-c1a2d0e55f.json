@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "neon-pulse-c1a2d0e55f",
+  "title": "Neon Pulse",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/neon-pulse-c1a2d0e55f.mp3",
+  "audioHash": "c1a2d0e55f1bcc2533747ade2c7389b628d84338cdecb37cfbb100b3a9958d32",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

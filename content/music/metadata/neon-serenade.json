@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "neon-serenade",
+  "title": "Neon Serenade",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/neon_serenade.mp3",
+  "audioHash": "5107c9d53c1df6147dd5fbc668cf6032c0964a75ab95da1c863f6c8e0272982b",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

@@ -142,6 +142,15 @@ try {
 }
 
 function expandEvents(document) {
+  if (document.schemaVersion === 2) {
+    const phaseIndexById = new Map(
+      document.phases.map((phase, index) => [phase.id, index]),
+    );
+    return document.events.map((event) => ({
+      ...event,
+      phaseIndex: phaseIndexById.get(event.phaseId),
+    }));
+  }
   const events = [];
   const loopDuration = Math.max(1, document.loopDuration);
   const grid = Math.max(0.05, document.grid);

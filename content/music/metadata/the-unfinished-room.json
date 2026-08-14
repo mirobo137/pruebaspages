@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "the-unfinished-room",
+  "title": "The Unfinished Room",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/the_unfinished_room.mp3",
+  "audioHash": "ed6cd8f11b2c33fa496236cf6bac621d045a8fc93c67f8359fea8c8678b37cd0",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

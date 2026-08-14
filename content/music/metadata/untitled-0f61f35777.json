@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "untitled-0f61f35777",
+  "title": "Suno Pilot 01",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/untitled-0f61f35777.mp3",
+  "audioHash": "0f61f357773f759e63bad15e930acc60b815236a783a7003d88e247f137eb8b2",
+  "durationSeconds": 124.872,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 34
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 34,
+      "endTime": 82
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 82,
+      "endTime": 124.872
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 2,
+  "trackId": "music-intelligence-pilot",
+  "difficulty": "medium",
+  "duration": 120,
+  "audioMode": "single",
+  "generatorVersion": "manual-pilot-v1",
+  "analysisHash": null,
+  "locked": true,
+  "spatialModelVersion": "spatial-v3-hard-mouse-acquisition",
+  "interactionContractVersion": "tap-drag-v1",
+  "phases": [
+    { "id": "read", "name": "LECTURA", "startTime": 0, "endTime": 28 },
+    { "id": "drive", "name": "IMPULSO", "startTime": 28, "endTime": 76 },
+    { "id": "climax", "name": "CLIMAX", "startTime": 76, "endTime": 120 }
+  ],
+  "events": [
+    {
+      "id": "note-001",
+      "time": 2,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": { "x": 0.25, "y": 0.3 }
+    },
+    {
+      "id": "note-002",
+      "time": 3,
+      "phaseId": "read",
+      "kind": "drag",
+      "start": { "x": 0.3, "y": 0.6 },
+      "controls": [{ "x": 0.48, "y": 0.35 }, { "x": 0.66, "y": 0.7 }],
+      "checkpoints": [{ "x": 0.43, "y": 0.45 }, { "x": 0.61, "y": 0.57 }],
+      "end": { "x": 0.75, "y": 0.4 }
+    }
+  ]
+}

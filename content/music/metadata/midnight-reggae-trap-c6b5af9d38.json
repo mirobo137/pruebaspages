@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "midnight-reggae-trap-c6b5af9d38",
+  "title": "Midnight Reggae Trap",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/midnight-reggae-trap-c6b5af9d38.mp3",
+  "audioHash": "c6b5af9d38faaa4c48fc4894560895f2b1c4be0c306516551e61cdbc8c62befc",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

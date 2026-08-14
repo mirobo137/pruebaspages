@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "midnight-reggae-trap-3b64364ff7",
+  "title": "Midnight Reggae Trap",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/midnight-reggae-trap-3b64364ff7.mp3",
+  "audioHash": "3b64364ff79fedb49c6f7e6ad6ea403c2e07ca680a321b19bd99741621bad95f",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

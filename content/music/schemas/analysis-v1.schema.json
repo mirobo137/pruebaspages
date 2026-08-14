@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://superflow.local/schemas/analysis-v1.schema.json",
+  "title": "SUPERFLOW Analysis v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "trackId",
+    "audioHash",
+    "analyzerVersion",
+    "duration",
+    "bpm",
+    "beatOffset",
+    "beats",
+    "onsets",
+    "energyFrames"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "trackId": { "$ref": "#/$defs/id" },
+    "audioHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "analyzerVersion": { "type": "string", "minLength": 1 },
+    "duration": { "type": "number", "exclusiveMinimum": 0 },
+    "bpm": { "type": "number", "minimum": 30, "maximum": 300 },
+    "beatOffset": { "type": "number", "minimum": 0 },
+    "beats": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0 }
+    },
+    "onsets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/onset" }
+    },
+    "energyFrames": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/energyFrame" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "unit": { "type": "number", "minimum": 0, "maximum": 1 },
+    "onset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["time", "strength"],
+      "properties": {
+        "time": { "type": "number", "minimum": 0 },
+        "strength": { "$ref": "#/$defs/unit" }
+      }
+    },
+    "energyFrame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["time", "volume", "low", "mid", "high"],
+      "properties": {
+        "time": { "type": "number", "minimum": 0 },
+        "volume": { "$ref": "#/$defs/unit" },
+        "low": { "$ref": "#/$defs/unit" },
+        "mid": { "$ref": "#/$defs/unit" },
+        "high": { "$ref": "#/$defs/unit" }
+      }
+    }
+  }
+}

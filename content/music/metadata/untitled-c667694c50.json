@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "untitled-c667694c50",
+  "title": "Untitled",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/premium/untitled-c667694c50.mp3",
+  "audioHash": "c667694c5052e5bd6ce9677340295e4ddb063dc80d75c84c8e6eeb28133476b6",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

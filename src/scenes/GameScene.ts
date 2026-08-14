@@ -1,6 +1,7 @@
 import { Container, Rectangle } from 'pixi.js';
 import type { FederatedPointerEvent } from 'pixi.js';
 import type { AudioManager } from '../audio/AudioManager';
+import { createBeatmapPlaybackOptions } from '../audio/BeatmapPlaybackPlan';
 import type { BeatEvent, Beatmap } from '../content/Beatmap';
 import type { MusicTrack } from '../content/MusicCatalog';
 import type { VisualTheme } from '../customization/ThemeTypes';
@@ -8,6 +9,7 @@ import type { VisualQualityProfile } from '../customization/VisualQuality';
 import type { Scene } from '../core/scene/Scene';
 import { BeatmapPlayer } from '../game/beatmap/BeatmapPlayer';
 import { PhaseTransitionGuard } from '../game/beatmap/PhaseTransitionGuard';
+import { findPhaseIndexAtTime } from '../game/beatmap/PhaseTimeline';
 import type { Difficulty, DifficultyProfile } from '../game/difficulty/Difficulty';
 import { DIFFICULTY_PROFILES } from '../game/difficulty/Difficulty';
 import { JuiceSystem } from '../game/effects/JuiceSystem';
@@ -615,13 +617,11 @@ export class GameScene implements Scene {
     if (this.musicStartRequested || this.gameEnded) return;
 
     this.musicStartRequested = true;
-    void this.audioManager.play(this.track, {
-      loop: true,
-      loopDuration: this.beatmap.loopDuration,
-      playbackDuration: this.beatmap.duration - this.musicTimelineStart,
-      startOffset: this.musicTimelineStart % this.beatmap.loopDuration,
-      timelineOffset: this.musicTimelineStart,
-    }).then(() => {
+    const playback = this.audioManager.play(
+      this.track,
+      createBeatmapPlaybackOptions(this.beatmap, this.musicTimelineStart),
+    );
+    void playback.then(() => {
       if (!this.mounted || this.gameEnded) return;
       this.musicStarted = true;
       if (this.paused) {
@@ -1075,10 +1075,7 @@ export class GameScene implements Scene {
   }
 
   private updatePhase(currentTime: number): void {
-    const nextPhaseIndex = Math.min(
-      this.beatmap.phases.length - 1,
-      Math.max(0, Math.floor(currentTime / this.beatmap.loopDuration)),
-    );
+    const nextPhaseIndex = findPhaseIndexAtTime(this.beatmap.phases, currentTime);
     const phase = this.beatmap.phases[nextPhaseIndex];
     if (!phase) return;
 
@@ -1140,10 +1137,7 @@ export class GameScene implements Scene {
 
   private isGameplayInteractive(): boolean {
     const currentTime = this.audioManager.currentTime;
-    const expectedPhaseIndex = Math.min(
-      this.beatmap.phases.length - 1,
-      Math.max(0, Math.floor(currentTime / this.beatmap.loopDuration)),
-    );
+    const expectedPhaseIndex = findPhaseIndexAtTime(this.beatmap.phases, currentTime);
     return this.musicStarted
       && this.audioManager.isPlaying
       && !this.paused

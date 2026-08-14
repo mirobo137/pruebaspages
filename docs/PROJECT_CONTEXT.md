@@ -26,15 +26,15 @@ El primer destino de pruebas es GitHub Pages. Cuando el nucleo sea solido, se pr
 
 El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 
-- Catalogo actual de 24 canciones detectadas automaticamente desde `public/assets/audio/`.
+- Catalogo jugable actual de 24 canciones v1 gratuitas y una canción completa piloto Beatmap v2.
 - Tres beatmaps separados por cancion en `public/assets/beatmaps/<id-cancion>/`.
 - Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
 - Menu tipo playlist desplazable por dedo o rueda, con numeracion, progreso visible, indicador de scroll, selector segmentado de dificultad y un solo boton Jugar.
 - Cuatro pestañas de catalogo por precio: Gratis, Economicas, Selectas y Premium.
-- El catalogo actual contiene 11 canciones gratis, 5 economicas, 4 selectas y 4 premium; categoria y precio dependen exclusivamente de la carpeta donde se suban.
+- Una de las 23 canciones Suno está activa como `Suno Pilot 01` en Selectas; las otras 22 permanecen candidatas y fuera del manifest hasta tener Beatmap v2.
 - Preview de 5 segundos al tocar cualquier cancion, incluso si aun esta bloqueada.
 - Musica de portada/menu en bucle gestionada por `MenuAudioController`; la pista provisional se cambia en `src/content/MenuMusic.ts`.
-- Partidas de 90 segundos divididas en Lectura, Impulso y Climax.
+- Partidas v1 de 90 segundos y un piloto v2 de 124.872 segundos, ambos divididos en Lectura, Impulso y Climax.
 - Audio de 30 segundos precargado y decodificado con Web Audio, con reloj jugable continuo durante las tres fases.
 - Objetivos `tap` y `drag`, con ventana `Perfect`, `Bien` y `Miss`.
 - Vidas, combo, puntuacion, monedas locales y desbloqueo preparado para futuras canciones.
@@ -95,6 +95,7 @@ src/
   progression/               Estrellas, records, monedas y desbloqueos locales
 public/assets/
   audio/                     Canciones gratuitas
+    agregadas suno/          Bandeja temporal; debe quedar vacia tras content:sync
     economicas/              Canciones de 400 monedas
     selectas/                Canciones de 800 monedas
     premium/                 Canciones de 1,400 monedas
@@ -104,8 +105,14 @@ docs/
   PROJECT_CONTEXT.md         Este contrato de arquitectura
   GAME_OBJECTIVES.md         Vision viva y objetivos editables
 scripts/
+  ingest-suno-tracks.mjs         Ingestion determinista de candidatas completas
   generate-music-manifest.mjs    Automatizacion del catalogo musical
   generate-default-beatmaps.mjs  Mapas iniciales para audios nuevos
+content/music/
+  metadata/                      BPM, modo, secciones y procedencia por trackId
+  analysis/                      Resultados offline versionados; nunca runtime
+  schemas/                       Beatmap v2, Analysis v1 y Metadata v1
+  suno-candidates.json           Registro offline; no se publica en el bundle
 ```
 
 Reglas de modularidad:
@@ -192,10 +199,11 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - FLOW suma geometria dorada y marco sutil. SUPER FLOW suma tunel cian/magenta, estelas radiales y marco de esquinas.
 - Nebulosas, poligonos, tunel y particulas se dibujan una vez y se animan mediante transformaciones para proteger el rendimiento movil.
 
-## Canciones cortas y fases
+## Canciones, playback y fases
 
-- Cada audio se trata como un loop de 30 segundos.
-- Una partida contiene tres fases y dura 90 segundos.
+- Los 24 audios v1 se tratan como loops de 30 segundos y duran 90 segundos.
+- Beatmap v2 admite canciones `single` completas y fases de duracion variable.
+- El piloto `Suno Pilot 01` dura 124.872 segundos y cambia de fase en 34 y 82 segundos.
 - El audio vuelve a empezar en cada fase, pero el reloj, score, vidas, combo y FLOW continuan.
 - Cada fase tiene un patron distinto para que la repeticion musical no produzca la misma lectura tactil.
 - Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.
@@ -210,7 +218,7 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 
 Si la composicion contiene un cierre, silencio o fade-out muy marcado, el crossfade reduce el corte pero no puede convertirla por completo en un loop musical. Para futuras canciones se debe pedir `seamless loop`, BPM constante, sin intro larga y sin fade-out.
 
-Los beatmaps son compactos. Cada archivo declara `grid`, `offset`, `gap` y un patron que se repite durante la fase. `grid` es la unidad ritmica en segundos y `gap` indica cuantas unidades pasan antes del siguiente objetivo. El cargador expande los patrones a eventos absolutos de 0 a 90 segundos.
+Los beatmaps v1 son compactos: declaran `grid`, `offset`, `gap` y un patron repetido. Beatmap v2 declara eventos absolutos, fases con límites y modo de audio. Adaptadores separados convierten ambos formatos al mismo modelo runtime.
 
 ## Inicio y pausa de partida
 
@@ -337,7 +345,7 @@ Medio y Dificil usan una rejilla de 0.375 segundos, equivalente a subdividir el 
 
 ### Estado de validacion 11.5G
 
-- `npm run test:regression` cubre ocho viewports, mouse/touch/pen, tres dificultades, 24 canciones, 72 beatmaps, FLOW persistente, Danger, derrota y la firma RIFF de `miss.wav`.
+- `npm run test:regression` cubre ocho viewports, mouse/touch/pen, tres dificultades, 25 canciones, 75 beatmaps, FLOW persistente, Danger, derrota y la firma RIFF de `miss.wav`.
 - Vite Preview sirve la build y `assets/audio/sfx/miss.wav` con estado 200, MIME `audio/wav`, 170426 bytes y firma RIFF.
 - La inspeccion visual automatizada no se realizo porque el navegador integrado no estuvo disponible en la sesion.
 - La fase permanece abierta hasta aprobar el checklist fisico en PC y movil: `docs/PHASE_11_5_VALIDATION_CHECKLIST.md`.
@@ -392,20 +400,20 @@ git commit -m "descripcion breve del cambio"
 git push origin main
 ```
 
-El workflow de GitHub Pages vuelve a sincronizar el contenido en cada build. La ubicacion del audio es la unica clasificacion manual necesaria. `npm run dev` y `npm run build` recorren la raiz y las tres carpetas, generan el catalogo con precio y categoria y, si faltan, crean tres beatmaps iniciales. Los beatmaps existentes nunca se sobrescriben.
+El workflow de GitHub Pages vuelve a sincronizar el contenido en cada build. `npm run dev` y `npm run build` vacian primero la bandeja `agregadas suno`, renombran cada MP3/OGG con un ID estable y hash, lo asignan pseudoaleatoriamente a una categoria de pago y lo registran como candidato. Despues generan el catalogo jugable y, para pistas v1 activas, crean tres beatmaps iniciales si faltan. Los beatmaps existentes nunca se sobrescriben.
 
 ### Agregar una cancion
 
-1. Subir desde el movil un MP3, OGG o WAV propio o con licencia compatible a una ubicacion:
-   - `public/assets/audio/` para Gratis.
-   - `public/assets/audio/economicas/` para 400 monedas.
-   - `public/assets/audio/selectas/` para 800 monedas.
-   - `public/assets/audio/premium/` para 1,400 monedas.
+Para una cancion completa de Suno:
+
+1. Subir desde el movil el MP3 u OGG a `public/assets/audio/agregadas suno/`. WAV completo no esta permitido dentro de `public`.
 2. En cualquier PC ejecutar `git pull --rebase origin main`.
-3. Ejecutar `npm run build`; `content:sync` detecta la cancion, asigna categoria/precio y crea `easy.json`, `medium.json` y `hard.json` si faltan.
-4. Probar los patrones iniciales en movil.
-5. Editar los beatmaps generados para sincronizarlos realmente con los golpes de la cancion. La automatizacion no vuelve a sobrescribirlos.
-6. Confirmar que `trackId` y dificultad son correctos, y hacer commit/push cuando los patrones esten ajustados.
+3. Ejecutar `npm run build`. `music:ingest` elimina sufijos de descarga, agrega diez caracteres del SHA-256 para impedir colisiones y elige de forma estable Economicas, Selectas o Premium.
+4. Revisar el movimiento en Git y `content/music/suno-candidates.json`. La bandeja debe quedar vacia.
+5. La pista conserva estado `candidate`: no aparece en la playlist ni se descarga al iniciar mientras el juego siga usando Beatmap v1 de 30 segundos.
+6. Desde M1 se activara individualmente al completar su metadata, Beatmap v2 y prueba humana con mouse y touch.
+
+Las canciones v1 cortas heredadas pueden seguir colocandose manualmente en la raiz o en una categoria. Ese flujo se mantiene solo por compatibilidad durante la migracion.
 
 Los beatmaps automaticos incluyen `generated: true` como aviso de que son una base jugable, no una sincronizacion musical definitiva. Una vez ajustado manualmente se puede cambiar a `false` o quitar esa propiedad.
 
@@ -446,7 +454,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Al terminar el preview vuelve automaticamente la musica del menu.
 - Volver desde una partida o recargar conserva la cancion y dificultad seleccionadas y deja esa fila visible.
 - Las cuatro categorias filtran la playlist sin abrir pantallas adicionales.
-- Las 11 canciones gratuitas se pueden jugar sin desbloqueo; las otras 13 respetan su categoria y precio.
+- Las 24 canciones v1 gratuitas se pueden jugar sin desbloqueo. `Suno Pilot 01` aparece en Selectas por 800 monedas; las otras 22 candidatas no aparecen antes de su activacion.
 - Una cancion nueva aparece en la categoria y con el precio correspondiente a su carpeta.
 - Completar cerca del final otorga al menos una estrella; 70% de precision ponderada entrega dos y 90% entrega tres.
 - Recargar la pagina conserva monedas, desbloqueos y records.

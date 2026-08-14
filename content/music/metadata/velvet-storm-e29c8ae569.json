@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "velvet-storm-e29c8ae569",
+  "title": "Velvet Storm",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/premium/velvet-storm-e29c8ae569.mp3",
+  "audioHash": "e29c8ae569b3ef8681bd950169228d8ed5c5b7d4f387b889c5265f3e1c957e33",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

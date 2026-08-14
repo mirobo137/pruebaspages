@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "velvet-static-9570e22f98",
+  "title": "Velvet Static",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/velvet-static-9570e22f98.mp3",
+  "audioHash": "9570e22f9858216bc05ac9775715eb5896e64d6eda5ad4dbb7495c7ba5b285a0",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

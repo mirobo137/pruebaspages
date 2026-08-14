@@ -27,6 +27,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Dificultades Facil, Medio y Dificil por cancion.
 - [x] Tres fases de 30 segundos: Lectura, Impulso y Climax.
 - [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
+- [~] Cancion completa Beatmap v2 en modo single implementada con fases variables; falta aprobar fisicamente el piloto de 124.872 segundos.
 - [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
 - [x] Estrellas independientes por cancion y dificultad.
@@ -52,6 +53,7 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Cancion seleccionada automaticamente desde `public/assets/audio/`.
 - [x] Beatmaps iniciales automaticos para que una cancion nueva entre al selector sin trabajo manual.
 - [x] Build recursiva para Gratis, Economicas, Selectas y Premium con deteccion de IDs duplicados.
+- [x] Bandeja Suno automatizada: nombre estable con hash, categoria de pago pseudoaleatoria y estado candidato hasta Beatmap v2.
 - [x] Feedback visual distinto para Perfect, Bien y Miss.
 - [x] Objetivos con profundidad, brillo, reflejo y bordes finos.
 - [x] Aros semanticos que hacen visibles las ventanas Bien y Perfect.

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "velvet-static-28560e4a5d",
+  "title": "Velvet Static",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/velvet-static-28560e4a5d.mp3",
+  "audioHash": "28560e4a5dbf2d6a733f9fac74b0fc67e843eeb0241ca458377688c565153be8",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

@@ -1,10 +1,14 @@
 import type { GameplayPointerMode } from './GameplayInteractionProfile';
+import musicContractVersions from '../content/music-contract-versions.json';
 
 export type GameplayInputProfileId = GameplayPointerMode | 'hybrid';
 
 // Increment only when playfield projection, travel budgets or mouse assistance
 // changes enough to affect competitive comparability.
-export const SPATIAL_MODEL_VERSION = 'spatial-v3-hard-mouse-acquisition';
+export const SPATIAL_MODEL_VERSION = musicContractVersions.spatialModelVersion;
+export const INTERACTION_CONTRACT_VERSION = (
+  musicContractVersions.interactionContractVersion
+);
 export const PROGRESSION_SCOPE = 'shared-across-input-profiles' as const;
 export const COMPETITIVE_RANKING_POLICY = 'separate-by-profile-and-spatial-version' as const;
 

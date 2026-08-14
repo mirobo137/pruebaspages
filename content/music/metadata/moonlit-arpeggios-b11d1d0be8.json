@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "moonlit-arpeggios-b11d1d0be8",
+  "title": "Moonlit Arpeggios",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/moonlit-arpeggios-b11d1d0be8.mp3",
+  "audioHash": "b11d1d0be88a558ed255a673dd29b3eefe4b931d823c87542a1d574aa26b90b1",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

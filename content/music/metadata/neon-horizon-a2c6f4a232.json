@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "neon-horizon-a2c6f4a232",
+  "title": "Neon Horizon",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/neon-horizon-a2c6f4a232.mp3",
+  "audioHash": "a2c6f4a2326e0c979a5e9516f18f663db9e699440e2e878fe639c71d08fc1e4b",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

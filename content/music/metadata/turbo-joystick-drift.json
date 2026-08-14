@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "turbo-joystick-drift",
+  "title": "Turbo Joystick Drift",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/turbo_joystick_drift.mp3",
+  "audioHash": "68fb27f784a726a5a4ba02f4116481d6c3d34b534fa394a835c384f99119b08e",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

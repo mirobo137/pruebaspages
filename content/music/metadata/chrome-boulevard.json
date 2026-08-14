@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "chrome-boulevard",
+  "title": "Chrome Boulevard",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/chrome_boulevard.mp3",
+  "audioHash": "e9c32a17e2f3ffeedb887e84775d1adb11104a3aab7b85f6db13aba1f7035545",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

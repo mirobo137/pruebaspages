@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "trackId": "fading-static-11615b8092",
+  "title": "Fading Static",
+  "status": "candidate",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/fading-static-11615b8092.mp3",
+  "audioHash": "11615b80928c7f37d40b1cc1d1436e4ce6d5db18282a8f6573c9d2ff3c05b67a",
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  }
+}

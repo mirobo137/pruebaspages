@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "final-score",
+  "title": "Final Score",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/final_score.mp3",
+  "audioHash": "356fa9d272c6f86f2ac0f95abd1c7b6e2423811a58d19def63d172ab05b67cf4",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

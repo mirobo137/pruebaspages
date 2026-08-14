@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "trackId": "velvet-rush",
+  "title": "Velvet Rush",
+  "status": "legacy-active",
+  "audioMode": "loop",
+  "webAudioPath": "./assets/audio/velvet_rush.mp3",
+  "audioHash": "df1a53faffd56144f4cee6c31f84d9a72c71c7aa56f399d3f9c8b53548d024f3",
+  "loopDuration": 30,
+  "rhythm": {
+    "tempoHint": null,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [],
+  "provenance": {
+    "sourceType": "legacy-unknown",
+    "provider": null,
+    "commercialUseStatus": "review-required",
+    "privateEvidenceRef": null
+  }
+}

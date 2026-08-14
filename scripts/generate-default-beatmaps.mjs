@@ -1,11 +1,37 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { canOverwriteBeatmap } from './lib/beatmap-generation-policy.mjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifestPath = path.join(projectRoot, 'public', 'assets', 'music-manifest.json');
 const beatmapsRoot = path.join(projectRoot, 'public', 'assets', 'beatmaps');
+const contractVersionsPath = path.join(
+  projectRoot,
+  'src',
+  'content',
+  'music-contract-versions.json',
+);
 const difficulties = ['easy', 'medium', 'hard'];
+
+function parseOptions(args) {
+  let trackId = null;
+  let force = false;
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+    if (argument === '--force') force = true;
+    else if (argument === '--track') {
+      trackId = args[index + 1] ?? null;
+      index += 1;
+    } else {
+      throw new Error(`Opcion desconocida: ${argument}`);
+    }
+  }
+  if (trackId !== null && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trackId)) {
+    throw new Error(`trackId invalido: ${trackId}`);
+  }
+  return { trackId, force };
+}
 
 const PHASES = [
   {
@@ -81,14 +107,20 @@ function transformPoint(point, variation) {
   return { ...point };
 }
 
-function createBeatmap(trackId, difficulty) {
+function createBeatmap(trackId, difficulty, contractVersions) {
   const config = DIFFICULTY_CONFIG[difficulty];
   const seed = hashId(trackId);
 
   return {
+    schemaVersion: 1,
     trackId,
     difficulty,
     generated: true,
+    generatorVersion: 'legacy-pattern-v1',
+    analysisHash: null,
+    locked: false,
+    spatialModelVersion: contractVersions.spatialModelVersion,
+    interactionContractVersion: contractVersions.interactionContractVersion,
     loopDuration: 30,
     grid: config.grid,
     phases: PHASES.map((phase, phaseIndex) => {
@@ -115,23 +147,51 @@ function createBeatmap(trackId, difficulty) {
   };
 }
 
+const { trackId: requestedTrackId, force } = parseOptions(process.argv.slice(2));
 const tracks = JSON.parse(await readFile(manifestPath, 'utf8'));
+const contractVersions = JSON.parse(await readFile(contractVersionsPath, 'utf8'));
+const selectedTracks = requestedTrackId
+  ? tracks.filter((track) => track.id === requestedTrackId)
+  : tracks;
+if (requestedTrackId && selectedTracks.length === 0) {
+  throw new Error(`No existe una cancion v1 activa con ID ${requestedTrackId}.`);
+}
 let createdCount = 0;
+let regeneratedCount = 0;
+let preservedCount = 0;
+let lockedCount = 0;
 
-for (const track of tracks) {
+for (const track of selectedTracks) {
   const beatmapDirectory = path.join(beatmapsRoot, track.id);
   await mkdir(beatmapDirectory, { recursive: true });
 
   for (const difficulty of difficulties) {
     const beatmapPath = path.join(beatmapDirectory, `${difficulty}.json`);
-    const document = createBeatmap(track.id, difficulty);
+    const document = createBeatmap(track.id, difficulty, contractVersions);
+
+    let existing = null;
+    try {
+      existing = JSON.parse(await readFile(beatmapPath, 'utf8'));
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error;
+    }
+    if (existing && !canOverwriteBeatmap(existing, force)) {
+      if (!force) {
+        preservedCount += 1;
+        continue;
+      }
+      lockedCount += 1;
+      console.log(`- bloqueado, no se sobrescribe: ${track.id}/${difficulty}.json`);
+      continue;
+    }
 
     try {
       await writeFile(beatmapPath, `${JSON.stringify(document, null, 2)}\n`, {
         encoding: 'utf8',
-        flag: 'wx',
+        flag: existing ? 'w' : 'wx',
       });
-      createdCount += 1;
+      if (existing) regeneratedCount += 1;
+      else createdCount += 1;
       console.log(`- beatmap inicial: ${track.id}/${difficulty}.json`);
     } catch (error) {
       if (error?.code !== 'EEXIST') throw error;
@@ -139,6 +199,7 @@ for (const track of tracks) {
   }
 }
 
-console.log(createdCount > 0
-  ? `Beatmaps iniciales creados: ${createdCount}`
-  : 'Beatmaps completos: no fue necesario crear archivos.');
+console.log(
+  `Beatmaps v1: ${createdCount} creado(s), ${regeneratedCount} regenerado(s), `
+  + `${preservedCount} preservado(s), ${lockedCount} bloqueado(s).`,
+);
