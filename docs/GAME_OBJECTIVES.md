@@ -27,7 +27,8 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Dificultades Facil, Medio y Dificil por cancion.
 - [x] Tres fases de 30 segundos: Lectura, Impulso y Climax.
 - [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
-- [~] Cancion completa Beatmap v2 en modo single implementada con fases variables; falta aprobar fisicamente el piloto de 124.872 segundos.
+- [x] Cancion completa Beatmap v2 en modo single implementada con fases variables y piloto de 124.872 segundos jugado completo.
+- [~] Rejilla BPM manual determinista con dificultades anidadas implementada; falta aprobar fisicamente su sensacion ritmica antes de M3.
 - [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
 - [x] Estrellas independientes por cancion y dificultad.

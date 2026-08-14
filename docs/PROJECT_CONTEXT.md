@@ -28,7 +28,7 @@ El prototipo ya es jugable y compila para GitHub Pages. Actualmente incluye:
 
 - Catalogo jugable actual de 24 canciones v1 gratuitas y una canción completa piloto Beatmap v2.
 - Tres beatmaps separados por cancion en `public/assets/beatmaps/<id-cancion>/`.
-- Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios.
+- Dificultades Facil, Medio y Dificil con vidas, timing y tolerancia tactil propios; en Beatmap v2 las notas forman subconjuntos estructurales entre dificultades.
 - Menu tipo playlist desplazable por dedo o rueda, con numeracion, progreso visible, indicador de scroll, selector segmentado de dificultad y un solo boton Jugar.
 - Cuatro pestañas de catalogo por precio: Gratis, Economicas, Selectas y Premium.
 - Una de las 23 canciones Suno está activa como `Suno Pilot 01` en Selectas; las otras 22 permanecen candidatas y fuera del manifest hasta tener Beatmap v2.
@@ -204,6 +204,7 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - Los 24 audios v1 se tratan como loops de 30 segundos y duran 90 segundos.
 - Beatmap v2 admite canciones `single` completas y fases de duracion variable.
 - El piloto `Suno Pilot 01` dura 124.872 segundos y cambia de fase en 34 y 82 segundos.
+- Su mapa M2 usa provisionalmente 128 BPM, offset de 0.5 s y 123/214/397 notas en Facil/Medio/Dificil. Los valores todavia no provienen de analizar el audio.
 - El audio vuelve a empezar en cada fase, pero el reloj, score, vidas, combo y FLOW continuan.
 - Cada fase tiene un patron distinto para que la repeticion musical no produzca la misma lectura tactil.
 - Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.
@@ -454,7 +455,7 @@ La prueba de progresion consiste en cargar FLOW y despues conseguir cuatro `Perf
 - Al terminar el preview vuelve automaticamente la musica del menu.
 - Volver desde una partida o recargar conserva la cancion y dificultad seleccionadas y deja esa fila visible.
 - Las cuatro categorias filtran la playlist sin abrir pantallas adicionales.
-- Las 24 canciones v1 y `Suno Pilot 01` se pueden jugar sin desbloqueo durante M1. El piloto permanece visualmente en Selectas, pero `testingPriceOverride: 0` elimina temporalmente su coste; las otras 22 candidatas no aparecen.
+- Las 24 canciones v1 son gratuitas. `Suno Pilot 01` permanece visualmente en Selectas y su metadata admite un `testingPriceOverride` temporal; las otras 22 candidatas no aparecen.
 - Una cancion nueva aparece en la categoria y con el precio correspondiente a su carpeta.
 - Completar cerca del final otorga al menos una estrella; 70% de precision ponderada entrega dos y 90% entrega tres.
 - Recargar la pagina conserva monedas, desbloqueos y records.

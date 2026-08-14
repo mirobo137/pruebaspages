@@ -39,6 +39,7 @@ try {
       const document = JSON.parse(await readFile(path.join(
         'public', 'assets', 'beatmaps', track.id, `${difficulty}.json`,
       ), 'utf8'));
+      const canonicalBeforeProjection = structuredClone(document);
       const events = expandEvents(document);
 
       for (const environment of environments) {
@@ -132,6 +133,11 @@ try {
           }
         }
       }
+      assert.deepEqual(
+        document,
+        canonicalBeforeProjection,
+        `${track.id}/${difficulty}: la proyeccion altero el beatmap canonico`,
+      );
       validatedMaps += 1;
     }
   }

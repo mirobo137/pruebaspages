@@ -23,7 +23,7 @@ elegida por ser la mas cercana, solo 4.872 segundos por encima, sin recortar aud
 Los límites son parte del Beatmap v2 y ya no se calculan dividiendo la cancion en
 tres. Revive inicia audio, reloj y eventos exactamente en 34 u 82 segundos.
 
-## Mapas provisionales
+## Mapas tecnicos usados para aprobar M1
 
 - Facil: 38 notas.
 - Medio: 62 notas.
@@ -31,9 +31,10 @@ tres. Revive inicia audio, reloj y eventos exactamente en 34 u 82 segundos.
 - `generatorVersion`: `m1-technical-pilot-v1`.
 - `locked: false` hasta una partida humana y ajuste musical.
 
-Estos mapas prueban playback, fases, pausa, derrota, revive y proyeccion espacial.
-No afirman estar sincronizados musicalmente: BPM manual corresponde a M2 y el
-analizador offline a M3.
+Estos mapas probaron playback, fases, pausa, derrota, revive y proyeccion espacial.
+Fueron reemplazados en M2 por mapas `bpm-grid-v1` de 123/214/397 notas. El historial
+de Git conserva este escalon tecnico; no se debe volver a ejecutar `music:pilot`
+sobre el mapa M2.
 
 ## Prueba fisica requerida
 
@@ -46,6 +47,7 @@ analizador offline a M3.
    cuenta 3-2-1 y sin reproducir desde el inicio de la cancion.
 7. Confirmar que el resultado aparece al terminar el audio completo.
 
-La compuerta M1 solo se aprueba después de esta prueba. Hasta entonces M2 no inicia.
+La compuerta M1 fue aprobada el 2026-08-14 despues de jugar la cancion completa.
+M2 comenzo tras esa aprobacion.
 Al terminar las pruebas, eliminar `testingPriceOverride` restaura automáticamente
 el precio normal de 800 monedas de la categoria Selectas.

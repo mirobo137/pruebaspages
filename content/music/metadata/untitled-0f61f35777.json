@@ -9,9 +9,9 @@
   "durationSeconds": 124.872,
   "testingPriceOverride": 0,
   "rhythm": {
-    "tempoHint": null,
-    "bpmOverride": null,
-    "beatOffsetOverride": null
+    "tempoHint": 128,
+    "bpmOverride": 128,
+    "beatOffsetOverride": 0.5
   },
   "suggestedSections": [
     {

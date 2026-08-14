@@ -13,9 +13,9 @@ distinto para cada dispositivo.
 ## Estado
 
 - Estado general: `EN EJECUCION`
-- Fase activa: `M1 IMPLEMENTADA / VALIDACION FISICA PENDIENTE`
-- Preparacion: `Ingestion Suno, auditoria mouse y contratos offline completados sin cambiar gameplay`
-- Siguiente accion: `Probar Suno Pilot 01 completa en mouse y touch; no iniciar M2 antes de aprobarla`
+- Fase activa: `M2 IMPLEMENTADA / VALIDACION FISICA PENDIENTE`
+- Preparacion: `M1 aprobada tras reproducir y jugar la pista completa sin cortes ni bloqueo`
+- Siguiente accion: `Probar la nueva rejilla BPM de Suno Pilot 01; no iniciar M3 antes de aprobar su sensacion ritmica`
 - Implementacion: una fase por vez; ninguna fase siguiente comienza sin aprobar
   la compuerta de la anterior.
 
@@ -128,8 +128,8 @@ Objetivo: reproducir una canción completa una sola vez, con fases de duración 
 - [x] M1.5 Mantener revive/seek, transiciones seguras, resultado y derrota.
 - [x] M1.6 Crear una canción piloto completa de 124.872 segundos con mapa técnico mínimo;
   se acepta la desviacion de 4.872 s porque ninguna candidata existente cae en 90-120 s.
-- [~] M1.7 Proyectar la cancion piloto con mouse, touch y pen usando el mismo Beatmap v2;
-  validacion automatica aprobada, partidas fisicas pendientes.
+- [x] M1.7 Proyectar la cancion piloto con mouse, touch y pen usando el mismo Beatmap v2;
+  validacion automatica aprobada y cancion completa jugada fisicamente por el usuario.
 
 Compuerta M1:
 
@@ -143,16 +143,16 @@ Compuerta M1:
 
 Objetivo: abandonar los intervalos globales sin depender todavía del analizador.
 
-- [ ] M2.1 Consumir BPM, beatOffset y overrides desde metadata.
-- [ ] M2.2 Calcular negras, corcheas y semicorcheas por canción como fallback.
-- [ ] M2.3 Crear presupuestos canonicos de densidad, distancia/tiempo, giro y drag
+- [x] M2.1 Consumir BPM, beatOffset y overrides desde metadata.
+- [x] M2.2 Calcular negras, corcheas y semicorcheas por canción como fallback.
+- [x] M2.3 Crear presupuestos canonicos de densidad, distancia/tiempo, giro y drag
   por dificultad, consumiendo `TravelBudget` en vez de duplicar sus formulas.
-- [ ] M2.4 Prohibir simultaneidad obligatoria y validar separación mínima por tipo de nota.
-- [ ] M2.5 Hacer Easy subconjunto estructural de Medium y Hard.
-- [ ] M2.6 Garantizar semilla determinista y cero posiciones aleatorias en mapas finales.
-- [ ] M2.7 Proyectar cada candidato con mouse, touch y pen y rechazar el mapa si un
+- [x] M2.4 Prohibir simultaneidad obligatoria y validar separación mínima por tipo de nota.
+- [x] M2.5 Hacer Easy subconjunto estructural de Medium y Hard.
+- [x] M2.6 Garantizar semilla determinista y cero posiciones aleatorias en mapas finales.
+- [x] M2.7 Proyectar cada candidato con mouse, touch y pen y rechazar el mapa si un
   perfil excede alcance, giro, corredor, plazo o descanso despues de drag.
-- [ ] M2.8 Conservar exactamente los mismos tiempos, tipos y cantidad de notas en
+- [x] M2.8 Conservar exactamente los mismos tiempos, tipos y cantidad de notas en
   todos los perfiles; solo la geometria final puede variar.
 
 Separaciones iniciales para calibrar, no contratos definitivos:
@@ -168,8 +168,8 @@ Compuerta M2:
 - canciones de 90, 105, 120, 128, 140 y 174 BPM pueden producir mapas válidos;
 - ningún mapa depende de dos acciones simultáneas;
 - mouse y touch completan las mismas notas con perfiles espaciales propios;
-- un drag de mouse `presionar-seguir-soltar` y su equivalente touch resuelven la
-  misma cabeza, checkpoints, destino y juicio musical;
+- el drag canonico comparte cabeza, controles y destino: touch/pen recorren la
+  traza y mouse usa su asistencia direccional aprobada sin cambiar el juicio musical;
 - las proyecciones son deterministas y el validador informa el perfil que fallo;
 - 70-100 ms permanece fuera hasta una fase futura con pruebas específicas.
 
@@ -282,7 +282,8 @@ el analizador M3 no debe ser requisito para demostrar playback y Beatmap v2.
 
 | Fecha | Fase | Estado | Evidencia |
 |---|---|---|---|
-| 2026-08-14 | M1 | Implementada / prueba fisica pendiente | Suno Pilot 01 de 124.872 s, audio single, fases 0/34/82, revive desde limites, 38/62/90 notas; 25 pistas/75 mapas, npm test/build y presupuesto mouse-touch correctos |
+| 2026-08-14 | M2 | Implementada / prueba fisica pendiente | Rejilla manual provisional de 128 BPM y offset 0.5 s; 123/214/397 notas anidadas, drags compartidos con 0.9 s de descanso; referencias 90/105/120/128/140/174 BPM y proyeccion mouse/touch/pen correctas |
+| 2026-08-14 | M1 | Completada | Suno Pilot 01 de 124.872 s jugada completa; audio single, fases 0/34/82, revive desde limites y mapa tecnico 38/62/90 validaron playback antes de M2 |
 | 2026-08-14 | M0 | Completada tecnicamente | 3 schemas, 47 metadata verificadas por SHA-256, version espacial/contrato centralizados, politica locked y comandos por pista; npm test/build correctos, chunk principal 477.33 kB |
 | 2026-08-14 | Preparacion M0 | Completada | 23 MP3 Suno renombrados por hash y distribuidos como candidatas; quedan fuera del manifest v1 para proteger playback, memoria movil y la linea base de 24 canciones/72 mapas |
 | 2026-08-13 | Planificación | No iniciado | M0-M6 adaptadas a Beatmap canonico, perfiles espaciales versionados y validacion mouse/touch; espera D0-D7 y cierre 11.5G |

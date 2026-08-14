@@ -46,6 +46,9 @@ assert.equal(canOverwriteBeatmap({ generated: true, locked: false }, false), fal
 assert.equal(canOverwriteBeatmap({ generated: true, locked: false }, true), true);
 assert.equal(canOverwriteBeatmap({ generated: true, locked: true }, true), false);
 assert.equal(canOverwriteBeatmap({ trackId: 'reviewed-map' }, true), false);
+assert.equal(canOverwriteBeatmap({ schemaVersion: 2, locked: false }, true), true);
+assert.equal(canOverwriteBeatmap({ schemaVersion: 2, locked: false }, false), false);
+assert.equal(canOverwriteBeatmap({ schemaVersion: 2, locked: true }, true), false);
 
 const manifest = await readJson(path.join(projectRoot, 'public', 'assets', 'music-manifest.json'));
 const candidates = (await readJson(path.join(musicRoot, 'suno-candidates.json'))).tracks
