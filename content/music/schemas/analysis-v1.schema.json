@@ -10,8 +10,11 @@
     "audioHash",
     "analyzerVersion",
     "duration",
+    "estimatedBpm",
     "bpm",
+    "tempoSource",
     "beatOffset",
+    "beatOffsetSource",
     "beats",
     "onsets",
     "energyFrames"
@@ -22,8 +25,11 @@
     "audioHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "analyzerVersion": { "type": "string", "minLength": 1 },
     "duration": { "type": "number", "exclusiveMinimum": 0 },
+    "estimatedBpm": { "type": "number", "minimum": 30, "maximum": 300 },
     "bpm": { "type": "number", "minimum": 30, "maximum": 300 },
+    "tempoSource": { "enum": ["estimated", "tempo-hint", "override"] },
     "beatOffset": { "type": "number", "minimum": 0 },
+    "beatOffsetSource": { "enum": ["estimated", "override"] },
     "beats": {
       "type": "array",
       "items": { "type": "number", "minimum": 0 }

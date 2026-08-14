@@ -3,4 +3,12 @@ dist/
 .DS_Store
 *.log
 *.tsbuildinfo
+__pycache__/
+*.pyc
+.python/
+.venv/
+python-*-amd64.exe
+tools/audio-analysis/.cache/
+tools/audio-analysis/.matplotlib/
+tools/audio-analysis/debug/
 public/assets/music-manifest.json

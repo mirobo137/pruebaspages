@@ -13,9 +13,9 @@ distinto para cada dispositivo.
 ## Estado
 
 - Estado general: `EN EJECUCION`
-- Fase activa: `M2 IMPLEMENTADA / VALIDACION FISICA PENDIENTE`
-- Preparacion: `M1 aprobada tras reproducir y jugar la pista completa sin cortes ni bloqueo`
-- Siguiente accion: `Probar la nueva rejilla BPM de Suno Pilot 01; no iniciar M3 antes de aprobar su sensacion ritmica`
+- Fase activa: `M3 COMPLETADA / M4 PENDIENTE DE APROBACION`
+- Preparacion: `M2 aprobada en Facil, Medio y Dificil; dificultad correcta y patron espacial predecible confirmado`
+- Siguiente accion: `Revisar evidencia M3 e iniciar M4 para convertir beats, onsets y energia en mapas con alma y motivos menos predecibles`
 - Implementacion: una fase por vez; ninguna fase siguiente comienza sin aprobar
   la compuerta de la anterior.
 
@@ -177,13 +177,13 @@ Compuerta M2:
 
 Objetivo: producir evidencia musical útil y corregible, no reconocimiento perfecto.
 
-- [ ] M3.1 Crear `tools/audio-analysis/analyze_song.py` con `librosa` y `numpy`.
-- [ ] M3.2 Extraer duración, BPM estimado, beatOffset, beats, onsets y strength.
-- [ ] M3.3 Calcular energía normalizada low/mid/high por rangos de Hz documentados.
-- [ ] M3.4 Aceptar `tempoHint`, BPM/offset overrides y resolver ambigüedad mitad/doble.
-- [ ] M3.5 Soportar archivo individual, carpeta, caché por hash y `--force`.
-- [ ] M3.6 En `--debug`, generar waveform con beats/onsets y resumen de consola.
-- [ ] M3.7 Versionar `analysis.json`; el resultado se guarda en Git y build solo valida.
+- [x] M3.1 Crear `tools/audio-analysis/analyze_song.py` con `librosa` y `numpy`.
+- [x] M3.2 Extraer duración, BPM estimado, beatOffset, beats, onsets y strength.
+- [x] M3.3 Calcular energía normalizada low/mid/high por rangos de Hz documentados.
+- [x] M3.4 Aceptar `tempoHint`, BPM/offset overrides y resolver ambigüedad mitad/doble.
+- [x] M3.5 Soportar archivo individual, carpeta, caché por hash y `--force`.
+- [x] M3.6 En `--debug`, generar waveform con beats/onsets y resumen de consola.
+- [x] M3.7 Versionar `analysis.json`; el resultado se guarda en Git y build solo valida.
 
 Compuerta M3:
 
@@ -282,7 +282,8 @@ el analizador M3 no debe ser requisito para demostrar playback y Beatmap v2.
 
 | Fecha | Fase | Estado | Evidencia |
 |---|---|---|---|
-| 2026-08-14 | M2 | Implementada / prueba fisica pendiente | Rejilla manual provisional de 128 BPM y offset 0.5 s; 123/214/397 notas anidadas, drags compartidos con 0.9 s de descanso; referencias 90/105/120/128/140/174 BPM y proyeccion mouse/touch/pen correctas |
+| 2026-08-14 | M3 | Completada | Analizador librosa-m3-v1 determinista; 6 pistas con hash, beats, onsets y energia low/mid/high; graficos debug inspeccionados, cache/force/carpeta/overrides y ambiguedad mitad-doble validados |
+| 2026-08-14 | M2 | Completada | Facil, Medio y Dificil jugados fisicamente; densidad y dificultad aprobadas, caos de Dificil aceptado provisionalmente y repeticion espacial reservada para motivos M4 |
 | 2026-08-14 | M1 | Completada | Suno Pilot 01 de 124.872 s jugada completa; audio single, fases 0/34/82, revive desde limites y mapa tecnico 38/62/90 validaron playback antes de M2 |
 | 2026-08-14 | M0 | Completada tecnicamente | 3 schemas, 47 metadata verificadas por SHA-256, version espacial/contrato centralizados, politica locked y comandos por pista; npm test/build correctos, chunk principal 477.33 kB |
 | 2026-08-14 | Preparacion M0 | Completada | 23 MP3 Suno renombrados por hash y distribuidos como candidatas; quedan fuera del manifest v1 para proteger playback, memoria movil y la linea base de 24 canciones/72 mapas |

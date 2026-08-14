@@ -123,7 +123,7 @@ export function validateBeatmapV2(document) {
 
 export function validateAnalysisV1(document) {
   const path = 'analysis';
-  const keys = ['schemaVersion', 'trackId', 'audioHash', 'analyzerVersion', 'duration', 'bpm', 'beatOffset', 'beats', 'onsets', 'energyFrames'];
+  const keys = ['schemaVersion', 'trackId', 'audioHash', 'analyzerVersion', 'duration', 'estimatedBpm', 'bpm', 'tempoSource', 'beatOffset', 'beatOffsetSource', 'beats', 'onsets', 'energyFrames'];
   exactKeys(document, keys, path);
   required(document, keys, path);
   if (document.schemaVersion !== 1) fail(path, 'schemaVersion debe ser 1');
@@ -131,8 +131,11 @@ export function validateAnalysisV1(document) {
   if (!HASH_PATTERN.test(document.audioHash)) fail(path, 'audioHash invalido');
   string(document.analyzerVersion, `${path}.analyzerVersion`);
   number(document.duration, `${path}.duration`, Number.EPSILON);
+  number(document.estimatedBpm, `${path}.estimatedBpm`, 30, 300);
   number(document.bpm, `${path}.bpm`, 30, 300);
+  if (!['estimated', 'tempo-hint', 'override'].includes(document.tempoSource)) fail(path, 'tempoSource invalido');
   number(document.beatOffset, `${path}.beatOffset`, 0, document.duration);
+  if (!['estimated', 'override'].includes(document.beatOffsetSource)) fail(path, 'beatOffsetSource invalido');
   if (!Array.isArray(document.beats) || !Array.isArray(document.onsets) || !Array.isArray(document.energyFrames)) fail(path, 'series invalidas');
   let lastBeat = -1;
   document.beats.forEach((beat, index) => {

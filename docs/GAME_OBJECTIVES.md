@@ -28,7 +28,9 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Tres fases de 30 segundos: Lectura, Impulso y Climax.
 - [x] Audio corto en bucle con reloj continuo hasta 90 segundos.
 - [x] Cancion completa Beatmap v2 en modo single implementada con fases variables y piloto de 124.872 segundos jugado completo.
-- [~] Rejilla BPM manual determinista con dificultades anidadas implementada; falta aprobar fisicamente su sensacion ritmica antes de M3.
+- [x] Rejilla BPM manual determinista con dificultades anidadas aprobada en los tres niveles; su repeticion espacial se resolvera en M4.
+- [x] Analisis offline M3 de BPM, beats, onsets y energia validado sobre seis canciones.
+- [ ] Generador hibrido M4 que use evidencia real y motivos espaciales menos predecibles.
 - [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
 - [x] Estrellas independientes por cancion y dificultad.

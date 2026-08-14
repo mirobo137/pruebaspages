@@ -205,6 +205,8 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - Beatmap v2 admite canciones `single` completas y fases de duracion variable.
 - El piloto `Suno Pilot 01` dura 124.872 segundos y cambia de fase en 34 y 82 segundos.
 - Su mapa M2 usa provisionalmente 128 BPM, offset de 0.5 s y 123/214/397 notas en Facil/Medio/Dificil. Los valores todavia no provienen de analizar el audio.
+- M3 analiza audio solo offline con `librosa-m3-v1`. El piloto estima 143.554688 BPM frente al override provisional de 128; M4 debe priorizar sus beats/onsets detectados para recuperar el caracter musical.
+- Seis pistas tienen Analysis v1 versionado con BPM estimado/resuelto, beats, onsets y energia low/mid/high. El build solo valida estos JSON y nunca necesita Python.
 - El audio vuelve a empezar en cada fase, pero el reloj, score, vidas, combo y FLOW continuan.
 - Cada fase tiene un patron distinto para que la repeticion musical no produzca la misma lectura tactil.
 - Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.

@@ -4,8 +4,11 @@
   "audioHash": "0000000000000000000000000000000000000000000000000000000000000000",
   "analyzerVersion": "manual-example-v1",
   "duration": 120,
+  "estimatedBpm": 119.8,
   "bpm": 120,
+  "tempoSource": "tempo-hint",
   "beatOffset": 0.5,
+  "beatOffsetSource": "estimated",
   "beats": [0.5, 1, 1.5, 2],
   "onsets": [
     { "time": 0.5, "strength": 0.9 },

@@ -45,11 +45,15 @@ conscientemente.
 
 El analisis contiene evidencia musical, no decisiones jugables:
 
-- BPM estimado y `beatOffset`;
+- BPM estimado, BPM resuelto, fuente de tempo y `beatOffset` con su fuente;
 - `beats[]` absolutos, que tienen prioridad sobre reconstruir toda la pista por BPM;
 - onsets con fuerza normalizada;
 - energia `low/mid/high` y volumen, todos entre 0 y 1;
 - hash del audio y version del analizador para reproducibilidad.
+
+M3 fija inicialmente low en 20-250 Hz, mid en 250-2,000 Hz y high en
+2,000-10,000 Hz. Las series se suavizan y normalizan por pista; representan energia
+relativa, no stems ni identificacion fiable de instrumentos.
 
 `analysisHash` en Beatmap v2 es el SHA-256 de los bytes UTF-8 exactos del
 `analysis.json` usado para generarlo. `null` significa mapa manual sin analisis.
