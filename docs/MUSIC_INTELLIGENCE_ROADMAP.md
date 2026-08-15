@@ -13,9 +13,9 @@ distinto para cada dispositivo.
 ## Estado
 
 - Estado general: `EN EJECUCION`
-- Fase activa: `M3 COMPLETADA / M4 PENDIENTE DE APROBACION`
-- Preparacion: `M2 aprobada en Facil, Medio y Dificil; dificultad correcta y patron espacial predecible confirmado`
-- Siguiente accion: `Revisar evidencia M3 e iniciar M4 para convertir beats, onsets y energia en mapas con alma y motivos menos predecibles`
+- Fase activa: `M6 CURACION, AUTOMATIZACION Y SALIDA`
+- Preparacion: `M5 aprobada en PC y movil; visualizador FFT modular y configurable por tema`
+- Siguiente accion: `Curar las cinco previews pendientes en Easy/Medium/Hard y registrar evidencia mouse/touch`
 - Implementacion: una fase por vez; ninguna fase siguiente comienza sin aprobar
   la compuerta de la anterior.
 
@@ -196,17 +196,31 @@ Compuerta M3:
 
 Objetivo: usar la música para el cuándo y los patrones para el cómo.
 
-- [ ] M4.1 Fusionar beats y onsets en candidatos, eliminando duplicados cercanos.
-- [ ] M4.2 Calcular intensidad local y segmentos tranquilos, buildup, pico y break sin
+- [x] M4.1 Fusionar beats y onsets en candidatos, eliminando duplicados cercanos.
+- [x] M4.2 Calcular intensidad local y segmentos tranquilos, buildup, pico y break sin
   afirmar reconocimiento perfecto de drops.
-- [ ] M4.3 Seleccionar candidatos por dificultad y presupuesto de densidad.
-- [ ] M4.4 Evolucionar patrones actuales en motivos, inversiones y call/response.
-- [ ] M4.5 Mapear low a acentos, mid a dirección y high a detalle opcional en Hard.
-- [ ] M4.6 Generar drags por contexto/espacio; no inferir sustain científico todavía.
-- [ ] M4.7 Crear validador multiperfil de ventanas solapadas, velocidad espacial,
+- [x] M4.3 Seleccionar candidatos por dificultad y presupuesto de densidad.
+- [x] M4.4 Evolucionar patrones actuales en motivos, inversiones y call/response.
+- [x] M4.5 Mapear low a acentos, mid a dirección y high a detalle opcional en Hard.
+- [x] M4.6 Generar drags por contexto/espacio; no inferir sustain científico todavía.
+- [x] M4.7 Crear validador multiperfil de ventanas solapadas, velocidad espacial,
   bordes, drag, release de mouse, descanso y fases.
-- [ ] M4.8 Permitir generación por pista, dificultad, preview y diff antes de sobrescribir.
-- [ ] M4.9 Incluir en preview/diff las proyecciones mouse y touch sin guardar dos mapas.
+- [x] M4.8 Permitir generación por pista, preview y diff antes de sobrescribir. Se
+  generan juntas las dificultades para proteger el anidamiento.
+- [x] M4.9 Incluir en preview/diff las proyecciones mouse y touch sin guardar dos mapas.
+- [x] M4.10 Inferir una gramatica 4/4 reproducible y exponer su confianza; cuando el
+  tiempo fuerte sea ambiguo se usa solo como ancla estructural, no como dato absoluto.
+- [x] M4.11 Etiquetar cada candidato como pulso fuerte, contratiempo, pulso interior
+  o sincopa, y conservar limites de frase de 16 pulsos.
+- [x] M4.12 Puntuar saliencia musical para que Easy y Medium prioricen evidencia
+  clara, mientras Hard puede conservar sincopas intencionales.
+- [x] M4.13 Crear drags solo sobre energia low/volumen sostenida durante 800 ms y
+  reservar el descanso posterior ya validado.
+- [x] M4.14 Publicar cobertura por dificultad: notas con beat/onset fuerte, saliencia,
+  roles ritmicos, frases capturadas y drags sostenidos.
+- [x] M4.15 Automatizar previews por lote y catalogo de desarrollo para candidatas;
+  metadata sin secciones usa fases provisionales ajustadas al beat y nunca puede
+  aplicarse como mapa oficial.
 
 Compuerta M4:
 
@@ -216,17 +230,19 @@ Compuerta M4:
 - los JSON son legibles, reproducibles, editables y bloqueables;
 - ninguna correccion ergonomica runtime oculta un error estructural del generador;
 - aprobar un mapa exige que sus proyecciones soportadas pasen el mismo validador.
+- cada nota debe poder explicarse por beat, onset fuerte o sincopa deliberada; la
+  dificultad nunca se obtiene agregando eventos sin evidencia.
 
 ## M5 - Visuales FFT en tiempo real
 
 Objetivo: añadir microreacción visual sin permitir que el FFT afecte reglas.
 
-- [ ] M5.1 Cambiar bandas porcentuales por rangos aproximados en Hz.
-- [ ] M5.2 Normalizar contra promedio móvil para comparar canciones suaves/intensas.
-- [ ] M5.3 Usar low para pulsación, volumen para glow y high para partículas sutiles.
-- [ ] M5.4 Combinar intensidad offline macro con FFT micro, sin flashes duplicados.
-- [ ] M5.5 Reducir muestras/efectos bajo el perfil visual reducido.
-- [ ] M5.6 Respetar `RenderResolutionPolicy`; calidad grafica nunca selecciona ni
+- [x] M5.1 Cambiar bandas porcentuales por rangos aproximados en Hz.
+- [x] M5.2 Normalizar contra promedio móvil para comparar canciones suaves/intensas.
+- [x] M5.3 Usar low para pulsación, volumen para glow y high para partículas sutiles.
+- [x] M5.4 Combinar intensidad offline macro con FFT micro, sin flashes duplicados.
+- [x] M5.5 Reducir muestras/efectos bajo el perfil visual reducido.
+- [x] M5.6 Respetar `RenderResolutionPolicy`; calidad grafica nunca selecciona ni
   modifica el perfil de interaccion.
 
 Compuerta M5:
@@ -242,8 +258,8 @@ Objetivo: convertir el pipeline en el flujo normal para mantener contenido.
 
 - [ ] M6.1 Curar al menos seis canciones completas y tres dificultades por canción.
 - [ ] M6.2 Comparar BPM/estilos distintos y registrar correcciones de reglas.
-- [ ] M6.3 Bloquear mapas aprobados y demostrar que regenerar no los altera.
-- [ ] M6.4 Documentar desde descarga de Suno/Mureka hasta push y GitHub Pages.
+- [x] M6.3 Bloquear mapas aprobados y demostrar que regenerar no los altera.
+- [x] M6.4 Documentar desde descarga de Suno/Mureka hasta push y GitHub Pages.
 - [ ] M6.5 Validar peso web, memoria, precarga, primer inicio y cambio de canción.
 - [ ] M6.6 Probar PC, móvil, GitHub Pages y portal objetivo.
 - [ ] M6.7 Decidir con evidencia si hace falta un editor visual sencillo.
@@ -282,6 +298,12 @@ el analizador M3 no debe ser requisito para demostrar playback y Beatmap v2.
 
 | Fecha | Fase | Estado | Evidencia |
 |---|---|---|---|
+| 2026-08-14 | M6 | En ejecucion | 6 pistas/18 previews en reporte reproducible; piloto protegido por `locked`, SHA-256 y prueba de regeneracion equivalente; flujo Suno/Mureka a GitHub Pages documentado; faltan cinco curaciones y pruebas de rendimiento/portales |
+| 2026-08-14 | M5 | Aprobada | Usuario comparo PC y movil, aprobo calibracion `high-v2`; barras y linea extraidas tras contrato/fabrica `MusicVisualizer`, configurables por tema y reemplazables sin tocar `RhythmBackground` |
+| 2026-08-14 | M5 | Candidato tecnico | FFT aislado de SFX, 24/16 barras logaritmicas, calibracion high-v2 con contraste comun y picos 0.6-0.8, bandas 45-250/250-2000/2000-8000 Hz, 6 envolventes macro offline, muestreo 60/30/off y control `musicVisuals=off`; prueba fisica pendiente |
+| 2026-08-14 | M4 | Aprobada | Usuario aprobo el avance tras probar el piloto y dos canciones adicionales; ritmo, PC/movil y eliminacion de notas consecutivas superpuestas aceptados |
+| 2026-08-14 | M4 | Automatizacion multipista | Fading Static 37/56/88 y Moonlit Arpeggios 262/365/404 generadas por lote con catalogo dev, fases provisionales seguras y mapas oficiales intactos |
+| 2026-08-14 | M4 | Revision ritmica v2 | Preview 139/261/340, cobertura beat/onset 100%/99.2%/86.2%, compas/frases y roles explicables, 6 drags sostenidos, sin cabezas consecutivas superpuestas; primera revision aprobada en PC/movil y v2 pendiente de prueba fisica |
 | 2026-08-14 | M3 | Completada | Analizador librosa-m3-v1 determinista; 6 pistas con hash, beats, onsets y energia low/mid/high; graficos debug inspeccionados, cache/force/carpeta/overrides y ambiguedad mitad-doble validados |
 | 2026-08-14 | M2 | Completada | Facil, Medio y Dificil jugados fisicamente; densidad y dificultad aprobadas, caos de Dificil aceptado provisionalmente y repeticion espacial reservada para motivos M4 |
 | 2026-08-14 | M1 | Completada | Suno Pilot 01 de 124.872 s jugada completa; audio single, fases 0/34/82, revive desde limites y mapa tecnico 38/62/90 validaron playback antes de M2 |

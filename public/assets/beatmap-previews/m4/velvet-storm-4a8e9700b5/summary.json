@@ -1,0 +1,360 @@
+{
+  "trackId": "velvet-storm-4a8e9700b5",
+  "generatorVersion": "hybrid-analysis-m4-v2",
+  "analysisPath": "content/music/analysis/velvet-storm-4a8e9700b5.json",
+  "analysisHash": "e7fc15a7f09c0aca098cbcbbac3c76fbb887cc48872e955ce95b04b636745f6c",
+  "mode": "preview",
+  "phaseSource": "analysis-derived-preview",
+  "currentGeneratorVersion": null,
+  "counts": {
+    "easy": {
+      "current": null,
+      "candidate": 240,
+      "difference": null,
+      "drags": 20
+    },
+    "medium": {
+      "current": null,
+      "candidate": 322,
+      "difference": null,
+      "drags": 20
+    },
+    "hard": {
+      "current": null,
+      "candidate": 410,
+      "difference": null,
+      "drags": 20
+    }
+  },
+  "fusedCandidates": 601,
+  "musicalGrammar": {
+    "meter": "4/4-inferred",
+    "beatsPerBar": 4,
+    "phraseBeats": 16,
+    "downbeatRemainder": 3,
+    "confidence": 0.035325,
+    "phaseScores": [
+      44.540239,
+      40.440923,
+      42.543015,
+      46.171232
+    ]
+  },
+  "musicalCoverage": {
+    "hard": {
+      "noteCount": 410,
+      "beatOrStrongOnsetRatio": 0.687805,
+      "averageSalience": 1.190935,
+      "phraseBoundariesCaptured": 16,
+      "rhythmicRoles": {
+        "syncopation": 156,
+        "downbeat": 69,
+        "backbeat": 117,
+        "pulse": 68
+      },
+      "sustainedDrags": 20
+    },
+    "medium": {
+      "noteCount": 322,
+      "beatOrStrongOnsetRatio": 0.822981,
+      "averageSalience": 1.276529,
+      "phraseBoundariesCaptured": 16,
+      "rhythmicRoles": {
+        "downbeat": 69,
+        "backbeat": 117,
+        "pulse": 67,
+        "syncopation": 69
+      },
+      "sustainedDrags": 20
+    },
+    "easy": {
+      "noteCount": 240,
+      "beatOrStrongOnsetRatio": 1,
+      "averageSalience": 1.35409,
+      "phraseBoundariesCaptured": 16,
+      "rhythmicRoles": {
+        "downbeat": 68,
+        "pulse": 65,
+        "backbeat": 105,
+        "syncopation": 2
+      },
+      "sustainedDrags": 20
+    }
+  },
+  "segmentThresholds": {
+    "low": 0.5684226936005038,
+    "high": 0.728912776622973
+  },
+  "segments": [
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 0,
+      "endTime": 4,
+      "candidateCount": 7,
+      "averageIntensity": 0.120217
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 4,
+      "endTime": 8,
+      "candidateCount": 9,
+      "averageIntensity": 0.208209
+    },
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 8,
+      "endTime": 12,
+      "candidateCount": 7,
+      "averageIntensity": 0.398483
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 12,
+      "endTime": 20,
+      "candidateCount": 23,
+      "averageIntensity": 0.447962
+    },
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 20,
+      "endTime": 24,
+      "candidateCount": 18,
+      "averageIntensity": 0.488657
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 24,
+      "endTime": 28,
+      "candidateCount": 19,
+      "averageIntensity": 0.56015
+    },
+    {
+      "type": "steady",
+      "phaseId": "read",
+      "startTime": 28,
+      "endTime": 36,
+      "candidateCount": 32,
+      "averageIntensity": 0.624536
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 36,
+      "endTime": 40,
+      "candidateCount": 17,
+      "averageIntensity": 0.626773
+    },
+    {
+      "type": "peak",
+      "phaseId": "read",
+      "startTime": 40,
+      "endTime": 44,
+      "candidateCount": 17,
+      "averageIntensity": 0.750011
+    },
+    {
+      "type": "steady",
+      "phaseId": "read",
+      "startTime": 44,
+      "endTime": 48,
+      "candidateCount": 19,
+      "averageIntensity": 0.703653
+    },
+    {
+      "type": "peak",
+      "phaseId": "read",
+      "startTime": 48,
+      "endTime": 56,
+      "candidateCount": 21,
+      "averageIntensity": 0.730801
+    },
+    {
+      "type": "steady",
+      "phaseId": "drive",
+      "startTime": 56.337838,
+      "endTime": 60.337838,
+      "candidateCount": 4,
+      "averageIntensity": 0.725224
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 60.337838,
+      "endTime": 68.337838,
+      "candidateCount": 31,
+      "averageIntensity": 0.748415
+    },
+    {
+      "type": "steady",
+      "phaseId": "drive",
+      "startTime": 68.337838,
+      "endTime": 72.337838,
+      "candidateCount": 14,
+      "averageIntensity": 0.71467
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 72.337838,
+      "endTime": 96.337838,
+      "candidateCount": 87,
+      "averageIntensity": 0.780274
+    },
+    {
+      "type": "break",
+      "phaseId": "drive",
+      "startTime": 96.337838,
+      "endTime": 100.337838,
+      "candidateCount": 8,
+      "averageIntensity": 0.273674
+    },
+    {
+      "type": "buildup",
+      "phaseId": "drive",
+      "startTime": 100.337838,
+      "endTime": 104.337838,
+      "candidateCount": 14,
+      "averageIntensity": 0.568538
+    },
+    {
+      "type": "steady",
+      "phaseId": "drive",
+      "startTime": 104.337838,
+      "endTime": 112.337838,
+      "candidateCount": 34,
+      "averageIntensity": 0.683358
+    },
+    {
+      "type": "steady",
+      "phaseId": "climax",
+      "startTime": 112.675677,
+      "endTime": 120.675677,
+      "candidateCount": 25,
+      "averageIntensity": 0.685446
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 120.675677,
+      "endTime": 124.675677,
+      "candidateCount": 18,
+      "averageIntensity": 0.672302
+    },
+    {
+      "type": "quiet",
+      "phaseId": "climax",
+      "startTime": 124.675677,
+      "endTime": 128.675677,
+      "candidateCount": 13,
+      "averageIntensity": 0.442531
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 128.675677,
+      "endTime": 132.675677,
+      "candidateCount": 19,
+      "averageIntensity": 0.732869
+    },
+    {
+      "type": "steady",
+      "phaseId": "climax",
+      "startTime": 132.675677,
+      "endTime": 144.675677,
+      "candidateCount": 49,
+      "averageIntensity": 0.650812
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 144.675677,
+      "endTime": 148.675677,
+      "candidateCount": 23,
+      "averageIntensity": 0.733561
+    },
+    {
+      "type": "quiet",
+      "phaseId": "climax",
+      "startTime": 148.675677,
+      "endTime": 152.675677,
+      "candidateCount": 20,
+      "averageIntensity": 0.434535
+    },
+    {
+      "type": "buildup",
+      "phaseId": "climax",
+      "startTime": 152.675677,
+      "endTime": 156.675677,
+      "candidateCount": 22,
+      "averageIntensity": 0.626044
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 156.675677,
+      "endTime": 168.675677,
+      "candidateCount": 31,
+      "averageIntensity": 0.274136
+    }
+  ],
+  "projections": {
+    "mouse-balanced": {
+      "easy": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 214.9,
+        "maximumTravel": 340
+      },
+      "medium": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 179.7,
+        "maximumTravel": 380
+      },
+      "hard": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 158.9,
+        "maximumTravel": 420
+      }
+    },
+    "touch-portrait": {
+      "easy": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 128.2,
+        "maximumTravel": 299.9
+      },
+      "medium": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 111.6,
+        "maximumTravel": 299.9
+      },
+      "hard": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 100.2,
+        "maximumTravel": 365.1
+      }
+    }
+  }
+}

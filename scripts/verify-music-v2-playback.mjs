@@ -18,6 +18,12 @@ try {
   const { adaptBeatmapV1 } = await server.ssrLoadModule(
     '/src/content/beatmap/BeatmapV1Adapter.ts',
   );
+  const { isBeatmapJsonContentType } = await server.ssrLoadModule(
+    '/src/content/Beatmap.ts',
+  );
+  assert.equal(isBeatmapJsonContentType('application/json'), true);
+  assert.equal(isBeatmapJsonContentType('application/json; charset=utf-8'), true);
+  assert.equal(isBeatmapJsonContentType('text/html'), false);
   const { adaptBeatmapV2 } = await server.ssrLoadModule(
     '/src/content/beatmap/BeatmapV2Adapter.ts',
   );

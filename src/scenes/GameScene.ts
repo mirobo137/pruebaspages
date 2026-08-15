@@ -48,6 +48,11 @@ import { ComboFocusPresenter, isComboMilestone } from '../ui/ComboFocusPresenter
 import { DangerIndicator } from '../ui/DangerIndicator';
 import type { RewardedAdStatus } from '../monetization/RewardTypes';
 import { RewardedGameplayPolicy } from '../game/checkpoint/RewardedGameplayPolicy';
+import { SILENT_AUDIO_FRAME } from '../audio/MusicSpectrum';
+import {
+  sampleMusicVisualIntensity,
+  type MusicVisualProfile,
+} from '../content/MusicVisualProfile';
 
 interface ActiveTarget {
   node: TargetNode;
@@ -73,6 +78,7 @@ export interface GameSceneOptions {
   beatmap: Beatmap;
   visualTheme: VisualTheme;
   visualQuality: VisualQualityProfile;
+  musicVisualProfile: MusicVisualProfile | null;
   audioReady: Promise<void>;
   onRestart: () => void;
   onExit: () => void;
@@ -122,6 +128,9 @@ export class GameScene implements Scene {
   private readonly difficultyProfile: DifficultyProfile;
   private readonly beatmap: Beatmap;
   private readonly visualTheme: VisualTheme;
+  private readonly musicVisualProfile: MusicVisualProfile | null;
+  private readonly musicVisualsEnabled: boolean;
+  private visualQuality: VisualQualityProfile;
   private readonly beatmapPlayer: BeatmapPlayer;
   private readonly phaseTransition = new PhaseTransitionGuard();
   private readonly audioReady: Promise<void>;
@@ -152,6 +161,8 @@ export class GameScene implements Scene {
   private awaitingSecondChance = false;
   private readonly rewardedGameplay = new RewardedGameplayPolicy();
   private readonly runFinalization = new RunFinalizationGate();
+  private musicVisualSampleElapsed = 0;
+  private musicVisualSampleCount = 0;
 
   private get dragState(): DragInteractionState<ActiveTarget> | null {
     return this.dragController.active;
@@ -165,6 +176,10 @@ export class GameScene implements Scene {
     this.difficulty = options.difficulty;
     this.travelBudget = new TravelBudget(options.difficulty);
     this.visualTheme = options.visualTheme;
+    this.musicVisualProfile = options.musicVisualProfile;
+    this.musicVisualsEnabled = !import.meta.env.DEV
+      || new URLSearchParams(window.location.search).get('musicVisuals') !== 'off';
+    this.visualQuality = options.visualQuality;
     const initialPointerMode = detectInitialPointerMode({
       maxTouchPoints: navigator.maxTouchPoints,
       coarsePointer: window.matchMedia('(pointer: coarse)').matches,
@@ -242,8 +257,13 @@ export class GameScene implements Scene {
   }
 
   setVisualQuality(quality: VisualQualityProfile): void {
+    this.visualQuality = quality;
     this.background.setVisualQuality(quality);
     this.effects.setVisualQuality(quality);
+    if (quality.id === 'minimal') {
+      this.background.setMusicFrame(SILENT_AUDIO_FRAME, 0);
+      this.effects.setMusicFrame(SILENT_AUDIO_FRAME, 0);
+    }
   }
 
   mount(): void {
@@ -287,6 +307,7 @@ export class GameScene implements Scene {
     if (this.gameEnded || this.paused) return;
 
     this.hud.animate(deltaSeconds);
+    this.updateMusicVisuals(deltaSeconds);
     this.background.updateBackground(deltaSeconds);
     this.effects.updateEffects(deltaSeconds);
     this.gameplayPointer.animate(deltaSeconds);
@@ -377,6 +398,46 @@ export class GameScene implements Scene {
         );
       }
       if (this.gameEnded) return;
+    }
+  }
+
+  private updateMusicVisuals(deltaSeconds: number): void {
+    if (!this.musicVisualsEnabled || this.visualQuality.id === 'minimal') return;
+    this.musicVisualSampleElapsed += deltaSeconds;
+    const interval = this.visualQuality.id === 'full' ? 1 / 60 : 1 / 30;
+    if (this.musicVisualSampleElapsed < interval) return;
+    const sampleDelta = this.musicVisualSampleElapsed;
+    this.musicVisualSampleElapsed = 0;
+    const frame = this.audioManager.readFrame(sampleDelta);
+    const phaseMacro = sampleMusicVisualIntensity(
+      this.musicVisualProfile,
+      this.audioManager.currentTime,
+      this.phaseIndex,
+    );
+    this.background.setMusicFrame(frame, phaseMacro);
+    this.effects.setMusicFrame(frame, phaseMacro);
+    if (import.meta.env.DEV) {
+      this.musicVisualSampleCount += 1;
+      const diagnosticsTarget = globalThis as typeof globalThis & {
+        __superflowMusicVisuals?: Record<string, unknown>;
+      };
+      diagnosticsTarget.__superflowMusicVisuals = {
+        enabled: this.musicVisualsEnabled,
+        quality: this.visualQuality.id,
+        samples: this.musicVisualSampleCount,
+        macro: Number(phaseMacro.toFixed(3)),
+        volume: Number(frame.volume.toFixed(3)),
+        bass: Number(frame.bass.toFixed(3)),
+        mids: Number(frame.mids.toFixed(3)),
+        highs: Number(frame.highs.toFixed(3)),
+        spectrumAverage: Number((frame.spectrum.length > 0
+          ? frame.spectrum.reduce((sum, value) => sum + value, 0) / frame.spectrum.length
+          : 0).toFixed(3)),
+        spectrumMinimum: Number((frame.spectrum.length > 0
+          ? Math.min(...frame.spectrum)
+          : 0).toFixed(3)),
+        spectrumPeak: Number(Math.max(0, ...frame.spectrum).toFixed(3)),
+      };
     }
   }
 

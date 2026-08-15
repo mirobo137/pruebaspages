@@ -30,7 +30,10 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Cancion completa Beatmap v2 en modo single implementada con fases variables y piloto de 124.872 segundos jugado completo.
 - [x] Rejilla BPM manual determinista con dificultades anidadas aprobada en los tres niveles; su repeticion espacial se resolvera en M4.
 - [x] Analisis offline M3 de BPM, beats, onsets y energia validado sobre seis canciones.
-- [ ] Generador hibrido M4 que use evidencia real y motivos espaciales menos predecibles.
+- [x] Generador hibrido M4 aprobado tras pruebas del piloto y dos canciones
+  adicionales; conserva perfiles PC/movil y evita cabezas consecutivas superpuestas.
+- [~] Visuales musicales M5 implementados con envolvente offline + FFT aislado;
+  falta comparar fisicamente M5 activo/inactivo antes de avanzar a M6.
 - [x] Crossfade Web Audio entre fases para eliminar el hueco del loop nativo.
 - [x] Menu inicial y pantalla de resultado.
 - [x] Estrellas independientes por cancion y dificultad.
@@ -72,9 +75,10 @@ Identidad provisional: **SUPERFLOW: RHYTHM RUSH**, una experiencia neon en la qu
 - [x] Riesgo de romper FLOW inmediatamente al fallar.
 - [x] SUPER FLOW x4 desbloqueado solo con cuatro Perfect consecutivos dentro de FLOW.
 - [x] Bien degrada SUPER FLOW a FLOW x2; Miss rompe todo el estado.
-- [~] Feedback procedural distinto para Perfect, Bien, FLOW, SUPER, Miss, combo roto
-  y derrota implementado; falta aprobar fisicamente el ultimo ajuste de volumen.
-- [~] Perfil desktop separado, campo centrado y cursor procedural implementados; falta validar fisicamente que mouse sea tan satisfactorio como touch.
+- [x] Feedback procedural distinto para Perfect, Bien, FLOW, SUPER, Miss, combo roto
+  y derrota implementado y aprobado fisicamente.
+- [x] Perfil desktop separado, campo centrado, cursor y drag asistido aprobados en
+  Facil, Medio y Dificil sin alterar touch.
 - [~] Combo focal, hitos y anticipacion FLOW implementados sin tapar notas visibles; falta validacion perceptual en una partida fisica.
 - [~] Advertencia periferica al quedar una sola vida implementada; falta validacion visual fisica y confirmar el audio real de Miss.
 - [x] FLOW persistente basado en precision: nunca expira por tiempo sin un error del jugador.

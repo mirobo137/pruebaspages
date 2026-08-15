@@ -1,13 +1,18 @@
 import type { MusicTrack } from '../content/MusicCatalog';
 import type { TimingGrade } from '../game/timing/TimingGrade';
 import { ReactiveAudioFeedback } from './ReactiveAudioFeedback';
+import {
+  AdaptiveSpectrumNormalizer,
+  averageFrequencyBand,
+  createLogFrequencyBands,
+  MUSIC_FREQUENCY_BANDS,
+  SILENT_AUDIO_FRAME,
+  type AudioFrame,
+} from './MusicSpectrum';
 
-export interface AudioFrame {
-  volume: number;
-  bass: number;
-  mids: number;
-  highs: number;
-}
+export type { AudioFrame } from './MusicSpectrum';
+
+const VISUAL_SPECTRUM_BANDS = createLogFrequencyBands(24);
 
 export class AudioManager {
   private context: AudioContext | null = null;
@@ -19,6 +24,7 @@ export class AudioManager {
     gain: GainNode;
   }> = [];
   private frequencyData = new Uint8Array(0);
+  private readonly spectrumNormalizer = new AdaptiveSpectrumNormalizer();
   private readonly trackData = new Map<string, Promise<ArrayBuffer>>();
   private readonly decodedTracks = new Map<string, Promise<AudioBuffer>>();
   private missSamplePromise: Promise<AudioBuffer | null> | null = null;
@@ -45,7 +51,10 @@ export class AudioManager {
   setPlatformMuted(muted: boolean): void {
     this.platformMuted = muted;
     if (this.masterGain) this.masterGain.gain.value = muted ? 0 : 1;
-    if (muted) this.feedback?.reset();
+    if (muted) {
+      this.feedback?.reset();
+      this.spectrumNormalizer.reset();
+    }
   }
 
   emitGameplayJudgement(
@@ -135,6 +144,7 @@ export class AudioManager {
         source.playbackRate.value = buffer.duration / renderedCycleDuration;
         source.connect(gain);
         gain.connect(this.feedback!.musicInput);
+        gain.connect(this.analyser!);
 
         gain.gain.setValueAtTime(cycle === 0 ? 1 : 0, cycleStart);
         if (cycle > 0) {
@@ -164,6 +174,7 @@ export class AudioManager {
       }
       source.connect(gain);
       gain.connect(this.feedback!.musicInput);
+      gain.connect(this.analyser!);
       const startOffset = Math.max(
         0,
         Math.min(options.startOffset ?? 0, Math.max(0, buffer.duration - 0.01)),
@@ -180,6 +191,7 @@ export class AudioManager {
     this.timelineOffset = Math.max(0, options.timelineOffset ?? 0);
     this.playing = true;
     this.paused = false;
+    this.spectrumNormalizer.reset();
   }
 
   async pause(): Promise<void> {
@@ -200,6 +212,7 @@ export class AudioManager {
 
     await this.context.resume();
     this.paused = false;
+    this.spectrumNormalizer.reset();
   }
 
   stop(preserveFeedback = false): void {
@@ -219,27 +232,39 @@ export class AudioManager {
     this.timelineOffset = 0;
     this.playing = false;
     this.paused = false;
+    this.spectrumNormalizer.reset();
   }
 
-  readFrame(): AudioFrame {
-    if (!this.analyser || this.frequencyData.length === 0) {
-      return { volume: 0, bass: 0, mids: 0, highs: 0 };
+  readFrame(deltaSeconds = 1 / 60): AudioFrame {
+    if (
+      !this.analyser
+      || this.frequencyData.length === 0
+      || !this.isPlaying
+      || this.platformMuted
+    ) {
+      return SILENT_AUDIO_FRAME;
     }
 
     this.analyser.getByteFrequencyData(this.frequencyData);
-
-    return {
-      volume: this.average(0, this.frequencyData.length),
-      bass: this.average(0, Math.floor(this.frequencyData.length * 0.12)),
-      mids: this.average(
-        Math.floor(this.frequencyData.length * 0.12),
-        Math.floor(this.frequencyData.length * 0.5),
-      ),
-      highs: this.average(
-        Math.floor(this.frequencyData.length * 0.5),
-        this.frequencyData.length,
-      ),
+    const sampleRate = this.context!.sampleRate;
+    const fftSize = this.analyser.fftSize;
+    const readBand = (band: { minimumHz: number; maximumHz: number }): number => (
+      averageFrequencyBand(
+        this.frequencyData,
+        sampleRate,
+        fftSize,
+        band.minimumHz,
+        band.maximumHz,
+      )
+    );
+    const raw: AudioFrame = {
+      volume: readBand(MUSIC_FREQUENCY_BANDS.volume),
+      bass: readBand(MUSIC_FREQUENCY_BANDS.bass),
+      mids: readBand(MUSIC_FREQUENCY_BANDS.mids),
+      highs: readBand(MUSIC_FREQUENCY_BANDS.highs),
+      spectrum: VISUAL_SPECTRUM_BANDS.map(readBand),
     };
+    return this.spectrumNormalizer.update(raw, deltaSeconds);
   }
 
   destroy(): void {
@@ -253,6 +278,7 @@ export class AudioManager {
     this.feedback = null;
     this.context = null;
     this.frequencyData = new Uint8Array(0);
+    this.spectrumNormalizer.reset();
     this.trackData.clear();
     this.decodedTracks.clear();
     this.missSamplePromise = null;
@@ -268,8 +294,7 @@ export class AudioManager {
     this.analyser.smoothingTimeConstant = 0.75;
     this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
     this.masterGain.gain.value = this.platformMuted ? 0 : 1;
-    this.feedback = new ReactiveAudioFeedback(this.context, this.analyser);
-    this.analyser.connect(this.masterGain);
+    this.feedback = new ReactiveAudioFeedback(this.context, this.masterGain);
     this.masterGain.connect(this.context.destination);
   }
 
@@ -317,17 +342,6 @@ export class AudioManager {
       .then((data) => data ? context.decodeAudioData(data.slice(0)) : null)
       .catch(() => null);
     return this.missSamplePromise;
-  }
-
-  private average(start: number, end: number): number {
-    const safeEnd = Math.max(start + 1, end);
-    let sum = 0;
-
-    for (let index = start; index < safeEnd; index += 1) {
-      sum += this.frequencyData[index] ?? 0;
-    }
-
-    return sum / ((safeEnd - start) * 255);
   }
 
   private createFadeCurve(fadeIn: boolean): Float32Array<ArrayBuffer> {

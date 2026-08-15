@@ -46,6 +46,9 @@ export const DEFAULT_VISUAL_THEME = {
   background: {
     flowPattern: 'polygon',
     superFlowPattern: 'tunnel',
+    musicVisualizer: {
+      style: 'spectrum-bars-line',
+    },
     backdrop: 0x0b1022,
     nebulaBase: 0xffffff,
     vignette: 0x02040d,

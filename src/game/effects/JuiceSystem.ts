@@ -6,6 +6,8 @@ import {
 } from '../../customization/VisualQuality';
 import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
 import type { TimingGrade } from '../timing/TimingGrade';
+import type { AudioFrame } from '../../audio/MusicSpectrum';
+import { SILENT_AUDIO_FRAME } from '../../audio/MusicSpectrum';
 
 interface ParticleEffect {
   node: Graphics;
@@ -66,6 +68,7 @@ const announcementStyle = new TextStyle({
 });
 
 export class JuiceSystem extends Container {
+  private readonly musicGlow = new Graphics();
   private readonly flash = new Graphics();
   private readonly superFrame = new Graphics();
   private readonly particles: ParticleEffect[] = [];
@@ -81,6 +84,10 @@ export class JuiceSystem extends Container {
   private flowActive = false;
   private superFlowActive = false;
   private elapsed = 0;
+  private musicFrame: AudioFrame = { ...SILENT_AUDIO_FRAME };
+  private musicMacroIntensity = .35;
+  private musicParticleElapsed = 0;
+  private musicParticleSequence = 0;
 
   constructor(
     private readonly visualTheme: EffectsVisualTheme = DEFAULT_VISUAL_THEME.effects,
@@ -89,9 +96,10 @@ export class JuiceSystem extends Container {
     super();
     this.flashColor = visualTheme.highlight;
     this.eventMode = 'none';
+    this.musicGlow.blendMode = 'add';
     this.flash.blendMode = 'add';
     this.superFrame.blendMode = 'add';
-    this.addChild(this.flash, this.superFrame);
+    this.addChild(this.musicGlow, this.flash, this.superFrame);
     this.setVisualQuality(quality);
   }
 
@@ -100,6 +108,7 @@ export class JuiceSystem extends Container {
     const enabled = quality.id !== 'minimal';
     this.flash.visible = enabled;
     this.superFrame.visible = enabled;
+    this.musicGlow.visible = enabled;
     if (!enabled) {
       while (this.particles.length > 0) this.particles.pop()?.node.destroy();
       while (this.rings.length > 0) this.rings.pop()?.node.destroy();
@@ -111,6 +120,12 @@ export class JuiceSystem extends Container {
     this.viewportHeight = height;
     this.redrawFlash();
     this.redrawSuperFrame();
+    this.redrawMusicGlow();
+  }
+
+  setMusicFrame(frame: AudioFrame, macroIntensity: number): void {
+    this.musicFrame = frame;
+    this.musicMacroIntensity = Math.max(0, Math.min(1, macroIntensity));
   }
 
   emitTouch(x: number, y: number): void {
@@ -421,6 +436,34 @@ export class JuiceSystem extends Container {
 
   updateEffects(deltaSeconds: number): void {
     this.elapsed += deltaSeconds;
+    const musicAmount = this.quality.id === 'minimal'
+      ? 0
+      : .62 + this.musicMacroIntensity * .48;
+    this.musicGlow.alpha = this.musicFrame.volume * musicAmount
+      * (this.quality.id === 'full' ? .19 : .115);
+    this.musicParticleElapsed += deltaSeconds;
+    const particleInterval = this.quality.id === 'full' ? .16 : .34;
+    if (
+      this.quality.id !== 'minimal'
+      && this.musicFrame.highs * musicAmount >= .18
+      && this.musicParticleElapsed >= particleInterval
+    ) {
+      this.musicParticleElapsed = 0;
+      const fromLeft = this.musicParticleSequence++ % 2 === 0;
+      const x = fromLeft ? this.viewportWidth * .07 : this.viewportWidth * .93;
+      const y = this.viewportHeight * (.18 + (this.musicParticleSequence * .173) % .64);
+      this.createParticle(
+        x,
+        y,
+        this.visualTheme.highlight,
+        fromLeft ? 18 : -18,
+        -22,
+        1.5,
+        .5,
+        8,
+        'dot',
+      );
+    }
     this.flashStrength = Math.max(0, this.flashStrength - deltaSeconds * 0.55);
     this.flash.alpha = this.flashStrength;
     this.superFrame.alpha = this.superFlowActive
@@ -631,6 +674,13 @@ export class JuiceSystem extends Container {
       color: this.flashColor,
     });
     this.flash.alpha = this.flashStrength;
+  }
+
+  private redrawMusicGlow(): void {
+    this.musicGlow.clear().rect(0, 0, this.viewportWidth, this.viewportHeight).fill({
+      color: this.visualTheme.highlight,
+    });
+    this.musicGlow.alpha = 0;
   }
 
   private redrawSuperFrame(): void {

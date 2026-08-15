@@ -2,6 +2,7 @@ import type {
   DeepPartial,
   DragTrailStyle,
   FlowBackgroundPattern,
+  MusicVisualizerStyle,
   SuperFlowBackgroundPattern,
   TargetShape,
   ThemeParticleStyle,
@@ -18,6 +19,11 @@ const TIMING_RING_STYLES = new Set<TimingRingStyle>([
 ]);
 const DRAG_TRAIL_STYLES = new Set<DragTrailStyle>(['luminous', 'electric', 'comet']);
 const FLOW_PATTERNS = new Set<FlowBackgroundPattern>(['polygon', 'waves', 'vortex']);
+const MUSIC_VISUALIZER_STYLES = new Set<MusicVisualizerStyle>([
+  'spectrum-bars-line',
+  'spectrum-bars',
+  'none',
+]);
 const SUPER_FLOW_PATTERNS = new Set<SuperFlowBackgroundPattern>([
   'tunnel',
   'hyperspace',
@@ -85,6 +91,9 @@ export function resolveVisualTheme(
   }
   if (!FLOW_PATTERNS.has(merged.background.flowPattern)) {
     merged.background.flowPattern = DEFAULT_VISUAL_THEME.background.flowPattern;
+  }
+  if (!MUSIC_VISUALIZER_STYLES.has(merged.background.musicVisualizer.style)) {
+    merged.background.musicVisualizer.style = DEFAULT_VISUAL_THEME.background.musicVisualizer.style;
   }
   if (!SUPER_FLOW_PATTERNS.has(merged.background.superFlowPattern)) {
     merged.background.superFlowPattern = DEFAULT_VISUAL_THEME.background.superFlowPattern;

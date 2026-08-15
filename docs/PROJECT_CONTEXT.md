@@ -207,6 +207,19 @@ Los efectos tienen limites simultaneos de particulas, anillos y textos para evit
 - Su mapa M2 usa provisionalmente 128 BPM, offset de 0.5 s y 123/214/397 notas en Facil/Medio/Dificil. Los valores todavia no provienen de analizar el audio.
 - M3 analiza audio solo offline con `librosa-m3-v1`. El piloto estima 143.554688 BPM frente al override provisional de 128; M4 debe priorizar sus beats/onsets detectados para recuperar el caracter musical.
 - Seis pistas tienen Analysis v1 versionado con BPM estimado/resuelto, beats, onsets y energia low/mid/high. El build solo valida estos JSON y nunca necesita Python.
+- M4 es el mapa oficial del piloto: fusiona beats/onsets, deriva 21
+  segmentos relativos, infiere compases/frases con confianza explicita, asigna roles
+  ritmicos, genera motivos deterministas y produce 139/261/340 notas. Su cobertura
+  beat/onset fuerte es 100%/99.2%/86.2%; Hard reserva el resto para sincopas. Los
+  reemplazo la rejilla M2 tras aprobarse fisicamente en PC/movil.
+- M4 admite generacion por lote de cualquier Analysis v1. Las candidatas sin
+  secciones editoriales reciben fases provisionales ajustadas al beat solamente en
+  preview y entran a un catalogo dev seleccionable con `previewTrack`; `--apply`
+  exige metadata revisada y nunca publica automaticamente esas decisiones.
+- M5 genera una envolvente visual offline de 1 s desde Analysis v1 y la combina con
+  FFT exclusivo de la musica: low 45-250 Hz pulsa el fondo, volumen controla glow y
+  high 2-8 kHz produce particulas laterales. Full muestrea a 60 Hz, Reduced a 30 Hz
+  y Minimal lo desactiva; `musicVisuals=off` permite comparar sin tocar gameplay.
 - El audio vuelve a empezar en cada fase, pero el reloj, score, vidas, combo y FLOW continuan.
 - Cada fase tiene un patron distinto para que la repeticion musical no produzca la misma lectura tactil.
 - Lectura presenta el pulso, Impulso aumenta movimiento y Climax concentra la mayor intensidad.

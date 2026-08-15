@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "tracks": [
+    {
+      "trackId": "untitled-0f61f35777",
+      "approvedAt": "2026-08-14",
+      "generatorVersion": "hybrid-analysis-m4-v2",
+      "analysisHash": "36fe6216f7e298d34e995ed253016830c0ed703f212c6516bf034b60fbb6c0ce",
+      "difficulties": {
+        "easy": {
+          "eventCount": 139,
+          "sha256": "ec0800d9bc1734a76ee931043b23f80c5902461bd0ec197a23a16d7e746a14e7"
+        },
+        "medium": {
+          "eventCount": 261,
+          "sha256": "19019e56551c97590f0b53126cbec75ca7de50a276860b73a77e9301219a4a3a"
+        },
+        "hard": {
+          "eventCount": 340,
+          "sha256": "ac57c533aa473772dba2cb85d29519df333eb68570522482d8ac6397af7e7362"
+        }
+      }
+    }
+  ]
+}

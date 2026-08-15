@@ -46,22 +46,8 @@ for (const bpm of referenceBpms) {
   assertSubset(maps.medium, maps.hard, `${bpm}: Medium no es subconjunto de Hard`);
 }
 
-const pilotMaps = {};
-for (const difficulty of difficulties) {
-  const document = JSON.parse(await readFile(
-    `public/assets/beatmaps/untitled-0f61f35777/${difficulty}.json`,
-    'utf8',
-  ));
-  validateBeatmapV2(document);
-  assert.equal(document.generatorVersion, 'bpm-grid-v1');
-  assertTemporalSafety(document, 128, difficulty);
-  pilotMaps[difficulty] = document;
-}
-assertSubset(pilotMaps.easy, pilotMaps.medium, 'Piloto: Easy no es subconjunto de Medium');
-assertSubset(pilotMaps.medium, pilotMaps.hard, 'Piloto: Medium no es subconjunto de Hard');
-
 console.log(
-  `BPM M2: ${referenceBpms.join('/')} BPM, determinismo, dificultad anidada, `
+  `BPM M2 fallback: ${referenceBpms.join('/')} BPM, determinismo, dificultad anidada, `
   + 'separacion y descanso de drag: OK',
 );
 

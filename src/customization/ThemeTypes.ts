@@ -3,6 +3,7 @@ export type TimingRingStyle = 'concentric' | 'broken' | 'orbiting';
 export type DragTrailStyle = 'luminous' | 'electric' | 'comet';
 export type FlowBackgroundPattern = 'polygon' | 'waves' | 'vortex';
 export type SuperFlowBackgroundPattern = 'tunnel' | 'hyperspace' | 'prism';
+export type MusicVisualizerStyle = 'spectrum-bars-line' | 'spectrum-bars' | 'none';
 export type ThemeParticleStyle = 'mixed' | 'spark' | 'diamond';
 
 export interface TargetVisualTheme {
@@ -48,6 +49,9 @@ export interface DragVisualTheme {
 export interface BackgroundVisualTheme {
   flowPattern: FlowBackgroundPattern;
   superFlowPattern: SuperFlowBackgroundPattern;
+  musicVisualizer: {
+    style: MusicVisualizerStyle;
+  };
   backdrop: number;
   nebulaBase: number;
   vignette: number;

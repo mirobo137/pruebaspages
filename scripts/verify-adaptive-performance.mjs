@@ -35,6 +35,10 @@ try {
   for (let index = 0; index < 59; index += 1) {
     assert.equal(slow.recordFrame(34, 'full', 1), null);
   }
+  assert.equal(slow.recordFrame(34, 'full', 1), null);
+  for (let index = 0; index < 59; index += 1) {
+    assert.equal(slow.recordFrame(34, 'full', 1), null);
+  }
   assert.deepEqual(slow.recordFrame(34, 'full', 1), {
     qualityId: 'reduced',
     resolutionScale: 1,
@@ -44,11 +48,17 @@ try {
 
   const severe = new AdaptivePerformanceController();
   for (let index = 0; index < 59; index += 1) severe.recordFrame(78, 'full', 1);
+  assert.equal(severe.recordFrame(78, 'full', 1), null);
+  for (let index = 0; index < 59; index += 1) severe.recordFrame(78, 'full', 1);
   assert.equal(severe.recordFrame(78, 'full', 1)?.qualityId, 'minimal');
 
   const fallback = new AdaptivePerformanceController();
   for (let index = 0; index < 59; index += 1) fallback.recordFrame(78, 'minimal', 1);
+  assert.equal(fallback.recordFrame(78, 'minimal', 1), null);
+  for (let index = 0; index < 59; index += 1) fallback.recordFrame(78, 'minimal', 1);
   assert.equal(fallback.recordFrame(78, 'minimal', 1)?.resolutionScale, 0.75);
+  for (let index = 0; index < 59; index += 1) fallback.recordFrame(78, 'minimal', 0.75);
+  assert.equal(fallback.recordFrame(78, 'minimal', 0.75), null);
   for (let index = 0; index < 59; index += 1) fallback.recordFrame(78, 'minimal', 0.75);
   assert.equal(fallback.recordFrame(78, 'minimal', 0.75)?.resolutionScale, 0.5);
 

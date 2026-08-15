@@ -8,6 +8,7 @@ import { MenuAudioController } from '../audio/MenuAudioController';
 import { loadBeatmap } from '../content/Beatmap';
 import type { TrackSelection } from '../content/TrackSelection';
 import { loadMusicCatalog } from '../content/MusicCatalog';
+import { loadMusicVisualProfile } from '../content/MusicVisualProfile';
 import { MENU_MUSIC_TRACK_ID } from '../content/MenuMusic';
 import { SceneManager } from '../core/scene/SceneManager';
 import { ThemeSelection } from '../customization/ThemeCatalog';
@@ -172,6 +173,12 @@ export class GameApplication {
       : 'unavailable';
     this.app.canvas.dataset.platform = this.gamePlatform.environment;
     this.app.canvas.dataset.releaseChannel = this.releaseConfig.channel;
+    this.app.canvas.dataset.musicVisuals = import.meta.env.DEV
+      && new URLSearchParams(window.location.search).get('musicVisuals') === 'off'
+      ? 'off'
+      : 'm5-hybrid';
+    this.app.canvas.dataset.musicVisualCalibration = 'high-v2';
+    this.app.canvas.dataset.graphicsRenderer = graphicsRendererLabel ?? 'unavailable';
     if (softwareRenderer) {
       this.applyRenderResolution();
       this.app.canvas.dataset.adaptivePerformance = 'software-renderer';
@@ -423,6 +430,7 @@ export class GameApplication {
         beatmap: selection.beatmaps[difficulty],
         visualTheme: this.themeSelection.current,
         visualQuality: this.visualQuality,
+        musicVisualProfile: selection.musicVisualProfile,
         audioReady,
         onRestart: () => this.startGame(difficulty, selection),
         onExit: this.showMenu,
@@ -621,19 +629,26 @@ export class GameApplication {
       const catalog = await loadMusicCatalog();
       const loadedTracks = await Promise.all(
         catalog.map(async (track) => {
-          const loadedBeatmaps = await Promise.all(
-            DIFFICULTIES.map((difficulty) => loadBeatmap(track, difficulty)),
-          );
-          if (loadedBeatmaps.some((beatmap) => beatmap === null)) return null;
+          try {
+            const loadedBeatmaps = await Promise.all(
+              DIFFICULTIES.map((difficulty) => loadBeatmap(track, difficulty)),
+            );
+            if (loadedBeatmaps.some((beatmap) => beatmap === null)) return null;
+            const musicVisualProfile = await loadMusicVisualProfile(track);
 
-          return {
-            track,
-            beatmaps: {
-              easy: loadedBeatmaps[0]!,
-              medium: loadedBeatmaps[1]!,
-              hard: loadedBeatmaps[2]!,
-            },
-          };
+            return {
+              track,
+              musicVisualProfile,
+              beatmaps: {
+                easy: loadedBeatmaps[0]!,
+                medium: loadedBeatmaps[1]!,
+                hard: loadedBeatmaps[2]!,
+              },
+            };
+          } catch (error) {
+            console.warn(`Beatmaps no disponibles para ${track.id}.`, error);
+            return null;
+          }
         }),
       );
       return loadedTracks.filter((selection): selection is TrackSelection => selection !== null);

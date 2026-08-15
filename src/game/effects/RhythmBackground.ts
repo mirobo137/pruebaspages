@@ -5,6 +5,12 @@ import {
   type VisualQualityProfile,
 } from '../../customization/VisualQuality';
 import { DEFAULT_VISUAL_THEME } from '../../customization/themes/defaultTheme';
+import type { AudioFrame } from '../../audio/MusicSpectrum';
+import { SILENT_AUDIO_FRAME } from '../../audio/MusicSpectrum';
+import {
+  createMusicVisualizer,
+  type MusicVisualizer,
+} from './music-visualizers/MusicVisualizer';
 
 interface AmbientOrb {
   node: Graphics;
@@ -19,6 +25,7 @@ export class RhythmBackground extends Container {
   private readonly nebulaA = new Graphics();
   private readonly nebulaB = new Graphics();
   private readonly flowOverlay = new Graphics();
+  private readonly musicVisualizer: MusicVisualizer;
   private readonly flowRays = new Graphics();
   private readonly flowGeometry = new Graphics();
   private readonly superTunnel = new Graphics();
@@ -35,12 +42,15 @@ export class RhythmBackground extends Container {
   private flowIntensity = 0;
   private superFlowIntensity = 0;
   private phaseIndex = 0;
+  private musicFrame: AudioFrame = { ...SILENT_AUDIO_FRAME };
+  private musicMacroIntensity = .35;
 
   constructor(
     private readonly visualTheme: BackgroundVisualTheme = DEFAULT_VISUAL_THEME.background,
     private quality: VisualQualityProfile = FULL_VISUAL_QUALITY,
   ) {
     super();
+    this.musicVisualizer = createMusicVisualizer(visualTheme, quality);
     this.eventMode = 'none';
     this.flowOverlay.blendMode = 'add';
     this.flowRays.blendMode = 'add';
@@ -53,6 +63,7 @@ export class RhythmBackground extends Container {
       this.nebulaA,
       this.nebulaB,
       this.flowOverlay,
+      this.musicVisualizer.view,
       this.grid,
       this.flowRays,
       this.flowGeometry,
@@ -65,6 +76,7 @@ export class RhythmBackground extends Container {
     }
     this.addChild(this.vignette);
     this.applyQualityVisibility();
+    this.musicVisualizer.setVisualQuality(quality);
   }
 
   setVisualQuality(quality: VisualQualityProfile): void {
@@ -76,6 +88,7 @@ export class RhythmBackground extends Container {
     while (this.orbs.length < quality.ambientOrbCount) {
       this.addAmbientOrb(this.orbs.length);
     }
+    this.musicVisualizer.setVisualQuality(quality);
     this.applyQualityVisibility();
     this.resize(this.viewportWidth, this.viewportHeight);
   }
@@ -147,6 +160,8 @@ export class RhythmBackground extends Container {
     });
     this.pulseRing.position.set(width / 2, height / 2);
 
+    this.musicVisualizer.resize(width, height);
+
     const edgeDepth = Math.max(18, Math.min(width, height) * 0.08);
     this.vignette.clear();
     for (let layer = 0; layer < 4; layer += 1) {
@@ -175,6 +190,11 @@ export class RhythmBackground extends Container {
     this.pulseEnergy = Math.max(this.pulseEnergy, strength);
   }
 
+  setMusicFrame(frame: AudioFrame, macroIntensity: number): void {
+    this.musicFrame = frame;
+    this.musicMacroIntensity = Math.max(0, Math.min(1, macroIntensity));
+  }
+
   setFlowState(active: boolean, superActive = false): void {
     if (active && !this.flowActive) this.pulse(1.5);
     if (superActive && !this.superFlowActive) this.pulse(2);
@@ -200,25 +220,39 @@ export class RhythmBackground extends Container {
       * Math.min(1, deltaSeconds * (this.superFlowActive ? 7 : 3.5));
     this.pulseEnergy = Math.max(0, this.pulseEnergy - deltaSeconds * 2.6);
     const breathing = 1 + Math.sin(this.elapsed * (1.4 + this.flowIntensity * 3)) * 0.025;
+    const musicAmount = this.quality.id === 'minimal'
+      ? 0
+      : .62 + this.musicMacroIntensity * .48;
+    const bassPulse = this.musicFrame.bass * musicAmount;
+    const musicGlow = this.musicFrame.volume * musicAmount;
     this.pulseRing.scale.set(
       breathing + this.pulseEnergy * 0.2 + this.flowIntensity * 0.08
-      + this.superFlowIntensity * 0.12,
+      + this.superFlowIntensity * 0.12 + bassPulse * .19,
     );
     this.pulseRing.alpha = 0.2 + this.pulseEnergy * 0.38
-      + this.flowIntensity * 0.35 + this.superFlowIntensity * 0.24;
+      + this.flowIntensity * 0.35 + this.superFlowIntensity * 0.24
+      + bassPulse * .16;
     const phaseColor = this.visualTheme.phasePrimary[this.phaseIndex];
     this.pulseRing.tint = this.superFlowIntensity > 0.1
       ? this.visualTheme.superPrimary
       : this.flowIntensity > 0.1
         ? this.visualTheme.flowPulse
         : phaseColor;
-    this.grid.alpha = 0.65 + this.pulseEnergy * 0.35 + this.flowIntensity * 0.35;
+    this.grid.alpha = 0.65 + this.pulseEnergy * 0.35 + this.flowIntensity * 0.35
+      + musicGlow * .12;
     this.grid.tint = this.superFlowIntensity > 0.1
       ? this.visualTheme.superSecondary
       : this.flowIntensity > 0.1
         ? this.visualTheme.flowGrid
         : phaseColor;
     if (this.quality.id === 'minimal') return;
+    this.musicVisualizer.update({
+      audio: this.musicFrame,
+      macroIntensity: this.musicMacroIntensity,
+      phaseColor,
+      superColor: this.visualTheme.superSecondary,
+      superFlowIntensity: this.superFlowIntensity,
+    });
     this.flowOverlay.alpha = this.flowIntensity
       * (0.055 + this.superFlowIntensity * 0.055 + Math.sin(this.elapsed * 8) * 0.018);
     this.flowOverlay.tint = this.superFlowIntensity > 0.1
@@ -240,9 +274,9 @@ export class RhythmBackground extends Container {
       this.viewportHeight * (0.74 + Math.sin(this.elapsed * 0.18) * 0.05),
     );
     this.nebulaA.alpha = 0.48 + this.flowIntensity * 0.24
-      + this.superFlowIntensity * 0.2;
+      + this.superFlowIntensity * 0.2 + musicGlow * .09;
     this.nebulaB.alpha = 0.42 + this.flowIntensity * 0.22
-      + this.superFlowIntensity * 0.25;
+      + this.superFlowIntensity * 0.25 + this.musicFrame.mids * musicAmount * .08;
     this.nebulaA.tint = this.superFlowIntensity > 0.1
       ? this.visualTheme.superPrimary
       : phaseColor;
@@ -272,7 +306,8 @@ export class RhythmBackground extends Container {
       );
       const orbX = orb.node.x - this.viewportWidth / 2;
       const orbY = orb.node.y - this.viewportHeight / 2;
-      const shimmer = 0.3 + Math.sin(this.elapsed * 2 + orb.phase) * 0.16;
+      const shimmer = 0.3 + Math.sin(this.elapsed * 2 + orb.phase) * 0.16
+        + this.musicFrame.highs * musicAmount * .12;
       orb.node.alpha = shimmer + this.pulseEnergy * 0.3 + this.flowIntensity * 0.28;
       const orbScale = 1 + this.pulseEnergy * 0.6 + orb.size * 0.02
         + this.flowIntensity * 0.55;

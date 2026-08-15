@@ -8,11 +8,13 @@ export interface AdaptivePerformanceAdjustment {
 }
 
 const SAMPLE_WINDOW = 60;
+const REQUIRED_SLOW_WINDOWS = 2;
 const SLOW_FRAME_P95_MS = 28;
 const SEVERE_FRAME_P95_MS = 50;
 
 export class AdaptivePerformanceController {
   private readonly samples: number[] = [];
+  private consecutiveSlowWindows = 0;
 
   recordFrame(
     milliseconds: number,
@@ -28,7 +30,13 @@ export class AdaptivePerformanceController {
     const sorted = [...this.samples].sort((left, right) => left - right);
     const p95Ms = sorted[Math.ceil(sorted.length * 0.95) - 1] ?? 0;
     this.samples.length = 0;
-    if (p95Ms < SLOW_FRAME_P95_MS) return null;
+    if (p95Ms < SLOW_FRAME_P95_MS) {
+      this.consecutiveSlowWindows = 0;
+      return null;
+    }
+    this.consecutiveSlowWindows += 1;
+    if (this.consecutiveSlowWindows < REQUIRED_SLOW_WINDOWS) return null;
+    this.consecutiveSlowWindows = 0;
 
     if (qualityId === 'full') {
       return this.adjustment(
@@ -51,6 +59,7 @@ export class AdaptivePerformanceController {
 
   resetSamples(): void {
     this.samples.length = 0;
+    this.consecutiveSlowWindows = 0;
   }
 
   private adjustment(
