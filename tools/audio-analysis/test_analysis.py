@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 from pathlib import Path
 import tempfile
@@ -9,6 +10,7 @@ import librosa
 
 from analyze_song import (
     ANALYZER_VERSION,
+    AUDIO_TOOLCHAIN_VERSION,
     SAMPLE_RATE,
     align_beats_to_offset,
     analyze_samples,
@@ -39,6 +41,21 @@ class AnalysisTests(unittest.TestCase):
         initial = settings_hash(metadata)
         metadata["rhythm"]["tempoHint"] = 174
         self.assertNotEqual(initial, settings_hash(metadata))
+
+    def test_cache_key_includes_audio_toolchain(self):
+        metadata = {"audioHash": "a" * 64, "rhythm": {}}
+        self.assertTrue(AUDIO_TOOLCHAIN_VERSION)
+        legacy_payload = {
+            "analyzerVersion": ANALYZER_VERSION,
+            "audioHash": metadata["audioHash"],
+            "rhythm": metadata["rhythm"],
+        }
+        legacy_hash = hashlib.sha256(json.dumps(
+            legacy_payload,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")).hexdigest()[:16]
+        self.assertNotEqual(settings_hash(metadata), legacy_hash)
 
     def test_folder_mode_only_selects_registered_audio(self):
         with tempfile.TemporaryDirectory() as directory:

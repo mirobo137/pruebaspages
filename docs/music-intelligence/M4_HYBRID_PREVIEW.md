@@ -4,7 +4,8 @@
 
 - Implementacion tecnica: completada y aprobada.
 - Piloto M4: aplicado como mapa oficial `hybrid-analysis-m4-v2`.
-- Candidatas adicionales: permanecen disponibles solo en desarrollo.
+- Candidatas adicionales: se activan automáticamente para el catálogo de pruebas y
+  permanecen `locked: false` hasta la revisión humana.
 - Compuerta: cerrada; M5 iniciado.
 - Primera prueba fisica: ritmo y sincronizacion mejoraron en PC y movil; se detecto
   que un subconjunto podia dejar dos notas consecutivas en la misma posicion.
@@ -94,10 +95,12 @@ La automatizacion por cancion queda dividida deliberadamente:
    BPM, beats, onsets y energia en `Analysis v1`; su cache depende del hash.
 2. `music:hybrid-preview -- --track <id>` consume ese JSON y genera las tres
    dificultades, cobertura musical, proyecciones y catalogo de prueba.
-3. Si metadata aun no tiene secciones revisadas, el preview toma la duracion del
-   analisis y crea tres fases provisionales, divididas en tercios y ajustadas al beat.
-4. `--apply` rechaza esas fases provisionales: publicar siempre exige duracion y
-   secciones humanas en metadata, ademas de los bloqueos existentes.
+3. Si metadata aún no tiene secciones revisadas, el pipeline de prueba toma la
+   duración del análisis e infiere tres fases provisionales, divididas en tercios y
+   ajustadas al beat.
+4. El preview manual sigue siendo útil para comparar candidatos. La activación
+   automática deja el mapa visible pero no lo bloquea; publicar sigue exigiendo
+   curación humana, evidencia comercial y bloqueo explícito.
 
 El candidato y su diff viven en:
 

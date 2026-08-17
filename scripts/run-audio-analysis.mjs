@@ -67,7 +67,7 @@ if (!python) {
       '--retries',
       '10',
       '-r',
-      'tools/audio-analysis/requirements.txt',
+      'tools/audio-analysis/requirements-lock.txt',
     ],
     { cwd: projectRoot, stdio: 'inherit' },
   );

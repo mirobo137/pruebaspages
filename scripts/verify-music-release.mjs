@@ -39,7 +39,13 @@ for (const approved of manifest.tracks) {
     assert.equal(current.locked, true, `${approved.trackId}/${difficulty} no esta bloqueado`);
     assert.equal(canOverwriteBeatmap(current, false), false);
     assert.equal(canOverwriteBeatmap(current, true), false);
-    assert.equal(sha256(fileText), approved.difficulties[difficulty].sha256);
+    // JSON generated on Windows can be checked out with CRLF. Hash the
+    // canonical serialization used by lock-approved-beatmaps.mjs so release
+    // verification is identical on Windows, macOS and Linux.
+    assert.equal(
+      sha256(`${JSON.stringify(current, null, 2)}\n`),
+      approved.difficulties[difficulty].sha256,
+    );
     assert.deepEqual(
       current,
       { ...generated[difficulty], locked: true },

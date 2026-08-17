@@ -5,6 +5,15 @@ import path from 'node:path';
 export const SUNO_REGISTRY_VERSION = 1;
 export const SUPPORTED_SUNO_EXTENSIONS = new Set(['.mp3', '.ogg']);
 
+const GENERATED_ADJECTIVES = [
+  'neon', 'velvet', 'quantum', 'midnight', 'chrome', 'solar', 'electric', 'hollow',
+  'lunar', 'crystal', 'silver', 'violet', 'radiant', 'static', 'cosmic', 'hidden',
+];
+const GENERATED_NOUNS = [
+  'pulse', 'mirage', 'drift', 'echo', 'circuit', 'horizon', 'current', 'signal',
+  'cascade', 'orbit', 'ember', 'rush', 'vector', 'tide', 'motif', 'phase',
+];
+
 export function normalizeSunoStem(fileName) {
   const extension = path.extname(fileName);
   const stem = path.basename(fileName, extension)
@@ -30,15 +39,28 @@ export function chooseSunoCategory(contentHash, categories) {
   return availableCategories[selector % availableCategories.length];
 }
 
-export function createSunoDisplayTitle(fileName, contentHash) {
-  const sourceTitle = path.basename(fileName, path.extname(fileName))
-    .replace(/\s*\(\d+\)\s*$/u, '')
-    .replace(/[_-]+/g, ' ')
-    .trim()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-  const code = contentHash.slice(0, 6).toUpperCase();
-  if (!sourceTitle || /^untitled$/i.test(sourceTitle)) return `Suno ${code}`;
-  return `${sourceTitle} ${code}`;
+function hashWordIndex(contentHash, offset, length) {
+  return Number.parseInt(contentHash.slice(offset, offset + 8), 16) % length;
+}
+
+/**
+ * Generates a readable, random-looking and deterministic filename stem.
+ * The hash is intentional: Math.random()/timestamps would make two clones
+ * produce different track IDs and would break progress and beatmap identity.
+ */
+export function createSunoGeneratedStem(contentHash) {
+  if (!/^[0-9a-f]{16,}$/iu.test(contentHash)) {
+    throw new Error('El hash de una cancion Suno no tiene formato SHA valido.');
+  }
+  const adjective = GENERATED_ADJECTIVES[hashWordIndex(contentHash, 0, GENERATED_ADJECTIVES.length)];
+  const noun = GENERATED_NOUNS[hashWordIndex(contentHash, 8, GENERATED_NOUNS.length)];
+  return `${adjective}-${noun}-${contentHash.slice(0, 10)}`;
+}
+
+export function createSunoDisplayTitle(_fileName, contentHash) {
+  const [adjective, noun, code] = createSunoGeneratedStem(contentHash).split('-');
+  return `${adjective[0].toUpperCase()}${adjective.slice(1)} `
+    + `${noun[0].toUpperCase()}${noun.slice(1)} ${code.toUpperCase()}`;
 }
 
 export async function hashFile(filePath) {
@@ -111,7 +133,7 @@ export async function ingestSunoTracks({
 
     const category = chooseSunoCategory(sha256, categories);
     const extension = path.extname(entry.name).toLowerCase();
-    const fileName = `${normalizeSunoStem(entry.name)}-${sha256.slice(0, 10)}${extension}`;
+    const fileName = `${createSunoGeneratedStem(sha256)}${extension}`;
     const relativeAudioPath = category.folder
       ? path.posix.join(category.folder, fileName)
       : fileName;

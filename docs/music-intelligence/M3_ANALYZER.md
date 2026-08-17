@@ -3,7 +3,9 @@
 ## Resultado
 
 M3 genera evidencia musical reproducible sin cambiar el gameplay. El navegador y
-GitHub Pages nunca ejecutan Python: reciben JSON ya analizado y versionado.
+GitHub Pages nunca ejecutan Python: reciben JSON ya analizado y versionado. Python
+solo se invoca offline desde `content:sync` cuando entra audio nuevo o queda una
+importación pendiente.
 
 El analizador `librosa-m3-v1` extrae:
 
@@ -42,7 +44,8 @@ priorizar `beats[]` y onsets reales, no reconstruir el mapa desde 128 BPM.
 
 ## Instalacion en otra PC
 
-Python nunca forma parte del build web. Para regenerar analisis:
+Python no forma parte del bundle ni del runtime web. Para regenerar análisis de forma
+reproducible:
 
 ```powershell
 python -m venv .venv

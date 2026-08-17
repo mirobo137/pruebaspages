@@ -19,7 +19,7 @@ Estado actual:
 - PC y movil fueron aprobados por el usuario; calidad full/reduced/minimal funciona.
 - CrazyGames y Poki estan implementados y probados con adaptadores simulados, pero
   faltan Preview Tool e Inspector oficiales.
-- No se ha hecho commit ni push de esta sesion.
+- Esta sesion contiene cambios locales pendientes de commit; no se ha hecho push.
 
 ## Gameplay estable
 
@@ -57,7 +57,7 @@ npm run build
 
 `scripts/sync-music-content.mjs` hace todo el proceso:
 
-1. calcula SHA-256 y crea un ID estable;
+1. calcula SHA-256 y crea un ID estable con nombre legible generado;
 2. mueve el audio a Economicas, Selectas o Premium con precio determinista;
 3. crea metadata y conserva procedencia Suno;
 4. ejecuta Analysis v1 solo para importaciones nuevas/pendientes automaticas;
@@ -105,17 +105,20 @@ public/assets/                 audio, beatmaps, previews, SFX y visuales
 - `content:sync` no sobrescribe mapas bloqueados.
 - Cancelar/error de anuncio nunca entrega recompensa; cada premio se concede una vez.
 - GitHub Pages no carga SDK publicitario real.
-- No activar candidatas historicas ni publicar pistas sin revisar licencias.
+- Las candidatas automáticas pueden aparecer en el catálogo de pruebas, pero no deben
+  bloquearse ni publicarse formalmente sin revisión humana y evidencia de licencia.
 
 ## Preparar otra PC
 
 ```powershell
 npm ci
-npm test
 npm run build
+npm test
 npm run dev -- --host 0.0.0.0
 ```
 
+`npm test` genera el manifest ignorado antes de validar, por lo que funciona también
+en un clon limpio. `npm run build` ejecuta primero la sincronización completa.
 Para canciones nuevas basta instalar Python 3. El primer build prepara `.venv`.
 `SUPERFLOW_PYTHON` permite elegir otro ejecutable y
 `SUPERFLOW_AUTO_INSTALL_AUDIO=0` desactiva la instalacion automatica en entornos

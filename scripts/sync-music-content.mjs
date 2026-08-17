@@ -71,6 +71,26 @@ async function activateAutomaticTracks(tracks) {
   for (const track of tracks) {
     const metadataPath = `content/music/metadata/${track.trackId}.json`;
     const analysisPath = `content/music/analysis/${track.trackId}.json`;
+    for (const difficulty of ['easy', 'medium', 'hard']) {
+      const existingPath = path.join(
+        projectRoot,
+        'public',
+        'assets',
+        'beatmaps',
+        track.trackId,
+        `${difficulty}.json`,
+      );
+      try {
+        const existing = await readJsonAbsolute(existingPath);
+        if (existing.locked === true) {
+          throw new Error(
+            `${track.trackId}/${difficulty}: el pipeline automatico no puede sobrescribir un mapa bloqueado.`,
+          );
+        }
+      } catch (error) {
+        if (error?.code !== 'ENOENT') throw error;
+      }
+    }
     const metadata = validateTrackMetadataV1(await readJson(metadataPath));
     const analysisText = await readFile(path.join(projectRoot, analysisPath), 'utf8');
     const analysis = validateAnalysisV1(JSON.parse(analysisText));
@@ -123,6 +143,10 @@ function runNode(script, args = []) {
 
 async function readJson(relativePath) {
   return JSON.parse(await readFile(path.join(projectRoot, relativePath), 'utf8'));
+}
+
+async function readJsonAbsolute(filePath) {
+  return JSON.parse(await readFile(filePath, 'utf8'));
 }
 
 async function writeJson(relativePath, value) {

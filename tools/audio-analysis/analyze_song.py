@@ -17,6 +17,9 @@ import numpy as np
 
 
 ANALYZER_VERSION = "librosa-m3-v1"
+# Changes here invalidate local cache entries without changing the public
+# Analysis v1 schema or rewriting already curated JSON files.
+AUDIO_TOOLCHAIN_VERSION = "requirements-lock-2026-08-17"
 SAMPLE_RATE = 22_050
 HOP_LENGTH = 512
 ENERGY_STEP_SECONDS = 0.25
@@ -223,6 +226,7 @@ def analyze_file(audio_path: Path, metadata: dict[str, Any]) -> tuple[dict[str, 
 def settings_hash(metadata: dict[str, Any]) -> str:
     relevant = {
         "analyzerVersion": ANALYZER_VERSION,
+        "audioToolchainVersion": AUDIO_TOOLCHAIN_VERSION,
         "audioHash": metadata.get("audioHash"),
         "rhythm": metadata.get("rhythm", {}),
     }

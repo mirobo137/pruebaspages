@@ -21,5 +21,6 @@ assert.equal(packageJson.scripts['content:sync'], 'node scripts/sync-music-conte
 assert.ok(packageJson.scripts.build.startsWith('npm run content:sync'));
 const analysisRunner = await readFile('scripts/run-audio-analysis.mjs', 'utf8');
 assert.ok(analysisRunner.includes("['-m', 'venv', virtualEnvironmentRoot]"));
-assert.ok(analysisRunner.includes("'tools/audio-analysis/requirements.txt'"));
+assert.ok(analysisRunner.includes("'tools/audio-analysis/requirements-lock.txt'"));
+assert.ok(source.includes('el pipeline automatico no puede sobrescribir un mapa bloqueado'));
 console.log('Pipeline automatico: inbox -> hash/categoria -> Analysis v1 -> Beatmap v2 -> visuales -> catalogo: OK');

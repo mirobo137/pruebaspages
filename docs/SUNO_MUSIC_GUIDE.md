@@ -65,11 +65,16 @@ requieren mayor curacion manual.
 5. Descartar pistas con intro larga, silencios, falsos finales, tempo inestable o
    parecido evidente con una obra conocida.
 6. Copiar el MP3 a `public/assets/audio/agregadas suno/` y ejecutar `npm run build`.
-   Ese unico comando lo renombra con ID/hash, asigna una categoria/precio estable,
+   Ese único comando lo renombra con un nombre legible generado a partir del hash,
+   asigna una categoria/precio estable,
    crea metadata, ejecuta Analysis v1, infiere tres secciones, genera Easy/Medium/
    Hard con M4, crea el perfil visual FFT y lo incorpora a la playlist.
-7. No mover ni renombrar manualmente una candidata ya registrada. Su hash mantiene
-   identidad aunque el titulo original sea `Untitled` o tenga sufijos como `(1)`.
+7. Los nombres nuevos tienen formato `adjetivo-sustantivo-código.mp3`. Parecen
+   aleatorios, pero son deterministas entre clones: el mismo audio produce el mismo
+   nombre y un audio distinto no reutiliza un destino existente. No se usa reloj ni
+   `Math.random`, porque eso rompería la identidad de progreso y beatmap. No mover ni
+   renombrar manualmente una candidata ya registrada; su `originalFileName` se guarda
+   como procedencia aunque el nombre de Suno sea `Untitled` o tenga `(1)`.
 8. En la primera importacion, el build crea `.venv` e instala automaticamente las
    dependencias fijadas del analizador; solo requiere Python 3 e Internet esa vez.
    Si el audio falla, conserva la pista como candidata y el siguiente build reintenta.

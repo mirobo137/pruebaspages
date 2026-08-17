@@ -15,8 +15,10 @@ beatmap definitivo                    public/assets/beatmaps/<trackId>/<difficul
 schemas y ejemplos                    content/music/schemas + examples
 ```
 
-`npm run build` solo ingiere MP3/OGG, sincroniza metadata y valida artefactos ya
-guardados. Nunca analiza audio, instala Python ni genera un Beatmap v2.
+`npm run build` ingiere MP3/OGG y sincroniza los artefactos. Cuando detecta una pista
+Suno nueva, prepara el entorno Python con el lockfile, analiza el audio y genera su
+Beatmap v2 automáticamente; con la bandeja vacía es idempotente y no vuelve a
+analizar. El navegador y GitHub Pages nunca ejecutan Python.
 
 ## Track Metadata v1
 

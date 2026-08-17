@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   chooseSunoCategory,
   createSunoDisplayTitle,
+  createSunoGeneratedStem,
   ingestSunoTracks,
   normalizeSunoStem,
 } from './lib/suno-ingestion.mjs';
@@ -23,11 +24,12 @@ assert.equal(
   'free',
 );
 assert.equal(chooseSunoCategory('00000002ffffffff', categories).id, 'select');
-assert.equal(createSunoDisplayTitle('Untitled (2).mp3', '61be6b1153'), 'Suno 61BE6B');
-assert.equal(
-  createSunoDisplayTitle('Velvet Steel (1).mp3', '686e538467'),
-  'Velvet Steel 686E53',
-);
+const generatedHashA = '61be6b1153aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const generatedHashB = '686e538467bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+assert.match(createSunoGeneratedStem(generatedHashA), /^[a-z]+-[a-z]+-61be6b1153$/u);
+assert.notEqual(createSunoGeneratedStem(generatedHashA), createSunoGeneratedStem(generatedHashB));
+assert.equal(createSunoDisplayTitle('Untitled (2).mp3', generatedHashA).endsWith('61BE6B1153'), true);
+assert.equal(createSunoDisplayTitle('Velvet Steel (1).mp3', generatedHashB).endsWith('686E538467'), true);
 
 const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), 'superflow-suno-'));
 try {
@@ -49,6 +51,9 @@ try {
   assert.ok(firstRun.every((track) => track.status === 'candidate'));
   assert.ok(firstRun.every((track) => track.pipeline === 'automatic'));
   assert.equal(new Set(firstRun.map((track) => track.title)).size, 2);
+  assert.ok(firstRun.every((track) => /^[a-z]+-[a-z]+-[0-9a-f]{10}\.mp3$/u.test(
+    track.relativeAudioPath.split('/').at(-1),
+  )));
   assert.ok(firstRun.every((track) => track.relativeAudioPath.endsWith('.mp3')));
   assert.deepEqual(await readdir(sourceDirectory), []);
 
