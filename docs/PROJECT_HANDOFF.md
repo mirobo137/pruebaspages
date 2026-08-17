@@ -15,8 +15,8 @@ Estado actual:
 - Las 24 canciones legacy de 30 segundos fueron retiradas; `miss.wav` se conserva.
 - Las 23 canciones largas de Suno fueron reimportadas con nombres estables, categorias
   y precios deterministas.
-- Las 23 pistas tienen Analysis v1 con onsets por banda y tres mapas M4/Beatmap v2;
-  permanecen `locked: false` hasta prueba humana.
+- Las 23 pistas tienen Analysis v1 con onsets por banda y tres mapas Musical v2;
+  los 69 mapas oficiales ya estan `locked: true`.
 - PC y movil fueron aprobados por el usuario; calidad full/reduced/minimal funciona.
 - CrazyGames y Poki estan implementados y probados con adaptadores simulados, pero
   faltan Preview Tool e Inspector oficiales.
@@ -37,10 +37,11 @@ Estado actual:
 - M3 extrae BPM, beats, onsets globales, onsets low/mid/high y energia offline con
   Python/librosa (`librosa-m3-bands-v2`).
 - M4 fusiona bandas, genera motivos, riffs, sincopas, secciones, drags sostenidos y
-  mapas anidados (`hybrid-analysis-m4-bands-v1`).
-- Interpretacion Musical v2 (`hybrid-analysis-m4-musical-v2`) genera previews separados
-  con roles heuristicos, densidad de riffs y anti-repeticion; los mapas oficiales
-  bloqueados todavia no fueron reemplazados.
+  mapas anidados (`hybrid-analysis-m4-bands-v1`) como referencia historica.
+- Interpretacion Musical v2 (`hybrid-analysis-m4-musical-v2`) es ahora la version
+  oficial: roles heuristicos, densidad de riffs y anti-repeticion en los 69 mapas.
+- La v3 melodica/chroma sigue preparada como preview experimental y no altera los
+  mapas oficiales.
 - M5 combina macro offline con FFT micro. El visualizador es modular mediante
   `src/game/effects/music-visualizers/MusicVisualizer.ts` y admite barras+linea,
   solo barras o ninguno desde el tema.
@@ -68,7 +69,7 @@ npm run build
 3. crea metadata y conserva procedencia Suno;
 4. ejecuta Analysis v1 solo para importaciones nuevas/pendientes automaticas;
 5. infiere Lectura/Impulso/Climax;
-6. genera Beatmap v2 M4 para Easy/Medium/Hard;
+6. genera Beatmap v2 Musical v2 para Easy/Medium/Hard;
 7. crea perfil visual musical;
 8. regenera manifest y deja la pista visible.
 

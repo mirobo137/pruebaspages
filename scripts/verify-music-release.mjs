@@ -27,6 +27,7 @@ for (const approved of manifest.tracks) {
     analysis,
     analysisHash: analysisSha256(analysisText),
     versions,
+    interpretationProfile: 'musical-v2',
   }).documents;
   for (const difficulty of ['easy', 'medium', 'hard']) {
     const fileText = await readFile(

@@ -4,7 +4,7 @@
   "difficulty": "easy",
   "duration": 51.733515,
   "audioMode": "single",
-  "generatorVersion": "hybrid-analysis-m4-bands-v1",
+  "generatorVersion": "hybrid-analysis-m4-musical-v2",
   "analysisHash": "d40542e772b1b7cb94487dc930a298626f885acba2a052f89b56020c61559341",
   "locked": true,
   "spatialModelVersion": "spatial-v3-hard-mouse-acquisition",
@@ -36,8 +36,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.74,
-        "y": 0.45
+        "x": 0.62,
+        "y": 0.6
       }
     },
     {
@@ -46,8 +46,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.26,
-        "y": 0.45
+        "x": 0.4,
+        "y": 0.34
       }
     },
     {
@@ -56,8 +56,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.32,
-        "y": 0.62
+        "x": 0.26,
+        "y": 0.45
       }
     },
     {
@@ -76,8 +76,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.32,
-        "y": 0.62
+        "x": 0.56,
+        "y": 0.38
       }
     },
     {
@@ -86,8 +86,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.68,
-        "y": 0.3
+        "x": 0.62,
+        "y": 0.6
       }
     },
     {
@@ -116,8 +116,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.603676,
-        "y": 0.332307
+        "x": 0.68,
+        "y": 0.38
       }
     },
     {
@@ -146,8 +146,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.708033,
-        "y": 0.581288
+        "x": 0.62,
+        "y": 0.6
       }
     },
     {
@@ -156,8 +156,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.4,
-        "y": 0.34
+        "x": 0.48,
+        "y": 0.7
       }
     },
     {
@@ -166,8 +166,8 @@
       "phaseId": "read",
       "kind": "tap",
       "start": {
-        "x": 0.62,
-        "y": 0.6
+        "x": 0.56,
+        "y": 0.38
       }
     },
     {
@@ -176,8 +176,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.36,
-        "y": 0.66
+        "x": 0.52,
+        "y": 0.54
       }
     },
     {
@@ -186,8 +186,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.68,
-        "y": 0.7
+        "x": 0.76,
+        "y": 0.5
       }
     },
     {
@@ -196,8 +196,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.599141,
-        "y": 0.239809
+        "x": 0.48,
+        "y": 0.44
       }
     },
     {
@@ -206,8 +206,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.32,
-        "y": 0.3
+        "x": 0.24,
+        "y": 0.5
       }
     },
     {
@@ -216,8 +216,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.36,
-        "y": 0.66
+        "x": 0.52,
+        "y": 0.54
       }
     },
     {
@@ -226,8 +226,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.68,
-        "y": 0.7
+        "x": 0.64,
+        "y": 0.32
       }
     },
     {
@@ -236,8 +236,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.725097,
-        "y": 0.349301
+        "x": 0.32,
+        "y": 0.3
       }
     },
     {
@@ -246,18 +246,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.32,
-        "y": 0.3
-      }
-    },
-    {
-      "id": "drive-m4-0064",
-      "time": 24.404172,
-      "phaseId": "drive",
-      "kind": "tap",
-      "start": {
-        "x": 0.36471,
-        "y": 0.749877
+        "x": 0.24,
+        "y": 0.5
       }
     },
     {
@@ -266,8 +256,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.48,
-        "y": 0.46
+        "x": 0.36,
+        "y": 0.68
       }
     },
     {
@@ -276,38 +266,28 @@
       "phaseId": "drive",
       "kind": "drag",
       "start": {
-        "x": 0.24,
-        "y": 0.5
+        "x": 0.52,
+        "y": 0.56
       },
       "controls": [
         {
-          "x": 0.439867,
-          "y": 0.519449
+          "x": 0.642803,
+          "y": 0.581083
         }
       ],
       "end": {
-        "x": 0.585939,
-        "y": 0.657245
-      }
-    },
-    {
-      "id": "drive-m4-0069",
-      "time": 26.679728,
-      "phaseId": "drive",
-      "kind": "tap",
-      "start": {
-        "x": 0.48,
-        "y": 0.44
+        "x": 0.68,
+        "y": 0.7
       }
     },
     {
       "id": "drive-m4-0071",
-      "time": 27.237007,
+      "time": 27.097687,
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.239109,
-        "y": 0.260547
+        "x": 0.36,
+        "y": 0.66
       }
     },
     {
@@ -336,8 +316,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.73541,
-        "y": 0.629079
+        "x": 0.68,
+        "y": 0.7
       }
     },
     {
@@ -346,8 +326,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.325595,
-        "y": 0.472188
+        "x": 0.24,
+        "y": 0.5
       }
     },
     {
@@ -366,8 +346,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.817851,
-        "y": 0.568944
+        "x": 0.76,
+        "y": 0.5
       }
     },
     {
@@ -386,8 +366,8 @@
       "phaseId": "drive",
       "kind": "tap",
       "start": {
-        "x": 0.76,
-        "y": 0.5
+        "x": 0.48,
+        "y": 0.46
       }
     },
     {
@@ -416,8 +396,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.5,
-        "y": 0.68
+        "x": 0.38,
+        "y": 0.54
       }
     },
     {
@@ -426,8 +406,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.4,
-        "y": 0.34
+        "x": 0.5,
+        "y": 0.22
       }
     },
     {
@@ -436,8 +416,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.62,
-        "y": 0.52
+        "x": 0.24,
+        "y": 0.44
       }
     },
     {
@@ -446,8 +426,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.5,
-        "y": 0.68
+        "x": 0.4,
+        "y": 0.34
       }
     },
     {
@@ -457,12 +437,12 @@
       "kind": "drag",
       "start": {
         "x": 0.62,
-        "y": 0.34
+        "y": 0.52
       },
       "controls": [
         {
-          "x": 0.621294,
-          "y": 0.531633
+          "x": 0.612,
+          "y": 0.639
         }
       ],
       "end": {
@@ -476,8 +456,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.76,
-        "y": 0.44
+        "x": 0.5,
+        "y": 0.68
       }
     },
     {
@@ -486,8 +466,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.24,
-        "y": 0.44
+        "x": 0.5,
+        "y": 0.22
       }
     },
     {
@@ -496,8 +476,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.76,
-        "y": 0.44
+        "x": 0.38,
+        "y": 0.54
       }
     },
     {
@@ -506,8 +486,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.24,
-        "y": 0.44
+        "x": 0.62,
+        "y": 0.34
       }
     },
     {
@@ -516,8 +496,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.62,
-        "y": 0.34
+        "x": 0.5,
+        "y": 0.68
       }
     },
     {
@@ -526,8 +506,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.5,
-        "y": 0.68
+        "x": 0.24,
+        "y": 0.44
       }
     },
     {
@@ -536,8 +516,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.4,
-        "y": 0.34
+        "x": 0.76,
+        "y": 0.44
       }
     },
     {
@@ -546,8 +526,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.62,
-        "y": 0.52
+        "x": 0.38,
+        "y": 0.54
       }
     },
     {
@@ -556,8 +536,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.24,
-        "y": 0.44
+        "x": 0.4,
+        "y": 0.34
       }
     },
     {
@@ -606,8 +586,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.84,
-        "y": 0.596606
+        "x": 0.6,
+        "y": 0.66
       }
     },
     {
@@ -616,8 +596,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.427693,
-        "y": 0.616324
+        "x": 0.4,
+        "y": 0.34
       }
     },
     {
@@ -626,8 +606,8 @@
       "phaseId": "climax",
       "kind": "tap",
       "start": {
-        "x": 0.5,
-        "y": 0.68
+        "x": 0.38,
+        "y": 0.54
       }
     },
     {

@@ -115,6 +115,7 @@ async function activateAutomaticTracks(tracks) {
       analysis,
       analysisHash: analysisSha256(analysisText),
       versions,
+      interpretationProfile: 'musical-v2',
     });
     for (const document of Object.values(result.documents)) validateBeatmapV2(document);
     prepared.push({ track, metadataPath, activeMetadata, documents: result.documents });

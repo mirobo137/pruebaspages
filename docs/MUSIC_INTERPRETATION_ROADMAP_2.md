@@ -53,9 +53,11 @@ Resultado: 23 pistas largas visibles, 8 gratis, 5 economicas, 4 selectas y 6 pre
 
 - [x] Regenerar las 23 canciones Suno con el generador de bandas.
 - [x] Generar previews `hybrid-analysis-m4-musical-v2` para las 23 canciones sin tocar mapas bloqueados.
-- [ ] Comparar cada dificultad con el audio y revisar si los riffs se perciben.
+- [x] Probar la interpretacion v2 en GitHub Pages y confirmar que es jugable en movil.
+- [x] Promover Musical v2 a los 69 mapas oficiales y bloquearlos con hashes reproducibles.
+- [ ] Comparar cada dificultad de las 23 pistas con el audio, de forma editorial, para una curacion fina.
 - [ ] Corregir offsets o secciones mediante metadata, no editando codigo.
-- [ ] Bloquear unicamente mapas probados con `lock-approved-beatmaps.mjs`.
+- [x] Bloquear el lote aprobado con `music:promote-v2`; las futuras pistas se bloquean individualmente.
 
 ### PI-5 - Mejora avanzada opcional
 
@@ -75,7 +77,7 @@ ergonomia en touch ni mouse.
 ```text
 MP3 en agregadas suno
 -> hash/categoria/nombre estable
--> Analysis v2: beat + onsets por banda
+-> Analysis v1: beat + onsets por banda
 -> candidatos de bateria, energia y riffs
 -> mapas Easy/Medium/Hard
 -> build y pruebas
@@ -88,7 +90,8 @@ los JSON resultantes se publican junto con el juego.
 
 ## Prueba movil de la interpretacion v2
 
-La nueva interpretacion se genera como preview para no sobrescribir mapas aprobados:
+La interpretacion v2 ya es oficial. El preview queda disponible para comparar o
+regenerar el lote sin tocar los mapas bloqueados:
 
 ```powershell
 npm run music:hybrid-batch -- --all-analyzed --interpretation-v2
@@ -111,6 +114,14 @@ Abrir en el movil una URL como:
 http://IP_DE_LA_PC:5173/?beatmapPreview=m4-v2&previewTrack=hollow-motif-0f61f35777
 ```
 
-Cambiar `previewTrack` por cualquier `trackId` del catalogo. Si la version v2 se
-aprueba despues de probarla, se aplicara de forma controlada y se volveran a
-bloquear los mapas; mientras tanto los mapas oficiales permanecen intactos.
+Cambiar `previewTrack` por cualquier `trackId` del catalogo. Los mapas oficiales
+actuales usan `hybrid-analysis-m4-musical-v2`. Para promover de nuevo un lote v2
+validado desde cero se usa:
+
+```powershell
+npm run music:hybrid-batch -- --all-analyzed --interpretation-v2
+npm run music:promote-v2
+```
+
+La v3 con chroma sigue siendo opcional y no debe publicarse como oficial sin una
+nueva prueba fisica.

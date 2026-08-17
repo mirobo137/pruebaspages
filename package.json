@@ -15,6 +15,7 @@
     "music:test-analyzer": "node scripts/run-audio-analysis.mjs --test",
     "music:hybrid-preview": "node scripts/generate-hybrid-beatmaps.mjs",
     "music:hybrid-batch": "node scripts/generate-hybrid-batch.mjs",
+    "music:promote-v2": "node scripts/promote-hybrid-v2.mjs",
     "music:visual-profiles": "node scripts/generate-music-visual-profiles.mjs",
     "music:lock-approved": "node scripts/lock-approved-beatmaps.mjs",
     "music:approve": "node scripts/approve-music-track.mjs",

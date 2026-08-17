@@ -68,7 +68,7 @@ requieren mayor curacion manual.
    Ese único comando lo renombra con un nombre legible generado a partir del hash,
    asigna una categoria/precio estable,
    crea metadata, ejecuta Analysis v1 con onsets low/mid/high, infiere tres secciones,
-   genera Easy/Medium/Hard con M4 y riffs, crea el perfil visual FFT y lo incorpora
+   genera Easy/Medium/Hard con Musical v2 y riffs, crea el perfil visual FFT y lo incorpora
    a la playlist.
 7. Los nombres nuevos tienen formato `adjetivo-sustantivo-código.mp3`. Parecen
    aleatorios, pero son deterministas entre clones: el mismo audio produce el mismo

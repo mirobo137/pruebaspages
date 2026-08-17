@@ -142,11 +142,11 @@ for (const fileName of analyzedFiles.filter((name) => name.endsWith('.json'))) {
 
 for (const difficulty of ['easy', 'medium', 'hard']) {
   const current = JSON.parse(await readFile(`public/assets/beatmaps/${trackId}/${difficulty}.json`, 'utf8'));
-  assert.equal(current.generatorVersion, HYBRID_GENERATOR_VERSION, 'mapa automático desactualizado');
+  assert.equal(current.generatorVersion, HYBRID_GENERATOR_NEXT_VERSION, 'mapa oficial desactualizado');
   assert.equal(typeof current.locked, 'boolean');
   assert.deepEqual(
     current,
-    { ...first.documents[difficulty], locked: current.locked },
+    { ...nextFirst.documents[difficulty], locked: current.locked },
     `Mapa automático ${difficulty} desactualizado`,
   );
 }

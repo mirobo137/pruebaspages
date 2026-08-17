@@ -13,22 +13,23 @@ y el build cubren 23 canciones y 69 mapas.
 
 Music Intelligence M0-M6 historica esta cerrada y la Interpretacion Musical 2 queda
 activa para el siguiente ciclo: las 23 canciones largas de Suno ya tienen Analysis
-por bandas, Easy/Medium/Hard M4 y mapas automaticos desbloqueados tecnicamente. El
-editor visual completo sigue fuera de alcance por ahora; la curacion humana de cada
+por bandas, Easy/Medium/Hard Musical v2 y 69 mapas oficiales bloqueados. El editor
+visual completo sigue fuera de alcance por ahora; la curacion humana fina de cada
 pista es el siguiente paso. Mouse y touch conservan `inputProfileId` y version
 espacial separados; no se mezclaran rankings competitivos hasta obtener evidencia.
 
-## P0 - Revision del nuevo lote automatico
+## P0 - Revision editorial del lote Musical v2
 
-- [ ] Escuchar/probar las 23 canciones reimportadas al menos una vez antes de release.
-- [ ] Si una pista es correcta, bloquear sus mapas con
-  `node scripts/lock-approved-beatmaps.mjs --track <id>`.
+- [x] Generar y validar Musical v2 para las 23 canciones.
+- [x] Probar la interpretacion v2 publicada en GitHub Pages desde movil.
+- [x] Bloquear los 69 mapas oficiales con `npm run music:promote-v2`.
+- [ ] Escuchar/probar las 23 canciones al menos una vez para curacion editorial fina.
 - [ ] Si una pista no es adecuada, retirarla del catalogo en vez de compensarla con
   reglas especiales que degraden las demas canciones.
 
 La automatizacion estructural ya esta aprobada: nombres unicos, 8 Gratis/5
-Economicas/4 Selectas/6 Premium, 23 Analysis v1 y 69 mapas M4. Esta revision es
-curacion de contenido nuevo, no una fase tecnica pendiente.
+Economicas/4 Selectas/6 Premium, 23 Analysis v1 y 69 mapas Musical v2. Esta revision
+es curacion editorial de contenido, no una fase tecnica pendiente.
 
 ## P1 - CrazyGames Preview Tool
 

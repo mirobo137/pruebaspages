@@ -4,460 +4,460 @@
     {
       "trackId": "chrome-ember-fc33f284d6",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "d40542e772b1b7cb94487dc930a298626f885acba2a052f89b56020c61559341",
       "difficulties": {
         "easy": {
-          "eventCount": 57,
-          "sha256": "efb5188affeb396e5d6ef68d2aae92c6b0f0243506f54e866368f139712a0f47"
+          "eventCount": 55,
+          "sha256": "a37c19db5315edc7d9cf6bff834414479f9bd8ba8c0d0dbdb938862ad88a496c"
         },
         "medium": {
           "eventCount": 85,
-          "sha256": "48969cc350309cae398230996c782edca6e6c72a0de17f24d36e65835eac822c"
+          "sha256": "5544536bc2e0dbbc5450ce9f42be1f2ae87623b1b62fc92e98ca2865ea7b5e8f"
         },
         "hard": {
           "eventCount": 150,
-          "sha256": "68b76794693914f3ec0159ec5c32f4eed7a43358a8e974207f9491972003a069"
+          "sha256": "1771aa9dd5c7f3ba0739c0ff120b0432c339f75508d4e76be80e9cbc6c034205"
         }
       }
     },
     {
       "trackId": "chrome-orbit-686e538467",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "5e0475b075092587fd3680d870e584ccac0d7f70691b74763d619809637f52b7",
       "difficulties": {
         "easy": {
           "eventCount": 76,
-          "sha256": "9de99978edb4ff42724e152b4b57c1b3ba2a2f29b0df13fe95f9424ab0c3664c"
+          "sha256": "de8279254ad8866ac6292436f115ced7d861b2584121810e5c7877fc245a9226"
         },
         "medium": {
-          "eventCount": 133,
-          "sha256": "6e7d4b420a8d469df8fa0e49312ffdfb23a2de39d9d57e08bca20423c31d09c3"
+          "eventCount": 131,
+          "sha256": "9c35d660123c72a2f0c9729f3d954633b1bdb407712db88b0e542be97610ee01"
         },
         "hard": {
           "eventCount": 221,
-          "sha256": "50e0e9a317419306fcb11c75080e531ae2b27d9f0133d5fe16ff02735a82135a"
+          "sha256": "b0e7ea6a413f89f0d7e25c42ec2c81385fac6c8cd554ed49e77ec9059e91cc84"
         }
       }
     },
     {
       "trackId": "crystal-phase-e86f1d9936",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "a993ad60c8d53509bad61d1025f5136d89cdfd808938933be2a602c3b5813ace",
       "difficulties": {
         "easy": {
-          "eventCount": 176,
-          "sha256": "6fbd9f98c6960a0edb8b0a9e0e1129c4f5a3b1d38cea19726c1f1055f39f93d1"
+          "eventCount": 174,
+          "sha256": "14ebecd9e992bf7a76130c8e4844a64db791d4a7541fe510efafc3404780ca93"
         },
         "medium": {
-          "eventCount": 242,
-          "sha256": "911cf9e131695fd4e9808588bd3a4bb195cd9fa07ac6e263630f628fc2f0b98a"
+          "eventCount": 244,
+          "sha256": "e3c402da9c5d8bc6cf083075d70e3dbdde8559707e60f962120ee95839c5c730"
         },
         "hard": {
-          "eventCount": 466,
-          "sha256": "681984007d4f3519ba10e93920947de3d4fc78a946d3df2b03538367bdc0a365"
+          "eventCount": 464,
+          "sha256": "f6fc4aeff4f84967d4fd337111f75886a9f4fc72abf29479e3c1aee53d83aa8b"
         }
       }
     },
     {
       "trackId": "electric-pulse-e6afdd865e",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "a6a106b2cc5956db71a282dc93a4284ca875013e5ede304976324a6eb54d0150",
       "difficulties": {
         "easy": {
-          "eventCount": 32,
-          "sha256": "e95e8e29def527bb5ab031eb2081342fd5265089a3707153e1c8c35718e87146"
+          "eventCount": 31,
+          "sha256": "2c02882901a36424c2e42bb9c0b947580fe80cca2838082fe81e299ac134746c"
         },
         "medium": {
           "eventCount": 48,
-          "sha256": "ab39b20a22f7ea51f2043bcb1bf0e266f02f92c08e20e8d3f0335adefbbbb8b0"
+          "sha256": "5837ae677a21c7b5629d2afeff9ac0cd92c5c5e64e0cf768a0348bd7c32b911c"
         },
         "hard": {
           "eventCount": 82,
-          "sha256": "3ece30926c66f9710e40ff194241aeb6df3f1c895aa59217a37cf0f8bcb58ba9"
+          "sha256": "ac97248fe780dc9b5c268afc81e62a9f26374c51bde96ed0ab2233498f70c6a8"
         }
       }
     },
     {
       "trackId": "hidden-circuit-3b64364ff7",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "51bd090c268959d23b6e9beb30a5322f6a8be94a784e0939f827df777e53c9cf",
       "difficulties": {
         "easy": {
-          "eventCount": 84,
-          "sha256": "fdacb7d567a33abd0df7ba25d848cc0f0ed1da6cb699e7e497168bf7769602c8"
+          "eventCount": 78,
+          "sha256": "2aa566849549a3844ebbfd20032e089551a14e9f4a689ba5cc85062e0a281ee4"
         },
         "medium": {
           "eventCount": 124,
-          "sha256": "7e9b0be2e878004c9a44c58715b70e2b3401f8e8922a57ee9ce46e82f32b3abe"
+          "sha256": "ad40645692ab880d6c5526727b40f5320d763fab0887b27e1d9fba0349c0d89f"
         },
         "hard": {
           "eventCount": 164,
-          "sha256": "b189285a14a829fad12c66f89d7df3a53cf3da2db5e0022e1240a7dda59c27b3"
+          "sha256": "d381e15a2a495e6ba5708984c86da09b4ee6ee2bc43e85255c66d4f7f2ff0492"
         }
       }
     },
     {
       "trackId": "hidden-rush-9570e22f98",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "368e7d96f97103b859252398aee8d0fa14b04119d53317a350c592d33d938d69",
       "difficulties": {
         "easy": {
-          "eventCount": 75,
-          "sha256": "0a18d485c40a182226e392b2288357d52d447520704f03c2ae2abf7f04969e36"
+          "eventCount": 69,
+          "sha256": "b05dd7052f6d5f885ffd5dec3eb313ecd789cf7cf2e382aae2b6e0bc7b78478c"
         },
         "medium": {
-          "eventCount": 126,
-          "sha256": "73cd33faa28f9b59d7ec87f114a4b49eaf3c3bde0e1e5a0c82c52fd0e8877681"
+          "eventCount": 127,
+          "sha256": "d3bc4ef11495456be092285fb6d8dcc18462346727e595a31023bc641aad5f7d"
         },
         "hard": {
-          "eventCount": 195,
-          "sha256": "12e6a5c91ebe890dece664e42a7124ca062618df33ed4100446692e184f179fb"
+          "eventCount": 197,
+          "sha256": "75f5b58933b18e49756bec4a0126198e526039a51eae14937b3b4fd1efdfd924"
         }
       }
     },
     {
       "trackId": "hollow-circuit-c9155457ad",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "6eda127134c52a8afcc2fbc3f26e56a86804f6fbc193b055e7cecd2193b81a44",
       "difficulties": {
         "easy": {
           "eventCount": 143,
-          "sha256": "b9b6265d486e4f628ba7110003a2312eab4a3c6fc17e85b6dac9561935d3b79c"
+          "sha256": "63b8c745140896e6644a948c1f96b3f9fd81f853cad9e60dd092c34868055bd0"
         },
         "medium": {
-          "eventCount": 278,
-          "sha256": "89fc076fba13a2a9e93a5ff9f25250286111bc9ddf983910e1ba6531488a1dda"
+          "eventCount": 274,
+          "sha256": "5a6aabf4802febf559d5bb0feea225eab0c6be567995620f642c029459d52796"
         },
         "hard": {
-          "eventCount": 504,
-          "sha256": "4a4f438f7d29ab34e638d756ebb6bc465083c144e73ed17526b82366e121c824"
+          "eventCount": 503,
+          "sha256": "ad8c2222ec9de59bb83ee5af294ddca4da18bc59d3e4bfe9d284efa8a7eee506"
         }
       }
     },
     {
       "trackId": "hollow-horizon-8f279d878d",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "f314b2f641c333b10ac6e7d649434ba6248acd843133aba0a5f2b3fd2a204651",
       "difficulties": {
         "easy": {
-          "eventCount": 211,
-          "sha256": "6aba4b0332e17ff29a13c338df4831d031098e70321ed98c75608c22e9706e1b"
+          "eventCount": 207,
+          "sha256": "f2d0bde0ddfc87c4cbfc0a9d5e8afcfe72717c61e505c42064d912018f500903"
         },
         "medium": {
-          "eventCount": 326,
-          "sha256": "780d21587a7f1fe293eabac5b1ee618b087a3370d9d300c8e35b4fc1ba3f3fd0"
+          "eventCount": 327,
+          "sha256": "fe6839cb7c50b9193ee3415b84be7e678d0e2a5b7fd8dc42212efea35ea87a08"
         },
         "hard": {
           "eventCount": 566,
-          "sha256": "66768d935ec20910dbe9c99e2ca44e68e4d41dff846f584e9720541e50384ce4"
+          "sha256": "a54f28d5bfdc26ada96ff5ea439e04be5195c08006c8975fb4e0345e83974aad"
         }
       }
     },
     {
       "trackId": "hollow-motif-0f61f35777",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "3afc00e0a95a7e32318450a68597b950bba8520a7122e42986aa27680950c8fd",
       "difficulties": {
         "easy": {
-          "eventCount": 132,
-          "sha256": "18e5094d2c1b9bd0f422bc2f8e08e0aa98b4ec290a899e33357bfa6f590b37b0"
+          "eventCount": 130,
+          "sha256": "c10f4df1c434e5861e9e471bfd1e1c23f6a46c803ce3a3d38b5684f6e9c95167"
         },
         "medium": {
-          "eventCount": 258,
-          "sha256": "525ecae4e445cac5239093e1ea0eb04d5036fc8ddb5fbbfbb3ce3dabde8e3245"
+          "eventCount": 250,
+          "sha256": "74cbf282f672cd08db512b396e74820b0e31fa241c390ccbc071a00806df68ff"
         },
         "hard": {
-          "eventCount": 451,
-          "sha256": "21df71160166801f0492ff4c3075db1b07fdd5e0fa536f012abb42400b811238"
+          "eventCount": 453,
+          "sha256": "49147e003918623f63b9761612f43f5cc9285431c4a0ed12cca8a52258f20d39"
         }
       }
     },
     {
       "trackId": "lunar-ember-9705aa889d",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "b3501974ca9f6508da36e24dc745f237655133e1b78b3c51703098228619f94a",
       "difficulties": {
         "easy": {
           "eventCount": 80,
-          "sha256": "f319a66e61c99e67eb858929aac1b3830de973849132c63f8bcfb818bd515495"
+          "sha256": "e355fd3f49a37f6c5f04120f93f4fc83c073506ca92b52670296819581c3e6a3"
         },
         "medium": {
-          "eventCount": 119,
-          "sha256": "ffa35fd84d35b07039836933ad2d78c8ce8b49bdcb04fd82e664ca4465c57728"
+          "eventCount": 120,
+          "sha256": "d82ee06c50f70e0eb3ab331f692dde8d7cdeb90e92efb28b99c4316d2d02a208"
         },
         "hard": {
           "eventCount": 197,
-          "sha256": "d88e4e04a9c59a9ab38b7f0cba41e100a528df4f29c09665cc293f647c22d2cc"
+          "sha256": "5ad50b24d284122c0a73f55694fa900c6343783a9e804c4f431afcec04774b8e"
         }
       }
     },
     {
       "trackId": "lunar-rush-3f77996812",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "cba3b532dd1bea9cb9e6dab41587a1d9e59e385e9549fc8c67f20d10dd1123ff",
       "difficulties": {
         "easy": {
           "eventCount": 150,
-          "sha256": "e95bb9d96a0f13260bb0143aef7c3afadeb3a6d889d565b04ea900a5977f7e5a"
+          "sha256": "c0017c227ee286bd6aa1f0300b7e2599f84e08a2584fd2afaf6b96166fa773b1"
         },
         "medium": {
-          "eventCount": 256,
-          "sha256": "ce969b2df7c096758bffcfa2afb72fc5f3aea2293b03d4d77e6f4c4f61194644"
+          "eventCount": 251,
+          "sha256": "95ed7884b830c6f752fffd3e33e36ab4619654f540fa5f7058b58c4b768d7601"
         },
         "hard": {
-          "eventCount": 410,
-          "sha256": "31e16305752d01900f2aee935506738acd48e96ba33f430d8e06e9a8cb12be54"
+          "eventCount": 411,
+          "sha256": "4799492df7e6f1f6ba0c75e157fd0d2f50e787a8bbb997780300ea622757a227"
         }
       }
     },
     {
       "trackId": "lunar-vector-5f90a288df",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "fd2ba1f2f5f179f127361ca0b7ee441111c4576eb956b8c8cc5f15f162e5966a",
       "difficulties": {
         "easy": {
-          "eventCount": 96,
-          "sha256": "e40bac60e8b9e5347d2ab8dc194335efcc75754aade0d9ac1c62a21d78311f9e"
+          "eventCount": 92,
+          "sha256": "69b2e5039747d43da3026c8ec17ed116718680bd28cf91e3eb8909ebc0d69ed2"
         },
         "medium": {
-          "eventCount": 111,
-          "sha256": "6597bb4e429826205cc2ece716f32d68111f2e891a4f2e97839b5d74942b6bb5"
+          "eventCount": 114,
+          "sha256": "2560eb891e7c214efa3ba6dbe842c90390a8fe538be7d06a860d789c1d521d6d"
         },
         "hard": {
           "eventCount": 194,
-          "sha256": "cfd8343b44d0e06db9061c2c67aad64b16425557bee90fab0d20fd766e320493"
+          "sha256": "194e6ce120e6eba5c6f3c380d08359047e021ad694eed7d9096722cdb70cad6c"
         }
       }
     },
     {
       "trackId": "neon-mirage-4a8e9700b5",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "08d9cf213915331296a7f900ab6bb69fb84fc1d163850e9b0e6bf03d284f113f",
       "difficulties": {
         "easy": {
-          "eventCount": 231,
-          "sha256": "e8b53856d8ed44c5aaeb145265804015511c1a0a654c3293a798717874781406"
+          "eventCount": 226,
+          "sha256": "779de41e2ed62d9329abc4edecb3f5b6f8b776c741be3bca37b85621301173f0"
         },
         "medium": {
-          "eventCount": 341,
-          "sha256": "194e8e3753f54ee176b21c58ca4e683704bb8c3f190bf71bcd5f8d3ec3bae45d"
+          "eventCount": 338,
+          "sha256": "b905e5fe9180c859fcb07e5d3a3a677ee0ac1d4b358ce87dae8ab451f426809d"
         },
         "hard": {
-          "eventCount": 482,
-          "sha256": "0f86ebba242d01c6d3813590fbc4f5758a848cbc4466d2fd8d2498073e8f34fe"
+          "eventCount": 481,
+          "sha256": "813965fd63c31083ceea3ac273164f1742c7c660605f0ce81928684d9ecc56da"
         }
       }
     },
     {
       "trackId": "neon-signal-11615b8092",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "0a2bcb67a9bc6e72b0b5b3f41cf1c8f129a9cd7eac10a3a0799e43d90d34abb9",
       "difficulties": {
         "easy": {
-          "eventCount": 38,
-          "sha256": "74b479dbf99487f776186bbfa052af9c861ce8e1b92e7918824223339879d7de"
+          "eventCount": 36,
+          "sha256": "2fc5c0465b5cca4610c2cb8ef1ba1fc31296ecc39daa7c3ebc944e22065a37b0"
         },
         "medium": {
-          "eventCount": 63,
-          "sha256": "97237b144e5f0bd5b1f9935dcafe116835d7556ce9db923e903ecbefed34e926"
+          "eventCount": 64,
+          "sha256": "df94964b431a54f657be7fef9aca06bf3c5dcf6a77cadade0cac0db092de71ea"
         },
         "hard": {
           "eventCount": 107,
-          "sha256": "90001f0dce1ad0b78f226e7badc75ad75db72798562d01bf877b0997351180ae"
+          "sha256": "0369d1b70c81ec1b0f6ab0cbe7d19763e71b728132ff1e11d0ad8617c36e9c4b"
         }
       }
     },
     {
       "trackId": "quantum-phase-6b0d30f214",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "846c072f45f4331c1f0c471af60b738bd64f83c6a740730d3072b549ee532d26",
       "difficulties": {
         "easy": {
           "eventCount": 80,
-          "sha256": "558ede400876d6a673ece51ac9b1e189c89399c86787ad065167c4a75205093c"
+          "sha256": "51766aa9546579a245d61361b5ed9ef1502c7608f772099be81a234f2b92d407"
         },
         "medium": {
           "eventCount": 105,
-          "sha256": "088a31bf29e4bfed6f8b3b9dae8b8f6be161616832f22fccc70102e6fdb40431"
+          "sha256": "f6e56e0595cdee7f472d52838693429f88e115308d4a601497c6f28793105670"
         },
         "hard": {
           "eventCount": 174,
-          "sha256": "a1ffa3da3d45007bf6ed7d8a817febd9d8dd59d735f3b6b9c22526c5fffd56d7"
+          "sha256": "005db8b8d1d8a51974360840666af896b76bdcb6e98947d500cae6bfc3a718f6"
         }
       }
     },
     {
       "trackId": "quantum-signal-a2c6f4a232",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "989f940da2b524fc43f6bff19959786c71efe0395107c4d009ecb7ef27163b71",
       "difficulties": {
         "easy": {
           "eventCount": 77,
-          "sha256": "9fba55bfe25bfd4a4c67a94fbcb02e8c604bc2f7d6f5d43b6897e977f2dceba1"
+          "sha256": "460414c6dcf3a92ba543981a7a97d8d779573fafe912bd4111e379ce09b317a4"
         },
         "medium": {
-          "eventCount": 122,
-          "sha256": "1fda18e0aec04220d30382da6647aa91083ceff0165cb438a0394fbe16835ef2"
+          "eventCount": 121,
+          "sha256": "34bd7a3d2926ee752abca13c60924656e8e4b301d3264cc665f0a1373a7ec91b"
         },
         "hard": {
           "eventCount": 220,
-          "sha256": "97a6a3fa48c759a0102b00764908f0d86c6f1a6149f23c34dbca9de75ee2c9b5"
+          "sha256": "360850c954a3d6d85b9b058a0e039cfb99681ce882b6905c5f11250542f8270c"
         }
       }
     },
     {
       "trackId": "radiant-tide-c667694c50",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "55e11c3627f275a3ed846a0dd1c50b389720c2084a6ad4f4c5371036a5a588be",
       "difficulties": {
         "easy": {
-          "eventCount": 215,
-          "sha256": "d67aba1f755a65cefc890e93d6c7e39179b1511f642dfd1e028debffe9ea282b"
+          "eventCount": 216,
+          "sha256": "f803bcb1d9dddcb826009f032a6689affb42c1ebb755f102822b10f88a38839a"
         },
         "medium": {
-          "eventCount": 315,
-          "sha256": "62af1bfcb20ce13258b829ecdfebfb36aea00397decea80e2acf233ed9d38fc9"
+          "eventCount": 318,
+          "sha256": "b1a557d4dc7b934f98231caee07bfa2b094038a24aa50bf7597dadd6f9196276"
         },
         "hard": {
-          "eventCount": 522,
-          "sha256": "6fc20179d6936d4fc6c443c67fbe7ce8d2f15da5297b5bf7f4062b490e81d5a8"
+          "eventCount": 520,
+          "sha256": "2b9c34490925d4d657ceb54e29844337863770283319f666b60bbe9320acc21a"
         }
       }
     },
     {
       "trackId": "silver-ember-28560e4a5d",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "87ad1a9d511e4675cda2908649bf55d736449b807ebf0d7398269b65d573991d",
       "difficulties": {
         "easy": {
           "eventCount": 72,
-          "sha256": "383dd04923976a0801fe94f8a36d5391a308a5b174a68adbf814ca0e055e2471"
+          "sha256": "cf09bf83650da74ede9653a406e2b5b7114394bf260a9a2a8d8cc951f613d01a"
         },
         "medium": {
           "eventCount": 115,
-          "sha256": "b520da8367e15dc3a9d9072a2351ca65aec591b7fb77498d53256e69de9066f5"
+          "sha256": "702db151949978870bee6ad06a0d848e0809049e8365950eaba9d0d548054ca7"
         },
         "hard": {
           "eventCount": 153,
-          "sha256": "9560bd170378cf8efaba3f07145388a92912578cf2c95df02f3c16947f0f0af1"
+          "sha256": "50ecba41e57b6c85a82a1b4bd0a6c8ae281842f99f8310a030797502225c9c10"
         }
       }
     },
     {
       "trackId": "solar-current-e29c8ae569",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "48a6bc4fcfce7119ded40d14790d295b72de652868e6a5ae271066034ef8ec96",
       "difficulties": {
         "easy": {
-          "eventCount": 253,
-          "sha256": "84971443447a0f55f51267b6dc20e0df351ffbef2c8f7620e08ee59c6da7984e"
+          "eventCount": 252,
+          "sha256": "8be3ebd3d47b68b04c3f602ceb6ab5bc75e4a0ee3ee1968432182a442d1ff38c"
         },
         "medium": {
-          "eventCount": 365,
-          "sha256": "5d2fc35350c70dfe328b36d03ffaf27ad4267be28daf7d64ba3c9888fcfe8aaa"
+          "eventCount": 367,
+          "sha256": "be5c75e1187074639185d2194ebecdec8774f94715124b163713c774c92adad5"
         },
         "hard": {
-          "eventCount": 533,
-          "sha256": "04f79ab0420da02c1301813eeccbeaccaa7c331ddcc7208ea38c5bfe85460246"
+          "eventCount": 530,
+          "sha256": "fcd5233c5353263041119336a4834ac82596378fd4812c7d88d9aabe9f80145b"
         }
       }
     },
     {
       "trackId": "solar-horizon-c1a2d0e55f",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "3b235339d3c34d484f50c6f9b7a3b9c8388cfe0a126e8db72205c769e73f7e9c",
       "difficulties": {
         "easy": {
           "eventCount": 47,
-          "sha256": "28e4e19db7027b6b0d10da982169bee609d6a1483d9f52f034c44703136b9da4"
+          "sha256": "4e28d33cc29d8759bfd0b93d0d78f85496f5ec490c60a26d2aa6b8acd3fbff60"
         },
         "medium": {
           "eventCount": 68,
-          "sha256": "3931318017071bea61a645d97406a404967554fc9e69ee5adeb1b7f40916c19d"
+          "sha256": "38607b703b1cb0e74f7f89abc89d93be933fb85f45542d269daa759c912a6851"
         },
         "hard": {
           "eventCount": 114,
-          "sha256": "d7d86bdea05ae4b0d42d21fa18f6e374b835f791ea10c5af73b1fd5bfc8c4edf"
+          "sha256": "6a78eb5898ec271a0d5badd8f39aabdfe3a4541a741ab6e8027465170eab2442"
         }
       }
     },
     {
       "trackId": "static-vector-c6b5af9d38",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "6266f5d2bc6c8d0d1972622c50b3f87294a6cb7fb3dd6c049b1104c168dc6731",
       "difficulties": {
         "easy": {
           "eventCount": 50,
-          "sha256": "b5488f8ea272be28b129211051f3e9b89a4d1de5fd4239248083cabc0e1235ad"
+          "sha256": "d218b75e70c455d7244dbe1b3b048fef14ccef57f146e74dcfa7b3e714d76e5d"
         },
         "medium": {
           "eventCount": 84,
-          "sha256": "b0f82625f2abc83d2c79a8307fec83ff87902babd3d3ea63ffe248c49f7afcd2"
+          "sha256": "389e0b534b21c03d1a16ab790110272f09418c3c08af8e336e565a69421a5eb9"
         },
         "hard": {
-          "eventCount": 121,
-          "sha256": "233a2a5da383a446517e3b2b340ca6daa521f52873705cf3b23977442d16f08d"
+          "eventCount": 122,
+          "sha256": "885aeceeb1418ec0c0f303dc5802c8dc5b298483291e579a4a4abf9e5747a49e"
         }
       }
     },
     {
       "trackId": "velvet-drift-61be6b1153",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "cbf9e3573c1e937fd79f8eea534a5440abc115f86d7e22e3fb3c72f270e5b13f",
       "difficulties": {
         "easy": {
           "eventCount": 69,
-          "sha256": "356f1fb02dede09da14477c18ccfddd0d4a71eb2f34dbbe9b84e4db686bd9e93"
+          "sha256": "4e3a4ce086b2b126846e71818b161e48b1974f96dccf44f9b9742230c26401d3"
         },
         "medium": {
           "eventCount": 102,
-          "sha256": "6526d67249267aa332ccbabed8c1d89262cc6f7bc978dbbbcb8590ed83015e42"
+          "sha256": "544a377cd8e28ba1bbc4bd38752a5c3376c93da836c15370d2866642b8f70e75"
         },
         "hard": {
           "eventCount": 191,
-          "sha256": "7473abcdd846c73f67ac2e83847bf1210e31303c87877356bfc1e4b1e01079ef"
+          "sha256": "7caa2cde5a449a031d7393424bc26b5a6b27149c75ad839c2459056f80e9db24"
         }
       }
     },
     {
       "trackId": "violet-motif-b11d1d0be8",
       "approvedAt": "2026-08-17",
-      "generatorVersion": "hybrid-analysis-m4-bands-v1",
+      "generatorVersion": "hybrid-analysis-m4-musical-v2",
       "analysisHash": "0f0f42994b307910b2650f16bdb27fad5314fffafee58d4e2a82cbc93c3500c3",
       "difficulties": {
         "easy": {
           "eventCount": 264,
-          "sha256": "decbe8aaacfed37de5a2f114488da8facdb0c620619af188be273d37e9ab9716"
+          "sha256": "eac764be6a72ab608b7d2acc6ca3f1604fd21cb86746fe1244b49b9470dbd8f8"
         },
         "medium": {
-          "eventCount": 371,
-          "sha256": "0d14539cc8a2ff923a8ec97b6a77650967c2fea627d94617707a2da1ccbf4581"
+          "eventCount": 372,
+          "sha256": "7c3de5600a3e77eb965f601182df3a960720512085ce812fcc01d35da8a49ca7"
         },
         "hard": {
           "eventCount": 558,
-          "sha256": "6b91bc07a97f2861f6b7c1ca399d340705c01faee187467f63f161d2173f46fc"
+          "sha256": "09254994152bb5a322ac9cba3f70908255ecf4ec63b40d38970129c59b48c6d7"
         }
       }
     }

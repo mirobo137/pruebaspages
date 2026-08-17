@@ -17,7 +17,9 @@ const interpretationMode = options.interpretationV3
   ? 'musical-v3'
   : options.interpretationV2
     ? 'musical-v2'
-    : 'approved';
+    : options.apply
+      ? 'musical-v2'
+      : 'approved';
 const previewDirectory = options.interpretationV3
   ? 'm4-v3'
   : options.interpretationV2

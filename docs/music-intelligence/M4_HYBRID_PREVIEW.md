@@ -1,14 +1,17 @@
-# M4 - candidato del generador hibrido
+# M4 - historial y referencia del generador hibrido
 
-La interpretacion Musical v2 se prueba en `public/assets/beatmap-previews/m4-v2/`
-con `?beatmapPreview=m4-v2`; no reemplaza mapas bloqueados hasta la aprobacion movil.
+La interpretacion Musical v2 se probo en `public/assets/beatmap-previews/m4-v2/`
+con `?beatmapPreview=m4-v2` y ahora es la version oficial de los 69 mapas.
+El generador de bandas v1 queda aqui como referencia historica; la v3 melodica/chroma
+continua aislada como preview experimental.
 
 ## Estado
 
 - Implementacion tecnica: completada y aprobada.
-- Piloto M4: el generador actual es `hybrid-analysis-m4-bands-v1`.
+- Version oficial actual: `hybrid-analysis-m4-musical-v2`.
+- Piloto historico de bandas: `hybrid-analysis-m4-bands-v1`.
 - Candidatas adicionales: se activan automáticamente para el catálogo de pruebas y
-  permanecen `locked: false` hasta la revisión humana.
+  permanecen `locked: false` hasta la revision humana y su promocion.
 - Compuerta: cerrada; M5 iniciado.
 - Primera prueba fisica: ritmo y sincronizacion mejoraron en PC y movil; se detecto
   que un subconjunto podia dejar dos notas consecutivas en la misma posicion.
@@ -132,12 +135,10 @@ URLs directas de desarrollo:
 El catalogo de preview las muestra gratis y aisladas para la prueba; no las agrega
 al catalogo de produccion, no cambia su estado `candidate` ni crea mapas oficiales.
 
-La aplicacion aprobada se ejecuto explicitamente y quedo protegida por la politica
-`locked`. Para futuras aplicaciones se invoca Node directamente porque npm puede
-consumir su propia bandera `--force`:
+La promocion oficial de Musical v2 se ejecuta con el comando reproducible:
 
 ```powershell
-node scripts/generate-hybrid-beatmaps.mjs --track untitled-0f61f35777 --apply --force
+npm run music:promote-v2
 ```
 
 ## Prueba fisica aprobada

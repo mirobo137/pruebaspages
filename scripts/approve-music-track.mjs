@@ -46,6 +46,7 @@ for (const trackId of trackIds) {
     analysis,
     analysisHash: analysisSha256(analysisText),
     versions,
+    interpretationProfile: 'musical-v2',
   });
   for (const document of Object.values(result.documents)) validateBeatmapV2(document);
   prepared.push({ trackId, metadataPath, activeMetadata, documents: result.documents });
