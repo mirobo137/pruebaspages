@@ -1,6 +1,7 @@
 # SUPERFLOW - trabajo restante
 
-Este es el unico plan activo del proyecto. Sustituye las hojas antiguas de LiveOps,
+Este es el plan activo de release y plataformas. La interpretacion musical se sigue
+en `MUSIC_INTERPRETATION_ROADMAP_2.md`; ambos sustituyen las hojas antiguas de LiveOps,
 perfil PC, 11.5 y Music Intelligence. Estado actualizado: 2026-08-17.
 
 ## Estado global
@@ -8,24 +9,25 @@ perfil PC, 11.5 y Music Intelligence. Estado actualizado: 2026-08-17.
 La implementacion del juego esta cerrada. El usuario aprobo PC, mouse, touch, movil,
 fullscreen, resize, calidad adaptativa, audio de juicios, Danger, FLOW/SUPER FLOW,
 derrota, revive, anuncios simulados, evento, skins y las tres dificultades. La suite
-y el build cubren 47 canciones y 141 mapas.
+y el build cubren 23 canciones y 69 mapas.
 
-Music Intelligence M0-M6 esta cerrada localmente: seis canciones completas poseen
-Analysis v1, Easy/Medium/Hard M4 y bloqueo SHA-256. El editor visual se descarta por
-ahora porque no hubo correccion manual recurrente que justifique su coste. Mouse y
-touch conservan `inputProfileId` y version espacial separados; no se mezclaran
-rankings competitivos hasta obtener evidencia suficiente.
+Music Intelligence M0-M6 historica esta cerrada y la Interpretacion Musical 2 queda
+activa para el siguiente ciclo: las 23 canciones largas de Suno ya tienen Analysis
+por bandas, Easy/Medium/Hard M4 y mapas automaticos desbloqueados tecnicamente. El
+editor visual completo sigue fuera de alcance por ahora; la curacion humana de cada
+pista es el siguiente paso. Mouse y touch conservan `inputProfileId` y version
+espacial separados; no se mezclaran rankings competitivos hasta obtener evidencia.
 
 ## P0 - Revision del nuevo lote automatico
 
-- [ ] Escuchar/probar las 17 canciones reimportadas al menos una vez antes de release.
+- [ ] Escuchar/probar las 23 canciones reimportadas al menos una vez antes de release.
 - [ ] Si una pista es correcta, bloquear sus mapas con
   `node scripts/lock-approved-beatmaps.mjs --track <id>`.
 - [ ] Si una pista no es adecuada, retirarla del catalogo en vez de compensarla con
   reglas especiales que degraden las demas canciones.
 
-La automatizacion estructural ya esta aprobada: nombres unicos, 6 Gratis/5
-Economicas/3 Selectas/3 Premium, 17 Analysis v1 y 51 mapas M4. Esta revision es
+La automatizacion estructural ya esta aprobada: nombres unicos, 8 Gratis/5
+Economicas/4 Selectas/6 Premium, 23 Analysis v1 y 69 mapas M4. Esta revision es
 curacion de contenido nuevo, no una fase tecnica pendiente.
 
 ## P1 - CrazyGames Preview Tool

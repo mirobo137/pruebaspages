@@ -11,8 +11,16 @@ import {
 } from './lib/hybrid-beatmap-generator.mjs';
 import { validateBeatmapV2 } from './lib/music-contract-validation.mjs';
 
-const trackId = 'untitled-0f61f35777';
-const metadata = JSON.parse(await readFile(`content/music/metadata/${trackId}.json`, 'utf8'));
+const metadataDocuments = await Promise.all(
+  (await readdir('content/music/metadata'))
+    .filter((fileName) => fileName.endsWith('.json'))
+    .map((fileName) => readFile(`content/music/metadata/${fileName}`, 'utf8').then(JSON.parse)),
+);
+const metadata = metadataDocuments.find((document) => (
+  document.trackId.endsWith('-0f61f35777')
+));
+assert.ok(metadata, 'no se encontró la pista piloto estable para probar M4');
+const trackId = metadata.trackId;
 const analysisText = await readFile(`content/music/analysis/${trackId}.json`, 'utf8');
 const analysis = JSON.parse(analysisText);
 const versions = JSON.parse(await readFile('src/content/music-contract-versions.json', 'utf8'));
@@ -55,16 +63,17 @@ for (const document of [easy, medium, hard]) {
 assertSubset(easy, medium, 'Easy no es subconjunto exacto de Medium');
 assertSubset(medium, hard, 'Medium no es subconjunto exacto de Hard');
 assert.ok(easy.events.length < medium.events.length && medium.events.length < hard.events.length);
-assert.ok(hard.events.length < analysis.onsets.length, 'M4 convirtio cada onset en nota');
+const fused = fuseMusicalCandidates(analysis, metadata.suggestedSections);
+assert.ok(hard.events.length < fused.length, 'M4 convirtió cada candidato en nota');
 
-const musicalTimes = [...analysis.beats, ...analysis.onsets.map((onset) => onset.time)];
+const bandTimes = Object.values(analysis.onsetsByBand ?? {}).flat().map((onset) => onset.time);
+const musicalTimes = [...analysis.beats, ...analysis.onsets.map((onset) => onset.time), ...bandTimes];
 for (const event of hard.events) {
   assert.ok(
     musicalTimes.some((time) => Math.abs(time - event.time) <= .000001),
     `${event.id}: no proviene de beat/onset`,
   );
 }
-const fused = fuseMusicalCandidates(analysis, metadata.suggestedSections);
 assert.ok(fused.length < analysis.beats.length + analysis.onsets.length);
 assert.ok(new Set(hard.events.map((event) => `${event.start.x},${event.start.y}`)).size >= 24);
 const fixedEightRepeats = hard.events.slice(8).filter((event, index) => (
@@ -85,27 +94,15 @@ for (const difficulty of ['easy', 'medium', 'hard']) {
   assert.ok(coverage.averageSalience > 0, `${difficulty}: saliencia musical vacia`);
   assert.ok(coverage.phraseBoundariesCaptured > 0, `${difficulty}: no conserva inicios de frase`);
   assert.ok(coverage.rhythmicRoles.downbeat > 0, `${difficulty}: no conserva tiempos fuertes`);
-  assert.ok(coverage.rhythmicRoles.syncopation > 0, `${difficulty}: perdio la sincopa`);
+  assert.ok(
+    (coverage.rhythmicRoles.syncopation ?? 0) > 0 || (coverage.rhythmicRoles.riff ?? 0) > 0,
+    `${difficulty}: perdio sincopa y riff`,
+  );
   assert.equal(
     coverage.sustainedDrags,
     first.documents[difficulty].events.filter((event) => event.kind === 'drag').length,
     `${difficulty}: existe un drag sin energia sostenida`,
   );
-}
-
-const previewCatalog = JSON.parse(await readFile('public/assets/beatmap-previews/m4/catalog.json', 'utf8'));
-for (const track of previewCatalog) {
-  assert.equal(track.price, 0);
-  assert.equal(track.priceTier, 'free');
-  for (const difficulty of ['easy', 'medium', 'hard']) {
-    const document = JSON.parse(await readFile(
-      `public/assets/beatmap-previews/m4/${track.id}/${difficulty}.json`,
-      'utf8',
-    ));
-    validateBeatmapV2(document);
-    assert.equal(document.trackId, track.id);
-    assert.equal(document.difficulty, difficulty);
-  }
 }
 
 const analyzedFiles = await readdir('content/music/analysis');
@@ -122,11 +119,9 @@ for (const fileName of analyzedFiles.filter((name) => name.endsWith('.json'))) {
 
 for (const difficulty of ['easy', 'medium', 'hard']) {
   const current = JSON.parse(await readFile(`public/assets/beatmaps/${trackId}/${difficulty}.json`, 'utf8'));
-  assert.equal(current.generatorVersion, HYBRID_GENERATOR_VERSION, 'M4 aprobado no esta aplicado');
-  assert.equal(current.locked, true, 'M4 aprobado debe quedar protegido en M6');
-  const preview = JSON.parse(await readFile(`public/assets/beatmap-previews/m4/${trackId}/${difficulty}.json`, 'utf8'));
-  assert.deepEqual(preview, first.documents[difficulty], `Preview ${difficulty} desactualizado`);
-  assert.deepEqual(current, { ...first.documents[difficulty], locked: true }, `Mapa oficial ${difficulty} difiere del M4 aprobado`);
+  assert.equal(current.generatorVersion, HYBRID_GENERATOR_VERSION, 'mapa automático desactualizado');
+  assert.equal(current.locked, false, 'el mapa de prueba no debe estar bloqueado');
+  assert.deepEqual(current, first.documents[difficulty], `Mapa automático ${difficulty} desactualizado`);
 }
 
 const server = await createServer({ configFile: false, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true } });

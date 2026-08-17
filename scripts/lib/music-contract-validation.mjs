@@ -123,9 +123,9 @@ export function validateBeatmapV2(document) {
 
 export function validateAnalysisV1(document) {
   const path = 'analysis';
-  const keys = ['schemaVersion', 'trackId', 'audioHash', 'analyzerVersion', 'duration', 'estimatedBpm', 'bpm', 'tempoSource', 'beatOffset', 'beatOffsetSource', 'beats', 'onsets', 'energyFrames'];
+  const keys = ['schemaVersion', 'trackId', 'audioHash', 'analyzerVersion', 'duration', 'estimatedBpm', 'bpm', 'tempoSource', 'beatOffset', 'beatOffsetSource', 'beats', 'onsets', 'onsetsByBand', 'energyFrames'];
   exactKeys(document, keys, path);
-  required(document, keys, path);
+  required(document, keys.filter((key) => key !== 'onsetsByBand'), path);
   if (document.schemaVersion !== 1) fail(path, 'schemaVersion debe ser 1');
   id(document.trackId, `${path}.trackId`);
   if (!HASH_PATTERN.test(document.audioHash)) fail(path, 'audioHash invalido');
@@ -154,6 +154,22 @@ export function validateAnalysisV1(document) {
       fields.slice(1).forEach((field) => number(entry[field], `${entryPath}.${field}`, 0, 1));
       lastTime = entry.time;
     });
+  }
+  if ('onsetsByBand' in document) {
+    exactKeys(document.onsetsByBand, ['low', 'mid', 'high'], `${path}.onsetsByBand`);
+    for (const band of ['low', 'mid', 'high']) {
+      if (!Array.isArray(document.onsetsByBand[band])) fail(`${path}.onsetsByBand.${band}`, 'serie invalida');
+      let lastTime = -1;
+      document.onsetsByBand[band].forEach((entry, index) => {
+        const entryPath = `${path}.onsetsByBand.${band}[${index}]`;
+        exactKeys(entry, ['time', 'strength'], entryPath);
+        required(entry, ['time', 'strength'], entryPath);
+        number(entry.time, `${entryPath}.time`, 0, document.duration);
+        number(entry.strength, `${entryPath}.strength`, 0, 1);
+        if (entry.time < lastTime) fail(entryPath, 'serie fuera de orden');
+        lastTime = entry.time;
+      });
+    }
   }
   return document;
 }

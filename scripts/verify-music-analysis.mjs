@@ -18,12 +18,17 @@ for (const fileName of files) {
   ));
   assert.equal(fileName, `${analysis.trackId}.json`);
   assert.equal(analysis.audioHash, metadata.audioHash);
-  assert.equal(analysis.analyzerVersion, 'librosa-m3-v1');
+  assert.equal(analysis.analyzerVersion, 'librosa-m3-bands-v2');
   assert.ok(analysis.beats.length > 0, `${analysis.trackId}: sin beats`);
   assert.ok(analysis.onsets.length > 0, `${analysis.trackId}: sin onsets`);
+  assert.deepEqual(Object.keys(analysis.onsetsByBand).sort(), ['high', 'low', 'mid']);
+  assert.ok(Object.values(analysis.onsetsByBand).some((onsets) => onsets.length > 0), `${analysis.trackId}: sin onsets por banda`);
   assert.ok(analysis.energyFrames.length > 0, `${analysis.trackId}: sin energia`);
   assertSorted(analysis.beats, `${analysis.trackId}/beats`);
   assertSorted(analysis.onsets.map((entry) => entry.time), `${analysis.trackId}/onsets`);
+  for (const [band, onsets] of Object.entries(analysis.onsetsByBand)) {
+    assertSorted(onsets.map((entry) => entry.time), `${analysis.trackId}/onsetsByBand/${band}`);
+  }
   assertSorted(analysis.energyFrames.map((entry) => entry.time), `${analysis.trackId}/energy`);
   const audioRelative = metadata.webAudioPath.replace(/^\.\/assets\/audio\//, '');
   const audio = await readFile(path.join('public', 'assets', 'audio', audioRelative));

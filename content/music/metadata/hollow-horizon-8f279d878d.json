@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "hollow-horizon-8f279d878d",
+  "title": "Hollow Horizon 8F279D878D",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/premium/hollow-horizon-8f279d878d.mp3",
+  "audioHash": "8f279d878dd826b55c49e6b31955fd2c20bfe10070eacbe4a1b47e502d61921b",
+  "rhythm": {
+    "tempoHint": 103.359375,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 56.577838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 56.577838,
+      "endTime": 113.155677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 113.155677,
+      "endTime": 169.733515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 169.733515
+}

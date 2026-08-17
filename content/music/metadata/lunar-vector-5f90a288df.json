@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "lunar-vector-5f90a288df",
+  "title": "Lunar Vector 5F90A288DF",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/lunar-vector-5f90a288df.mp3",
+  "audioHash": "5f90a288df4f909c59f85aeebbff80fb721c4e9af50f1f58848edf65293d269f",
+  "rhythm": {
+    "tempoHint": 95.703125,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 26.337838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 26.337838,
+      "endTime": 52.675677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 52.675677,
+      "endTime": 79.013515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 79.013515
+}

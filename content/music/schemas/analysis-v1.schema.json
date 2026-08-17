@@ -38,6 +38,16 @@
       "type": "array",
       "items": { "$ref": "#/$defs/onset" }
     },
+    "onsetsByBand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low", "mid", "high"],
+      "properties": {
+        "low": { "type": "array", "items": { "$ref": "#/$defs/onset" } },
+        "mid": { "type": "array", "items": { "$ref": "#/$defs/onset" } },
+        "high": { "type": "array", "items": { "$ref": "#/$defs/onset" } }
+      }
+    },
     "energyFrames": {
       "type": "array",
       "items": { "$ref": "#/$defs/energyFrame" }

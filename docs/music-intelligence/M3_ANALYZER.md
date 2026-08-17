@@ -7,13 +7,14 @@ GitHub Pages nunca ejecutan Python: reciben JSON ya analizado y versionado. Pyth
 solo se invoca offline desde `content:sync` cuando entra audio nuevo o queda una
 importación pendiente.
 
-El analizador `librosa-m3-v1` extrae:
+El analizador `librosa-m3-bands-v2` extrae:
 
 - duracion decodificada;
 - BPM estimado y BPM resuelto por estimacion, `tempoHint` u override;
 - beat offset estimado o corregido manualmente;
 - beats detectados absolutos;
 - onsets con fuerza normalizada;
+- onsets independientes por banda (`onsetsByBand.low`, `mid` y `high`);
 - volumen y energia low/mid/high cada 0.25 segundos.
 
 Bandas iniciales:
@@ -72,4 +73,5 @@ npm run music:analyze -- --input public/assets/audio/selectas
   impide diagnosticar el archivo afectado.
 
 Los JSON definitivos viven en `content/music/analysis/` y `npm test` los valida sin
-Python contra schema, metadata y SHA-256 del MP3.
+Python contra schema, metadata y SHA-256 del MP3. El campo por bandas es opcional en
+el contrato para conservar compatibilidad con fixtures y mapas antiguos.

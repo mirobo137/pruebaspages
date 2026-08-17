@@ -1,0 +1,1144 @@
+{
+  "schemaVersion": 2,
+  "trackId": "quantum-phase-6b0d30f214",
+  "difficulty": "medium",
+  "duration": 58.613515,
+  "audioMode": "single",
+  "generatorVersion": "hybrid-analysis-m4-bands-v1",
+  "analysisHash": "846c072f45f4331c1f0c471af60b738bd64f83c6a740730d3072b549ee532d26",
+  "locked": false,
+  "spatialModelVersion": "spatial-v3-hard-mouse-acquisition",
+  "interactionContractVersion": "tap-drag-v1",
+  "phases": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 19.537838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 19.537838,
+      "endTime": 39.075677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 39.075677,
+      "endTime": 58.613515
+    }
+  ],
+  "events": [
+    {
+      "id": "read-m4-0001",
+      "time": 1.834376,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.76,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "read-m4-0003",
+      "time": 2.368435,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.48,
+        "y": 0.46
+      }
+    },
+    {
+      "id": "read-m4-0005",
+      "time": 2.925714,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.24,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "read-m4-0007",
+      "time": 3.482993,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.52,
+        "y": 0.56
+      }
+    },
+    {
+      "id": "read-m4-0009",
+      "time": 4.063492,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.36,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "read-m4-0011",
+      "time": 4.620771,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.76,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "read-m4-0013",
+      "time": 5.17805,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.48,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "read-m4-0015",
+      "time": 5.735329,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.24,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "read-m4-0017",
+      "time": 6.292608,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.52,
+        "y": 0.54
+      }
+    },
+    {
+      "id": "read-m4-0019",
+      "time": 6.849887,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "read-m4-0021",
+      "time": 7.407166,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.36,
+        "y": 0.68
+      }
+    },
+    {
+      "id": "read-m4-0023",
+      "time": 7.964444,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.52,
+        "y": 0.56
+      }
+    },
+    {
+      "id": "read-m4-0025",
+      "time": 8.521723,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.64,
+        "y": 0.34
+      }
+    },
+    {
+      "id": "read-m4-0027",
+      "time": 9.102222,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.781773,
+        "y": 0.412673
+      }
+    },
+    {
+      "id": "read-m4-0029",
+      "time": 9.659501,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.36,
+        "y": 0.68
+      }
+    },
+    {
+      "id": "read-m4-0031",
+      "time": 10.21678,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.76,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "read-m4-0033",
+      "time": 10.774059,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.52,
+        "y": 0.56
+      }
+    },
+    {
+      "id": "read-m4-0035",
+      "time": 11.331338,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.64,
+        "y": 0.32
+      }
+    },
+    {
+      "id": "read-m4-0037",
+      "time": 11.888617,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "read-m4-0039",
+      "time": 12.445896,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.36,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "read-m4-0041",
+      "time": 13.026395,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.48,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "read-m4-0043",
+      "time": 13.583673,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.16,
+        "y": 0.475193
+      }
+    },
+    {
+      "id": "read-m4-0045",
+      "time": 14.140952,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.52,
+        "y": 0.54
+      }
+    },
+    {
+      "id": "read-m4-0047",
+      "time": 14.698231,
+      "phaseId": "read",
+      "kind": "drag",
+      "start": {
+        "x": 0.76,
+        "y": 0.5
+      },
+      "controls": [
+        {
+          "x": 0.613928,
+          "y": 0.362204
+        }
+      ],
+      "end": {
+        "x": 0.414061,
+        "y": 0.342755
+      }
+    },
+    {
+      "id": "read-m4-0048",
+      "time": 15.812789,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.24,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "read-m4-0050",
+      "time": 16.370068,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.48,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "read-m4-0052",
+      "time": 16.950567,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.76,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "read-m4-0054",
+      "time": 17.507846,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.602845,
+        "y": 0.575166
+      }
+    },
+    {
+      "id": "read-m4-0056",
+      "time": 18.065125,
+      "phaseId": "read",
+      "kind": "tap",
+      "start": {
+        "x": 0.24,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "drive-m4-0058",
+      "time": 21.989297,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.62,
+        "y": 0.52
+      }
+    },
+    {
+      "id": "drive-m4-0060",
+      "time": 22.546576,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.5,
+        "y": 0.68
+      }
+    },
+    {
+      "id": "drive-m4-0062",
+      "time": 23.127075,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.16,
+        "y": 0.472253
+      }
+    },
+    {
+      "id": "drive-m4-0064",
+      "time": 23.684354,
+      "phaseId": "drive",
+      "kind": "drag",
+      "start": {
+        "x": 0.5,
+        "y": 0.78
+      },
+      "controls": [
+        {
+          "x": 0.379649,
+          "y": 0.65414
+        }
+      ],
+      "end": {
+        "x": 0.38,
+        "y": 0.48
+      }
+    },
+    {
+      "id": "drive-m4-0065",
+      "time": 24.798912,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.76,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "drive-m4-0067",
+      "time": 25.35619,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.5,
+        "y": 0.68
+      }
+    },
+    {
+      "id": "drive-m4-0069",
+      "time": 25.913469,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.24,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "drive-m4-0071",
+      "time": 26.493968,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.5,
+        "y": 0.22
+      }
+    },
+    {
+      "id": "drive-m4-0073",
+      "time": 27.051247,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.84,
+        "y": 0.418227
+      }
+    },
+    {
+      "id": "drive-m4-0075",
+      "time": 27.608526,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.48
+      }
+    },
+    {
+      "id": "drive-m4-0077",
+      "time": 28.165805,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.812901,
+        "y": 0.512812
+      }
+    },
+    {
+      "id": "drive-m4-0079",
+      "time": 28.723084,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.5,
+        "y": 0.78
+      }
+    },
+    {
+      "id": "drive-m4-0081",
+      "time": 29.280363,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.24,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "drive-m4-0083",
+      "time": 29.837642,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.54
+      }
+    },
+    {
+      "id": "drive-m4-0085",
+      "time": 30.394921,
+      "phaseId": "drive",
+      "kind": "drag",
+      "start": {
+        "x": 0.531367,
+        "y": 0.504372
+      },
+      "controls": [
+        {
+          "x": 0.399706,
+          "y": 0.408717
+        }
+      ],
+      "end": {
+        "x": 0.24,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "drive-m4-0086",
+      "time": 31.532698,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "drive-m4-0088",
+      "time": 32.089977,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.6,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "drive-m4-0089",
+      "time": 32.368617,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.62,
+        "y": 0.46
+      }
+    },
+    {
+      "id": "drive-m4-0090",
+      "time": 32.647256,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.627844,
+        "y": 0.370342
+      }
+    },
+    {
+      "id": "drive-m4-0091",
+      "time": 32.925896,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.62,
+        "y": 0.46
+      }
+    },
+    {
+      "id": "drive-m4-0092",
+      "time": 33.204535,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.48
+      }
+    },
+    {
+      "id": "drive-m4-0093",
+      "time": 33.483175,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.454613,
+        "y": 0.429673
+      }
+    },
+    {
+      "id": "drive-m4-0094",
+      "time": 33.785034,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "drive-m4-0095",
+      "time": 34.063673,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.4,
+        "y": 0.34
+      }
+    },
+    {
+      "id": "drive-m4-0096",
+      "time": 34.342313,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.486067,
+        "y": 0.366313
+      }
+    },
+    {
+      "id": "drive-m4-0097",
+      "time": 34.620952,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.54
+      }
+    },
+    {
+      "id": "drive-m4-0098",
+      "time": 34.899592,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.62,
+        "y": 0.46
+      }
+    },
+    {
+      "id": "drive-m4-0099",
+      "time": 35.178231,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.653715,
+        "y": 0.543447
+      }
+    },
+    {
+      "id": "drive-m4-0100",
+      "time": 35.456871,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.5,
+        "y": 0.68
+      }
+    },
+    {
+      "id": "drive-m4-0101",
+      "time": 35.73551,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.481288,
+        "y": 0.768033
+      }
+    },
+    {
+      "id": "drive-m4-0102",
+      "time": 36.01415,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.76,
+        "y": 0.44
+      }
+    },
+    {
+      "id": "drive-m4-0103",
+      "time": 36.316009,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.5,
+        "y": 0.78
+      }
+    },
+    {
+      "id": "drive-m4-0104",
+      "time": 36.571429,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.6,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "drive-m4-0105",
+      "time": 36.873288,
+      "phaseId": "drive",
+      "kind": "tap",
+      "start": {
+        "x": 0.42,
+        "y": 0.3
+      }
+    },
+    {
+      "id": "drive-m4-0106",
+      "time": 37.151927,
+      "phaseId": "drive",
+      "kind": "drag",
+      "start": {
+        "x": 0.56,
+        "y": 0.4
+      },
+      "controls": [
+        {
+          "x": 0.614809,
+          "y": 0.534985
+        }
+      ],
+      "end": {
+        "x": 0.54,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "climax-m4-0107",
+      "time": 41.1922,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.62
+      }
+    },
+    {
+      "id": "climax-m4-0109",
+      "time": 41.633379,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.4,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "climax-m4-0110",
+      "time": 41.912018,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.376706,
+        "y": 0.573067
+      }
+    },
+    {
+      "id": "climax-m4-0112",
+      "time": 42.190658,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "climax-m4-0115",
+      "time": 42.747937,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.74,
+        "y": 0.45
+      }
+    },
+    {
+      "id": "climax-m4-0117",
+      "time": 43.026576,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.687327,
+        "y": 0.361773
+      }
+    },
+    {
+      "id": "climax-m4-0119",
+      "time": 43.444535,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "climax-m4-0121",
+      "time": 43.885714,
+      "phaseId": "climax",
+      "kind": "drag",
+      "start": {
+        "x": 0.52,
+        "y": 0.7
+      },
+      "controls": [
+        {
+          "x": 0.623452,
+          "y": 0.5341
+        }
+      ],
+      "end": {
+        "x": 0.6,
+        "y": 0.34
+      }
+    },
+    {
+      "id": "climax-m4-0122",
+      "time": 44.977052,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.62
+      }
+    },
+    {
+      "id": "climax-m4-0124",
+      "time": 45.278912,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.6,
+        "y": 0.34
+      }
+    },
+    {
+      "id": "climax-m4-0125",
+      "time": 45.557551,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.522058,
+        "y": 0.385
+      }
+    },
+    {
+      "id": "climax-m4-0127",
+      "time": 45.83619,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.470219,
+        "y": 0.613722
+      }
+    },
+    {
+      "id": "climax-m4-0128",
+      "time": 46.11483,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "climax-m4-0130",
+      "time": 46.393469,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.508378,
+        "y": 0.546276
+      }
+    },
+    {
+      "id": "climax-m4-0132",
+      "time": 46.672109,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.32,
+        "y": 0.38
+      }
+    },
+    {
+      "id": "climax-m4-0133",
+      "time": 46.950748,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.344807,
+        "y": 0.293486
+      }
+    },
+    {
+      "id": "climax-m4-0135",
+      "time": 47.252608,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.6
+      }
+    },
+    {
+      "id": "climax-m4-0137",
+      "time": 47.531247,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.489507,
+        "y": 0.650592
+      }
+    },
+    {
+      "id": "climax-m4-0139",
+      "time": 47.809887,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.6,
+        "y": 0.34
+      }
+    },
+    {
+      "id": "climax-m4-0141",
+      "time": 48.088526,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.782252,
+        "y": 0.529465
+      }
+    },
+    {
+      "id": "climax-m4-0143",
+      "time": 48.367166,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.6
+      }
+    },
+    {
+      "id": "climax-m4-0145",
+      "time": 48.645805,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.44,
+        "y": 0.38
+      }
+    },
+    {
+      "id": "climax-m4-0147",
+      "time": 48.924444,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.6,
+        "y": 0.34
+      }
+    },
+    {
+      "id": "climax-m4-0148",
+      "time": 49.203084,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.48,
+        "y": 0.3
+      }
+    },
+    {
+      "id": "climax-m4-0150",
+      "time": 49.481723,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.70923,
+        "y": 0.388253
+      }
+    },
+    {
+      "id": "climax-m4-0152",
+      "time": 49.760363,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.707747,
+        "y": 0.465978
+      }
+    },
+    {
+      "id": "climax-m4-0154",
+      "time": 50.039002,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.4,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "climax-m4-0155",
+      "time": 50.317642,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.26,
+        "y": 0.55
+      }
+    },
+    {
+      "id": "climax-m4-0157",
+      "time": 50.619501,
+      "phaseId": "climax",
+      "kind": "drag",
+      "start": {
+        "x": 0.48,
+        "y": 0.3
+      },
+      "controls": [
+        {
+          "x": 0.376548,
+          "y": 0.4659
+        }
+      ],
+      "end": {
+        "x": 0.4,
+        "y": 0.66
+      }
+    },
+    {
+      "id": "climax-m4-0158",
+      "time": 51.734059,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.62,
+        "y": 0.4
+      }
+    },
+    {
+      "id": "climax-m4-0160",
+      "time": 52.012698,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.6
+      }
+    },
+    {
+      "id": "climax-m4-0162",
+      "time": 52.430658,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.44,
+        "y": 0.38
+      }
+    },
+    {
+      "id": "climax-m4-0164",
+      "time": 52.871837,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.74,
+        "y": 0.45
+      }
+    },
+    {
+      "id": "climax-m4-0165",
+      "time": 53.127256,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.68,
+        "y": 0.62
+      }
+    },
+    {
+      "id": "climax-m4-0166",
+      "time": 53.545215,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.52,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "climax-m4-0167",
+      "time": 54.125714,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.38,
+        "y": 0.6
+      }
+    },
+    {
+      "id": "climax-m4-0168",
+      "time": 54.706213,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.26,
+        "y": 0.45
+      }
+    },
+    {
+      "id": "climax-m4-0169",
+      "time": 55.286712,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.42,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "climax-m4-0170",
+      "time": 55.867211,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.3,
+        "y": 0.58
+      }
+    },
+    {
+      "id": "climax-m4-0171",
+      "time": 56.47093,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.7,
+        "y": 0.58
+      }
+    },
+    {
+      "id": "climax-m4-0173",
+      "time": 57.004989,
+      "phaseId": "climax",
+      "kind": "tap",
+      "start": {
+        "x": 0.58,
+        "y": 0.46
+      }
+    }
+  ]
+}

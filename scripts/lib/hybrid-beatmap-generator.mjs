@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-export const HYBRID_GENERATOR_VERSION = 'hybrid-analysis-m4-v2';
+export const HYBRID_GENERATOR_VERSION = 'hybrid-analysis-m4-bands-v1';
 
 const MINIMUM_GAP = { easy: 0.48, medium: 0.28, hard: 0.16 };
 const PHASE_SAFE_START = 2.1;
@@ -66,11 +66,33 @@ export function inferMusicalGrammar(analysis) {
 export function fuseMusicalCandidates(analysis, phases) {
   const onsetMergeSeconds = 0.075;
   const grammar = inferMusicalGrammar(analysis);
+  const bandEntries = Object.entries(analysis.onsetsByBand ?? {}).flatMap(([band, onsets]) => (
+    onsets.map((onset) => ({
+      time: onset.time,
+      beat: false,
+      beatIndex: null,
+      onsetStrength: onset.strength,
+      band,
+    }))
+  ));
   const entries = [
-    ...analysis.beats.map((time, beatIndex) => ({ time, beat: true, beatIndex, onsetStrength: 0 })),
+    ...analysis.beats.map((time, beatIndex) => ({
+      time,
+      beat: true,
+      beatIndex,
+      onsetStrength: 0,
+      band: null,
+    })),
     ...analysis.onsets
       .filter((onset) => onset.strength >= 0.12)
-      .map((onset) => ({ time: onset.time, beat: false, beatIndex: null, onsetStrength: onset.strength })),
+      .map((onset) => ({
+        time: onset.time,
+        beat: false,
+        beatIndex: null,
+        onsetStrength: onset.strength,
+        band: null,
+      })),
+    ...bandEntries,
   ].sort((left, right) => left.time - right.time || Number(right.beat) - Number(left.beat));
   const fused = [];
   for (const entry of entries) {
@@ -82,9 +104,10 @@ export function fuseMusicalCandidates(analysis, phases) {
       }
       previous.beat ||= entry.beat;
       previous.onsetStrength = Math.max(previous.onsetStrength, entry.onsetStrength);
+      if (entry.band) previous.bandHits = [...new Set([...previous.bandHits, entry.band])];
       continue;
     }
-    fused.push({ ...entry });
+    fused.push({ ...entry, bandHits: entry.band ? [entry.band] : [] });
   }
 
   return fused.flatMap((candidate) => {
@@ -130,6 +153,7 @@ export function fuseMusicalCandidates(analysis, phases) {
       phraseIndex,
       phraseBoundary,
       sustain,
+      bandHits: candidate.bandHits,
     }];
   });
 }
@@ -199,7 +223,8 @@ export function generateHybridBeatmaps({ trackId, duration, phases, analysis, an
   const musicalGrammar = inferMusicalGrammar(analysis);
   const fused = fuseMusicalCandidates(analysis, phases);
   const classified = classifyMusicalSegments(fused, phases);
-  const hardInitial = selectBySpacing(classified.candidates, MINIMUM_GAP.hard);
+  const riffCandidates = annotateRiffSequences(classified.candidates, analysis.bpm);
+  const hardInitial = selectBySpacing(riffCandidates, MINIMUM_GAP.hard);
   const mediumInitial = selectBySpacing(hardInitial, MINIMUM_GAP.medium);
   const easyInitial = selectBySpacing(mediumInitial, MINIMUM_GAP.easy);
   const dragTimes = chooseDragTimes(easyInitial);
@@ -249,6 +274,51 @@ export function generateHybridBeatmaps({ trackId, duration, phases, analysis, an
   };
 }
 
+function annotateRiffSequences(candidates, bpm) {
+  const maximumInterval = Math.min(.9, (60 / Math.max(30, bpm)) * 1.75);
+  const ordered = [...candidates].sort((left, right) => left.time - right.time);
+  const sequences = [];
+  let current = [];
+
+  const flush = () => {
+    if (current.length >= 3) sequences.push(current);
+    current = [];
+  };
+
+  for (const candidate of ordered) {
+    const isMelodicAttack = !candidate.beat
+      && candidate.bandHits.some((band) => band === 'mid' || band === 'high');
+    if (!isMelodicAttack) {
+      flush();
+      continue;
+    }
+    const previous = current.at(-1);
+    if (previous && candidate.time - previous.time > maximumInterval) flush();
+    current.push(candidate);
+  }
+  flush();
+
+  const riffByTime = new Map();
+  for (const sequence of sequences) {
+    const firstEnergy = sequence[0].energy.mid + sequence[0].energy.high;
+    const lastEnergy = sequence.at(-1).energy.mid + sequence.at(-1).energy.high;
+    const direction = lastEnergy >= firstEnergy ? 1 : -1;
+    sequence.forEach((candidate, riffStep) => {
+      riffByTime.set(candidate.time, {
+        riffStep,
+        riffLength: sequence.length,
+        riffDirection: direction,
+      });
+    });
+  }
+  return candidates.map((candidate) => {
+    const riff = riffByTime.get(candidate.time);
+    return riff
+      ? { ...candidate, ...riff, rhythmicRole: 'riff' }
+      : candidate;
+  });
+}
+
 function selectBySpacing(candidates, minimumGap) {
   const chosen = [];
   const ranked = [...candidates].sort((left, right) => candidateScore(right) - candidateScore(left) || left.time - right.time);
@@ -280,7 +350,7 @@ function effectiveGap(candidate, baseGap) {
 
 function candidateScore(candidate) {
   const segmentBonus = { peak: .22, buildup: .13, steady: .08, break: .04, quiet: 0 }[candidate.segment];
-  const roleBonus = { downbeat: .34, backbeat: .22, pulse: .14, syncopation: .08 }[candidate.rhythmicRole] ?? 0;
+  const roleBonus = { downbeat: .34, backbeat: .22, pulse: .14, syncopation: .08, riff: .22 }[candidate.rhythmicRole] ?? 0;
   const phraseBonus = candidate.phraseBoundary ? .24 : 0;
   return candidate.intensity + candidate.onsetStrength * .32
     + (candidate.beat ? .2 : 0) + roleBonus + phraseBonus + segmentBonus;
@@ -294,7 +364,7 @@ function chooseDragTimes(easyCandidates) {
     if (
       candidate.beat
       && candidate.sustain >= .48
-      && candidate.energy.low >= .48
+      && (candidate.energy.low >= .48 || candidate.energy.mid >= .55)
       && (candidate.rhythmicRole === 'downbeat' || candidate.phraseBoundary)
       && candidate.time - lastDrag >= 6
       && easyCandidates[index + 1].time - candidate.time >= .48
@@ -328,7 +398,8 @@ function assignSpatialMotifs(candidates, trackId, dragTimes, membershipByDifficu
         ? -1
         : 0;
     const responseStep = phrase % 2 === 0 ? phraseStep : 7 - phraseStep;
-    const pointIndex = positiveModulo(responseStep + directionalShift, motif.length);
+    const riffOffset = (candidate.riffStep ?? 0) * (candidate.riffDirection ?? 1);
+    const pointIndex = positiveModulo(responseStep + directionalShift + riffOffset, motif.length);
     const variation = (seed + callResponse + candidate.phaseIndex
       + (candidate.energy.mid >= .55 ? 1 : 0)) % 4;
     const desiredStart = transformPoint(motif[pointIndex], variation);

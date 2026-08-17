@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "solar-horizon-c1a2d0e55f",
+  "title": "Solar Horizon C1A2D0E55F",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/solar-horizon-c1a2d0e55f.mp3",
+  "audioHash": "c1a2d0e55f1bcc2533747ade2c7389b628d84338cdecb37cfbb100b3a9958d32",
+  "rhythm": {
+    "tempoHint": 107.666016,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 14.777838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 14.777838,
+      "endTime": 29.555677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 29.555677,
+      "endTime": 44.333515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 44.333515
+}

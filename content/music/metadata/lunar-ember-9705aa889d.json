@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "lunar-ember-9705aa889d",
+  "title": "Lunar Ember 9705AA889D",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/lunar-ember-9705aa889d.mp3",
+  "audioHash": "9705aa889d6794eab37beaec16e8c3e0e62453942b535069cf25883b88985d69",
+  "rhythm": {
+    "tempoHint": 117.453835,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 22.431172
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 22.431172,
+      "endTime": 44.862343
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 44.862343,
+      "endTime": 67.293515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 67.293515
+}

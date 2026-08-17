@@ -11,11 +11,12 @@ touch y pen solo cambian proyeccion espacial y asistencia fisica.
 
 Estado actual:
 
-- 47 canciones visibles y 141 beatmaps.
-- 24 canciones legacy v1 y 23 canciones completas M4/Beatmap v2.
-- Seis canciones M4 aprobadas tienen sus 18 mapas bloqueados por SHA-256.
-- Las otras 17 fueron reimportadas por el pipeline automatico; tienen Analysis v1,
-  tres mapas y perfil FFT, pero permanecen `locked: false` hasta prueba humana.
+- 23 canciones visibles y 69 beatmaps.
+- Las 24 canciones legacy de 30 segundos fueron retiradas; `miss.wav` se conserva.
+- Las 23 canciones largas de Suno fueron reimportadas con nombres estables, categorias
+  y precios deterministas.
+- Las 23 pistas tienen Analysis v1 con onsets por banda y tres mapas M4/Beatmap v2;
+  permanecen `locked: false` hasta prueba humana.
 - PC y movil fueron aprobados por el usuario; calidad full/reduced/minimal funciona.
 - CrazyGames y Poki estan implementados y probados con adaptadores simulados, pero
   faltan Preview Tool e Inspector oficiales.
@@ -33,8 +34,10 @@ Estado actual:
 ## Audio y Music Intelligence
 
 - AudioManager separa musica, SFX procedurales y FFT; los efectos nunca alteran reloj.
-- M3 extrae BPM, beats, onsets y energia offline con Python/librosa.
-- M4 genera motivos, sincopas, secciones, drags sostenidos y mapas anidados.
+- M3 extrae BPM, beats, onsets globales, onsets low/mid/high y energia offline con
+  Python/librosa (`librosa-m3-bands-v2`).
+- M4 fusiona bandas, genera motivos, riffs, sincopas, secciones, drags sostenidos y
+  mapas anidados (`hybrid-analysis-m4-bands-v1`).
 - M5 combina macro offline con FFT micro. El visualizador es modular mediante
   `src/game/effects/music-visualizers/MusicVisualizer.ts` y admite barras+linea,
   solo barras o ninguno desde el tema.
@@ -126,7 +129,7 @@ que exijan provisionar dependencias manualmente.
 
 ## Verificacion actual
 
-- Suite completa: contratos, 47 pistas/141 mapas, input, render, anuncios, progreso,
+- Suite completa: contratos, 23 pistas/69 mapas, input, render, anuncios, progreso,
   Music Intelligence y regresion multiplataforma.
 - Presupuesto JS: chunk principal menor a 500 kB.
 - Pipeline nuevo: `npm run test:music-pipeline`.
@@ -134,7 +137,8 @@ que exijan provisionar dependencias manualmente.
 
 ## Documentacion
 
-- Plan activo único: `REMAINING_WORK.md`.
+- Planes activos: `MUSIC_INTERPRETATION_ROADMAP_2.md` para musica y
+  `REMAINING_WORK.md` para release/plataformas.
 - Guia de musica/licencias: `SUNO_MUSIC_GUIDE.md`.
 - Evidencia especializada: `music-intelligence/` y `desktop-baselines/`.
 - Planes y handoffs sustituidos: `archive/`; son historia, no instrucciones activas.

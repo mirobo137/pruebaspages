@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "hollow-motif-0f61f35777",
+  "title": "Hollow Motif 0F61F35777",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/premium/hollow-motif-0f61f35777.mp3",
+  "audioHash": "0f61f357773f759e63bad15e930acc60b815236a783a7003d88e247f137eb8b2",
+  "rhythm": {
+    "tempoHint": 143.554688,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 41.604505
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 41.604505,
+      "endTime": 83.20901
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 83.20901,
+      "endTime": 124.813515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 124.813515
+}

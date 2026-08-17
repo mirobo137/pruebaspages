@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "quantum-signal-a2c6f4a232",
+  "title": "Quantum Signal A2C6F4A232",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/selectas/quantum-signal-a2c6f4a232.mp3",
+  "audioHash": "a2c6f4a2326e0c979a5e9516f18f663db9e699440e2e878fe639c71d08fc1e4b",
+  "rhythm": {
+    "tempoHint": 129.199219,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 24.577838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 24.577838,
+      "endTime": 49.155677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 49.155677,
+      "endTime": 73.733515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 73.733515
+}

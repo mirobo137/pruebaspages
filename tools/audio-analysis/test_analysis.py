@@ -103,6 +103,7 @@ class AnalysisTests(unittest.TestCase):
         self.assertEqual(first["tempoSource"], "override")
         self.assertEqual(first["beatOffset"], 0.5)
         self.assertEqual(first["beatOffsetSource"], "override")
+        self.assertEqual(set(first["onsetsByBand"]), {"low", "mid", "high"})
         self.assertGreater(len(first["beats"]), 15)
         self.assertGreater(len(first["onsets"]), 15)
         self.assertEqual(first_diagnostics["rawBpm"], second_diagnostics["rawBpm"])

@@ -3,7 +3,7 @@
 ## Estado
 
 - Implementacion tecnica: completada y aprobada.
-- Piloto M4: aplicado como mapa oficial `hybrid-analysis-m4-v2`.
+- Piloto M4: el generador actual es `hybrid-analysis-m4-bands-v1`.
 - Candidatas adicionales: se activan automáticamente para el catálogo de pruebas y
   permanecen `locked: false` hasta la revisión humana.
 - Compuerta: cerrada; M5 iniciado.
@@ -19,9 +19,9 @@ Beatmap v2 canonico para todos los perfiles.
 ## Pipeline
 
 ```text
-beats + onsets -> fusion 75 ms -> energia/bloques de 4 s
+beats + onsets globales + onsets low/mid/high -> fusion 75 ms -> energia/bloques de 4 s
 -> compas/frase + rol ritmico -> quiet/buildup/steady/peak/break
--> saliencia y Easy < Medium < Hard -> motivos/call-response
+-> saliencia, riffs y Easy < Medium < Hard -> motivos/call-response
 -> drags por energia sostenida -> Beatmap v2 + diagnostico de cobertura
 ```
 
@@ -35,7 +35,7 @@ beats + onsets -> fusion 75 ms -> energia/bloques de 4 s
   eliminar notas intermedias al formar un subconjunto ya no puede superponerlas.
 - Los drags nacen de beats con energia low/volumen sostenida durante 800 ms y
   reservan al menos 1.05 s de descanso.
-- Cada candidato conserva un rol: tiempo fuerte, contratiempo, pulso o sincopa.
+- Cada candidato conserva un rol: tiempo fuerte, contratiempo, pulso, sincopa o riff.
 - La fase de compas 4/4 del piloto tiene confianza baja (`0.005136`): organiza
   motivos y frases, pero no se presenta como reconocimiento absoluto del tiempo 1.
 - Cada mapa conserva el SHA-256 exacto del Analysis v1 usado.
@@ -78,14 +78,14 @@ aprobado.
 ## Uso
 
 ```powershell
-npm run music:hybrid-preview -- --track untitled-0f61f35777
+npm run music:hybrid-preview -- --track <track-id>
 npm run test:music-hybrid
 ```
 
 Para generar varias pistas analizadas en una sola orden:
 
 ```powershell
-npm run music:hybrid-batch -- --tracks "fading-static-11615b8092,moonlit-arpeggios-b11d1d0be8"
+npm run music:hybrid-batch -- --tracks "<track-id-1>,<track-id-2>"
 npm run music:hybrid-batch -- --all-analyzed
 ```
 

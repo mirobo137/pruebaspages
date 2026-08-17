@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "solar-current-e29c8ae569",
+  "title": "Solar Current E29C8AE569",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/economicas/solar-current-e29c8ae569.mp3",
+  "audioHash": "e29c8ae569b3ef8681bd950169228d8ed5c5b7d4f387b889c5265f3e1c957e33",
+  "rhythm": {
+    "tempoHint": 107.666016,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 59.884505
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 59.884505,
+      "endTime": 119.76901
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 119.76901,
+      "endTime": 179.653515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 179.653515
+}

@@ -16,10 +16,10 @@ import librosa
 import numpy as np
 
 
-ANALYZER_VERSION = "librosa-m3-v1"
+ANALYZER_VERSION = "librosa-m3-bands-v2"
 # Changes here invalidate local cache entries without changing the public
 # Analysis v1 schema or rewriting already curated JSON files.
-AUDIO_TOOLCHAIN_VERSION = "requirements-lock-2026-08-17"
+AUDIO_TOOLCHAIN_VERSION = "requirements-lock-2026-08-17-bands-v1"
 SAMPLE_RATE = 22_050
 HOP_LENGTH = 512
 ENERGY_STEP_SECONDS = 0.25
@@ -82,6 +82,46 @@ def smooth(values: np.ndarray, seconds: float = 0.5) -> np.ndarray:
 def sample_frames(values: np.ndarray, frame_times: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     stride = max(1, int(round(ENERGY_STEP_SECONDS * SAMPLE_RATE / HOP_LENGTH)))
     return values[..., ::stride], frame_times[::stride]
+
+
+def detect_band_onsets(
+    power: np.ndarray,
+    frequencies: np.ndarray,
+    sample_rate: int,
+    low_frequency: float,
+    high_frequency: float,
+) -> list[dict[str, float]]:
+    """Find transient attacks inside one spectral band.
+
+    The global onset envelope is useful for the beat grid, while these band
+    envelopes let the chart generator distinguish drum/bass attacks from
+    mid/high melodic riffs.
+    """
+    mask = (frequencies >= low_frequency) & (frequencies < high_frequency)
+    if not np.any(mask):
+        return []
+    band_power = power[mask]
+    band_db = librosa.power_to_db(band_power, ref=np.max)
+    envelope = librosa.onset.onset_strength(
+        S=band_db,
+        sr=sample_rate,
+        hop_length=HOP_LENGTH,
+        aggregate=np.median,
+    )
+    frames = librosa.onset.onset_detect(
+        onset_envelope=envelope,
+        sr=sample_rate,
+        hop_length=HOP_LENGTH,
+        backtrack=False,
+        units="frames",
+    )
+    strengths = normalize_robust(envelope[frames])
+    times = librosa.frames_to_time(frames, sr=sample_rate, hop_length=HOP_LENGTH)
+    return [
+        {"time": round_number(time), "strength": round_number(strength)}
+        for time, strength in zip(times, strengths, strict=True)
+        if time <= power.shape[1] * HOP_LENGTH / sample_rate
+    ]
 
 
 def analyze_samples(
@@ -153,6 +193,17 @@ def analyze_samples(
     low = band_energy(power, frequencies, 20, 250)
     mid = band_energy(power, frequencies, 250, 2_000)
     high = band_energy(power, frequencies, 2_000, min(10_000, sample_rate / 2 + 1))
+    onsets_by_band = {
+        "low": detect_band_onsets(power, frequencies, sample_rate, 20, 250),
+        "mid": detect_band_onsets(power, frequencies, sample_rate, 250, 2_000),
+        "high": detect_band_onsets(
+            power,
+            frequencies,
+            sample_rate,
+            2_000,
+            min(10_000, sample_rate / 2 + 1),
+        ),
+    }
     stacked, sampled_times = sample_frames(
         np.vstack([
             normalize_robust(smooth(volume)),
@@ -183,6 +234,7 @@ def analyze_samples(
             for time, strength in zip(onset_times, onset_strengths, strict=True)
             if time <= duration
         ],
+        "onsetsByBand": onsets_by_band,
         "energyFrames": [
             {
                 "time": round_number(sampled_times[index]),

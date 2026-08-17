@@ -67,8 +67,9 @@ requieren mayor curacion manual.
 6. Copiar el MP3 a `public/assets/audio/agregadas suno/` y ejecutar `npm run build`.
    Ese único comando lo renombra con un nombre legible generado a partir del hash,
    asigna una categoria/precio estable,
-   crea metadata, ejecuta Analysis v1, infiere tres secciones, genera Easy/Medium/
-   Hard con M4, crea el perfil visual FFT y lo incorpora a la playlist.
+   crea metadata, ejecuta Analysis v1 con onsets low/mid/high, infiere tres secciones,
+   genera Easy/Medium/Hard con M4 y riffs, crea el perfil visual FFT y lo incorpora
+   a la playlist.
 7. Los nombres nuevos tienen formato `adjetivo-sustantivo-código.mp3`. Parecen
    aleatorios, pero son deterministas entre clones: el mismo audio produce el mismo
    nombre y un audio distinto no reutiliza un destino existente. No se usa reloj ni
@@ -83,7 +84,7 @@ requieren mayor curacion manual.
    una publicacion formal debe jugarse y bloquearse con
    `node scripts/lock-approved-beatmaps.mjs --track <id>`.
 
-Las 17 candidatas historicas se reimportaron el 2026-08-17 mediante este mismo
+Las 23 pistas Suno se reimportaron el 2026-08-17 mediante este mismo
 pipeline. Nuevas pistas reciben `pipeline: automatic`; no se debe editar esa marca
 manualmente.
 

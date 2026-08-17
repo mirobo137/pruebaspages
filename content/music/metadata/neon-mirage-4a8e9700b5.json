@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "trackId": "neon-mirage-4a8e9700b5",
+  "title": "Neon Mirage 4A8E9700B5",
+  "status": "active",
+  "audioMode": "single",
+  "webAudioPath": "./assets/audio/neon-mirage-4a8e9700b5.mp3",
+  "audioHash": "4a8e9700b53ef0811c8c957b4e64b193bc2dde0192772bcc0c0a6cfb838c7b2d",
+  "rhythm": {
+    "tempoHint": 103.359375,
+    "bpmOverride": null,
+    "beatOffsetOverride": null
+  },
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 56.337838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 56.337838,
+      "endTime": 112.675677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 112.675677,
+      "endTime": 169.013515
+    }
+  ],
+  "provenance": {
+    "sourceType": "ai-generated",
+    "provider": "suno",
+    "commercialUseStatus": "evidence-required",
+    "privateEvidenceRef": null
+  },
+  "durationSeconds": 169.013515
+}

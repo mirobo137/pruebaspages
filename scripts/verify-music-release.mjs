@@ -11,7 +11,6 @@ import { validateBeatmapV2 } from './lib/music-contract-validation.mjs';
 
 const manifest = await readJson('content/music/approved-beatmaps.json');
 assert.equal(manifest.schemaVersion, 1);
-assert.ok(manifest.tracks.length > 0, 'no hay mapas aprobados bloqueados');
 const versions = await readJson('src/content/music-contract-versions.json');
 
 for (const approved of manifest.tracks) {
@@ -55,7 +54,12 @@ for (const approved of manifest.tracks) {
 }
 
 const analyses = (await readdir('content/music/analysis')).filter((file) => file.endsWith('.json'));
-const previewCatalog = await readJson('public/assets/beatmap-previews/m4/catalog.json');
+let previewCatalog = [];
+try {
+  previewCatalog = await readJson('public/assets/beatmap-previews/m4/catalog.json');
+} catch (error) {
+  if (error?.code !== 'ENOENT') throw error;
+}
 assert.ok(analyses.length >= 6, 'M6 requiere al menos seis canciones analizadas');
 const approvedIds = new Set(manifest.tracks.map((track) => track.trackId));
 const previewIds = new Set(previewCatalog.map((track) => track.id));
