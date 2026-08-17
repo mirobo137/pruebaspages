@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "trackId": "fading-static-fc33f284d6",
+  "generatorVersion": "music-visual-profile-m5-v1",
+  "analysisHash": "a7302c2aaff72e53106ebe170577d746c24fa7babd5058ee1a91c5ae8de14332",
+  "duration": 51.733515,
+  "frameStep": 1,
+  "frames": [
+    {
+      "time": 0,
+      "intensity": 0.335921
+    },
+    {
+      "time": 1,
+      "intensity": 0.476927
+    },
+    {
+      "time": 2,
+      "intensity": 0.398763
+    },
+    {
+      "time": 3,
+      "intensity": 0.211479
+    },
+    {
+      "time": 4,
+      "intensity": 0.137347
+    },
+    {
+      "time": 5,
+      "intensity": 0.370293
+    },
+    {
+      "time": 6,
+      "intensity": 0.424411
+    },
+    {
+      "time": 7,
+      "intensity": 0.399395
+    },
+    {
+      "time": 8,
+      "intensity": 0.354604
+    },
+    {
+      "time": 9,
+      "intensity": 0.47416
+    },
+    {
+      "time": 10,
+      "intensity": 0.541393
+    },
+    {
+      "time": 11,
+      "intensity": 0.518146
+    },
+    {
+      "time": 12,
+      "intensity": 0.421643
+    },
+    {
+      "time": 13,
+      "intensity": 0.535533
+    },
+    {
+      "time": 14,
+      "intensity": 0.521302
+    },
+    {
+      "time": 15,
+      "intensity": 0.480152
+    },
+    {
+      "time": 16,
+      "intensity": 0.506519
+    },
+    {
+      "time": 17,
+      "intensity": 0.54357
+    },
+    {
+      "time": 18,
+      "intensity": 0.571101
+    },
+    {
+      "time": 19,
+      "intensity": 0.604286
+    },
+    {
+      "time": 20,
+      "intensity": 0.629923
+    },
+    {
+      "time": 21,
+      "intensity": 0.573893
+    },
+    {
+      "time": 22,
+      "intensity": 0.583301
+    },
+    {
+      "time": 23,
+      "intensity": 0.494465
+    },
+    {
+      "time": 24,
+      "intensity": 0.59188
+    },
+    {
+      "time": 25,
+      "intensity": 0.473573
+    },
+    {
+      "time": 26,
+      "intensity": 0.613052
+    },
+    {
+      "time": 27,
+      "intensity": 0.632269
+    },
+    {
+      "time": 28,
+      "intensity": 0.602229
+    },
+    {
+      "time": 29,
+      "intensity": 0.583459
+    },
+    {
+      "time": 30,
+      "intensity": 0.590927
+    },
+    {
+      "time": 31,
+      "intensity": 0.624804
+    },
+    {
+      "time": 32,
+      "intensity": 0.730851
+    },
+    {
+      "time": 33,
+      "intensity": 0.705911
+    },
+    {
+      "time": 34,
+      "intensity": 0.759955
+    },
+    {
+      "time": 35,
+      "intensity": 0.880487
+    },
+    {
+      "time": 36,
+      "intensity": 0.851891
+    },
+    {
+      "time": 37,
+      "intensity": 0.853319
+    },
+    {
+      "time": 38,
+      "intensity": 0.833911
+    },
+    {
+      "time": 39,
+      "intensity": 0.869939
+    },
+    {
+      "time": 40,
+      "intensity": 0.860054
+    },
+    {
+      "time": 41,
+      "intensity": 0.867908
+    },
+    {
+      "time": 42,
+      "intensity": 0.855194
+    },
+    {
+      "time": 43,
+      "intensity": 0.890298
+    },
+    {
+      "time": 44,
+      "intensity": 0.876704
+    },
+    {
+      "time": 45,
+      "intensity": 0.86207
+    },
+    {
+      "time": 46,
+      "intensity": 0.718549
+    },
+    {
+      "time": 47,
+      "intensity": 0.650338
+    },
+    {
+      "time": 48,
+      "intensity": 0.763767
+    },
+    {
+      "time": 49,
+      "intensity": 0.3792
+    },
+    {
+      "time": 50,
+      "intensity": 0
+    },
+    {
+      "time": 51,
+      "intensity": 0
+    }
+  ]
+}

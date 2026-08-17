@@ -51,12 +51,26 @@ for (const approved of manifest.tracks) {
 const analyses = (await readdir('content/music/analysis')).filter((file) => file.endsWith('.json'));
 const previewCatalog = await readJson('public/assets/beatmap-previews/m4/catalog.json');
 assert.ok(analyses.length >= 6, 'M6 requiere al menos seis canciones analizadas');
-assert.deepEqual(
-  previewCatalog.map((track) => track.id).sort(),
-  analyses.map((file) => file.replace(/\.json$/, '')).sort(),
-  'toda pista analizada debe tener preview curable',
-);
-console.log(`M6 release: ${manifest.tracks.length} pista(s) bloqueada(s), ${analyses.length} previews listas para curacion: OK`);
+const approvedIds = new Set(manifest.tracks.map((track) => track.trackId));
+const previewIds = new Set(previewCatalog.map((track) => track.id));
+const registry = await readJson('content/music/suno-candidates.json');
+const automaticIds = new Set(registry.tracks.filter((track) => (
+  track.pipeline === 'automatic' && track.status === 'active'
+)).map((track) => track.trackId));
+for (const file of analyses) {
+  const trackId = file.replace(/\.json$/, '');
+  assert.ok(
+    previewIds.has(trackId) || approvedIds.has(trackId) || automaticIds.has(trackId),
+    `${trackId}: analisis sin preview, aprobacion ni alta automatica`,
+  );
+  if (automaticIds.has(trackId)) {
+    for (const difficulty of ['easy', 'medium', 'hard']) {
+      const document = await readJson(`public/assets/beatmaps/${trackId}/${difficulty}.json`);
+      validateBeatmapV2(document);
+    }
+  }
+}
+console.log(`M6 release: ${manifest.tracks.length} pista(s) bloqueada(s), ${automaticIds.size} automatica(s), ${analyses.length} analisis cubiertos: OK`);
 
 async function readJson(relativePath) {
   return JSON.parse(await readFile(relativePath, 'utf8'));

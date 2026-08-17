@@ -2,6 +2,86 @@
   "schemaVersion": 1,
   "tracks": [
     {
+      "trackId": "fading-static-11615b8092",
+      "approvedAt": "2026-08-17",
+      "generatorVersion": "hybrid-analysis-m4-v2",
+      "analysisHash": "c7c7f4096106557bc059d2a7056468f875a8f733f59c422c473256c133ae9a29",
+      "difficulties": {
+        "easy": {
+          "eventCount": 37,
+          "sha256": "c16a2dcf46e19799bd48755547e2668170cbb6ed5ac95c7b61ca7664309702ef"
+        },
+        "medium": {
+          "eventCount": 56,
+          "sha256": "c723beab6a1e030c2389fa66a22d30d1c7e5ad51ea4a5c3a41001eff36a4796c"
+        },
+        "hard": {
+          "eventCount": 88,
+          "sha256": "39e8f58d11bbfbff4be14f87859ab86566ec8276134edbbd11e262db79bb6ef6"
+        }
+      }
+    },
+    {
+      "trackId": "midnight-reggae-trap-3b64364ff7",
+      "approvedAt": "2026-08-17",
+      "generatorVersion": "hybrid-analysis-m4-v2",
+      "analysisHash": "aa3834cddacf1810e3e2d72f6447fb1f447478a2eb86498a701765c294d80ac0",
+      "difficulties": {
+        "easy": {
+          "eventCount": 81,
+          "sha256": "940339be783c46480b7273046ae2bd6df1a5fc9b9faa752be48d2723369ef11d"
+        },
+        "medium": {
+          "eventCount": 117,
+          "sha256": "62f0c9e4bf1136b36206272375e7458efd4b232e6e272af50c258e9f06cb57b4"
+        },
+        "hard": {
+          "eventCount": 149,
+          "sha256": "31f1216ac188964ac9767873307d8976d52bcd76137a920ef481e9ed2a7a9c32"
+        }
+      }
+    },
+    {
+      "trackId": "moonlit-arpeggios-b11d1d0be8",
+      "approvedAt": "2026-08-17",
+      "generatorVersion": "hybrid-analysis-m4-v2",
+      "analysisHash": "e6336d6a50d96e5af20977b672b96cd676ce36fddd6b2343928e8a7f355edea5",
+      "difficulties": {
+        "easy": {
+          "eventCount": 262,
+          "sha256": "91ae1d92bfa416c04cdafc39da1aff2933ec94d6a103e7c8d3c5acd1b42baff3"
+        },
+        "medium": {
+          "eventCount": 365,
+          "sha256": "058734672630d3af764d76938c45228d704e72601222ea6e8fb98f41673856c7"
+        },
+        "hard": {
+          "eventCount": 404,
+          "sha256": "a856bc80605542f2561084a32fce81abb7c11e890792e94609ad05396f8604d4"
+        }
+      }
+    },
+    {
+      "trackId": "neon-country-run-6b0d30f214",
+      "approvedAt": "2026-08-17",
+      "generatorVersion": "hybrid-analysis-m4-v2",
+      "analysisHash": "50bdb335dff710093355dd420426a3a4040b8e88085794c07b8bb93605cc88f0",
+      "difficulties": {
+        "easy": {
+          "eventCount": 75,
+          "sha256": "a882563d8753cb17be724fe682b76a819f2bdd9af0147853415d9771cbf648b0"
+        },
+        "medium": {
+          "eventCount": 98,
+          "sha256": "a73c47f9c720db16336792e5e48a43a68f9eab9de51daa341453aa5f41ce4a55"
+        },
+        "hard": {
+          "eventCount": 151,
+          "sha256": "72ed8df026b42be851f089448a43a721c4a8caf963d3ccc8cb2a13cef946dd1a"
+        }
+      }
+    },
+    {
       "trackId": "untitled-0f61f35777",
       "approvedAt": "2026-08-14",
       "generatorVersion": "hybrid-analysis-m4-v2",
@@ -18,6 +98,26 @@
         "hard": {
           "eventCount": 340,
           "sha256": "ac57c533aa473772dba2cb85d29519df333eb68570522482d8ac6397af7e7362"
+        }
+      }
+    },
+    {
+      "trackId": "velvet-storm-4a8e9700b5",
+      "approvedAt": "2026-08-17",
+      "generatorVersion": "hybrid-analysis-m4-v2",
+      "analysisHash": "e7fc15a7f09c0aca098cbcbbac3c76fbb887cc48872e955ce95b04b636745f6c",
+      "difficulties": {
+        "easy": {
+          "eventCount": 240,
+          "sha256": "aad4a5775e44e7967d69956030ca1e0e33ad651638a12978a1f03c219b50c4c0"
+        },
+        "medium": {
+          "eventCount": 322,
+          "sha256": "96ddb3ce0a6a7211947d55aa641962673850205e78f78606be6c1e0fe55134e0"
+        },
+        "hard": {
+          "eventCount": 410,
+          "sha256": "8bcfb53ffc910be6ea73aad83b48cb2360d307d5dfb09dfeb6e4282f9a21eeb6"
         }
       }
     }

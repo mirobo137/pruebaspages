@@ -36,7 +36,7 @@ try {
 }
 const entry = {
   trackId,
-  approvedAt: '2026-08-14',
+  approvedAt: new Date().toISOString().slice(0, 10),
   generatorVersion: documents.easy.generatorVersion,
   analysisHash: documents.easy.analysisHash,
   difficulties: Object.fromEntries(Object.entries(documents).map(([difficulty, document]) => [

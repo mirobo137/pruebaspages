@@ -20,8 +20,8 @@ y anterior a Beatmap v2. Se actualiza al cerrar M0 con los comandos indicados.
 - Touch/pen conservan politica `trace` y geometria canonica.
 - Progreso compartido; ranking futuro separado por perfil/version.
 
-La evidencia detallada permanece en `DESKTOP_INPUT_PROFILE_PLAN.md` y
-`SESSION_HANDOFF_2026-08-13.md`.
+La evidencia detallada permanece archivada en `../archive/DESKTOP_INPUT_PROFILE_PLAN.md` y
+`../archive/SESSION_HANDOFF_2026-08-13.md`.
 
 ## Comandos de cierre
 

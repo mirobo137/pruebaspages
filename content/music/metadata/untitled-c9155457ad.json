@@ -1,21 +1,41 @@
 {
   "schemaVersion": 1,
   "trackId": "untitled-c9155457ad",
-  "title": "Untitled",
-  "status": "candidate",
+  "title": "Suno C91554",
+  "status": "active",
   "audioMode": "single",
-  "webAudioPath": "./assets/audio/economicas/untitled-c9155457ad.mp3",
+  "webAudioPath": "./assets/audio/premium/untitled-c9155457ad.mp3",
   "audioHash": "c9155457ad9536a4f95d265a104867ea5db3a8c97d91962e2d14ac765fd6091b",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 143.554688,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 45.804505
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 45.804505,
+      "endTime": 91.60901
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 91.60901,
+      "endTime": 137.413515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 137.413515
 }

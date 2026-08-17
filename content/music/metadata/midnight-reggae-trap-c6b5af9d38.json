@@ -1,21 +1,41 @@
 {
   "schemaVersion": 1,
   "trackId": "midnight-reggae-trap-c6b5af9d38",
-  "title": "Midnight Reggae Trap",
-  "status": "candidate",
+  "title": "Midnight Reggae Trap C6B5AF",
+  "status": "active",
   "audioMode": "single",
   "webAudioPath": "./assets/audio/economicas/midnight-reggae-trap-c6b5af9d38.mp3",
   "audioHash": "c6b5af9d38faaa4c48fc4894560895f2b1c4be0c306516551e61cdbc8c62befc",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 135.999178,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 16.231172
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 16.231172,
+      "endTime": 32.462343
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 32.462343,
+      "endTime": 48.693515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 48.693515
 }

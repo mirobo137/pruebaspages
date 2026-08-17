@@ -18,16 +18,27 @@ export function normalizeSunoStem(fileName) {
   return stem || 'suno-track';
 }
 
-export function choosePaidCategory(contentHash, categories) {
-  const paidCategories = categories.filter(
-    (category) => category?.folder && Number(category.price) > 0,
+export function chooseSunoCategory(contentHash, categories) {
+  const availableCategories = categories.filter(
+    (category) => category && Number.isFinite(Number(category.price)),
   );
-  if (paidCategories.length === 0) {
-    throw new Error('No hay categorias de pago disponibles para canciones Suno.');
+  if (availableCategories.length === 0) {
+    throw new Error('No hay categorias disponibles para canciones Suno.');
   }
 
   const selector = Number.parseInt(contentHash.slice(0, 8), 16);
-  return paidCategories[selector % paidCategories.length];
+  return availableCategories[selector % availableCategories.length];
+}
+
+export function createSunoDisplayTitle(fileName, contentHash) {
+  const sourceTitle = path.basename(fileName, path.extname(fileName))
+    .replace(/\s*\(\d+\)\s*$/u, '')
+    .replace(/[_-]+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const code = contentHash.slice(0, 6).toUpperCase();
+  if (!sourceTitle || /^untitled$/i.test(sourceTitle)) return `Suno ${code}`;
+  return `${sourceTitle} ${code}`;
 }
 
 export async function hashFile(filePath) {
@@ -98,11 +109,15 @@ export async function ingestSunoTracks({
       );
     }
 
-    const category = choosePaidCategory(sha256, categories);
+    const category = chooseSunoCategory(sha256, categories);
     const extension = path.extname(entry.name).toLowerCase();
     const fileName = `${normalizeSunoStem(entry.name)}-${sha256.slice(0, 10)}${extension}`;
-    const relativeAudioPath = path.posix.join(category.folder, fileName);
-    const destinationDirectory = path.join(audioDirectory, category.folder);
+    const relativeAudioPath = category.folder
+      ? path.posix.join(category.folder, fileName)
+      : fileName;
+    const destinationDirectory = category.folder
+      ? path.join(audioDirectory, category.folder)
+      : audioDirectory;
     const destinationPath = path.join(destinationDirectory, fileName);
 
     await mkdir(destinationDirectory, { recursive: true });
@@ -117,9 +132,11 @@ export async function ingestSunoTracks({
       trackId: path.basename(fileName, extension),
       relativeAudioPath,
       originalFileName: entry.name,
+      title: createSunoDisplayTitle(entry.name, sha256),
       sha256,
       categoryId: category.id,
       status: 'candidate',
+      pipeline: 'automatic',
     };
     await rename(sourcePath, destinationPath);
     registry.tracks.push(track);

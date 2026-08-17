@@ -1,21 +1,41 @@
 {
   "schemaVersion": 1,
   "trackId": "velvet-storm-e29c8ae569",
-  "title": "Velvet Storm",
-  "status": "candidate",
+  "title": "Velvet Storm E29C8A",
+  "status": "active",
   "audioMode": "single",
-  "webAudioPath": "./assets/audio/premium/velvet-storm-e29c8ae569.mp3",
+  "webAudioPath": "./assets/audio/economicas/velvet-storm-e29c8ae569.mp3",
   "audioHash": "e29c8ae569b3ef8681bd950169228d8ed5c5b7d4f387b889c5265f3e1c957e33",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 107.666016,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 59.884505
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 59.884505,
+      "endTime": 119.76901
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 119.76901,
+      "endTime": 179.653515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 179.653515
 }

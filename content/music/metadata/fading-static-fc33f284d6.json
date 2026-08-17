@@ -1,21 +1,41 @@
 {
   "schemaVersion": 1,
   "trackId": "fading-static-fc33f284d6",
-  "title": "Fading Static",
-  "status": "candidate",
+  "title": "Fading Static FC33F2",
+  "status": "active",
   "audioMode": "single",
-  "webAudioPath": "./assets/audio/premium/fading-static-fc33f284d6.mp3",
+  "webAudioPath": "./assets/audio/fading-static-fc33f284d6.mp3",
   "audioHash": "fc33f284d6d340fab235e01a64f78b26a49e59273f8c93d506602ae341b07887",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 107.666016,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 17.244505
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 17.244505,
+      "endTime": 34.48901
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 34.48901,
+      "endTime": 51.733515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 51.733515
 }

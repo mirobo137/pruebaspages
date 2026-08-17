@@ -64,15 +64,23 @@ requieren mayor curacion manual.
    o edicion; no publicarlo con el juego.
 5. Descartar pistas con intro larga, silencios, falsos finales, tempo inestable o
    parecido evidente con una obra conocida.
-6. Subir el MP3 a `public/assets/audio/agregadas suno/` y ejecutar `npm run build`.
-   La ingestion lo renombra con ID/hash, lo reparte de forma pseudoaleatoria y
-   estable entre las tres categorias de pago y lo registra como `candidate`.
+6. Copiar el MP3 a `public/assets/audio/agregadas suno/` y ejecutar `npm run build`.
+   Ese unico comando lo renombra con ID/hash, asigna una categoria/precio estable,
+   crea metadata, ejecuta Analysis v1, infiere tres secciones, genera Easy/Medium/
+   Hard con M4, crea el perfil visual FFT y lo incorpora a la playlist.
 7. No mover ni renombrar manualmente una candidata ya registrada. Su hash mantiene
    identidad aunque el titulo original sea `Untitled` o tenga sufijos como `(1)`.
-8. Activarla solo cuando tenga metadata y Beatmap v2; hasta entonces no aparece en
-   la playlist v1 ni se precarga en movil.
-9. Probar y bloquear el beatmap definitivo; nunca publicar un mapa automatico sin
-   una partida humana completa.
+8. En la primera importacion, el build crea `.venv` e instala automaticamente las
+   dependencias fijadas del analizador; solo requiere Python 3 e Internet esa vez.
+   Si el audio falla, conserva la pista como candidata y el siguiente build reintenta.
+   Con la bandeja vacia no necesita Python ni vuelve a analizar.
+9. El mapa automatico aparece inmediatamente pero queda `locked: false`. Antes de
+   una publicacion formal debe jugarse y bloquearse con
+   `node scripts/lock-approved-beatmaps.mjs --track <id>`.
+
+Las 17 candidatas historicas se reimportaron el 2026-08-17 mediante este mismo
+pipeline. Nuevas pistas reciben `pipeline: automatic`; no se debe editar esa marca
+manualmente.
 
 El registro `content/music/suno-candidates.json` no contiene recibos, cuenta ni
 datos privados. La evidencia comercial se conserva fuera del repositorio.

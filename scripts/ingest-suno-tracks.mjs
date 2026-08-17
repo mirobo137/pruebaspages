@@ -20,9 +20,9 @@ const imported = await ingestSunoTracks({
 if (imported.length === 0) {
   console.log('Bandeja Suno vacia: no fue necesario importar canciones.');
 } else {
-  console.log(`Canciones Suno importadas como candidatas: ${imported.length}`);
+  console.log(`Canciones Suno recibidas por el pipeline automatico: ${imported.length}`);
   for (const track of imported) {
     console.log(`- ${track.originalFileName} -> ${track.relativeAudioPath}`);
   }
-  console.log('Las candidatas se activaran individualmente con Beatmap v2 desde M1.');
+  console.log('El sincronizador completara Analysis v1, Beatmap v2 y activacion.');
 }

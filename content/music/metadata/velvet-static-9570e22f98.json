@@ -1,21 +1,41 @@
 {
   "schemaVersion": 1,
   "trackId": "velvet-static-9570e22f98",
-  "title": "Velvet Static",
-  "status": "candidate",
+  "title": "Velvet Static 9570E2",
+  "status": "active",
   "audioMode": "single",
-  "webAudioPath": "./assets/audio/economicas/velvet-static-9570e22f98.mp3",
+  "webAudioPath": "./assets/audio/premium/velvet-static-9570e22f98.mp3",
   "audioHash": "9570e22f9858216bc05ac9775715eb5896e64d6eda5ad4dbb7495c7ba5b285a0",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 135.999178,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 23.137838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 23.137838,
+      "endTime": 46.275677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 46.275677,
+      "endTime": 69.413515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 69.413515
 }

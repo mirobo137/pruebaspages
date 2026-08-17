@@ -2,20 +2,40 @@
   "schemaVersion": 1,
   "trackId": "midnight-reggae-trap-3b64364ff7",
   "title": "Midnight Reggae Trap",
-  "status": "candidate",
+  "status": "active",
   "audioMode": "single",
   "webAudioPath": "./assets/audio/selectas/midnight-reggae-trap-3b64364ff7.mp3",
   "audioHash": "3b64364ff79fedb49c6f7e6ad6ea403c2e07ca680a321b19bd99741621bad95f",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 103.359375,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 22.444505
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 22.444505,
+      "endTime": 44.88901
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 44.88901,
+      "endTime": 67.333515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 67.333515
 }

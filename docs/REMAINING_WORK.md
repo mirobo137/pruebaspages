@@ -1,0 +1,77 @@
+# SUPERFLOW - trabajo restante
+
+Este es el unico plan activo del proyecto. Sustituye las hojas antiguas de LiveOps,
+perfil PC, 11.5 y Music Intelligence. Estado actualizado: 2026-08-17.
+
+## Estado global
+
+La implementacion del juego esta cerrada. El usuario aprobo PC, mouse, touch, movil,
+fullscreen, resize, calidad adaptativa, audio de juicios, Danger, FLOW/SUPER FLOW,
+derrota, revive, anuncios simulados, evento, skins y las tres dificultades. La suite
+y el build cubren 47 canciones y 141 mapas.
+
+Music Intelligence M0-M6 esta cerrada localmente: seis canciones completas poseen
+Analysis v1, Easy/Medium/Hard M4 y bloqueo SHA-256. El editor visual se descarta por
+ahora porque no hubo correccion manual recurrente que justifique su coste. Mouse y
+touch conservan `inputProfileId` y version espacial separados; no se mezclaran
+rankings competitivos hasta obtener evidencia suficiente.
+
+## P0 - Revision del nuevo lote automatico
+
+- [ ] Escuchar/probar las 17 canciones reimportadas al menos una vez antes de release.
+- [ ] Si una pista es correcta, bloquear sus mapas con
+  `node scripts/lock-approved-beatmaps.mjs --track <id>`.
+- [ ] Si una pista no es adecuada, retirarla del catalogo en vez de compensarla con
+  reglas especiales que degraden las demas canciones.
+
+La automatizacion estructural ya esta aprobada: nombres unicos, 6 Gratis/5
+Economicas/3 Selectas/3 Premium, 17 Analysis v1 y 51 mapas M4. Esta revision es
+curacion de contenido nuevo, no una fase tecnica pendiente.
+
+## P1 - CrazyGames Preview Tool
+
+- [ ] Subir la build candidata al entorno oficial de Preview.
+- [ ] Confirmar carga, `gameplayStart/Stop`, pausa y mute del SDK.
+- [ ] Recorrer rewarded exitoso, cancelado, `unfilled`, adblock y error.
+- [ ] Probar duplicacion de monedas, revive y skin diaria sin recompensa doble.
+- [ ] Confirmar que el juego siempre conserva una ruta sin anuncio.
+- [ ] Verificar Data/guardado en el entorno real y repetir en mouse/touch disponibles.
+
+Cierre: marcar Fase 11 completa solo con evidencia del Preview Tool.
+
+## P2 - Poki Inspector
+
+- [ ] Subir la misma build candidata a Poki Inspector.
+- [ ] Confirmar el orden de `gameLoadingFinished`, `gameplayStart` y `gameplayStop`.
+- [ ] Recorrer revive, duplicacion y skin con recompensa, cancelacion y error.
+- [ ] Confirmar que audio, reloj e input no avanzan mientras el anuncio esta activo.
+- [ ] Probar escritorio y movil; verificar que una respuesta sin recompensa no entrega contenido.
+- [ ] Revisar checkpoints `measure()` sin duplicar metricas automaticas del anuncio.
+
+Cierre: marcar Fase 12 completa solo con evidencia del Inspector.
+
+## P3 - Candidato de publicacion
+
+- [ ] Confirmar licencia/evidencia comercial privada de cada pista publicada.
+- [ ] Revisar privacidad y datos enviados a cada plataforma.
+- [ ] Crear icono, miniatura, capturas y textos de tienda.
+- [ ] Ejecutar `npm test`, `npm run build` y `git diff --check` en revision limpia.
+- [ ] Probar instalacion/carga sin cache y ausencia de 404 en la URL candidata.
+- [ ] Crear commit y etiqueta de release despues de aprobar P1/P2.
+
+## P4 - Lanzamiento controlado y datos reales
+
+- [ ] Publicar primero a un grupo o entorno limitado.
+- [ ] Observar al menos una ventana real de retorno; idealmente una semana completa.
+- [ ] Medir inicio/final de canciones, abandono, retorno, evento semanal y ofertas.
+- [ ] Comparar revive y duplicacion antes de cambiar precios o frecuencia.
+- [ ] Confirmar que los anuncios no aumentan significativamente el abandono.
+- [ ] Decidir con datos si se habilitan rankings y si mouse/touch pueden mezclarse.
+
+Cierre: Fase 13 termina con datos reales, no solo con telemetria instalada.
+
+## Fuera del cierre actual
+
+Objetivos moviles, notas hold, modo entrenamiento, reto diario, resultado compartible,
+backend/rankings y visualizadores vendibles como piezas de skin son backlog opcional.
+No bloquean Preview, Inspector ni el primer lanzamiento.

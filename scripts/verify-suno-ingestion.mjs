@@ -3,7 +3,8 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import os from 'node:os';
 import path from 'node:path';
 import {
-  choosePaidCategory,
+  chooseSunoCategory,
+  createSunoDisplayTitle,
   ingestSunoTracks,
   normalizeSunoStem,
 } from './lib/suno-ingestion.mjs';
@@ -18,8 +19,14 @@ const categories = [
 assert.equal(normalizeSunoStem('Canci\u00f3n El\u00e9ctrica (4).mp3'), 'cancion-electrica');
 assert.equal(normalizeSunoStem('Untitled (2).mp3'), 'untitled');
 assert.equal(
-  choosePaidCategory('00000002ffffffff', categories).id,
-  'premium',
+  chooseSunoCategory('00000000ffffffff', categories).id,
+  'free',
+);
+assert.equal(chooseSunoCategory('00000002ffffffff', categories).id, 'select');
+assert.equal(createSunoDisplayTitle('Untitled (2).mp3', '61be6b1153'), 'Suno 61BE6B');
+assert.equal(
+  createSunoDisplayTitle('Velvet Steel (1).mp3', '686e538467'),
+  'Velvet Steel 686E53',
 );
 
 const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), 'superflow-suno-'));
@@ -40,6 +47,8 @@ try {
   assert.equal(firstRun.length, 2);
   assert.notEqual(firstRun[0].trackId, firstRun[1].trackId);
   assert.ok(firstRun.every((track) => track.status === 'candidate'));
+  assert.ok(firstRun.every((track) => track.pipeline === 'automatic'));
+  assert.equal(new Set(firstRun.map((track) => track.title)).size, 2);
   assert.ok(firstRun.every((track) => track.relativeAudioPath.endsWith('.mp3')));
   assert.deepEqual(await readdir(sourceDirectory), []);
 

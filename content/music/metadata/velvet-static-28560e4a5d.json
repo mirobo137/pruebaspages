@@ -1,21 +1,41 @@
 {
   "schemaVersion": 1,
   "trackId": "velvet-static-28560e4a5d",
-  "title": "Velvet Static",
-  "status": "candidate",
+  "title": "Velvet Static 28560E",
+  "status": "active",
   "audioMode": "single",
   "webAudioPath": "./assets/audio/selectas/velvet-static-28560e4a5d.mp3",
   "audioHash": "28560e4a5dbf2d6a733f9fac74b0fc67e843eeb0241ca458377688c565153be8",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 103.359375,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 19.137838
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 19.137838,
+      "endTime": 38.275677
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 38.275677,
+      "endTime": 57.413515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 57.413515
 }

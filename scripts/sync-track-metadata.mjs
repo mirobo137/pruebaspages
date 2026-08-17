@@ -71,7 +71,7 @@ const definitions = [
   })),
   ...managedTracks.map((track) => ({
     trackId: track.trackId,
-    title: titleFromFileName(track.originalFileName),
+    title: track.title ?? titleFromFileName(track.originalFileName),
     status: track.status,
     audioMode: 'single',
     webAudioPath: `./assets/audio/${track.relativeAudioPath}`,

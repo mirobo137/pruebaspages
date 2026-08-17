@@ -1,21 +1,41 @@
 {
   "schemaVersion": 1,
   "trackId": "velvet-steel-686e538467",
-  "title": "Velvet Steel",
-  "status": "candidate",
+  "title": "Velvet Steel 686E53",
+  "status": "active",
   "audioMode": "single",
-  "webAudioPath": "./assets/audio/economicas/velvet-steel-686e538467.mp3",
+  "webAudioPath": "./assets/audio/velvet-steel-686e538467.mp3",
   "audioHash": "686e53846705f529179ae28166bb3eca57ee475aa5f1b15ab8ec394102b67da3",
   "rhythm": {
-    "tempoHint": null,
+    "tempoHint": 143.554688,
     "bpmOverride": null,
     "beatOffsetOverride": null
   },
-  "suggestedSections": [],
+  "suggestedSections": [
+    {
+      "id": "read",
+      "name": "LECTURA",
+      "startTime": 0,
+      "endTime": 24.324505
+    },
+    {
+      "id": "drive",
+      "name": "IMPULSO",
+      "startTime": 24.324505,
+      "endTime": 48.64901
+    },
+    {
+      "id": "climax",
+      "name": "CLIMAX",
+      "startTime": 48.64901,
+      "endTime": 72.973515
+    }
+  ],
   "provenance": {
     "sourceType": "ai-generated",
     "provider": "suno",
     "commercialUseStatus": "evidence-required",
     "privateEvidenceRef": null
-  }
+  },
+  "durationSeconds": 72.973515
 }
