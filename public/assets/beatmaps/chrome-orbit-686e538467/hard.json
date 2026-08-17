@@ -6,7 +6,7 @@
   "audioMode": "single",
   "generatorVersion": "hybrid-analysis-m4-bands-v1",
   "analysisHash": "5e0475b075092587fd3680d870e584ccac0d7f70691b74763d619809637f52b7",
-  "locked": false,
+  "locked": true,
   "spatialModelVersion": "spatial-v3-hard-mouse-acquisition",
   "interactionContractVersion": "tap-drag-v1",
   "phases": [

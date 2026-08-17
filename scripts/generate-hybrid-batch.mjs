@@ -4,10 +4,16 @@ import path from 'node:path';
 
 const argumentsList = process.argv.slice(2);
 const tracks = await parseTracks(argumentsList);
+const interpretationV2 = argumentsList.includes('--interpretation-v2');
 for (const trackId of tracks) {
   const result = spawnSync(
     process.execPath,
-    ['scripts/generate-hybrid-beatmaps.mjs', '--track', trackId],
+    [
+      'scripts/generate-hybrid-beatmaps.mjs',
+      '--track',
+      trackId,
+      ...(interpretationV2 ? ['--interpretation-v2'] : []),
+    ],
     { cwd: process.cwd(), stdio: 'inherit' },
   );
   if (result.status !== 0) process.exit(result.status ?? 1);

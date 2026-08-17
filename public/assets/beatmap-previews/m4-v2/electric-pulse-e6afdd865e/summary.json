@@ -1,0 +1,211 @@
+{
+  "trackId": "electric-pulse-e6afdd865e",
+  "generatorVersion": "hybrid-analysis-m4-musical-v2",
+  "analysisPath": "content/music/analysis/electric-pulse-e6afdd865e.json",
+  "analysisHash": "a6a106b2cc5956db71a282dc93a4284ca875013e5ede304976324a6eb54d0150",
+  "mode": "preview",
+  "phaseSource": "metadata-reviewed",
+  "currentGeneratorVersion": "hybrid-analysis-m4-bands-v1",
+  "counts": {
+    "easy": {
+      "current": 32,
+      "candidate": 31,
+      "difference": -1,
+      "drags": 3
+    },
+    "medium": {
+      "current": 48,
+      "candidate": 48,
+      "difference": 0,
+      "drags": 3
+    },
+    "hard": {
+      "current": 82,
+      "candidate": 82,
+      "difference": 0,
+      "drags": 3
+    }
+  },
+  "fusedCandidates": 96,
+  "musicalGrammar": {
+    "meter": "4/4-inferred",
+    "beatsPerBar": 4,
+    "phraseBeats": 16,
+    "downbeatRemainder": 0,
+    "confidence": 0.162758,
+    "phaseScores": [
+      11.419431,
+      6.642685,
+      8.359616,
+      9.560831
+    ]
+  },
+  "musicalCoverage": {
+    "hard": {
+      "noteCount": 82,
+      "beatOrStrongOnsetRatio": 0.792683,
+      "averageSalience": 1.186512,
+      "phraseBoundariesCaptured": 2,
+      "rhythmicRoles": {
+        "backbeat": 22,
+        "snare": 18,
+        "downbeat": 11,
+        "kick": 21,
+        "pulse": 9,
+        "hihat": 1
+      },
+      "sustainedDrags": 3
+    },
+    "medium": {
+      "noteCount": 48,
+      "beatOrStrongOnsetRatio": 0.958333,
+      "averageSalience": 1.323219,
+      "phraseBoundariesCaptured": 2,
+      "rhythmicRoles": {
+        "backbeat": 21,
+        "downbeat": 11,
+        "pulse": 8,
+        "kick": 4,
+        "snare": 4
+      },
+      "sustainedDrags": 3
+    },
+    "easy": {
+      "noteCount": 31,
+      "beatOrStrongOnsetRatio": 1,
+      "averageSalience": 1.397304,
+      "phraseBoundariesCaptured": 2,
+      "rhythmicRoles": {
+        "downbeat": 11,
+        "pulse": 7,
+        "backbeat": 12,
+        "kick": 1
+      },
+      "sustainedDrags": 3
+    }
+  },
+  "segmentThresholds": {
+    "low": 0.5490800744597397,
+    "high": 0.6113407938227676
+  },
+  "segments": [
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 0,
+      "endTime": 4,
+      "candidateCount": 9,
+      "averageIntensity": 0.498541
+    },
+    {
+      "type": "peak",
+      "phaseId": "read",
+      "startTime": 4,
+      "endTime": 8,
+      "candidateCount": 16,
+      "averageIntensity": 0.611341
+    },
+    {
+      "type": "steady",
+      "phaseId": "read",
+      "startTime": 8,
+      "endTime": 11.497838,
+      "candidateCount": 8,
+      "averageIntensity": 0.598757
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 11.497838,
+      "endTime": 15.497838,
+      "candidateCount": 8,
+      "averageIntensity": 0.683484
+    },
+    {
+      "type": "break",
+      "phaseId": "drive",
+      "startTime": 15.497838,
+      "endTime": 22.995677,
+      "candidateCount": 25,
+      "averageIntensity": 0.446306
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 22.995677,
+      "endTime": 26.995677,
+      "candidateCount": 7,
+      "averageIntensity": 0.665441
+    },
+    {
+      "type": "steady",
+      "phaseId": "climax",
+      "startTime": 26.995677,
+      "endTime": 30.995677,
+      "candidateCount": 15,
+      "averageIntensity": 0.604288
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 30.995677,
+      "endTime": 34.493515,
+      "candidateCount": 8,
+      "averageIntensity": 0.723811
+    }
+  ],
+  "projections": {
+    "mouse-balanced": {
+      "easy": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 214.6,
+        "maximumTravel": 340
+      },
+      "medium": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 210.2,
+        "maximumTravel": 380
+      },
+      "hard": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 175.8,
+        "maximumTravel": 306.5
+      }
+    },
+    "touch-portrait": {
+      "easy": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 119.9,
+        "maximumTravel": 365.1
+      },
+      "medium": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 132.4,
+        "maximumTravel": 365.1
+      },
+      "hard": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 116.5,
+        "maximumTravel": 288.1
+      }
+    }
+  }
+}

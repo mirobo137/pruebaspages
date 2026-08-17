@@ -1,0 +1,301 @@
+[
+  {
+    "id": "chrome-ember-fc33f284d6",
+    "title": "Chrome Ember [MUSICAL V2]",
+    "audioPath": "./assets/audio/chrome-ember-fc33f284d6.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 107.666016,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/chrome-ember-fc33f284d6/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/chrome-ember-fc33f284d6/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/chrome-ember-fc33f284d6/hard.json"
+    }
+  },
+  {
+    "id": "chrome-orbit-686e538467",
+    "title": "Chrome Orbit [MUSICAL V2]",
+    "audioPath": "./assets/audio/chrome-orbit-686e538467.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 143.554688,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/chrome-orbit-686e538467/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/chrome-orbit-686e538467/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/chrome-orbit-686e538467/hard.json"
+    }
+  },
+  {
+    "id": "crystal-phase-e86f1d9936",
+    "title": "Crystal Phase [MUSICAL V2]",
+    "audioPath": "./assets/audio/economicas/crystal-phase-e86f1d9936.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 123.046875,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/crystal-phase-e86f1d9936/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/crystal-phase-e86f1d9936/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/crystal-phase-e86f1d9936/hard.json"
+    }
+  },
+  {
+    "id": "electric-pulse-e6afdd865e",
+    "title": "Electric Pulse [MUSICAL V2]",
+    "audioPath": "./assets/audio/selectas/electric-pulse-e6afdd865e.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 117.453835,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/electric-pulse-e6afdd865e/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/electric-pulse-e6afdd865e/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/electric-pulse-e6afdd865e/hard.json"
+    }
+  },
+  {
+    "id": "hidden-circuit-3b64364ff7",
+    "title": "Hidden Circuit [MUSICAL V2]",
+    "audioPath": "./assets/audio/premium/hidden-circuit-3b64364ff7.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 103.359375,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/hidden-circuit-3b64364ff7/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/hidden-circuit-3b64364ff7/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/hidden-circuit-3b64364ff7/hard.json"
+    }
+  },
+  {
+    "id": "hidden-rush-9570e22f98",
+    "title": "Hidden Rush [MUSICAL V2]",
+    "audioPath": "./assets/audio/premium/hidden-rush-9570e22f98.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 135.999178,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/hidden-rush-9570e22f98/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/hidden-rush-9570e22f98/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/hidden-rush-9570e22f98/hard.json"
+    }
+  },
+  {
+    "id": "hollow-circuit-c9155457ad",
+    "title": "Hollow Circuit [MUSICAL V2]",
+    "audioPath": "./assets/audio/premium/hollow-circuit-c9155457ad.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 143.554688,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/hollow-circuit-c9155457ad/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/hollow-circuit-c9155457ad/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/hollow-circuit-c9155457ad/hard.json"
+    }
+  },
+  {
+    "id": "hollow-horizon-8f279d878d",
+    "title": "Hollow Horizon [MUSICAL V2]",
+    "audioPath": "./assets/audio/premium/hollow-horizon-8f279d878d.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 103.359375,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/hollow-horizon-8f279d878d/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/hollow-horizon-8f279d878d/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/hollow-horizon-8f279d878d/hard.json"
+    }
+  },
+  {
+    "id": "hollow-motif-0f61f35777",
+    "title": "Hollow Motif [MUSICAL V2]",
+    "audioPath": "./assets/audio/premium/hollow-motif-0f61f35777.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 143.554688,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/hollow-motif-0f61f35777/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/hollow-motif-0f61f35777/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/hollow-motif-0f61f35777/hard.json"
+    }
+  },
+  {
+    "id": "lunar-ember-9705aa889d",
+    "title": "Lunar Ember [MUSICAL V2]",
+    "audioPath": "./assets/audio/lunar-ember-9705aa889d.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 117.453835,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/lunar-ember-9705aa889d/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/lunar-ember-9705aa889d/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/lunar-ember-9705aa889d/hard.json"
+    }
+  },
+  {
+    "id": "lunar-rush-3f77996812",
+    "title": "Lunar Rush [MUSICAL V2]",
+    "audioPath": "./assets/audio/lunar-rush-3f77996812.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 143.554688,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/lunar-rush-3f77996812/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/lunar-rush-3f77996812/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/lunar-rush-3f77996812/hard.json"
+    }
+  },
+  {
+    "id": "lunar-vector-5f90a288df",
+    "title": "Lunar Vector [MUSICAL V2]",
+    "audioPath": "./assets/audio/lunar-vector-5f90a288df.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 95.703125,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/lunar-vector-5f90a288df/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/lunar-vector-5f90a288df/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/lunar-vector-5f90a288df/hard.json"
+    }
+  },
+  {
+    "id": "neon-mirage-4a8e9700b5",
+    "title": "Neon Mirage [MUSICAL V2]",
+    "audioPath": "./assets/audio/neon-mirage-4a8e9700b5.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 103.359375,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/neon-mirage-4a8e9700b5/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/neon-mirage-4a8e9700b5/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/neon-mirage-4a8e9700b5/hard.json"
+    }
+  },
+  {
+    "id": "neon-signal-11615b8092",
+    "title": "Neon Signal [MUSICAL V2]",
+    "audioPath": "./assets/audio/neon-signal-11615b8092.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 103.359375,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/neon-signal-11615b8092/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/neon-signal-11615b8092/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/neon-signal-11615b8092/hard.json"
+    }
+  },
+  {
+    "id": "quantum-phase-6b0d30f214",
+    "title": "Quantum Phase [MUSICAL V2]",
+    "audioPath": "./assets/audio/selectas/quantum-phase-6b0d30f214.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 107.666016,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/quantum-phase-6b0d30f214/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/quantum-phase-6b0d30f214/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/quantum-phase-6b0d30f214/hard.json"
+    }
+  },
+  {
+    "id": "quantum-signal-a2c6f4a232",
+    "title": "Quantum Signal [MUSICAL V2]",
+    "audioPath": "./assets/audio/selectas/quantum-signal-a2c6f4a232.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 129.199219,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/quantum-signal-a2c6f4a232/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/quantum-signal-a2c6f4a232/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/quantum-signal-a2c6f4a232/hard.json"
+    }
+  },
+  {
+    "id": "radiant-tide-c667694c50",
+    "title": "Radiant Tide [MUSICAL V2]",
+    "audioPath": "./assets/audio/radiant-tide-c667694c50.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 103.359375,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/radiant-tide-c667694c50/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/radiant-tide-c667694c50/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/radiant-tide-c667694c50/hard.json"
+    }
+  },
+  {
+    "id": "silver-ember-28560e4a5d",
+    "title": "Silver Ember [MUSICAL V2]",
+    "audioPath": "./assets/audio/selectas/silver-ember-28560e4a5d.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 103.359375,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/silver-ember-28560e4a5d/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/silver-ember-28560e4a5d/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/silver-ember-28560e4a5d/hard.json"
+    }
+  },
+  {
+    "id": "solar-current-e29c8ae569",
+    "title": "Solar Current [MUSICAL V2]",
+    "audioPath": "./assets/audio/economicas/solar-current-e29c8ae569.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 107.666016,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/solar-current-e29c8ae569/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/solar-current-e29c8ae569/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/solar-current-e29c8ae569/hard.json"
+    }
+  },
+  {
+    "id": "solar-horizon-c1a2d0e55f",
+    "title": "Solar Horizon [MUSICAL V2]",
+    "audioPath": "./assets/audio/economicas/solar-horizon-c1a2d0e55f.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 107.666016,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/solar-horizon-c1a2d0e55f/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/solar-horizon-c1a2d0e55f/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/solar-horizon-c1a2d0e55f/hard.json"
+    }
+  },
+  {
+    "id": "static-vector-c6b5af9d38",
+    "title": "Static Vector [MUSICAL V2]",
+    "audioPath": "./assets/audio/economicas/static-vector-c6b5af9d38.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 135.999178,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/static-vector-c6b5af9d38/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/static-vector-c6b5af9d38/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/static-vector-c6b5af9d38/hard.json"
+    }
+  },
+  {
+    "id": "velvet-drift-61be6b1153",
+    "title": "Velvet Drift [MUSICAL V2]",
+    "audioPath": "./assets/audio/economicas/velvet-drift-61be6b1153.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 123.046875,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/velvet-drift-61be6b1153/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/velvet-drift-61be6b1153/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/velvet-drift-61be6b1153/hard.json"
+    }
+  },
+  {
+    "id": "violet-motif-b11d1d0be8",
+    "title": "Violet Motif [MUSICAL V2]",
+    "audioPath": "./assets/audio/premium/violet-motif-b11d1d0be8.mp3",
+    "priceTier": "free",
+    "price": 0,
+    "bpm": 120.18532,
+    "beatmapPaths": {
+      "easy": "./assets/beatmap-previews/m4-v2/violet-motif-b11d1d0be8/easy.json",
+      "medium": "./assets/beatmap-previews/m4-v2/violet-motif-b11d1d0be8/medium.json",
+      "hard": "./assets/beatmap-previews/m4-v2/violet-motif-b11d1d0be8/hard.json"
+    }
+  }
+]

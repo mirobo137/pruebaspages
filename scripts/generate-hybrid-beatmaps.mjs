@@ -18,6 +18,9 @@ if (metadata.trackId !== analysis.trackId || metadata.audioHash !== analysis.aud
 }
 if (metadata.audioMode !== 'single') throw new Error(`${options.trackId}: M4 requiere audio single.`);
 const hasReviewedStructure = Boolean(metadata.durationSeconds && metadata.suggestedSections.length > 0);
+if (options.interpretationV2 && options.apply) {
+  throw new Error('Interpretation Musical v2 solo genera previews hasta completar la prueba movil.');
+}
 if (options.apply && !hasReviewedStructure) {
   throw new Error(`${options.trackId}: aplicar M4 requiere duracion y secciones revisadas en metadata.`);
 }
@@ -33,6 +36,7 @@ const result = generateHybridBeatmaps({
   analysis,
   analysisHash: analysisSha256(analysisText),
   versions,
+  interpretationProfile: options.interpretationV2 ? 'musical-v2' : 'approved',
 });
 for (const document of Object.values(result.documents)) validateBeatmapV2(document);
 
@@ -66,7 +70,14 @@ const summary = {
 
 const outputDirectory = options.apply
   ? path.join(projectRoot, 'public', 'assets', 'beatmaps', options.trackId)
-  : path.join(projectRoot, 'public', 'assets', 'beatmap-previews', 'm4', options.trackId);
+  : path.join(
+    projectRoot,
+    'public',
+    'assets',
+    'beatmap-previews',
+    options.interpretationV2 ? 'm4-v2' : 'm4',
+    options.trackId,
+  );
 if (options.apply) {
   for (const difficulty of ['easy', 'medium', 'hard']) {
     if (!currentDocuments[difficulty]) {
@@ -78,7 +89,7 @@ if (options.apply) {
   }
 }
 await writeDocuments(outputDirectory, result.documents);
-if (!options.apply) await updatePreviewCatalog(metadata, analysis);
+if (!options.apply) await updatePreviewCatalog(metadata, analysis, options.interpretationV2);
 await writeFile(
   path.join(outputDirectory, options.apply ? 'm4-generation-summary.json' : 'summary.json'),
   `${JSON.stringify(summary, null, 2)}\n`,
@@ -93,22 +104,26 @@ console.log(`- metrica inferida: ${summary.musicalGrammar.meter}; confianza: ${s
 for (const [difficulty, coverage] of Object.entries(summary.musicalCoverage)) {
   console.log(`- ${difficulty}: ${(coverage.beatOrStrongOnsetRatio * 100).toFixed(1)}% beat/onset fuerte; ${coverage.phraseBoundariesCaptured} inicios de frase`);
 }
-if (!options.apply) console.log('- probar con ?beatmapPreview=m4 (solo desarrollo)');
+if (!options.apply) {
+  console.log(`- probar con ?beatmapPreview=${options.interpretationV2 ? 'm4-v2' : 'm4'} (solo desarrollo)`);
+}
 
 function parseOptions(args) {
   let trackId = null;
   let apply = false;
   let force = false;
+  let interpretationV2 = false;
   for (let index = 0; index < args.length; index += 1) {
     if (args[index] === '--track') trackId = args[++index] ?? null;
     else if (args[index] === '--apply') apply = true;
     else if (args[index] === '--force') force = true;
+    else if (args[index] === '--interpretation-v2') interpretationV2 = true;
     else if (!args[index].startsWith('-') && !trackId) trackId = args[index];
     else throw new Error(`Opcion desconocida: ${args[index]}`);
   }
   if (!trackId) throw new Error('Falta --track <trackId>.');
   if (force && !apply) throw new Error('--force solo se acepta junto con --apply.');
-  return { trackId, apply, force };
+  return { trackId, apply, force, interpretationV2 };
 }
 
 async function readJson(relativePath) {
@@ -124,8 +139,9 @@ async function readOptionalJson(relativePath) {
   }
 }
 
-async function updatePreviewCatalog(trackMetadata, trackAnalysis) {
-  const catalogPath = path.join(projectRoot, 'public', 'assets', 'beatmap-previews', 'm4', 'catalog.json');
+async function updatePreviewCatalog(trackMetadata, trackAnalysis, interpretationV2) {
+  const previewDirectory = interpretationV2 ? 'm4-v2' : 'm4';
+  const catalogPath = path.join(projectRoot, 'public', 'assets', 'beatmap-previews', previewDirectory, 'catalog.json');
   let catalog = [];
   try {
     catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
@@ -133,10 +149,10 @@ async function updatePreviewCatalog(trackMetadata, trackAnalysis) {
     if (error?.code !== 'ENOENT') throw error;
   }
   const audioPath = trackMetadata.webAudioPath;
-  const previewRoot = `./assets/beatmap-previews/m4/${trackMetadata.trackId}`;
+  const previewRoot = `./assets/beatmap-previews/${previewDirectory}/${trackMetadata.trackId}`;
   const entry = {
     id: trackMetadata.trackId,
-    title: `${trackMetadata.title} [M4]`,
+    title: `${trackMetadata.title} [${interpretationV2 ? 'MUSICAL V2' : 'M4'}]`,
     audioPath,
     priceTier: 'free',
     price: 0,

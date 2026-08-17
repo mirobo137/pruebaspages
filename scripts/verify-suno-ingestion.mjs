@@ -28,8 +28,10 @@ const generatedHashA = '61be6b1153aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 const generatedHashB = '686e538467bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 assert.match(createSunoGeneratedStem(generatedHashA), /^[a-z]+-[a-z]+-61be6b1153$/u);
 assert.notEqual(createSunoGeneratedStem(generatedHashA), createSunoGeneratedStem(generatedHashB));
-assert.equal(createSunoDisplayTitle('Untitled (2).mp3', generatedHashA).endsWith('61BE6B1153'), true);
-assert.equal(createSunoDisplayTitle('Velvet Steel (1).mp3', generatedHashB).endsWith('686E538467'), true);
+assert.match(createSunoDisplayTitle('Untitled (2).mp3', generatedHashA), /^[A-Z][a-z]+ [A-Z][a-z]+$/u);
+assert.match(createSunoDisplayTitle('Velvet Steel (1).mp3', generatedHashB), /^[A-Z][a-z]+ [A-Z][a-z]+$/u);
+assert.doesNotMatch(createSunoDisplayTitle('Untitled (2).mp3', generatedHashA), /[0-9A-F]{10}$/u);
+assert.doesNotMatch(createSunoDisplayTitle('Velvet Steel (1).mp3', generatedHashB), /[0-9A-F]{10}$/u);
 
 const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), 'superflow-suno-'));
 try {

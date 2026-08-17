@@ -1,5 +1,8 @@
 # M4 - candidato del generador hibrido
 
+La interpretacion Musical v2 se prueba en `public/assets/beatmap-previews/m4-v2/`
+con `?beatmapPreview=m4-v2`; no reemplaza mapas bloqueados hasta la aprobacion movil.
+
 ## Estado
 
 - Implementacion tecnica: completada y aprobada.

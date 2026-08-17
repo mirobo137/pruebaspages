@@ -6,6 +6,7 @@ import {
   fuseMusicalCandidates,
   generateHybridBeatmaps,
   HYBRID_GENERATOR_VERSION,
+  HYBRID_GENERATOR_NEXT_VERSION,
   inferPreviewPhases,
   inferMusicalGrammar,
 } from './lib/hybrid-beatmap-generator.mjs';
@@ -35,6 +36,20 @@ const options = {
 const first = generateHybridBeatmaps(options);
 const second = generateHybridBeatmaps(options);
 assert.deepEqual(first, second, 'M4 debe ser determinista');
+const nextFirst = generateHybridBeatmaps({ ...options, interpretationProfile: 'musical-v2' });
+const nextSecond = generateHybridBeatmaps({ ...options, interpretationProfile: 'musical-v2' });
+assert.deepEqual(nextFirst, nextSecond, 'M4 Musical v2 debe ser determinista');
+assert.equal(nextFirst.documents.easy.generatorVersion, HYBRID_GENERATOR_NEXT_VERSION);
+assert.ok(
+  nextFirst.documents.hard.events.length > 0
+  && nextFirst.documents.easy.events.length <= nextFirst.documents.medium.events.length
+  && nextFirst.documents.medium.events.length <= nextFirst.documents.hard.events.length,
+);
+assert.notDeepEqual(
+  nextFirst.documents.hard.events,
+  first.documents.hard.events,
+  'M4 Musical v2 debe producir una lectura espacial distinta',
+);
 
 const grammar = inferMusicalGrammar(analysis);
 assert.equal(grammar.meter, '4/4-inferred');
@@ -65,6 +80,14 @@ assertSubset(medium, hard, 'Medium no es subconjunto exacto de Hard');
 assert.ok(easy.events.length < medium.events.length && medium.events.length < hard.events.length);
 const fused = fuseMusicalCandidates(analysis, metadata.suggestedSections);
 assert.ok(hard.events.length < fused.length, 'M4 convirtió cada candidato en nota');
+const nextFused = fuseMusicalCandidates(analysis, metadata.suggestedSections, { interpretationProfile: 'musical-v2' });
+assert.ok(nextFused.some((candidate) => candidate.roleHits.length > 0), 'M4 Musical v2 no clasificó roles por banda');
+assert.ok(
+  Object.keys(nextFirst.diagnostics.coverage.hard.rhythmicRoles)
+    .some((role) => ['kick', 'snare', 'hihat', 'melodic'].includes(role)),
+  'M4 Musical v2 perdió los roles instrumentales heurísticos',
+);
+assert.ok(maxRepeatedPositionRun(nextFirst.documents.hard.events) <= 2, 'M4 Musical v2 repite demasiado la misma posicion');
 
 const bandTimes = Object.values(analysis.onsetsByBand ?? {}).flat().map((onset) => onset.time);
 const musicalTimes = [...analysis.beats, ...analysis.onsets.map((onset) => onset.time), ...bandTimes];
@@ -120,8 +143,12 @@ for (const fileName of analyzedFiles.filter((name) => name.endsWith('.json'))) {
 for (const difficulty of ['easy', 'medium', 'hard']) {
   const current = JSON.parse(await readFile(`public/assets/beatmaps/${trackId}/${difficulty}.json`, 'utf8'));
   assert.equal(current.generatorVersion, HYBRID_GENERATOR_VERSION, 'mapa automático desactualizado');
-  assert.equal(current.locked, false, 'el mapa de prueba no debe estar bloqueado');
-  assert.deepEqual(current, first.documents[difficulty], `Mapa automático ${difficulty} desactualizado`);
+  assert.equal(typeof current.locked, 'boolean');
+  assert.deepEqual(
+    current,
+    { ...first.documents[difficulty], locked: current.locked },
+    `Mapa automático ${difficulty} desactualizado`,
+  );
 }
 
 const server = await createServer({ configFile: false, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true } });
@@ -174,6 +201,19 @@ function assertTemporalSafety(document) {
     assert.ok(gap < .07 || gap > .1, `${document.difficulty}: intervalo prohibido 70-100 ms`);
     if (previous.kind === 'drag') assert.ok(gap >= 1.05 - 1e-6, `${document.difficulty}: sin descanso de drag`);
   }
+}
+
+function maxRepeatedPositionRun(events) {
+  let maximum = 0;
+  let current = 0;
+  let previous = null;
+  for (const event of events) {
+    const key = `${event.start.x},${event.start.y}`;
+    current = key === previous ? current + 1 : 1;
+    maximum = Math.max(maximum, current);
+    previous = key;
+  }
+  return maximum;
 }
 
 function assertPointInBounds(point, bounds) {

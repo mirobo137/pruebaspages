@@ -1,0 +1,234 @@
+{
+  "trackId": "lunar-ember-9705aa889d",
+  "generatorVersion": "hybrid-analysis-m4-musical-v2",
+  "analysisPath": "content/music/analysis/lunar-ember-9705aa889d.json",
+  "analysisHash": "b3501974ca9f6508da36e24dc745f237655133e1b78b3c51703098228619f94a",
+  "mode": "preview",
+  "phaseSource": "metadata-reviewed",
+  "currentGeneratorVersion": "hybrid-analysis-m4-bands-v1",
+  "counts": {
+    "easy": {
+      "current": 80,
+      "candidate": 80,
+      "difference": 0,
+      "drags": 7
+    },
+    "medium": {
+      "current": 119,
+      "candidate": 120,
+      "difference": 1,
+      "drags": 7
+    },
+    "hard": {
+      "current": 197,
+      "candidate": 197,
+      "difference": 0,
+      "drags": 7
+    }
+  },
+  "fusedCandidates": 255,
+  "musicalGrammar": {
+    "meter": "4/4-inferred",
+    "beatsPerBar": 4,
+    "phraseBeats": 16,
+    "downbeatRemainder": 1,
+    "confidence": 0.033923,
+    "phaseScores": [
+      17.265444,
+      19.399698,
+      18.741595,
+      15.897166
+    ]
+  },
+  "musicalCoverage": {
+    "hard": {
+      "noteCount": 197,
+      "beatOrStrongOnsetRatio": 0.756345,
+      "averageSalience": 1.18012,
+      "phraseBoundariesCaptured": 8,
+      "rhythmicRoles": {
+        "pulse": 22,
+        "kick": 66,
+        "backbeat": 51,
+        "snare": 25,
+        "downbeat": 29,
+        "hihat": 4
+      },
+      "sustainedDrags": 7
+    },
+    "medium": {
+      "noteCount": 120,
+      "beatOrStrongOnsetRatio": 0.941667,
+      "averageSalience": 1.327105,
+      "phraseBoundariesCaptured": 8,
+      "rhythmicRoles": {
+        "pulse": 22,
+        "backbeat": 51,
+        "downbeat": 29,
+        "kick": 10,
+        "snare": 8
+      },
+      "sustainedDrags": 7
+    },
+    "easy": {
+      "noteCount": 80,
+      "beatOrStrongOnsetRatio": 1,
+      "averageSalience": 1.432489,
+      "phraseBoundariesCaptured": 8,
+      "rhythmicRoles": {
+        "pulse": 18,
+        "downbeat": 29,
+        "backbeat": 33
+      },
+      "sustainedDrags": 7
+    }
+  },
+  "segmentThresholds": {
+    "low": 0.3776872680312852,
+    "high": 0.6649583024645773
+  },
+  "segments": [
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 0,
+      "endTime": 4,
+      "candidateCount": 10,
+      "averageIntensity": 0.162316
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 4,
+      "endTime": 8,
+      "candidateCount": 16,
+      "averageIntensity": 0.277371
+    },
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 8,
+      "endTime": 12,
+      "candidateCount": 20,
+      "averageIntensity": 0.345545
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 12,
+      "endTime": 16,
+      "candidateCount": 18,
+      "averageIntensity": 0.377687
+    },
+    {
+      "type": "steady",
+      "phaseId": "read",
+      "startTime": 16,
+      "endTime": 22.431172,
+      "candidateCount": 22,
+      "averageIntensity": 0.517288
+    },
+    {
+      "type": "steady",
+      "phaseId": "drive",
+      "startTime": 22.431172,
+      "endTime": 30.431172,
+      "candidateCount": 34,
+      "averageIntensity": 0.479976
+    },
+    {
+      "type": "buildup",
+      "phaseId": "drive",
+      "startTime": 30.431172,
+      "endTime": 34.431172000000004,
+      "candidateCount": 16,
+      "averageIntensity": 0.517078
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 34.431172000000004,
+      "endTime": 44.862343,
+      "candidateCount": 36,
+      "averageIntensity": 0.669534
+    },
+    {
+      "type": "steady",
+      "phaseId": "climax",
+      "startTime": 44.862343,
+      "endTime": 48.862343,
+      "candidateCount": 8,
+      "averageIntensity": 0.638544
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 48.862343,
+      "endTime": 60.862343,
+      "candidateCount": 56,
+      "averageIntensity": 0.735806
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 60.862343,
+      "endTime": 67.293515,
+      "candidateCount": 19,
+      "averageIntensity": 0.400024
+    }
+  ],
+  "projections": {
+    "mouse-balanced": {
+      "easy": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 225.5,
+        "maximumTravel": 340
+      },
+      "medium": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 192.5,
+        "maximumTravel": 380
+      },
+      "hard": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 171,
+        "maximumTravel": 385.6
+      }
+    },
+    "touch-portrait": {
+      "easy": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 125.4,
+        "maximumTravel": 295.8
+      },
+      "medium": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 116.1,
+        "maximumTravel": 295.8
+      },
+      "hard": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 110,
+        "maximumTravel": 299.9
+      }
+    }
+  }
+}

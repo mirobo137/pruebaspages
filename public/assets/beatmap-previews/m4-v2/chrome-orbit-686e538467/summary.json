@@ -1,0 +1,252 @@
+{
+  "trackId": "chrome-orbit-686e538467",
+  "generatorVersion": "hybrid-analysis-m4-musical-v2",
+  "analysisPath": "content/music/analysis/chrome-orbit-686e538467.json",
+  "analysisHash": "5e0475b075092587fd3680d870e584ccac0d7f70691b74763d619809637f52b7",
+  "mode": "preview",
+  "phaseSource": "metadata-reviewed",
+  "currentGeneratorVersion": "hybrid-analysis-m4-bands-v1",
+  "counts": {
+    "easy": {
+      "current": 76,
+      "candidate": 76,
+      "difference": 0,
+      "drags": 7
+    },
+    "medium": {
+      "current": 133,
+      "candidate": 131,
+      "difference": -2,
+      "drags": 7
+    },
+    "hard": {
+      "current": 221,
+      "candidate": 221,
+      "difference": 0,
+      "drags": 7
+    }
+  },
+  "fusedCandidates": 269,
+  "musicalGrammar": {
+    "meter": "4/4-inferred",
+    "beatsPerBar": 4,
+    "phraseBeats": 16,
+    "downbeatRemainder": 1,
+    "confidence": 0.05185,
+    "phaseScores": [
+      18.409394,
+      19.598618,
+      18.281529,
+      18.582421
+    ]
+  },
+  "musicalCoverage": {
+    "hard": {
+      "noteCount": 221,
+      "beatOrStrongOnsetRatio": 0.728507,
+      "averageSalience": 1.185802,
+      "phraseBoundariesCaptured": 10,
+      "rhythmicRoles": {
+        "kick": 53,
+        "downbeat": 37,
+        "backbeat": 66,
+        "pulse": 30,
+        "snare": 30,
+        "hihat": 5
+      },
+      "sustainedDrags": 7
+    },
+    "medium": {
+      "noteCount": 131,
+      "beatOrStrongOnsetRatio": 0.992366,
+      "averageSalience": 1.287674,
+      "phraseBoundariesCaptured": 10,
+      "rhythmicRoles": {
+        "downbeat": 37,
+        "backbeat": 63,
+        "kick": 4,
+        "pulse": 26,
+        "snare": 1
+      },
+      "sustainedDrags": 7
+    },
+    "easy": {
+      "noteCount": 76,
+      "beatOrStrongOnsetRatio": 0.986842,
+      "averageSalience": 1.388158,
+      "phraseBoundariesCaptured": 10,
+      "rhythmicRoles": {
+        "downbeat": 28,
+        "kick": 4,
+        "backbeat": 29,
+        "pulse": 14,
+        "snare": 1
+      },
+      "sustainedDrags": 7
+    }
+  },
+  "segmentThresholds": {
+    "low": 0.4604145775155337,
+    "high": 0.6934278359156404
+  },
+  "segments": [
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 0,
+      "endTime": 8,
+      "candidateCount": 27,
+      "averageIntensity": 0.327394
+    },
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 8,
+      "endTime": 12,
+      "candidateCount": 15,
+      "averageIntensity": 0.458136
+    },
+    {
+      "type": "steady",
+      "phaseId": "read",
+      "startTime": 12,
+      "endTime": 16,
+      "candidateCount": 16,
+      "averageIntensity": 0.466518
+    },
+    {
+      "type": "break",
+      "phaseId": "read",
+      "startTime": 16,
+      "endTime": 24,
+      "candidateCount": 24,
+      "averageIntensity": 0.354086
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 24.324505,
+      "endTime": 28.324505,
+      "candidateCount": 9,
+      "averageIntensity": 0.693428
+    },
+    {
+      "type": "steady",
+      "phaseId": "drive",
+      "startTime": 28.324505,
+      "endTime": 36.324505,
+      "candidateCount": 33,
+      "averageIntensity": 0.610913
+    },
+    {
+      "type": "buildup",
+      "phaseId": "drive",
+      "startTime": 36.324505,
+      "endTime": 40.324505,
+      "candidateCount": 17,
+      "averageIntensity": 0.59711
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 40.324505,
+      "endTime": 48.324505,
+      "candidateCount": 29,
+      "averageIntensity": 0.71362
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 48.64901,
+      "endTime": 56.64901,
+      "candidateCount": 27,
+      "averageIntensity": 0.71988
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 56.64901,
+      "endTime": 60.64901,
+      "candidateCount": 17,
+      "averageIntensity": 0.471843
+    },
+    {
+      "type": "buildup",
+      "phaseId": "climax",
+      "startTime": 60.64901,
+      "endTime": 64.64901,
+      "candidateCount": 19,
+      "averageIntensity": 0.513689
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 64.64901,
+      "endTime": 68.64901,
+      "candidateCount": 19,
+      "averageIntensity": 0.796268
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 68.64901,
+      "endTime": 72.64901,
+      "candidateCount": 17,
+      "averageIntensity": 0.65634
+    }
+  ],
+  "projections": {
+    "mouse-balanced": {
+      "easy": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 222.7,
+        "maximumTravel": 340
+      },
+      "medium": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 210.6,
+        "maximumTravel": 380
+      },
+      "hard": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 173.1,
+        "maximumTravel": 401
+      }
+    },
+    "touch-portrait": {
+      "easy": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 143.4,
+        "maximumTravel": 294.6
+      },
+      "medium": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 121.5,
+        "maximumTravel": 290.5
+      },
+      "hard": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 115.4,
+        "maximumTravel": 297.9
+      }
+    }
+  }
+}

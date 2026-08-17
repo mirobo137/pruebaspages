@@ -58,9 +58,9 @@ export function createSunoGeneratedStem(contentHash) {
 }
 
 export function createSunoDisplayTitle(_fileName, contentHash) {
-  const [adjective, noun, code] = createSunoGeneratedStem(contentHash).split('-');
+  const [adjective, noun] = createSunoGeneratedStem(contentHash).split('-');
   return `${adjective[0].toUpperCase()}${adjective.slice(1)} `
-    + `${noun[0].toUpperCase()}${noun.slice(1)} ${code.toUpperCase()}`;
+    + `${noun[0].toUpperCase()}${noun.slice(1)}`;
 }
 
 export async function hashFile(filePath) {

@@ -38,6 +38,9 @@ Estado actual:
   Python/librosa (`librosa-m3-bands-v2`).
 - M4 fusiona bandas, genera motivos, riffs, sincopas, secciones, drags sostenidos y
   mapas anidados (`hybrid-analysis-m4-bands-v1`).
+- Interpretacion Musical v2 (`hybrid-analysis-m4-musical-v2`) genera previews separados
+  con roles heuristicos, densidad de riffs y anti-repeticion; los mapas oficiales
+  bloqueados todavia no fueron reemplazados.
 - M5 combina macro offline con FFT micro. El visualizador es modular mediante
   `src/game/effects/music-visualizers/MusicVisualizer.ts` y admite barras+linea,
   solo barras o ninguno desde el tema.

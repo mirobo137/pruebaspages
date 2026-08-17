@@ -1,0 +1,245 @@
+{
+  "trackId": "silver-ember-28560e4a5d",
+  "generatorVersion": "hybrid-analysis-m4-musical-v2",
+  "analysisPath": "content/music/analysis/silver-ember-28560e4a5d.json",
+  "analysisHash": "87ad1a9d511e4675cda2908649bf55d736449b807ebf0d7398269b65d573991d",
+  "mode": "preview",
+  "phaseSource": "metadata-reviewed",
+  "currentGeneratorVersion": "hybrid-analysis-m4-bands-v1",
+  "counts": {
+    "easy": {
+      "current": 72,
+      "candidate": 72,
+      "difference": 0,
+      "drags": 6
+    },
+    "medium": {
+      "current": 115,
+      "candidate": 115,
+      "difference": 0,
+      "drags": 6
+    },
+    "hard": {
+      "current": 153,
+      "candidate": 153,
+      "difference": 0,
+      "drags": 6
+    }
+  },
+  "fusedCandidates": 281,
+  "musicalGrammar": {
+    "meter": "4/4-inferred",
+    "beatsPerBar": 4,
+    "phraseBeats": 16,
+    "downbeatRemainder": 1,
+    "confidence": 0.135012,
+    "phaseScores": [
+      11.126565,
+      12.961589,
+      9.205757,
+      11.211616
+    ]
+  },
+  "musicalCoverage": {
+    "hard": {
+      "noteCount": 153,
+      "beatOrStrongOnsetRatio": 0.856209,
+      "averageSalience": 1.116817,
+      "phraseBoundariesCaptured": 4,
+      "rhythmicRoles": {
+        "pulse": 21,
+        "riff": 44,
+        "backbeat": 35,
+        "downbeat": 21,
+        "kick": 16,
+        "hihat": 2,
+        "snare": 14
+      },
+      "sustainedDrags": 6
+    },
+    "medium": {
+      "noteCount": 115,
+      "beatOrStrongOnsetRatio": 0.93913,
+      "averageSalience": 1.19169,
+      "phraseBoundariesCaptured": 4,
+      "rhythmicRoles": {
+        "pulse": 21,
+        "backbeat": 35,
+        "downbeat": 21,
+        "riff": 20,
+        "kick": 8,
+        "snare": 10
+      },
+      "sustainedDrags": 6
+    },
+    "easy": {
+      "noteCount": 72,
+      "beatOrStrongOnsetRatio": 1,
+      "averageSalience": 1.262422,
+      "phraseBoundariesCaptured": 4,
+      "rhythmicRoles": {
+        "pulse": 20,
+        "downbeat": 21,
+        "backbeat": 30,
+        "riff": 1
+      },
+      "sustainedDrags": 6
+    }
+  },
+  "segmentThresholds": {
+    "low": 0.34304427069160587,
+    "high": 0.47451595138584357
+  },
+  "segments": [
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 0,
+      "endTime": 4,
+      "candidateCount": 17,
+      "averageIntensity": 0.254803
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 4,
+      "endTime": 8,
+      "candidateCount": 28,
+      "averageIntensity": 0.343044
+    },
+    {
+      "type": "steady",
+      "phaseId": "read",
+      "startTime": 8,
+      "endTime": 19.137838,
+      "candidateCount": 67,
+      "averageIntensity": 0.369615
+    },
+    {
+      "type": "quiet",
+      "phaseId": "drive",
+      "startTime": 19.137838,
+      "endTime": 23.137838,
+      "candidateCount": 9,
+      "averageIntensity": 0.280402
+    },
+    {
+      "type": "buildup",
+      "phaseId": "drive",
+      "startTime": 23.137838,
+      "endTime": 27.137838,
+      "candidateCount": 15,
+      "averageIntensity": 0.317616
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 27.137838,
+      "endTime": 31.137838,
+      "candidateCount": 27,
+      "averageIntensity": 0.474516
+    },
+    {
+      "type": "buildup",
+      "phaseId": "drive",
+      "startTime": 31.137838,
+      "endTime": 35.137838,
+      "candidateCount": 28,
+      "averageIntensity": 0.451586
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 35.137838,
+      "endTime": 38.275677,
+      "candidateCount": 11,
+      "averageIntensity": 0.604241
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 38.275677,
+      "endTime": 42.275677,
+      "candidateCount": 12,
+      "averageIntensity": 0.486555
+    },
+    {
+      "type": "steady",
+      "phaseId": "climax",
+      "startTime": 42.275677,
+      "endTime": 46.275677,
+      "candidateCount": 25,
+      "averageIntensity": 0.45687
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 46.275677,
+      "endTime": 54.275677,
+      "candidateCount": 35,
+      "averageIntensity": 0.640744
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 54.275677,
+      "endTime": 57.413515,
+      "candidateCount": 7,
+      "averageIntensity": 0.397848
+    }
+  ],
+  "projections": {
+    "mouse-balanced": {
+      "easy": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 224,
+        "maximumTravel": 340
+      },
+      "medium": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 195.4,
+        "maximumTravel": 380
+      },
+      "hard": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 171.4,
+        "maximumTravel": 368.5
+      }
+    },
+    "touch-portrait": {
+      "easy": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 129.5,
+        "maximumTravel": 277.8
+      },
+      "medium": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 119.7,
+        "maximumTravel": 248
+      },
+      "hard": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 113.9,
+        "maximumTravel": 248
+      }
+    }
+  }
+}

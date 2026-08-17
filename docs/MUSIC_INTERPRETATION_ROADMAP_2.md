@@ -38,7 +38,7 @@ Resultado: 23 pistas largas visibles, 8 gratis, 5 economicas, 4 selectas y 6 pre
 - [x] Detectar secuencias de tres o mas ataques medios/agudos como candidatos de riff.
 - [x] Dar prioridad a riffs en la seleccion de dificultad.
 - [x] Usar el paso y direccion del riff para variar el patron espacial.
-- [ ] Separar candidatos de kick, snare, hi-hat y riff con metricas mas especificas.
+- [x] Separar candidatos heuristicos de kick, snare, hi-hat y riff con las bandas existentes.
 - [ ] Anadir contorno melodico/chroma como senal opcional.
 
 ### PI-3 - Generacion jugable
@@ -46,12 +46,13 @@ Resultado: 23 pistas largas visibles, 8 gratis, 5 economicas, 4 selectas y 6 pre
 - [x] Mantener Easy < Medium < Hard por subconjuntos temporales.
 - [x] Conservar separacion minima, descansos y limites touch/mouse.
 - [x] Permitir que energia media tambien sugiera drags sostenidos.
-- [ ] Ajustar densidad de riffs segun BPM, dificultad y tamano de pantalla.
-- [ ] Anadir pruebas de patrones repetidos y secuencias demasiado largas.
+- [x] Ajustar densidad de riffs segun BPM y dificultad, conservando un canon seguro para cualquier pantalla.
+- [x] Anadir pruebas de patrones repetidos, secuencias largas y determinismo espacial.
 
 ### PI-4 - Comparacion y curacion
 
 - [x] Regenerar las 23 canciones Suno con el generador de bandas.
+- [x] Generar previews `hybrid-analysis-m4-musical-v2` para las 23 canciones sin tocar mapas bloqueados.
 - [ ] Comparar cada dificultad con el audio y revisar si los riffs se perciben.
 - [ ] Corregir offsets o secciones mediante metadata, no editando codigo.
 - [ ] Bloquear unicamente mapas probados con `lock-approved-beatmaps.mjs`.
@@ -84,3 +85,22 @@ MP3 en agregadas suno
 
 El navegador nunca ejecuta Python. Todo el analisis ocurre durante el build local y
 los JSON resultantes se publican junto con el juego.
+
+## Prueba movil de la interpretacion v2
+
+La nueva interpretacion se genera como preview para no sobrescribir mapas aprobados:
+
+```powershell
+npm run music:hybrid-batch -- --all-analyzed --interpretation-v2
+npm run dev -- --host 0.0.0.0
+```
+
+Abrir en el movil una URL como:
+
+```text
+http://IP_DE_LA_PC:5173/?beatmapPreview=m4-v2&previewTrack=hollow-motif-0f61f35777
+```
+
+Cambiar `previewTrack` por cualquier `trackId` del catalogo. Si la version v2 se
+aprueba despues de probarla, se aplicara de forma controlada y se volveran a
+bloquear los mapas; mientras tanto los mapas oficiales permanecen intactos.

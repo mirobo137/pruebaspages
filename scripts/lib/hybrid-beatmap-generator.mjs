@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 export const HYBRID_GENERATOR_VERSION = 'hybrid-analysis-m4-bands-v1';
+export const HYBRID_GENERATOR_NEXT_VERSION = 'hybrid-analysis-m4-musical-v2';
 
 const MINIMUM_GAP = { easy: 0.48, medium: 0.28, hard: 0.16 };
 const PHASE_SAFE_START = 2.1;
@@ -63,7 +64,8 @@ export function inferMusicalGrammar(analysis) {
   };
 }
 
-export function fuseMusicalCandidates(analysis, phases) {
+export function fuseMusicalCandidates(analysis, phases, options = {}) {
+  const musicalV2 = options.interpretationProfile === 'musical-v2';
   const onsetMergeSeconds = 0.075;
   const grammar = inferMusicalGrammar(analysis);
   const bandEntries = Object.entries(analysis.onsetsByBand ?? {}).flatMap(([band, onsets]) => (
@@ -75,6 +77,19 @@ export function fuseMusicalCandidates(analysis, phases) {
       band,
     }))
   ));
+  const roleEntries = musicalV2
+    ? Object.entries({
+      kick: analysis.onsetsByBand?.low ?? [],
+      snare: analysis.onsetsByBand?.mid ?? [],
+      hihat: analysis.onsetsByBand?.high ?? [],
+    }).flatMap(([role, onsets]) => onsets.map((onset) => ({
+      time: onset.time,
+      beat: false,
+      beatIndex: null,
+      onsetStrength: onset.strength,
+      role,
+    })))
+    : [];
   const entries = [
     ...analysis.beats.map((time, beatIndex) => ({
       time,
@@ -93,6 +108,7 @@ export function fuseMusicalCandidates(analysis, phases) {
         band: null,
       })),
     ...bandEntries,
+    ...roleEntries,
   ].sort((left, right) => left.time - right.time || Number(right.beat) - Number(left.beat));
   const fused = [];
   for (const entry of entries) {
@@ -105,9 +121,14 @@ export function fuseMusicalCandidates(analysis, phases) {
       previous.beat ||= entry.beat;
       previous.onsetStrength = Math.max(previous.onsetStrength, entry.onsetStrength);
       if (entry.band) previous.bandHits = [...new Set([...previous.bandHits, entry.band])];
+      if (entry.role) previous.roleHits = [...new Set([...previous.roleHits, entry.role])];
       continue;
     }
-    fused.push({ ...entry, bandHits: entry.band ? [entry.band] : [] });
+    fused.push({
+      ...entry,
+      bandHits: entry.band ? [entry.band] : [],
+      roleHits: entry.role ? [entry.role] : [],
+    });
   }
 
   return fused.flatMap((candidate) => {
@@ -135,7 +156,9 @@ export function fuseMusicalCandidates(analysis, phases) {
         : relativeBeat === 1 || relativeBeat === 3
           ? 'backbeat'
           : 'pulse'
-      : 'syncopation';
+      : musicalV2
+        ? classifyBandRole(candidate)
+        : 'syncopation';
     const phraseBeat = Math.max(0, referenceBeatIndex - grammar.downbeatRemainder);
     const phraseIndex = Math.floor(phraseBeat / grammar.phraseBeats);
     const phraseBoundary = candidate.beat
@@ -154,6 +177,7 @@ export function fuseMusicalCandidates(analysis, phases) {
       phraseBoundary,
       sustain,
       bandHits: candidate.bandHits,
+      roleHits: candidate.roleHits,
     }];
   });
 }
@@ -219,14 +243,29 @@ export function classifyMusicalSegments(candidates, phases) {
   return { candidates: labelled, segments, thresholds: { low, high }, phases };
 }
 
-export function generateHybridBeatmaps({ trackId, duration, phases, analysis, analysisHash, versions }) {
+export function generateHybridBeatmaps({
+  trackId,
+  duration,
+  phases,
+  analysis,
+  analysisHash,
+  versions,
+  interpretationProfile = 'approved',
+}) {
+  const musicalV2 = interpretationProfile === 'musical-v2';
   const musicalGrammar = inferMusicalGrammar(analysis);
-  const fused = fuseMusicalCandidates(analysis, phases);
+  const fused = fuseMusicalCandidates(analysis, phases, { interpretationProfile });
   const classified = classifyMusicalSegments(fused, phases);
   const riffCandidates = annotateRiffSequences(classified.candidates, analysis.bpm);
-  const hardInitial = selectBySpacing(riffCandidates, MINIMUM_GAP.hard);
-  const mediumInitial = selectBySpacing(hardInitial, MINIMUM_GAP.medium);
-  const easyInitial = selectBySpacing(mediumInitial, MINIMUM_GAP.easy);
+  const hardInitial = selectBySpacing(riffCandidates, MINIMUM_GAP.hard, musicalV2
+    ? { riffShare: riffShareFor('hard', analysis.bpm) }
+    : undefined);
+  const mediumInitial = selectBySpacing(hardInitial, MINIMUM_GAP.medium, musicalV2
+    ? { riffShare: riffShareFor('medium', analysis.bpm) }
+    : undefined);
+  const easyInitial = selectBySpacing(mediumInitial, MINIMUM_GAP.easy, musicalV2
+    ? { riffShare: riffShareFor('easy', analysis.bpm) }
+    : undefined);
   const dragTimes = chooseDragTimes(easyInitial);
   const hard = removePostDragCandidates(hardInitial, dragTimes);
   const mediumIds = new Set(removePostDragCandidates(mediumInitial, dragTimes).map((item) => item.time));
@@ -235,7 +274,7 @@ export function generateHybridBeatmaps({ trackId, duration, phases, analysis, an
     easy: easyIds,
     medium: mediumIds,
     hard: new Set(hard.map((item) => item.time)),
-  });
+  }, { avoidRepeats: musicalV2 });
   const byDifficulty = {
     hard: spatialEvents,
     medium: spatialEvents.filter((event) => mediumIds.has(event.time)),
@@ -249,7 +288,7 @@ export function generateHybridBeatmaps({ trackId, duration, phases, analysis, an
       difficulty,
       duration,
       audioMode: 'single',
-      generatorVersion: HYBRID_GENERATOR_VERSION,
+      generatorVersion: musicalV2 ? HYBRID_GENERATOR_NEXT_VERSION : HYBRID_GENERATOR_VERSION,
       analysisHash,
       locked: false,
       spatialModelVersion: versions.spatialModelVersion,
@@ -267,6 +306,7 @@ export function generateHybridBeatmaps({ trackId, duration, phases, analysis, an
       segments: classified.segments,
       thresholds: classified.thresholds,
       musicalGrammar,
+      interpretationProfile,
       coverage: Object.fromEntries(Object.entries(byDifficulty).map(
         ([difficulty, events]) => [difficulty, summarizeMusicalCoverage(events)],
       )),
@@ -319,10 +359,31 @@ function annotateRiffSequences(candidates, bpm) {
   });
 }
 
-function selectBySpacing(candidates, minimumGap) {
+function classifyBandRole(candidate) {
+  const roleHits = candidate.roleHits ?? [];
+  const bandHits = candidate.bandHits ?? [];
+  if (roleHits.includes('kick')) return 'kick';
+  if (roleHits.includes('snare')) return 'snare';
+  if (roleHits.includes('hihat')) return 'hihat';
+  if (bandHits.includes('mid') && bandHits.includes('high')) return 'melodic';
+  return 'syncopation';
+}
+
+function riffShareFor(difficulty, bpm) {
+  const speed = clamp01((bpm - 90) / 90);
+  const base = { easy: .28, medium: .5, hard: .72 }[difficulty] ?? .5;
+  return clamp01(base - speed * .08);
+}
+
+function selectBySpacing(candidates, minimumGap, options = {}) {
   const chosen = [];
+  const riffLimit = options.riffShare === undefined
+    ? Number.POSITIVE_INFINITY
+    : Math.max(1, Math.ceil(candidates.filter((candidate) => candidate.rhythmicRole === 'riff').length * options.riffShare));
+  let riffCount = 0;
   const ranked = [...candidates].sort((left, right) => candidateScore(right) - candidateScore(left) || left.time - right.time);
   for (const candidate of ranked) {
+    if (candidate.rhythmicRole === 'riff' && riffCount >= riffLimit) continue;
     if (chosen.every((other) => (
       other.phaseId !== candidate.phaseId
       || Math.abs(other.time - candidate.time) >= Math.max(
@@ -331,6 +392,7 @@ function selectBySpacing(candidates, minimumGap) {
       ) - 1e-6
     ))) {
       chosen.push(candidate);
+      if (candidate.rhythmicRole === 'riff') riffCount += 1;
     }
   }
   return chosen.sort((left, right) => left.time - right.time);
@@ -350,7 +412,17 @@ function effectiveGap(candidate, baseGap) {
 
 function candidateScore(candidate) {
   const segmentBonus = { peak: .22, buildup: .13, steady: .08, break: .04, quiet: 0 }[candidate.segment];
-  const roleBonus = { downbeat: .34, backbeat: .22, pulse: .14, syncopation: .08, riff: .22 }[candidate.rhythmicRole] ?? 0;
+  const roleBonus = {
+    downbeat: .34,
+    backbeat: .22,
+    pulse: .14,
+    kick: .2,
+    snare: .18,
+    hihat: .08,
+    melodic: .16,
+    syncopation: .08,
+    riff: .22,
+  }[candidate.rhythmicRole] ?? 0;
   const phraseBonus = candidate.phraseBoundary ? .24 : 0;
   return candidate.intensity + candidate.onsetStrength * .32
     + (candidate.beat ? .2 : 0) + roleBonus + phraseBonus + segmentBonus;
@@ -383,9 +455,10 @@ function removePostDragCandidates(candidates, dragTimes) {
   ));
 }
 
-function assignSpatialMotifs(candidates, trackId, dragTimes, membershipByDifficulty) {
+function assignSpatialMotifs(candidates, trackId, dragTimes, membershipByDifficulty, options = {}) {
   const seed = hashText(trackId);
   const lastPointByDifficulty = new Map();
+  const recentPointsByDifficulty = new Map();
   return candidates.map((candidate, index) => {
     const phrase = candidate.phraseIndex;
     const callResponse = Math.floor(phrase / 2);
@@ -402,10 +475,19 @@ function assignSpatialMotifs(candidates, trackId, dragTimes, membershipByDifficu
     const pointIndex = positiveModulo(responseStep + directionalShift + riffOffset, motif.length);
     const variation = (seed + callResponse + candidate.phaseIndex
       + (candidate.energy.mid >= .55 ? 1 : 0)) % 4;
-    const desiredStart = transformPoint(motif[pointIndex], variation);
     const relevantDifficulties = Object.entries(membershipByDifficulty)
       .filter(([, times]) => times.has(candidate.time))
       .map(([difficulty]) => difficulty);
+    const desiredStart = options.avoidRepeats
+      ? chooseNonRepeatingPoint(
+        motif,
+        pointIndex,
+        variation,
+        relevantDifficulties,
+        recentPointsByDifficulty,
+        seed + index,
+      )
+      : transformPoint(motif[pointIndex], variation);
     const start = separateFromPreviousPoints(
       desiredStart,
       relevantDifficulties.map((difficulty) => lastPointByDifficulty.get(difficulty)).filter(Boolean),
@@ -413,7 +495,14 @@ function assignSpatialMotifs(candidates, trackId, dragTimes, membershipByDifficu
     );
     const id = `${candidate.phaseId}-m4-${String(index).padStart(4, '0')}`;
     const base = { id, time: candidate.time, phaseId: candidate.phaseId, kind: 'tap', start };
-    for (const difficulty of relevantDifficulties) lastPointByDifficulty.set(difficulty, start);
+    for (const difficulty of relevantDifficulties) {
+      lastPointByDifficulty.set(difficulty, start);
+      if (options.avoidRepeats) {
+        const recent = recentPointsByDifficulty.get(difficulty) ?? [];
+        recent.push(`${start.x},${start.y}`);
+        recentPointsByDifficulty.set(difficulty, recent.slice(-4));
+      }
+    }
     if (!dragTimes.includes(candidate.time)) return { ...base, _analysis: candidate };
     const target = transformPoint(motif[(pointIndex + 3) % motif.length], variation);
     const end = limitNormalizedDistance(start, target, .38);
@@ -427,6 +516,28 @@ function assignSpatialMotifs(candidates, trackId, dragTimes, membershipByDifficu
     };
     return { ...base, kind: 'drag', controls: [control], end, _analysis: candidate };
   });
+}
+
+function chooseNonRepeatingPoint(
+  motif,
+  pointIndex,
+  variation,
+  difficulties,
+  recentPointsByDifficulty,
+  seed,
+) {
+  for (let attempt = 0; attempt < motif.length; attempt += 1) {
+    const candidate = transformPoint(
+      motif[positiveModulo(pointIndex + attempt + seed % 2, motif.length)],
+      variation,
+    );
+    const key = `${rounded(candidate.x)},${rounded(candidate.y)}`;
+    const repeats = difficulties.some((difficulty) => (
+      (recentPointsByDifficulty.get(difficulty) ?? []).slice(-3).includes(key)
+    ));
+    if (!repeats) return candidate;
+  }
+  return transformPoint(motif[pointIndex], variation);
 }
 
 function separateFromPreviousPoints(desired, previousPoints, seed) {

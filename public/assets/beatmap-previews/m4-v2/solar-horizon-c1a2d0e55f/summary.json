@@ -1,0 +1,220 @@
+{
+  "trackId": "solar-horizon-c1a2d0e55f",
+  "generatorVersion": "hybrid-analysis-m4-musical-v2",
+  "analysisPath": "content/music/analysis/solar-horizon-c1a2d0e55f.json",
+  "analysisHash": "3b235339d3c34d484f50c6f9b7a3b9c8388cfe0a126e8db72205c769e73f7e9c",
+  "mode": "preview",
+  "phaseSource": "metadata-reviewed",
+  "currentGeneratorVersion": "hybrid-analysis-m4-bands-v1",
+  "counts": {
+    "easy": {
+      "current": 47,
+      "candidate": 47,
+      "difference": 0,
+      "drags": 6
+    },
+    "medium": {
+      "current": 68,
+      "candidate": 68,
+      "difference": 0,
+      "drags": 6
+    },
+    "hard": {
+      "current": 114,
+      "candidate": 114,
+      "difference": 0,
+      "drags": 6
+    }
+  },
+  "fusedCandidates": 223,
+  "musicalGrammar": {
+    "meter": "4/4-inferred",
+    "beatsPerBar": 4,
+    "phraseBeats": 16,
+    "downbeatRemainder": 0,
+    "confidence": 0.023277,
+    "phaseScores": [
+      12.204538,
+      10.115588,
+      11.920449,
+      11.47461
+    ]
+  },
+  "musicalCoverage": {
+    "hard": {
+      "noteCount": 114,
+      "beatOrStrongOnsetRatio": 0.789474,
+      "averageSalience": 1.331226,
+      "phraseBoundariesCaptured": 4,
+      "rhythmicRoles": {
+        "backbeat": 24,
+        "downbeat": 15,
+        "snare": 5,
+        "pulse": 15,
+        "riff": 52,
+        "kick": 3
+      },
+      "sustainedDrags": 6
+    },
+    "medium": {
+      "noteCount": 68,
+      "beatOrStrongOnsetRatio": 0.941176,
+      "averageSalience": 1.423841,
+      "phraseBoundariesCaptured": 4,
+      "rhythmicRoles": {
+        "backbeat": 18,
+        "downbeat": 15,
+        "snare": 1,
+        "pulse": 14,
+        "riff": 19,
+        "kick": 1
+      },
+      "sustainedDrags": 6
+    },
+    "easy": {
+      "noteCount": 47,
+      "beatOrStrongOnsetRatio": 1,
+      "averageSalience": 1.470322,
+      "phraseBoundariesCaptured": 4,
+      "rhythmicRoles": {
+        "downbeat": 15,
+        "pulse": 14,
+        "backbeat": 16,
+        "riff": 2
+      },
+      "sustainedDrags": 6
+    }
+  },
+  "segmentThresholds": {
+    "low": 0.6165028147441348,
+    "high": 0.6812077459885968
+  },
+  "segments": [
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 0,
+      "endTime": 4,
+      "candidateCount": 17,
+      "averageIntensity": 0.425472
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 4,
+      "endTime": 12,
+      "candidateCount": 52,
+      "averageIntensity": 0.564408
+    },
+    {
+      "type": "peak",
+      "phaseId": "read",
+      "startTime": 12,
+      "endTime": 14.777838,
+      "candidateCount": 10,
+      "averageIntensity": 0.741959
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 14.777838,
+      "endTime": 18.777838,
+      "candidateCount": 14,
+      "averageIntensity": 0.681208
+    },
+    {
+      "type": "steady",
+      "phaseId": "drive",
+      "startTime": 18.777838,
+      "endTime": 26.777838,
+      "candidateCount": 54,
+      "averageIntensity": 0.647383
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 26.777838,
+      "endTime": 29.555677,
+      "candidateCount": 10,
+      "averageIntensity": 0.699355
+    },
+    {
+      "type": "steady",
+      "phaseId": "climax",
+      "startTime": 29.555677,
+      "endTime": 33.555677,
+      "candidateCount": 14,
+      "averageIntensity": 0.678956
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 33.555677,
+      "endTime": 41.555677,
+      "candidateCount": 50,
+      "averageIntensity": 0.753729
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 41.555677,
+      "endTime": 44.333515,
+      "candidateCount": 2,
+      "averageIntensity": 0.105292
+    }
+  ],
+  "projections": {
+    "mouse-balanced": {
+      "easy": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 197.1,
+        "maximumTravel": 340
+      },
+      "medium": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 192.9,
+        "maximumTravel": 380
+      },
+      "hard": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 171.4,
+        "maximumTravel": 345.6
+      }
+    },
+    "touch-portrait": {
+      "easy": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 125.3,
+        "maximumTravel": 240.7
+      },
+      "medium": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 120.4,
+        "maximumTravel": 365.1
+      },
+      "hard": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 121,
+        "maximumTravel": 313.7
+      }
+    }
+  }
+}

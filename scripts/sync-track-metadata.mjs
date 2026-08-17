@@ -1,7 +1,7 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { hashFile } from './lib/suno-ingestion.mjs';
+import { createSunoDisplayTitle, hashFile } from './lib/suno-ingestion.mjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const audioDirectory = path.join(projectRoot, 'public', 'assets', 'audio');
@@ -48,7 +48,19 @@ function resolveAudioFile(relativeAudioPath) {
 const { trackId: requestedTrackId, force } = parseOptions(process.argv.slice(2));
 const activeTracks = JSON.parse(await readFile(manifestPath, 'utf8'));
 const candidateRegistry = JSON.parse(await readFile(candidatesPath, 'utf8'));
-const managedTracks = candidateRegistry.tracks.filter(
+const normalizedRegistryTracks = candidateRegistry.tracks.map((track) => {
+  if (track.pipeline !== 'automatic' || typeof track.sha256 !== 'string') return track;
+  const title = createSunoDisplayTitle(track.originalFileName, track.sha256);
+  return track.title === title ? track : { ...track, title };
+});
+if (normalizedRegistryTracks.some((track, index) => track !== candidateRegistry.tracks[index])) {
+  await writeFile(
+    candidatesPath,
+    `${JSON.stringify({ ...candidateRegistry, tracks: normalizedRegistryTracks }, null, 2)}\n`,
+    'utf8',
+  );
+}
+const managedTracks = normalizedRegistryTracks.filter(
   (track) => track.status === 'candidate' || track.status === 'active',
 );
 const managedIds = new Set(managedTracks.map((track) => track.trackId));
@@ -71,7 +83,9 @@ const definitions = [
   })),
   ...managedTracks.map((track) => ({
     trackId: track.trackId,
-    title: track.title ?? titleFromFileName(track.originalFileName),
+    title: track.pipeline === 'automatic' && typeof track.sha256 === 'string'
+      ? createSunoDisplayTitle(track.originalFileName, track.sha256)
+      : track.title ?? titleFromFileName(track.originalFileName),
     status: track.status,
     audioMode: 'single',
     webAudioPath: `./assets/audio/${track.relativeAudioPath}`,
@@ -113,7 +127,13 @@ for (const definition of selected) {
     exists = false;
   }
   if (exists && !force) {
-    preserved += 1;
+    const existing = JSON.parse(await readFile(metadataPath, 'utf8'));
+    if (existing.title === definition.title) {
+      preserved += 1;
+      continue;
+    }
+    await writeFile(metadataPath, `${JSON.stringify({ ...existing, title: definition.title }, null, 2)}\n`, 'utf8');
+    updated += 1;
     continue;
   }
 

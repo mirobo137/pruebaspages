@@ -1,0 +1,231 @@
+{
+  "trackId": "lunar-vector-5f90a288df",
+  "generatorVersion": "hybrid-analysis-m4-musical-v2",
+  "analysisPath": "content/music/analysis/lunar-vector-5f90a288df.json",
+  "analysisHash": "fd2ba1f2f5f179f127361ca0b7ee441111c4576eb956b8c8cc5f15f162e5966a",
+  "mode": "preview",
+  "phaseSource": "metadata-reviewed",
+  "currentGeneratorVersion": "hybrid-analysis-m4-bands-v1",
+  "counts": {
+    "easy": {
+      "current": 96,
+      "candidate": 92,
+      "difference": -4,
+      "drags": 5
+    },
+    "medium": {
+      "current": 111,
+      "candidate": 114,
+      "difference": 3,
+      "drags": 5
+    },
+    "hard": {
+      "current": 194,
+      "candidate": 194,
+      "difference": 0,
+      "drags": 5
+    }
+  },
+  "fusedCandidates": 251,
+  "musicalGrammar": {
+    "meter": "4/4-inferred",
+    "beatsPerBar": 4,
+    "phraseBeats": 16,
+    "downbeatRemainder": 0,
+    "confidence": 0.113509,
+    "phaseScores": [
+      12.784261,
+      11.333132,
+      10.582572,
+      11.000291
+    ]
+  },
+  "musicalCoverage": {
+    "hard": {
+      "noteCount": 194,
+      "beatOrStrongOnsetRatio": 0.623711,
+      "averageSalience": 1.08535,
+      "phraseBoundariesCaptured": 7,
+      "rhythmicRoles": {
+        "backbeat": 46,
+        "downbeat": 26,
+        "snare": 46,
+        "kick": 22,
+        "pulse": 25,
+        "riff": 14,
+        "hihat": 15
+      },
+      "sustainedDrags": 5
+    },
+    "medium": {
+      "noteCount": 114,
+      "beatOrStrongOnsetRatio": 0.894737,
+      "averageSalience": 1.146595,
+      "phraseBoundariesCaptured": 7,
+      "rhythmicRoles": {
+        "backbeat": 44,
+        "downbeat": 26,
+        "snare": 14,
+        "kick": 7,
+        "pulse": 21,
+        "riff": 2
+      },
+      "sustainedDrags": 5
+    },
+    "easy": {
+      "noteCount": 92,
+      "beatOrStrongOnsetRatio": 0.98913,
+      "averageSalience": 1.226843,
+      "phraseBoundariesCaptured": 7,
+      "rhythmicRoles": {
+        "downbeat": 26,
+        "kick": 4,
+        "snare": 3,
+        "backbeat": 39,
+        "pulse": 19,
+        "riff": 1
+      },
+      "sustainedDrags": 5
+    }
+  },
+  "segmentThresholds": {
+    "low": 0.311897320824897,
+    "high": 0.5240472610636996
+  },
+  "segments": [
+    {
+      "type": "quiet",
+      "phaseId": "read",
+      "startTime": 0,
+      "endTime": 4,
+      "candidateCount": 9,
+      "averageIntensity": 0.273908
+    },
+    {
+      "type": "buildup",
+      "phaseId": "read",
+      "startTime": 4,
+      "endTime": 12,
+      "candidateCount": 30,
+      "averageIntensity": 0.393917
+    },
+    {
+      "type": "steady",
+      "phaseId": "read",
+      "startTime": 12,
+      "endTime": 20,
+      "candidateCount": 38,
+      "averageIntensity": 0.496454
+    },
+    {
+      "type": "break",
+      "phaseId": "read",
+      "startTime": 20,
+      "endTime": 26.337838,
+      "candidateCount": 17,
+      "averageIntensity": 0.288557
+    },
+    {
+      "type": "peak",
+      "phaseId": "drive",
+      "startTime": 26.337838,
+      "endTime": 50.337838000000005,
+      "candidateCount": 97,
+      "averageIntensity": 0.70627
+    },
+    {
+      "type": "break",
+      "phaseId": "drive",
+      "startTime": 50.337838000000005,
+      "endTime": 52.675677,
+      "candidateCount": 4,
+      "averageIntensity": 0.410239
+    },
+    {
+      "type": "quiet",
+      "phaseId": "climax",
+      "startTime": 52.675677,
+      "endTime": 60.675677,
+      "candidateCount": 19,
+      "averageIntensity": 0.162799
+    },
+    {
+      "type": "buildup",
+      "phaseId": "climax",
+      "startTime": 60.675677,
+      "endTime": 68.67567700000001,
+      "candidateCount": 25,
+      "averageIntensity": 0.273254
+    },
+    {
+      "type": "peak",
+      "phaseId": "climax",
+      "startTime": 68.67567700000001,
+      "endTime": 72.67567700000001,
+      "candidateCount": 9,
+      "averageIntensity": 0.524047
+    },
+    {
+      "type": "break",
+      "phaseId": "climax",
+      "startTime": 72.67567700000001,
+      "endTime": 76.67567700000001,
+      "candidateCount": 3,
+      "averageIntensity": 0.342665
+    }
+  ],
+  "projections": {
+    "mouse-balanced": {
+      "easy": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 219,
+        "maximumTravel": 340
+      },
+      "medium": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 216.2,
+        "maximumTravel": 380
+      },
+      "hard": {
+        "playfield": {
+          "width": 820,
+          "height": 680
+        },
+        "averageTravel": 185.7,
+        "maximumTravel": 420
+      }
+    },
+    "touch-portrait": {
+      "easy": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 131.8,
+        "maximumTravel": 299.9
+      },
+      "medium": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 129.1,
+        "maximumTravel": 279
+      },
+      "hard": {
+        "playfield": {
+          "width": 266,
+          "height": 652
+        },
+        "averageTravel": 121,
+        "maximumTravel": 279
+      }
+    }
+  }
+}
