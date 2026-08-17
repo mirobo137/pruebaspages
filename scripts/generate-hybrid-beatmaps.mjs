@@ -13,13 +13,49 @@ const analysisPath = `content/music/analysis/${options.trackId}.json`;
 const analysisText = await readFile(path.join(projectRoot, analysisPath), 'utf8');
 const analysis = validateAnalysisV1(JSON.parse(analysisText));
 const versions = await readJson('src/content/music-contract-versions.json');
+const interpretationMode = options.interpretationV3
+  ? 'musical-v3'
+  : options.interpretationV2
+    ? 'musical-v2'
+    : 'approved';
+const previewDirectory = options.interpretationV3
+  ? 'm4-v3'
+  : options.interpretationV2
+    ? 'm4-v2'
+    : 'm4';
+const chromaDocument = options.interpretationV3
+  ? await readJson(`content/music/chroma-preview/${options.trackId}.json`)
+  : null;
+const chromaFrames = chromaDocument?.frames ?? null;
+if (options.interpretationV3) {
+  if (
+    chromaDocument.trackId !== options.trackId
+    || chromaDocument.audioHash !== metadata.audioHash
+    || !Array.isArray(chromaFrames)
+  ) {
+    throw new Error(`${options.trackId}: preview chroma no corresponde al audio.`);
+  }
+  for (let index = 0; index < chromaFrames.length; index += 1) {
+    const frame = chromaFrames[index];
+    if (
+      !Number.isFinite(frame.time)
+      || !Number.isInteger(frame.pitchClass)
+      || frame.pitchClass < 0
+      || frame.pitchClass > 11
+      || !Number.isFinite(frame.strength)
+      || frame.strength < 0
+      || frame.strength > 1
+      || (index > 0 && frame.time < chromaFrames[index - 1].time)
+    ) throw new Error(`${options.trackId}: frame chroma invalido en ${index}.`);
+  }
+}
 if (metadata.trackId !== analysis.trackId || metadata.audioHash !== analysis.audioHash) {
   throw new Error(`${options.trackId}: metadata y Analysis v1 no corresponden.`);
 }
 if (metadata.audioMode !== 'single') throw new Error(`${options.trackId}: M4 requiere audio single.`);
 const hasReviewedStructure = Boolean(metadata.durationSeconds && metadata.suggestedSections.length > 0);
-if (options.interpretationV2 && options.apply) {
-  throw new Error('Interpretation Musical v2 solo genera previews hasta completar la prueba movil.');
+if ((options.interpretationV2 || options.interpretationV3) && options.apply) {
+  throw new Error('Las interpretaciones musicales nuevas solo generan previews hasta completar la prueba movil.');
 }
 if (options.apply && !hasReviewedStructure) {
   throw new Error(`${options.trackId}: aplicar M4 requiere duracion y secciones revisadas en metadata.`);
@@ -36,7 +72,8 @@ const result = generateHybridBeatmaps({
   analysis,
   analysisHash: analysisSha256(analysisText),
   versions,
-  interpretationProfile: options.interpretationV2 ? 'musical-v2' : 'approved',
+  interpretationProfile: interpretationMode,
+  chromaFrames,
 });
 for (const document of Object.values(result.documents)) validateBeatmapV2(document);
 
@@ -75,7 +112,7 @@ const outputDirectory = options.apply
     'public',
     'assets',
     'beatmap-previews',
-    options.interpretationV2 ? 'm4-v2' : 'm4',
+    previewDirectory,
     options.trackId,
   );
 if (options.apply) {
@@ -89,7 +126,7 @@ if (options.apply) {
   }
 }
 await writeDocuments(outputDirectory, result.documents);
-if (!options.apply) await updatePreviewCatalog(metadata, analysis, options.interpretationV2);
+if (!options.apply) await updatePreviewCatalog(metadata, analysis, previewDirectory);
 await writeFile(
   path.join(outputDirectory, options.apply ? 'm4-generation-summary.json' : 'summary.json'),
   `${JSON.stringify(summary, null, 2)}\n`,
@@ -105,7 +142,7 @@ for (const [difficulty, coverage] of Object.entries(summary.musicalCoverage)) {
   console.log(`- ${difficulty}: ${(coverage.beatOrStrongOnsetRatio * 100).toFixed(1)}% beat/onset fuerte; ${coverage.phraseBoundariesCaptured} inicios de frase`);
 }
 if (!options.apply) {
-  console.log(`- probar con ?beatmapPreview=${options.interpretationV2 ? 'm4-v2' : 'm4'} (solo desarrollo)`);
+  console.log(`- probar con ?beatmapPreview=${previewDirectory} (solo desarrollo)`);
 }
 
 function parseOptions(args) {
@@ -113,17 +150,20 @@ function parseOptions(args) {
   let apply = false;
   let force = false;
   let interpretationV2 = false;
+  let interpretationV3 = false;
   for (let index = 0; index < args.length; index += 1) {
     if (args[index] === '--track') trackId = args[++index] ?? null;
     else if (args[index] === '--apply') apply = true;
     else if (args[index] === '--force') force = true;
     else if (args[index] === '--interpretation-v2') interpretationV2 = true;
+    else if (args[index] === '--interpretation-v3') interpretationV3 = true;
     else if (!args[index].startsWith('-') && !trackId) trackId = args[index];
     else throw new Error(`Opcion desconocida: ${args[index]}`);
   }
   if (!trackId) throw new Error('Falta --track <trackId>.');
   if (force && !apply) throw new Error('--force solo se acepta junto con --apply.');
-  return { trackId, apply, force, interpretationV2 };
+  if (interpretationV2 && interpretationV3) throw new Error('Elige una sola interpretacion de preview.');
+  return { trackId, apply, force, interpretationV2, interpretationV3 };
 }
 
 async function readJson(relativePath) {
@@ -139,8 +179,7 @@ async function readOptionalJson(relativePath) {
   }
 }
 
-async function updatePreviewCatalog(trackMetadata, trackAnalysis, interpretationV2) {
-  const previewDirectory = interpretationV2 ? 'm4-v2' : 'm4';
+async function updatePreviewCatalog(trackMetadata, trackAnalysis, previewDirectory) {
   const catalogPath = path.join(projectRoot, 'public', 'assets', 'beatmap-previews', previewDirectory, 'catalog.json');
   let catalog = [];
   try {
@@ -152,7 +191,7 @@ async function updatePreviewCatalog(trackMetadata, trackAnalysis, interpretation
   const previewRoot = `./assets/beatmap-previews/${previewDirectory}/${trackMetadata.trackId}`;
   const entry = {
     id: trackMetadata.trackId,
-    title: `${trackMetadata.title} [${interpretationV2 ? 'MUSICAL V2' : 'M4'}]`,
+    title: `${trackMetadata.title} [${previewDirectory === 'm4-v3' ? 'MELODIC V3' : previewDirectory === 'm4-v2' ? 'MUSICAL V2' : 'M4'}]`,
     audioPath,
     priceTier: 'free',
     price: 0,

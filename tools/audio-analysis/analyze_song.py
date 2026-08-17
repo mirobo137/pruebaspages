@@ -17,6 +17,7 @@ import numpy as np
 
 
 ANALYZER_VERSION = "librosa-m3-bands-v2"
+CHROMA_ANALYZER_VERSION = "librosa-chroma-v1"
 # Changes here invalidate local cache entries without changing the public
 # Analysis v1 schema or rewriting already curated JSON files.
 AUDIO_TOOLCHAIN_VERSION = "requirements-lock-2026-08-17-bands-v1"
@@ -121,6 +122,37 @@ def detect_band_onsets(
         {"time": round_number(time), "strength": round_number(strength)}
         for time, strength in zip(times, strengths, strict=True)
         if time <= power.shape[1] * HOP_LENGTH / sample_rate
+    ]
+
+
+def extract_chroma_frames(samples: np.ndarray, sample_rate: int) -> list[dict[str, float | int]]:
+    """Extract a compact melodic hint for preview beatmaps.
+
+    This is a candidate signal, not exact note transcription. Each frame keeps
+    only the strongest pitch class and normalized confidence.
+    """
+    stft = librosa.stft(samples, n_fft=2_048, hop_length=HOP_LENGTH, center=True)
+    chroma = librosa.feature.chroma_stft(
+        S=np.abs(stft),
+        sr=sample_rate,
+        hop_length=HOP_LENGTH,
+        n_fft=2_048,
+        tuning=0,
+    )
+    strengths = normalize_robust(np.max(chroma, axis=0))
+    pitch_classes = np.argmax(chroma, axis=0)
+    times = librosa.frames_to_time(
+        np.arange(chroma.shape[1]), sr=sample_rate, hop_length=HOP_LENGTH,
+    )
+    stride = max(1, int(round(ENERGY_STEP_SECONDS * sample_rate / HOP_LENGTH)))
+    return [
+        {
+            "time": round_number(times[index]),
+            "pitchClass": int(pitch_classes[index]),
+            "strength": round_number(strengths[index]),
+        }
+        for index in range(0, len(times), stride)
+        if times[index] <= samples.size / sample_rate
     ]
 
 
@@ -256,7 +288,12 @@ def analyze_samples(
     return analysis, diagnostics
 
 
-def analyze_file(audio_path: Path, metadata: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+def analyze_file(
+    audio_path: Path,
+    metadata: dict[str, Any],
+    *,
+    include_chroma: bool = False,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     audio_bytes = audio_path.read_bytes()
     audio_hash = hashlib.sha256(audio_bytes).hexdigest()
     expected_hash = metadata.get("audioHash")
@@ -264,7 +301,7 @@ def analyze_file(audio_path: Path, metadata: dict[str, Any]) -> tuple[dict[str, 
         raise ValueError(f"Hash distinto para {metadata['trackId']}: metadata={expected_hash}, audio={audio_hash}")
     samples, sample_rate = librosa.load(audio_path, sr=SAMPLE_RATE, mono=True)
     rhythm = metadata.get("rhythm", {})
-    return analyze_samples(
+    analysis, diagnostics = analyze_samples(
         samples,
         sample_rate,
         track_id=metadata["trackId"],
@@ -273,6 +310,9 @@ def analyze_file(audio_path: Path, metadata: dict[str, Any]) -> tuple[dict[str, 
         bpm_override=rhythm.get("bpmOverride"),
         beat_offset_override=rhythm.get("beatOffsetOverride"),
     )
+    if include_chroma:
+        diagnostics["chromaFrames"] = extract_chroma_frames(samples, sample_rate)
+    return analysis, diagnostics
 
 
 def settings_hash(metadata: dict[str, Any]) -> str:
@@ -377,6 +417,11 @@ def parse_args(arguments: Iterable[str]) -> argparse.Namespace:
     parser.add_argument("--input", type=Path, help="archivo o carpeta ya registrada en metadata")
     parser.add_argument("--force", action="store_true", help="ignora cache y regenera")
     parser.add_argument("--debug", action="store_true", help="genera PNG de waveform/beat/onsets/energia")
+    parser.add_argument(
+        "--chroma-output",
+        action="store_true",
+        help="escribe una senal melodica compacta en content/music/chroma-preview",
+    )
     parser.add_argument("--project-root", type=Path, help=argparse.SUPPRESS)
     return parser.parse_args(arguments)
 
@@ -386,6 +431,7 @@ def main(arguments: Iterable[str] | None = None) -> int:
     project_root = (options.project_root or Path(__file__).resolve().parents[2]).resolve()
     metadata_directory = project_root / "content" / "music" / "metadata"
     output_directory = project_root / "content" / "music" / "analysis"
+    chroma_output_directory = project_root / "content" / "music" / "chroma-preview"
     cache_directory = Path(__file__).resolve().parent / ".cache"
     debug_directory = Path(__file__).resolve().parent / "debug"
     selected = select_tracks(load_metadata(metadata_directory), project_root, options.track, options.input)
@@ -398,15 +444,31 @@ def main(arguments: Iterable[str] | None = None) -> int:
         try:
             if not audio_path.is_file():
                 raise FileNotFoundError(f"Audio inexistente: {audio_path}")
-            if cache_path.is_file() and not options.force:
+            if cache_path.is_file() and not options.force and not options.chroma_output:
                 analysis = json.loads(cache_path.read_text(encoding="utf-8"))
                 write_json_atomic(output_path, analysis)
                 print(f"- cache: {track_id} | {analysis['bpm']} BPM | {len(analysis['beats'])} beats")
                 if not options.debug:
                     continue
-            analysis, diagnostics = analyze_file(audio_path, metadata)
+            analysis, diagnostics = analyze_file(
+                audio_path,
+                metadata,
+                include_chroma=options.chroma_output,
+            )
             write_json_atomic(output_path, analysis)
             write_json_atomic(cache_path, analysis)
+            if options.chroma_output:
+                write_json_atomic(
+                    chroma_output_directory / f"{track_id}.json",
+                    {
+                        "schemaVersion": 1,
+                        "trackId": track_id,
+                        "audioHash": analysis["audioHash"],
+                        "analyzerVersion": CHROMA_ANALYZER_VERSION,
+                        "duration": analysis["duration"],
+                        "frames": diagnostics["chromaFrames"],
+                    },
+                )
             if options.debug:
                 render_debug(debug_directory / f"{track_id}.png", analysis, diagnostics)
             print(

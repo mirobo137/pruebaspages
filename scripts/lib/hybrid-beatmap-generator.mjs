@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 export const HYBRID_GENERATOR_VERSION = 'hybrid-analysis-m4-bands-v1';
 export const HYBRID_GENERATOR_NEXT_VERSION = 'hybrid-analysis-m4-musical-v2';
+export const HYBRID_GENERATOR_MELODIC_VERSION = 'hybrid-analysis-m4-melodic-v3';
 
 const MINIMUM_GAP = { easy: 0.48, medium: 0.28, hard: 0.16 };
 const PHASE_SAFE_START = 2.1;
@@ -65,7 +66,8 @@ export function inferMusicalGrammar(analysis) {
 }
 
 export function fuseMusicalCandidates(analysis, phases, options = {}) {
-  const musicalV2 = options.interpretationProfile === 'musical-v2';
+  const musicalV2 = ['musical-v2', 'musical-v3'].includes(options.interpretationProfile);
+  const musicalV3 = options.interpretationProfile === 'musical-v3';
   const onsetMergeSeconds = 0.075;
   const grammar = inferMusicalGrammar(analysis);
   const bandEntries = Object.entries(analysis.onsetsByBand ?? {}).flatMap(([band, onsets]) => (
@@ -150,6 +152,12 @@ export function fuseMusicalCandidates(analysis, phases, options = {}) {
     );
     const referenceBeatIndex = candidate.beatIndex ?? nearestBeatIndex(analysis.beats, candidate.time);
     const relativeBeat = positiveModulo(referenceBeatIndex - grammar.downbeatRemainder, 4);
+    const chroma = musicalV3
+      ? strongestChromaNear(options.chromaFrames ?? [], candidate.time, .3)
+      : null;
+    const candidateWithChroma = chroma
+      ? { ...candidate, chromaStrength: chroma.strength, pitchClass: chroma.pitchClass }
+      : candidate;
     const rhythmicRole = candidate.beat
       ? relativeBeat === 0
         ? 'downbeat'
@@ -157,7 +165,7 @@ export function fuseMusicalCandidates(analysis, phases, options = {}) {
           ? 'backbeat'
           : 'pulse'
       : musicalV2
-        ? classifyBandRole(candidate)
+        ? classifyBandRole(candidateWithChroma)
         : 'syncopation';
     const phraseBeat = Math.max(0, referenceBeatIndex - grammar.downbeatRemainder);
     const phraseIndex = Math.floor(phraseBeat / grammar.phraseBeats);
@@ -178,6 +186,9 @@ export function fuseMusicalCandidates(analysis, phases, options = {}) {
       sustain,
       bandHits: candidate.bandHits,
       roleHits: candidate.roleHits,
+      ...(chroma
+        ? { chromaStrength: chroma.strength, pitchClass: chroma.pitchClass }
+        : {}),
     }];
   });
 }
@@ -251,10 +262,12 @@ export function generateHybridBeatmaps({
   analysisHash,
   versions,
   interpretationProfile = 'approved',
+  chromaFrames = null,
 }) {
-  const musicalV2 = interpretationProfile === 'musical-v2';
+  const musicalV2 = ['musical-v2', 'musical-v3'].includes(interpretationProfile);
+  const musicalV3 = interpretationProfile === 'musical-v3';
   const musicalGrammar = inferMusicalGrammar(analysis);
-  const fused = fuseMusicalCandidates(analysis, phases, { interpretationProfile });
+  const fused = fuseMusicalCandidates(analysis, phases, { interpretationProfile, chromaFrames });
   const classified = classifyMusicalSegments(fused, phases);
   const riffCandidates = annotateRiffSequences(classified.candidates, analysis.bpm);
   const hardInitial = selectBySpacing(riffCandidates, MINIMUM_GAP.hard, musicalV2
@@ -274,7 +287,7 @@ export function generateHybridBeatmaps({
     easy: easyIds,
     medium: mediumIds,
     hard: new Set(hard.map((item) => item.time)),
-  }, { avoidRepeats: musicalV2 });
+  }, { avoidRepeats: musicalV2 || musicalV3, useChroma: musicalV3 });
   const byDifficulty = {
     hard: spatialEvents,
     medium: spatialEvents.filter((event) => mediumIds.has(event.time)),
@@ -288,7 +301,11 @@ export function generateHybridBeatmaps({
       difficulty,
       duration,
       audioMode: 'single',
-      generatorVersion: musicalV2 ? HYBRID_GENERATOR_NEXT_VERSION : HYBRID_GENERATOR_VERSION,
+      generatorVersion: musicalV3
+        ? HYBRID_GENERATOR_MELODIC_VERSION
+        : musicalV2
+          ? HYBRID_GENERATOR_NEXT_VERSION
+          : HYBRID_GENERATOR_VERSION,
       analysisHash,
       locked: false,
       spatialModelVersion: versions.spatialModelVersion,
@@ -362,6 +379,10 @@ function annotateRiffSequences(candidates, bpm) {
 function classifyBandRole(candidate) {
   const roleHits = candidate.roleHits ?? [];
   const bandHits = candidate.bandHits ?? [];
+  if (
+    (candidate.chromaStrength ?? 0) >= .48
+    && (bandHits.includes('mid') || bandHits.includes('high'))
+  ) return 'melodic';
   if (roleHits.includes('kick')) return 'kick';
   if (roleHits.includes('snare')) return 'snare';
   if (roleHits.includes('hihat')) return 'hihat';
@@ -472,7 +493,13 @@ function assignSpatialMotifs(candidates, trackId, dragTimes, membershipByDifficu
         : 0;
     const responseStep = phrase % 2 === 0 ? phraseStep : 7 - phraseStep;
     const riffOffset = (candidate.riffStep ?? 0) * (candidate.riffDirection ?? 1);
-    const pointIndex = positiveModulo(responseStep + directionalShift + riffOffset, motif.length);
+    const chromaOffset = options.useChroma
+      ? positiveModulo(candidate.pitchClass ?? 0, 3)
+      : 0;
+    const pointIndex = positiveModulo(
+      responseStep + directionalShift + riffOffset + chromaOffset,
+      motif.length,
+    );
     const variation = (seed + callResponse + candidate.phaseIndex
       + (candidate.energy.mid >= .55 ? 1 : 0)) % 4;
     const relevantDifficulties = Object.entries(membershipByDifficulty)
@@ -633,6 +660,16 @@ function strongestOnsetNear(onsets, time, radius) {
     if (onset.time < time - radius) continue;
     if (onset.time > time + radius) break;
     strongest = Math.max(strongest, onset.strength);
+  }
+  return strongest;
+}
+
+function strongestChromaNear(frames, time, radius) {
+  let strongest = null;
+  for (const frame of frames) {
+    if (frame.time < time - radius) continue;
+    if (frame.time > time + radius) break;
+    if (!strongest || frame.strength > strongest.strength) strongest = frame;
   }
   return strongest;
 }

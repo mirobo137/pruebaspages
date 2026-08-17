@@ -24,7 +24,7 @@ export async function loadMusicCatalog(): Promise<MusicTrack[]> {
   const catalog = await response.json() as MusicTrack[];
   const parameters = new URLSearchParams(window.location.search);
   const previewMode = parameters.get('beatmapPreview');
-  if (previewMode !== 'm4' && previewMode !== 'm4-v2') return catalog;
+  if (previewMode !== 'm4' && previewMode !== 'm4-v2' && previewMode !== 'm4-v3') return catalog;
   const requestedTrack = parameters.get('previewTrack');
   if (!requestedTrack) return catalog;
   const previewUrl = new URL(`./assets/beatmap-previews/${previewMode}/catalog.json`, document.baseURI);

@@ -5,6 +5,8 @@ import path from 'node:path';
 const argumentsList = process.argv.slice(2);
 const tracks = await parseTracks(argumentsList);
 const interpretationV2 = argumentsList.includes('--interpretation-v2');
+const interpretationV3 = argumentsList.includes('--interpretation-v3');
+if (interpretationV2 && interpretationV3) throw new Error('Elige una sola interpretacion de preview.');
 for (const trackId of tracks) {
   const result = spawnSync(
     process.execPath,
@@ -13,6 +15,7 @@ for (const trackId of tracks) {
       '--track',
       trackId,
       ...(interpretationV2 ? ['--interpretation-v2'] : []),
+      ...(interpretationV3 ? ['--interpretation-v3'] : []),
     ],
     { cwd: process.cwd(), stdio: 'inherit' },
   );

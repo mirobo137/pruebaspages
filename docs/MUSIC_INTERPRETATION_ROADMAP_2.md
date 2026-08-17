@@ -95,6 +95,16 @@ npm run music:hybrid-batch -- --all-analyzed --interpretation-v2
 npm run dev -- --host 0.0.0.0
 ```
 
+Para preparar la senal chroma en una PC con Python 3 y las dependencias de audio:
+
+```powershell
+npm run music:chroma-preview
+npm run music:hybrid-batch -- --all-analyzed --interpretation-v3
+```
+
+La v3 usa los sidecars de `content/music/chroma-preview/` y se publica como
+`beatmapPreview=m4-v3`. No reemplaza los mapas bloqueados hasta probarla.
+
 Abrir en el movil una URL como:
 
 ```text

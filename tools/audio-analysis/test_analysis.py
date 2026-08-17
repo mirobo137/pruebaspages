@@ -11,9 +11,11 @@ import librosa
 from analyze_song import (
     ANALYZER_VERSION,
     AUDIO_TOOLCHAIN_VERSION,
+    CHROMA_ANALYZER_VERSION,
     SAMPLE_RATE,
     align_beats_to_offset,
     analyze_samples,
+    extract_chroma_frames,
     normalize_robust,
     resolve_tempo,
     select_tracks,
@@ -107,6 +109,18 @@ class AnalysisTests(unittest.TestCase):
         self.assertGreater(len(first["beats"]), 15)
         self.assertGreater(len(first["onsets"]), 15)
         self.assertEqual(first_diagnostics["rawBpm"], second_diagnostics["rawBpm"])
+
+    def test_chroma_preview_is_deterministic_and_bounded(self):
+        duration = 4
+        time = np.arange(SAMPLE_RATE * duration) / SAMPLE_RATE
+        samples = np.sin(2 * np.pi * 440 * time).astype(np.float32)
+        first = extract_chroma_frames(samples, SAMPLE_RATE)
+        second = extract_chroma_frames(samples, SAMPLE_RATE)
+        self.assertTrue(CHROMA_ANALYZER_VERSION)
+        self.assertEqual(first, second)
+        self.assertGreater(len(first), 0)
+        self.assertTrue(all(0 <= frame["pitchClass"] <= 11 for frame in first))
+        self.assertTrue(all(0 <= frame["strength"] <= 1 for frame in first))
 
 
 if __name__ == "__main__":
