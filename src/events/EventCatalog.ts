@@ -20,6 +20,7 @@ const COSMETIC_SLOTS = new Set<EventRewardDefinition['cosmeticSlot']>([
   'timing-ring',
   'drag-trail',
   'perfect-impact',
+  'music-visualizer',
   'flow-background',
   'super-flow-background',
   'complete-theme',

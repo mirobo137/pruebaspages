@@ -9,6 +9,7 @@ export const THEME_COMPONENT_SLOTS = [
   'timing-ring',
   'drag-trail',
   'perfect-impact',
+  'music-visualizer',
   'flow-background',
   'super-flow-background',
 ] as const;
@@ -27,6 +28,7 @@ export const THEME_COMPONENT_LABELS: Record<ThemeComponentSlot, string> = {
   'timing-ring': 'ARO',
   'drag-trail': 'ESTELA',
   'perfect-impact': 'PERFECT',
+  'music-visualizer': 'BARRAS',
   'flow-background': 'FLOW',
   'super-flow-background': 'SUPER FLOW',
 };
@@ -72,6 +74,7 @@ export function composeCustomTheme(selection: CustomThemeSelection): VisualTheme
   const timingRing = getVisualTheme(selection['timing-ring']);
   const dragTrail = getVisualTheme(selection['drag-trail']);
   const perfectImpact = getVisualTheme(selection['perfect-impact']);
+  const musicVisualizer = getVisualTheme(selection['music-visualizer']);
   const flowBackground = getVisualTheme(selection['flow-background']);
   const superBackground = getVisualTheme(selection['super-flow-background']);
   const partial: DeepPartial<VisualTheme> = {
@@ -87,6 +90,7 @@ export function composeCustomTheme(selection: CustomThemeSelection): VisualTheme
     drag: { ...dragTrail.drag },
     background: {
       ...targetPalette.background,
+      musicVisualizer: musicVisualizer.background.musicVisualizer,
       flowPattern: flowBackground.background.flowPattern,
       flowOverlay: flowBackground.background.flowOverlay,
       flowOverlayTint: flowBackground.background.flowOverlayTint,

@@ -34,6 +34,15 @@ export type TelemetryEvent =
   | { type: 'weekly_event_opened'; eventId: string }
   | { type: 'weekly_event_progressed'; eventId: string; points: number }
   | { type: 'weekly_reward_claimed'; eventId: string; rewardId: string; completed: boolean }
+  | { type: 'daily_roulette_visible'; dayKey: string }
+  | { type: 'daily_roulette_opened'; dayKey: string }
+  | {
+    type: 'daily_roulette_claimed';
+    dayKey: string;
+    rewardKind: 'coins' | 'theme' | 'component';
+    rewardId: string;
+    duplicate: boolean;
+  }
   | { type: 'rewarded_offer_visible'; placement: RewardedPlacement }
   | { type: 'rewarded_offer_interacted'; placement: RewardedPlacement }
   | { type: 'rewarded_offer_outcome'; placement: RewardedPlacement; outcome: TelemetryRewardOutcome };

@@ -2,7 +2,12 @@
 
 Este es el plan activo de release y plataformas. La interpretacion musical se sigue
 en `MUSIC_INTERPRETATION_ROADMAP_2.md`; ambos sustituyen las hojas antiguas de LiveOps,
-perfil PC, 11.5 y Music Intelligence. Estado actualizado: 2026-08-17.
+perfil PC, 11.5 y Music Intelligence. Estado actualizado: 2026-08-18.
+
+La siguiente sesion de producto se sigue en `RETENTION_UX_RELEASE_ROADMAP.md`:
+ruleta diaria, expansion de cosmeticos, playlist v2 y preparacion de release sin SDK.
+La expansion base de temas y barras modulares ya esta implementada; queda como
+pulido pendiente mostrar el preview del premio de la ruleta antes del giro.
 
 ## Estado global
 

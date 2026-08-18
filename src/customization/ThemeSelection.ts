@@ -22,6 +22,9 @@ const FLOW_PATTERNS = new Set<FlowBackgroundPattern>(['polygon', 'waves', 'vorte
 const MUSIC_VISUALIZER_STYLES = new Set<MusicVisualizerStyle>([
   'spectrum-bars-line',
   'spectrum-bars',
+  'spectrum-columns',
+  'spectrum-rings',
+  'spectrum-pulse',
   'none',
 ]);
 const SUPER_FLOW_PATTERNS = new Set<SuperFlowBackgroundPattern>([

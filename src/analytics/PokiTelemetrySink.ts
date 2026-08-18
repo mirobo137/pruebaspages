@@ -25,6 +25,15 @@ export class PokiTelemetrySink implements TelemetrySink {
       case 'weekly_reward_claimed':
         this.measure('weekly-event', event.rewardId, event.completed ? 'complete' : 'claimed');
         break;
+      case 'daily_roulette_visible':
+        this.measure('button', 'daily-roulette', 'visible');
+        break;
+      case 'daily_roulette_opened':
+        this.measure('button', 'daily-roulette', 'interact');
+        break;
+      case 'daily_roulette_claimed':
+        this.measure('daily-roulette', event.rewardKind, event.duplicate ? 'duplicate' : 'claimed');
+        break;
       case 'rewarded_offer_visible':
         this.measure('rewarded', event.placement, 'visible');
         break;

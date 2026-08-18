@@ -22,6 +22,7 @@ interface ThemeCollectionDefinition {
   requiredRuns: number;
   eventCampaignId?: string;
   rewardedRotation?: boolean;
+  rouletteReward?: boolean;
 }
 
 const DEFINITIONS: readonly ThemeCollectionDefinition[] = [
@@ -49,6 +50,34 @@ const DEFINITIONS: readonly ThemeCollectionDefinition[] = [
     unlockDescription: 'Completa y reclama los 7 escalones del evento semanal.',
     requiredRuns: -1,
     eventCampaignId: 'neon-ascent-2026',
+  },
+  {
+    themeId: 'aurora-pulse',
+    origin: 'Ruleta diaria',
+    unlockDescription: 'Consiguelo en la ruleta diaria o gana sus componentes.',
+    requiredRuns: -1,
+    rouletteReward: true,
+  },
+  {
+    themeId: 'magenta-circuit',
+    origin: 'Ruleta diaria',
+    unlockDescription: 'Consiguelo en la ruleta diaria o gana sus componentes.',
+    requiredRuns: -1,
+    rouletteReward: true,
+  },
+  {
+    themeId: 'midnight-nebula',
+    origin: 'Ruleta diaria',
+    unlockDescription: 'Consiguelo en la ruleta diaria o gana sus componentes.',
+    requiredRuns: -1,
+    rouletteReward: true,
+  },
+  {
+    themeId: 'lime-velocity',
+    origin: 'Ruleta diaria',
+    unlockDescription: 'Consiguelo en la ruleta diaria o gana sus componentes.',
+    requiredRuns: -1,
+    rouletteReward: true,
   },
   ...listRewardedThemeDefinitions().map(({ theme }) => ({
     themeId: theme.id,
@@ -84,6 +113,8 @@ export function listThemeCollection(
           ? definition.themeId === dailyOfferThemeId
             ? 'OFERTA DE HOY'
             : 'VUELVE OTRO DIA'
+        : definition.rouletteReward
+          ? 'PREMIO DE RULETA'
         : definition.requiredRuns <= 0
         ? 'DISPONIBLE'
         : `${Math.min(safeRuns, definition.requiredRuns)}/${definition.requiredRuns} PARTIDAS`,

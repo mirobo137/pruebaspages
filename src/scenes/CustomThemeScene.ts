@@ -56,7 +56,7 @@ export class CustomThemeScene implements Scene {
     this.saveButton = new MenuButton('GUARDAR Y EQUIPAR', this.save, 0x187762, 56);
     this.componentButtons = Object.fromEntries(THEME_COMPONENT_SLOTS.map((slot) => [
       slot,
-      new MenuButton('', () => this.cycle(slot), 0x132c3b, 52),
+      new MenuButton('', () => this.cycle(slot), 0x132c3b, 48),
     ])) as Record<ThemeComponentSlot, MenuButton>;
     this.root.addChild(
       this.background,
@@ -106,16 +106,20 @@ export class CustomThemeScene implements Scene {
     this.subtitle.visible = !compact;
     this.subtitle.position.set(width / 2, 64);
     const previewTop = compact ? 62 : 84;
-    const previewHeight = compact ? 142 : Math.min(235, height * 0.27);
+    const previewHeight = compact
+      ? Math.max(90, Math.min(142, height - 334))
+      : Math.min(235, height * 0.27);
     this.preview.position.set(x, previewTop);
     this.preview.resize(contentWidth, previewHeight);
     const gridTop = previewTop + previewHeight + 12;
     const gap = 8;
     const buttonWidth = (contentWidth - gap) / 2;
+    const buttonHeight = compact ? 42 : 48;
+    const rowStep = buttonHeight + 6;
     THEME_COMPONENT_SLOTS.forEach((slot, index) => {
       const button = this.componentButtons[slot];
-      button.resize(buttonWidth);
-      button.position.set(x + index % 2 * (buttonWidth + gap), gridTop + Math.floor(index / 2) * 60);
+      button.resize(buttonWidth, buttonHeight);
+      button.position.set(x + index % 2 * (buttonWidth + gap), gridTop + Math.floor(index / 2) * rowStep);
     });
     this.saveButton.resize(contentWidth);
     this.saveButton.position.set(x, height - 70);
@@ -134,10 +138,12 @@ export class CustomThemeScene implements Scene {
     this.preview.position.set(x, 70);
     this.preview.resize(previewWidth, Math.max(180, height - 88));
     const buttonWidth = (rightWidth - 8) / 2;
+    const buttonHeight = height < 360 ? 40 : 48;
+    const rowStep = buttonHeight + 6;
     THEME_COMPONENT_SLOTS.forEach((slot, index) => {
       const button = this.componentButtons[slot];
-      button.resize(buttonWidth);
-      button.position.set(rightX + index % 2 * (buttonWidth + 8), 70 + Math.floor(index / 2) * 60);
+      button.resize(buttonWidth, buttonHeight);
+      button.position.set(rightX + index % 2 * (buttonWidth + 8), 70 + Math.floor(index / 2) * rowStep);
     });
     this.saveButton.resize(rightWidth);
     this.saveButton.position.set(rightX, height - 70);

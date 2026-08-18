@@ -31,6 +31,7 @@ import { EventScene } from '../scenes/EventScene';
 import { EventThemePreviewScene } from '../scenes/EventThemePreviewScene';
 import { CustomThemeScene } from '../scenes/CustomThemeScene';
 import { TitleScene } from '../scenes/TitleScene';
+import { DailyRouletteScene } from '../scenes/DailyRouletteScene';
 import type { ScoreSnapshot } from '../game/score/ScoreModel';
 import type { FlowSnapshot } from '../game/flow/FlowModel';
 import type { GameplayTechnicalResult } from '../input/GameplayInputTelemetry';
@@ -238,11 +239,18 @@ export class GameApplication {
   private showMenu = (): void => {
     this.gamePlatform.gameplayStop();
     const eventSnapshot = this.progression.getWeeklyEvent(this.weeklyEvents);
+    const dailyRoulette = this.progression.getDailyRoulette();
     const activeEventId = eventSnapshot.activeEvent?.id;
     if (activeEventId) {
       this.telemetry?.trackOnce(`weekly-event-visible:${activeEventId}`, {
         type: 'weekly_event_visible',
         eventId: activeEventId,
+      });
+    }
+    if (dailyRoulette.canClaim) {
+      this.telemetry?.trackOnce(`daily-roulette-visible:${dailyRoulette.dayKey}`, {
+        type: 'daily_roulette_visible',
+        dayKey: dailyRoulette.dayKey,
       });
     }
     this.updateCanvasState('menu');
@@ -253,10 +261,43 @@ export class GameApplication {
         visualTheme: this.themeSelection.current,
         onOpenCollection: this.showCollection,
         onOpenEvent: this.showEvent,
+        onOpenDailyRoulette: this.showDailyRoulette,
         eventRewardPending: eventSnapshot.claimableRewardIds.length > 0,
+        dailyRewardPending: dailyRoulette.canClaim,
         onPreview: (selection) => this.menuAudio.preview(selection.track),
         onStopPreview: this.menuAudio.start.bind(this.menuAudio),
         onStart: this.startGame,
+      }),
+    );
+    this.menuAudio.start();
+  };
+
+  private showDailyRoulette = (): void => {
+    const offer = this.progression.getDailyRoulette();
+    this.telemetry?.track({
+      type: 'daily_roulette_opened',
+      dayKey: offer.dayKey,
+    });
+    this.updateCanvasState('daily-roulette');
+    this.sceneManager.switchTo(
+      new DailyRouletteScene(this.app.screen.width, this.app.screen.height, {
+        offer,
+        coins: this.progression.coins,
+        visualTheme: this.themeSelection.current,
+        onClaim: () => {
+          const result = this.progression.claimDailyRoulette();
+          if (result.claimed) {
+            this.telemetry?.track({
+              type: 'daily_roulette_claimed',
+              dayKey: result.offer.dayKey,
+              rewardKind: result.reward.kind,
+              rewardId: result.reward.id,
+              duplicate: result.duplicate,
+            });
+          }
+          return result;
+        },
+        onBack: this.showMenu,
       }),
     );
     this.menuAudio.start();

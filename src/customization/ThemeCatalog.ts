@@ -4,6 +4,12 @@ import { CYBER_SAKURA_THEME } from './themes/cyberSakuraTheme';
 import { DEFAULT_VISUAL_THEME } from './themes/defaultTheme';
 import { SOLAR_FLUX_THEME } from './themes/solarFluxTheme';
 import { NEON_ASCENT_THEME } from './themes/neonAscentTheme';
+import {
+  AURORA_PULSE_THEME,
+  LIME_VELOCITY_THEME,
+  MAGENTA_CIRCUIT_THEME,
+  MIDNIGHT_NEBULA_THEME,
+} from './themes/modularThemes';
 import { listRewardedVisualThemes } from './RewardedThemeCatalog';
 
 const THEMES = [
@@ -11,6 +17,10 @@ const THEMES = [
   resolveVisualTheme(CYBER_SAKURA_THEME),
   resolveVisualTheme(SOLAR_FLUX_THEME),
   resolveVisualTheme(NEON_ASCENT_THEME),
+  resolveVisualTheme(AURORA_PULSE_THEME),
+  resolveVisualTheme(MAGENTA_CIRCUIT_THEME),
+  resolveVisualTheme(MIDNIGHT_NEBULA_THEME),
+  resolveVisualTheme(LIME_VELOCITY_THEME),
   ...listRewardedVisualThemes(),
 ] as const;
 const THEMES_BY_ID = new Map<string, VisualTheme>(

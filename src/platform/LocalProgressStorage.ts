@@ -218,6 +218,7 @@ function sanitizeV3State(value: unknown): ProgressState | null {
     customization: sanitizeCustomization(value.customization, empty.customization),
     weeklyEvent: sanitizeWeeklyEvent(value.weeklyEvent),
     rewardedLimits: sanitizeRewardedLimits(value.rewardedLimits),
+    dailyRoulette: sanitizeDailyRoulette(value.dailyRoulette),
   };
 }
 
@@ -307,6 +308,14 @@ function sanitizeRewardedLimits(value: unknown): ProgressState['rewardedLimits']
     claimedOpportunityIds: isRecord(value)
       ? sanitizeIdentifiers(value.claimedOpportunityIds, 250)
       : [],
+  };
+}
+
+function sanitizeDailyRoulette(value: unknown): ProgressState['dailyRoulette'] {
+  return {
+    dayKey: isRecord(value) ? sanitizeNullableIdentifier(value.dayKey) : null,
+    outcomeId: isRecord(value) ? sanitizeNullableIdentifier(value.outcomeId) : null,
+    claimed: isRecord(value) && value.claimed === true,
   };
 }
 

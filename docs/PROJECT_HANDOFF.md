@@ -1,7 +1,9 @@
 # SUPERFLOW - contexto para continuar en otra PC
 
 Documento canonico de estado y arquitectura. Leer primero junto con
-`REMAINING_WORK.md`. Actualizado: 2026-08-17.
+`REMAINING_WORK.md`. Actualizado: 2026-08-18.
+
+Resumen de la ultima sesion: `SESSION_HANDOFF_R2.md`.
 
 ## Producto y estado
 
@@ -30,6 +32,11 @@ Estado actual:
 - FLOW x2 persiste hasta Miss; SUPER FLOW x4 baja a FLOW con Bien y termina con Miss.
 - Danger deriva de la ultima vida; derrota tiene revive/reintento/playlist/resultado.
 - Progreso local v3 con checksum, respaldo, estrellas, records, monedas, skins y evento.
+- Ruleta diaria gratuita con resultado determinista, proteccion contra duplicados y
+  acceso desde el menu; no depende de anuncios ni SDK.
+- R2 de cosmeticos en progreso: `Aurora Pulse`, `Magenta Circuit`, `Midnight Nebula`
+  y `Lime Velocity` son temas procedurales nuevos. `MI SKIN` ahora combina siete
+  slots independientes, incluido el visualizador musical.
 
 ## Audio y Music Intelligence
 
@@ -44,7 +51,8 @@ Estado actual:
   mapas oficiales.
 - M5 combina macro offline con FFT micro. El visualizador es modular mediante
   `src/game/effects/music-visualizers/MusicVisualizer.ts` y admite barras+linea,
-  solo barras o ninguno desde el tema.
+  solo barras, columnas, anillos, pulso o ninguno desde el tema. El slot
+  `music-visualizer` se puede combinar desde `MI SKIN` sin alterar gameplay.
 - M6 bloquea mapas aprobados en `content/music/approved-beatmaps.json` y verifica
   que regenerarlos produzca exactamente el mismo contenido.
 
@@ -143,6 +151,8 @@ que exijan provisionar dependencias manualmente.
 
 - Planes activos: `MUSIC_INTERPRETATION_ROADMAP_2.md` para musica y
   `REMAINING_WORK.md` para release/plataformas.
+- Proxima sesion de producto: `RETENTION_UX_RELEASE_ROADMAP.md` para ruleta diaria,
+  cosmeticos modulares, playlist v2 y preparacion de release sin SDK.
 - Guia de musica/licencias: `SUNO_MUSIC_GUIDE.md`.
 - Evidencia especializada: `music-intelligence/` y `desktop-baselines/`.
 - Planes y handoffs sustituidos: `archive/`; son historia, no instrucciones activas.

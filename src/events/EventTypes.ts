@@ -25,6 +25,7 @@ export interface EventRewardDefinition {
     | 'timing-ring'
     | 'drag-trail'
     | 'perfect-impact'
+    | 'music-visualizer'
     | 'flow-background'
     | 'super-flow-background'
     | 'complete-theme';

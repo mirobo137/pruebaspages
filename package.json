@@ -34,6 +34,7 @@
     "test:music-pipeline": "node scripts/verify-automatic-music-pipeline.mjs",
     "test:progress": "node scripts/verify-progress-migration.mjs",
     "test:event": "node scripts/verify-weekly-event.mjs",
+    "test:daily-roulette": "node scripts/verify-daily-roulette.mjs",
     "test:layout": "node scripts/verify-menu-layout.mjs",
     "test:ads": "node scripts/verify-rewarded-ads.mjs",
     "test:revive": "node scripts/verify-phase-revive.mjs",
@@ -55,7 +56,7 @@
     "test:defeat": "node scripts/verify-defeat-flow.mjs",
     "test:regression": "node scripts/verify-multiplatform-regression.mjs",
     "pretest": "npm run music:manifest",
-    "test": "npm run test:music-ingest && npm run test:music-contracts && npm run test:music-v2 && npm run test:music-bpm && npm run test:music-analysis && npm run test:music-hybrid && npm run test:music-visuals && npm run test:music-release && npm run test:music-pipeline && npm run test:theme && npm run test:progress && npm run test:event && npm run test:layout && npm run test:ads && npm run test:revive && npm run test:daily-cosmetic && npm run test:crazygames && npm run test:poki && npm run test:telemetry && npm run test:input-profile && npm run test:desktop-baseline && npm run test:render-resolution && npm run test:adaptive-performance && npm run test:travel-budget && npm run test:mouse-drag && npm run test:input-equity && npm run test:combo-focus && npm run test:reactive-audio && npm run test:danger-flow && npm run test:defeat && npm run test:regression",
+    "test": "npm run test:music-ingest && npm run test:music-contracts && npm run test:music-v2 && npm run test:music-bpm && npm run test:music-analysis && npm run test:music-hybrid && npm run test:music-visuals && npm run test:music-release && npm run test:music-pipeline && npm run test:theme && npm run test:progress && npm run test:event && npm run test:daily-roulette && npm run test:layout && npm run test:ads && npm run test:revive && npm run test:daily-cosmetic && npm run test:crazygames && npm run test:poki && npm run test:telemetry && npm run test:input-profile && npm run test:desktop-baseline && npm run test:render-resolution && npm run test:adaptive-performance && npm run test:travel-budget && npm run test:mouse-drag && npm run test:input-equity && npm run test:combo-focus && npm run test:reactive-audio && npm run test:danger-flow && npm run test:defeat && npm run test:regression",
     "dev": "npm run content:sync && vite",
     "build": "npm run content:sync && tsc -b && vite build && npm run test:bundle",
     "preview": "vite preview"

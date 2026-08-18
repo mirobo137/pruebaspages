@@ -3,7 +3,13 @@ export type TimingRingStyle = 'concentric' | 'broken' | 'orbiting';
 export type DragTrailStyle = 'luminous' | 'electric' | 'comet';
 export type FlowBackgroundPattern = 'polygon' | 'waves' | 'vortex';
 export type SuperFlowBackgroundPattern = 'tunnel' | 'hyperspace' | 'prism';
-export type MusicVisualizerStyle = 'spectrum-bars-line' | 'spectrum-bars' | 'none';
+export type MusicVisualizerStyle =
+  | 'spectrum-bars-line'
+  | 'spectrum-bars'
+  | 'spectrum-columns'
+  | 'spectrum-rings'
+  | 'spectrum-pulse'
+  | 'none';
 export type ThemeParticleStyle = 'mixed' | 'spark' | 'diamond';
 
 export interface TargetVisualTheme {

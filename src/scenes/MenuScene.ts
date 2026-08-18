@@ -23,7 +23,9 @@ export interface MenuSceneOptions {
   visualTheme: VisualTheme;
   onOpenCollection: () => void;
   onOpenEvent: () => void;
+  onOpenDailyRoulette: () => void;
   eventRewardPending: boolean;
+  dailyRewardPending: boolean;
   onPreview: (selection: TrackSelection) => void;
   onStopPreview: () => void;
   onStart: (difficulty: Difficulty, selection: TrackSelection) => void;
@@ -89,6 +91,7 @@ export class MenuScene implements Scene {
   private readonly playButton: MenuButton;
   private readonly collectionButton: MenuButton;
   private readonly eventButton: MenuButton;
+  private readonly dailyButton: MenuButton;
   private readonly tracks: TrackSelection[];
   private readonly progression: ProgressionStore;
   private readonly visualTheme: VisualTheme;
@@ -148,11 +151,21 @@ export class MenuScene implements Scene {
       options.eventRewardPending ? 0x297a58 : 0x173e39,
       42,
     );
+    this.dailyButton = new MenuButton(
+      options.dailyRewardPending ? 'DIARIO !' : 'DIARIO',
+      () => {
+        this.onStopPreview();
+        options.onOpenDailyRoulette();
+      },
+      options.dailyRewardPending ? 0x6a4dba : 0x2b2554,
+      42,
+    );
 
     this.root.addChild(
       this.background,
       this.collectionButton,
       this.eventButton,
+      this.dailyButton,
       this.title,
       this.subtitle,
       this.currency,
@@ -218,6 +231,7 @@ export class MenuScene implements Scene {
       this.currency.position.set(width - 14, 14);
       this.collectionButton.position.set(14, 13);
       this.eventButton.position.set(14 + layout.actionWidth + 7, 13);
+      this.dailyButton.position.set(14 + (layout.actionWidth + 7) * 2, 13);
       this.resizeLandscape(width, height, layout);
       return;
     }
@@ -225,6 +239,7 @@ export class MenuScene implements Scene {
     const actionGap = 7;
     this.collectionButton.position.set(14, layout.actionsY);
     this.eventButton.position.set(14 + layout.actionWidth + actionGap, layout.actionsY);
+    this.dailyButton.position.set(14 + (layout.actionWidth + actionGap) * 2, layout.actionsY);
     this.currency.position.set(width - 14, layout.actionsY + 12);
 
     this.songSection.position.set(layout.contentX + 4, layout.categoryTop - 16);

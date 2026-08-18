@@ -37,6 +37,12 @@ import {
   isRewardedTheme,
   type DailyRewardedThemeState,
 } from '../customization/RewardedThemeCatalog';
+import {
+  claimDailyRoulette as resolveDailyRouletteClaim,
+  getDailyRouletteOffer,
+  type DailyRouletteClaimResult,
+  type DailyRouletteOffer,
+} from '../retention/DailyRouletteEngine';
 
 export class ProgressionStore {
   private readonly storage: LocalProgressStorage;
@@ -74,6 +80,45 @@ export class ProgressionStore {
 
   get customThemeSelection(): CustomThemeSelection {
     return { ...this.state.customization.customTheme.componentThemeIds };
+  }
+
+  getDailyRoulette(date: Date = new Date()): DailyRouletteOffer {
+    const offer = getDailyRouletteOffer(
+      this.state.dailyRoulette,
+      this.state.customization,
+      date,
+    );
+    const nextProgress = {
+      dayKey: offer.dayKey,
+      outcomeId: offer.reward.id,
+      claimed: offer.claimed,
+    };
+    if (JSON.stringify(nextProgress) !== JSON.stringify(this.state.dailyRoulette)) {
+      this.state.dailyRoulette = nextProgress;
+      this.save();
+    }
+    return offer;
+  }
+
+  claimDailyRoulette(date: Date = new Date()): DailyRouletteClaimResult {
+    const result = resolveDailyRouletteClaim(
+      this.state.dailyRoulette,
+      this.state.customization,
+      date,
+    );
+    if (!result.claimed) return result;
+
+    this.state.dailyRoulette = result.progress;
+    this.state.coins += result.coinsAwarded;
+    if (result.grantedThemeId && !this.state.customization.unlockedThemeIds.includes(result.grantedThemeId)) {
+      this.state.customization.unlockedThemeIds.push(result.grantedThemeId);
+    }
+    if (result.grantedCosmeticId && !this.state.customization.unlockedCosmeticIds.includes(result.grantedCosmeticId)) {
+      this.state.customization.unlockedCosmeticIds.push(result.grantedCosmeticId);
+    }
+    this.syncCustomization();
+    this.save();
+    return result;
   }
 
   get equippedVisualTheme(): VisualTheme {

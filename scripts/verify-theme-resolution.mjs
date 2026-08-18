@@ -73,6 +73,10 @@ try {
       'cyber-sakura',
       'solar-flux',
       'neon-ascent',
+      'aurora-pulse',
+      'magenta-circuit',
+      'midnight-nebula',
+      'lime-velocity',
       'aqua-vector',
       'violet-drive',
       'ember-beat',
@@ -90,6 +94,9 @@ try {
   assert.equal(selection.current.background.flowPattern, 'vortex');
   assert.equal(selection.current.background.superFlowPattern, 'hyperspace');
   assert.equal(selection.current.effects.particleStyle, 'spark');
+  assert.equal(selection.select('aurora-pulse').background.musicVisualizer.style, 'spectrum-columns');
+  assert.equal(selection.select('magenta-circuit').background.musicVisualizer.style, 'spectrum-rings');
+  assert.equal(selection.select('midnight-nebula').background.musicVisualizer.style, 'spectrum-pulse');
   assert.equal(selection.select('neon-ascent').drag.trailStyle, 'comet');
   assert.equal(selection.current.background.superFlowPattern, 'prism');
   assert.equal(selection.select('missing-theme').id, DEFAULT_VISUAL_THEME.id);
@@ -107,7 +114,7 @@ try {
 
   const newPlayerUnlocks = getAutomaticallyUnlockedThemeIds(0);
   const newPlayerCollection = listThemeCollection(0, newPlayerUnlocks);
-  assert.equal(newPlayerCollection.length, 7);
+  assert.equal(newPlayerCollection.length, 11);
   assert.equal(newPlayerUnlocks.includes('neon-pulse'), true);
   assert.equal(newPlayerUnlocks.includes('cyber-sakura'), true);
   assert.equal(newPlayerUnlocks.includes('solar-flux'), false);
@@ -130,10 +137,22 @@ try {
     available['drag-trail'].map((option) => option.themeId),
     ['neon-pulse', 'cyber-sakura', 'neon-ascent'],
   );
+  assert.deepEqual(
+    available['music-visualizer'].map((option) => option.themeId),
+    ['neon-pulse', 'cyber-sakura'],
+  );
+  const modularAvailable = listAvailableThemeComponents(newPlayerUnlocks, [
+    'aurora-pulse:music-visualizer',
+  ]);
+  assert.deepEqual(
+    modularAvailable['music-visualizer'].map((option) => option.themeId),
+    ['neon-pulse', 'cyber-sakura', 'aurora-pulse'],
+  );
   const customSelection = {
     ...createDefaultCustomThemeSelection(),
     'target-palette': 'cyber-sakura',
     'drag-trail': 'neon-ascent',
+    'music-visualizer': 'aurora-pulse',
     'super-flow-background': 'cyber-sakura',
   };
   const custom = composeCustomTheme(customSelection);
@@ -144,6 +163,7 @@ try {
     custom.background.superFlowPattern,
     getVisualTheme('cyber-sakura').background.superFlowPattern,
   );
+  assert.equal(custom.background.musicVisualizer.style, 'spectrum-columns');
   const sanitizedCustom = sanitizeCustomThemeSelection(
     { ...customSelection, 'perfect-impact': 'locked-theme' },
     newPlayerUnlocks,

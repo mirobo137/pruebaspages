@@ -12,7 +12,7 @@ export class MenuButton extends Container {
   private readonly background = new Graphics();
   private readonly textLabel = new Text({ text: '', style: buttonTextStyle });
   private buttonWidth: number;
-  private readonly buttonHeight: number;
+  private buttonHeight: number;
   private enabled = true;
   private hovered = false;
   private readonly color: number;
@@ -62,8 +62,9 @@ export class MenuButton extends Container {
     this.draw();
   }
 
-  resize(width: number): void {
+  resize(width: number, height = this.buttonHeight): void {
     this.buttonWidth = width;
+    this.buttonHeight = height;
     this.hitArea = new Rectangle(0, 0, this.buttonWidth, this.buttonHeight);
     this.textLabel.position.set(this.buttonWidth / 2, this.buttonHeight / 2);
     this.fitLabel();
