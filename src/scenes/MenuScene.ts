@@ -74,6 +74,7 @@ export class MenuScene implements Scene {
   readonly root = new Container();
 
   private readonly background = new Graphics();
+  private readonly actionDock = new Graphics();
   private readonly title = new Text({ text: 'SUPERFLOW', style: titleStyle });
   private readonly subtitle = new Text({
     text: 'TU PLAYLIST · Toca una pista para escuchar 5 segundos.',
@@ -98,7 +99,8 @@ export class MenuScene implements Scene {
   private readonly onPreview: MenuSceneOptions['onPreview'];
   private readonly onStopPreview: MenuSceneOptions['onStopPreview'];
   private readonly onStart: MenuSceneOptions['onStart'];
-  private selectedTrackIndex = 0;
+  private selectedTrackIndex = -1;
+  private hasTrackSelection = false;
   private selectedTier: SongPriceTier = 'free';
   private readonly selectedTrackByTier: Partial<Record<SongPriceTier, number>> = {};
   private visibleTrackIndexes: number[] = [];
@@ -123,12 +125,13 @@ export class MenuScene implements Scene {
     const rememberedIndex = this.tracks.findIndex(
       (selection) => selection.track.id === preferences.selectedTrackId,
     );
-    this.selectedTrackIndex = rememberedIndex >= 0 ? rememberedIndex : 0;
+    this.selectedTrackIndex = rememberedIndex >= 0 ? rememberedIndex : -1;
+    this.hasTrackSelection = this.selectedTrackIndex >= 0;
     const rememberedTrack = this.tracks[this.selectedTrackIndex];
     this.selectedTier = rememberedTrack
       ? rememberedTrack.track.priceTier
       : 'free';
-    this.selectedTrackByTier[this.selectedTier] = this.selectedTrackIndex;
+    if (this.hasTrackSelection) this.selectedTrackByTier[this.selectedTier] = this.selectedTrackIndex;
     this.tierSelector = new SongTierSelector(this.handleTierChanged);
     this.songList = new SongList(this.handleSongSelected);
     this.difficultySelector = new DifficultySelector(this.handleDifficultyChanged);
@@ -163,6 +166,7 @@ export class MenuScene implements Scene {
 
     this.root.addChild(
       this.background,
+      this.actionDock,
       this.collectionButton,
       this.eventButton,
       this.dailyButton,
@@ -203,7 +207,7 @@ export class MenuScene implements Scene {
   resize(width: number, height: number): void {
     this.width = width;
     this.height = height;
-    const layout = calculateMenuLayout(width, height);
+    const layout = calculateMenuLayout(width, height, this.hasTrackSelection);
 
     this.background.clear().rect(0, 0, width, height).fill({
       color: this.visualTheme.background.backdrop,
@@ -224,8 +228,17 @@ export class MenuScene implements Scene {
     this.currency.style.fontSize = width < 350 ? 10 : 12;
     this.collectionButton.resize(layout.actionWidth);
     this.eventButton.resize(layout.actionWidth);
-    this.difficultyHint.visible = layout.showDetails;
-    this.progressPanel.visible = layout.showDetails;
+    this.dailyButton.resize(layout.actionWidth);
+    const actionGap = 7;
+    const dockWidth = layout.actionWidth * 3 + actionGap * 2 + 8;
+    this.actionDock.clear()
+      .roundRect(10, layout.actionsY - 4, dockWidth, 50, 16)
+      .fill({ color: 0x071021, alpha: 0.74 })
+      .stroke({ color: this.visualTheme.background.phasePrimary[0], alpha: 0.2, width: 1 });
+    this.difficultyHint.visible = layout.showDetails && this.hasTrackSelection;
+    this.progressPanel.visible = layout.showDetails && this.hasTrackSelection;
+    this.difficultySelector.visible = this.hasTrackSelection;
+    this.playButton.visible = this.hasTrackSelection;
 
     if (layout.landscape) {
       this.currency.position.set(width - 14, 14);
@@ -236,7 +249,6 @@ export class MenuScene implements Scene {
       return;
     }
 
-    const actionGap = 7;
     this.collectionButton.position.set(14, layout.actionsY);
     this.eventButton.position.set(14 + layout.actionWidth + actionGap, layout.actionsY);
     this.dailyButton.position.set(14 + (layout.actionWidth + actionGap) * 2, layout.actionsY);
@@ -248,7 +260,7 @@ export class MenuScene implements Scene {
     this.songList.position.set(layout.contentX, layout.listTop);
     this.songList.resize(layout.contentWidth, layout.listHeight);
 
-    this.difficultySection.visible = layout.showDetails;
+    this.difficultySection.visible = layout.showDetails && this.hasTrackSelection;
     this.difficultySection.position.set(layout.contentX + 4, layout.difficultyTop);
     this.difficultySelector.position.set(
       layout.contentX,
@@ -272,12 +284,14 @@ export class MenuScene implements Scene {
     const globalIndex = this.visibleTrackIndexes[index];
     if (globalIndex === undefined) return;
     this.selectedTrackIndex = globalIndex;
+    this.hasTrackSelection = true;
     this.selectedTrackByTier[this.selectedTier] = globalIndex;
     this.previewTrackIndex = globalIndex;
     this.previewElapsed = 0;
     this.status.text = 'PREVIEW DE 5 SEGUNDOS';
     this.persistMenuPreferences();
     this.refresh();
+    this.resize(this.width, this.height);
     this.songList.setPreview(index, 0);
     const selection = this.tracks[globalIndex];
     if (selection) this.onPreview(selection);
@@ -296,13 +310,15 @@ export class MenuScene implements Scene {
     const remembered = this.selectedTrackByTier[tier];
     this.selectedTrackIndex = remembered !== undefined && available.includes(remembered)
       ? remembered
-      : available[0] ?? -1;
+      : -1;
+    this.hasTrackSelection = this.selectedTrackIndex >= 0;
     if (this.selectedTrackIndex >= 0) {
       this.selectedTrackByTier[tier] = this.selectedTrackIndex;
       this.persistMenuPreferences();
     }
     this.status.text = '';
     this.refresh();
+    this.resize(this.width, this.height);
   };
 
   private readonly handleDifficultyChanged = (difficulty: Difficulty): void => {
@@ -371,7 +387,7 @@ export class MenuScene implements Scene {
         attempts: record?.attempts ?? 0,
       };
     }));
-    this.songList.setSelectedIndex(this.getVisibleIndex(this.selectedTrackIndex) ?? 0);
+    this.songList.setSelectedIndex(this.getVisibleIndex(this.selectedTrackIndex));
     this.songList.setPreview(
       this.getVisibleIndex(this.previewTrackIndex),
       this.previewElapsed / MENU_TRACK_PREVIEW_SECONDS,
@@ -456,7 +472,10 @@ export class MenuScene implements Scene {
     this.songList.resize(leftWidth, listHeight);
 
     this.difficultySection.position.set(rightX + 4, top - 23);
-    this.difficultySection.visible = true;
+    this.difficultySection.visible = this.hasTrackSelection;
+    this.difficultySelector.visible = this.hasTrackSelection;
+    this.difficultyHint.visible = this.hasTrackSelection;
+    this.progressPanel.visible = this.hasTrackSelection;
     this.difficultySelector.position.set(rightX, top);
     this.difficultySelector.resize(rightWidth);
     this.difficultyHint.anchor.set(0.5, 0);

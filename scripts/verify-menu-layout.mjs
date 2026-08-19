@@ -62,6 +62,12 @@ try {
   assert.equal(calculateMenuLayout(320, 568).showDetails, false);
   assert.equal(calculateMenuLayout(390, 844).showDetails, true);
   assert.equal(calculateMenuLayout(650, 360).compact, true);
+  const unselectedMobile = calculateMenuLayout(390, 844, false);
+  const selectedMobile = calculateMenuLayout(390, 844, true);
+  assert.ok(unselectedMobile.listHeight > selectedMobile.listHeight);
+  assert.ok(unselectedMobile.difficultyTop > 844);
+  assert.ok(unselectedMobile.playTop > 844);
+  assert.ok(unselectedMobile.listTop + unselectedMobile.listHeight <= 844);
   console.log('Responsive menu and rewarded result across 9 mobile viewports: OK');
 } finally {
   await server.close();

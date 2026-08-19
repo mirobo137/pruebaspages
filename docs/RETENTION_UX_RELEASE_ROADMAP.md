@@ -141,9 +141,10 @@ Trabajo:
 Compuerta R3: pruebas automatizadas en las resoluciones existentes, sin solapamientos,
 sin perdida de seleccion y con el mismo flujo en touch/mouse.
 
-Estado R3: primera iteracion completada. Falta probar la densidad visual en movil
-antes de decidir si la tarjeta seleccionada debe crecer o si la lista necesita mas
-espacio.
+Estado R3.2: implementada. Sin seleccion, la playlist gana espacio y oculta
+dificultad, records y `JUGAR`; al seleccionar una fila aparece el contexto completo.
+Las filas incorporan profundidad procedural y el layout tiene pruebas para ambos
+estados. Falta validacion visual en GitHub Pages antes de cerrar R3.
 
 ## Fase R4 - Preparacion de release sin SDK real
 

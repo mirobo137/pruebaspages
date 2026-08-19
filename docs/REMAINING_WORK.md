@@ -7,8 +7,9 @@ perfil PC, 11.5 y Music Intelligence. Estado actualizado: 2026-08-18.
 La siguiente sesion de producto se sigue en `RETENTION_UX_RELEASE_ROADMAP.md`:
 ruleta diaria, expansion de cosmeticos, playlist v2 y preparacion de release sin SDK.
 La expansion de temas, barras modulares y preview de premios de la ruleta ya esta
-implementada. R3 comenzo con una primera iteracion de playlist; falta probarla en
-movil y decidir si requiere una tarjeta seleccionada mas grande o mas compacta.
+implementada. R3.2 deja la playlist limpia sin seleccion y expande el contexto solo
+al tocar una cancion; falta probarla en movil y decidir si requiere mas profundidad
+visual o una tarjeta seleccionada mas grande.
 
 ## Estado global
 

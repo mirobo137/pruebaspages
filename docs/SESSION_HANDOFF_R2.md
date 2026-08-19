@@ -127,6 +127,23 @@ Validacion de esta iteracion: `npm run build`, `npm run test:layout`,
 Siguiente mejora sugerida: probar en movil y ajustar la altura de la tarjeta/lista
 si alguna pantalla pequena se siente saturada antes de avanzar con R3.2.
 
+## R3.2 - playlist limpia y profundidad procedural
+
+- Si no hay una cancion seleccionada, se ocultan dificultad, records y `JUGAR`.
+- La playlist ocupa mas espacio y queda como foco principal.
+- Al tocar una cancion, aparecen sus opciones de dificultad, progreso y accion
+  primaria.
+- Las filas tienen sombra, elevacion, escala sutil y lineas de profundidad para
+  una sensacion de carrusel sin assets 3D.
+- Skin, Evento y Diario quedaron agrupados en un dock superior secundario y los
+  tres botones respetan el ancho responsive de cada viewport.
+- Se agregaron pruebas de layout para los estados seleccionado/no seleccionado.
+
+Validacion R3.2: `npm run build` paso con `496.62 kB`, `npm run test:layout` paso y
+el resto de la suite previa permanece aprobado. El navegador local no estuvo
+disponible para captura visual en esta sesion; la comprobacion pendiente es verla
+en GitHub Pages, en movil vertical y horizontal.
+
 ## Regla de arquitectura
 
 Todo lo visual debe seguir siendo procedural y modular. Los cosmeticos no pueden

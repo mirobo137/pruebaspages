@@ -223,9 +223,11 @@ export class SongList extends Container {
     this.drawRows();
   }
 
-  setSelectedIndex(index: number): void {
-    this.selectedIndex = Math.max(0, Math.min(this.items.length - 1, index));
-    this.ensureSelectedVisible();
+  setSelectedIndex(index: number | null): void {
+    this.selectedIndex = index === null
+      ? -1
+      : Math.max(0, Math.min(this.items.length - 1, index));
+    if (this.selectedIndex >= 0) this.ensureSelectedVisible();
     this.drawRows();
   }
 
@@ -387,18 +389,36 @@ export class SongList extends Container {
       const item = this.items[index];
       if (!item) return;
       const rowWidth = Math.max(0, this.listWidth - 16);
+      const distance = this.selectedIndex >= 0
+        ? Math.min(4, Math.abs(index - this.selectedIndex))
+        : 0;
+      row.root.x = selected ? 1 : distance * 1.2;
+      row.root.scale.set(selected ? 1.012 : 1 - distance * 0.008);
+      row.root.alpha = selected || previewing ? 1 : 0.88 - distance * 0.05;
 
       row.background.clear()
+        .roundRect(9, 8, rowWidth, this.rowHeight - 6, 10)
+        .fill({ color: 0x020611, alpha: selected ? 0.76 : 0.5 })
         .roundRect(6, 3, rowWidth, this.rowHeight - 6, 10)
         .fill({
-          color: previewing ? 0x173553 : selected ? 0x142a4a : 0x10172b,
-          alpha: selected || previewing ? 0.97 : 0.78,
+          color: previewing ? 0x1a3e5d : selected ? 0x173252 : 0x10172b,
+          alpha: selected || previewing ? 0.98 : 0.82,
         })
         .stroke({
           color: previewing ? 0xff5bd8 : selected ? 0x64efff : 0x6879aa,
           alpha: previewing ? 0.7 : selected ? 0.52 : 0.13,
           width: previewing ? 1.2 : 0.8,
         });
+      if (selected || previewing) {
+        row.background
+          .moveTo(20, 7)
+          .lineTo(rowWidth - 12, 7)
+          .stroke({
+            color: previewing ? 0xff72df : 0x78efff,
+            alpha: 0.55,
+            width: 1,
+          });
+      }
       row.accent.clear();
       if (selected || previewing) {
         row.accent

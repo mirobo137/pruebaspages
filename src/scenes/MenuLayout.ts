@@ -18,7 +18,11 @@ export interface MenuLayout {
 
 const TIER_HEIGHT = 48;
 
-export function calculateMenuLayout(width: number, height: number): MenuLayout {
+export function calculateMenuLayout(
+  width: number,
+  height: number,
+  hasTrackSelection = true,
+): MenuLayout {
   const safeWidth = Math.max(1, width);
   const safeHeight = Math.max(1, height);
   const landscape = safeWidth > safeHeight && safeWidth >= 650;
@@ -33,14 +37,23 @@ export function calculateMenuLayout(width: number, height: number): MenuLayout {
   const actionsY = compact ? 50 : 77;
   const categoryTop = compact ? 112 : Math.max(146, safeHeight * 0.17);
   const listTop = categoryTop + TIER_HEIGHT + 8;
-  const reservedBelowList = compact ? 148 : 300;
+  const reservedBelowList = hasTrackSelection
+    ? compact ? 148 : 300
+    : compact ? 34 : 64;
   const minimumListHeight = compact ? 112 : 128;
+  const maximumListHeight = hasTrackSelection
+    ? 246
+    : compact ? 330 : 380;
   const listHeight = Math.max(
     minimumListHeight,
-    Math.min(246, safeHeight - listTop - reservedBelowList),
+    Math.min(maximumListHeight, safeHeight - listTop - reservedBelowList),
   );
-  const difficultyTop = listTop + listHeight + (compact ? 12 : 14);
-  const playTop = compact ? difficultyTop + 62 : difficultyTop + 214;
+  const difficultyTop = hasTrackSelection
+    ? listTop + listHeight + (compact ? 12 : 14)
+    : safeHeight + 24;
+  const playTop = hasTrackSelection
+    ? compact ? difficultyTop + 62 : difficultyTop + 214
+    : safeHeight + 96;
 
   return {
     landscape,
