@@ -1,11 +1,13 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { Scene } from '../core/scene/Scene';
+import type { VisualQualityProfile } from '../customization/VisualQuality';
 import type { VisualTheme } from '../customization/ThemeTypes';
 import type {
   DailyRouletteClaimResult,
   DailyRouletteOffer,
 } from '../retention/DailyRouletteEngine';
 import { MenuButton } from '../ui/MenuButton';
+import { ThemePreview } from '../ui/ThemePreview';
 
 const titleStyle = new TextStyle({
   fill: '#f8fbff', fontFamily: 'system-ui, sans-serif', fontSize: 28,
@@ -23,11 +25,17 @@ const statusStyle = new TextStyle({
   fill: '#73f4d0', fontFamily: 'system-ui, sans-serif', fontSize: 12,
   fontWeight: '800', align: 'center',
 });
+const previewLabelStyle = new TextStyle({
+  fill: '#9fb4d7', fontFamily: 'system-ui, sans-serif', fontSize: 10,
+  fontWeight: '900', letterSpacing: 1.2, align: 'center',
+});
 
 export interface DailyRouletteSceneOptions {
   offer: DailyRouletteOffer;
   coins: number;
   visualTheme: VisualTheme;
+  previewTheme: VisualTheme;
+  visualQuality: VisualQualityProfile;
   onClaim: () => DailyRouletteClaimResult;
   onBack: () => void;
 }
@@ -40,6 +48,7 @@ export class DailyRouletteScene implements Scene {
   private readonly wheel = new Container();
   private readonly wheelGraphics = new Graphics();
   private readonly wheelPointer = new Graphics();
+  private readonly preview: ThemePreview;
   private readonly title = new Text({ text: 'RECOMPENSA DIARIA', style: titleStyle });
   private readonly subtitle = new Text({
     text: 'UNA TIRADA GRATIS CADA DIA · EL RESULTADO NO SE REPITE',
@@ -48,6 +57,7 @@ export class DailyRouletteScene implements Scene {
   private readonly reward = new Text({ text: '', style: rewardStyle });
   private readonly status = new Text({ text: '', style: statusStyle });
   private readonly coins = new Text({ text: '', style: subtitleStyle });
+  private readonly previewLabel = new Text({ text: 'VISTA PREVIA DEL PREMIO', style: previewLabelStyle });
   private readonly spinButton: MenuButton;
   private readonly backButton: MenuButton;
   private readonly visualTheme: VisualTheme;
@@ -67,20 +77,24 @@ export class DailyRouletteScene implements Scene {
     this.visualTheme = options.visualTheme;
     this.offer = options.offer;
     this.onClaim = options.onClaim;
+    this.preview = new ThemePreview(options.visualQuality);
     this.spinButton = new MenuButton('GIRAR RULETA', this.handleSpin, 0x3155a5, 56);
     this.backButton = new MenuButton('VOLVER', options.onBack, 0x17233e, 44);
     this.wheel.addChild(this.wheelGraphics, this.wheelPointer);
     this.root.addChild(
       this.background,
       this.wheel,
+      this.preview,
       this.title,
       this.subtitle,
       this.reward,
       this.status,
       this.coins,
+      this.previewLabel,
       this.spinButton,
       this.backButton,
     );
+    this.preview.setTheme(options.previewTheme);
     this.setInitialState(options.coins);
   }
 
@@ -89,6 +103,7 @@ export class DailyRouletteScene implements Scene {
   }
 
   update(deltaSeconds: number): void {
+    this.preview.updatePreview(deltaSeconds);
     if (!this.spinning) return;
     this.spinElapsed += deltaSeconds;
     const progress = Math.min(1, this.spinElapsed / 1.35);
@@ -126,6 +141,7 @@ export class DailyRouletteScene implements Scene {
     this.subtitle.anchor.set(0.5);
     this.reward.anchor.set(0.5);
     this.status.anchor.set(0.5);
+    this.previewLabel.anchor.set(0.5);
     this.coins.anchor.set(1, 0);
     this.backButton.resize(82);
     this.backButton.position.set(12, 12);
@@ -137,20 +153,36 @@ export class DailyRouletteScene implements Scene {
       this.wheel.position.set(centerX, centerY);
       this.title.position.set(width * 0.7, height * 0.22);
       this.subtitle.position.set(width * 0.7, height * 0.29);
-      this.reward.position.set(width * 0.7, height * 0.45);
-      this.status.position.set(width * 0.7, height * 0.53);
+      const previewWidth = Math.min(280, width * 0.3);
+      const previewHeight = Math.min(128, Math.max(82, height * 0.22));
+      this.previewLabel.position.set(width * 0.7, height * 0.35);
+      this.preview.position.set(width * 0.7 - previewWidth / 2, height * 0.37);
+      this.preview.resize(previewWidth, previewHeight);
+      this.reward.position.set(width * 0.7, height * 0.61);
+      this.status.position.set(width * 0.7, height * 0.68);
       this.spinButton.resize(Math.min(330, width * 0.34));
-      this.spinButton.position.set(width * 0.7 - this.spinButton.width / 2, height * 0.64);
+      this.spinButton.position.set(width * 0.7 - this.spinButton.width / 2, height * 0.76);
       return;
     }
 
-    this.wheel.position.set(width / 2, compact ? height * 0.37 : height * 0.42);
+    const wheelY = compact ? height * 0.31 : height * 0.34;
+    this.wheel.position.set(width / 2, wheelY);
     this.title.position.set(width / 2, compact ? 70 : 82);
     this.subtitle.position.set(width / 2, compact ? 105 : 120);
-    this.reward.position.set(width / 2, compact ? height * 0.64 : height * 0.68);
-    this.status.position.set(width / 2, compact ? height * 0.7 : height * 0.73);
+    const previewWidth = Math.min(260, width - 42);
+    const previewHeight = compact ? 78 : 104;
+    const previewTop = wheelY + wheelRadius + 12;
+    this.previewLabel.position.set(width / 2, previewTop - 8);
+    this.preview.position.set((width - previewWidth) / 2, previewTop);
+    this.preview.resize(previewWidth, previewHeight);
+    this.reward.position.set(width / 2, previewTop + previewHeight + 24);
+    this.status.position.set(width / 2, previewTop + previewHeight + 52);
     this.spinButton.resize(Math.min(330, width - 42));
-    this.spinButton.position.set((width - this.spinButton.width) / 2, Math.min(height - 76, height * 0.79));
+    const buttonY = Math.min(
+      height - 76,
+      Math.max(previewTop + previewHeight + 76, height * 0.79),
+    );
+    this.spinButton.position.set((width - this.spinButton.width) / 2, buttonY);
   }
 
   unmount(): void {}

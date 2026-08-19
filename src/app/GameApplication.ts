@@ -39,7 +39,14 @@ import { calculateWeightedAccuracy } from '../progression/StarRating';
 import { loadWeeklyEventCatalog } from '../events/EventCatalog';
 import type { WeeklyEventCampaign } from '../events/EventTypes';
 import { getVisualTheme } from '../customization/ThemeCatalog';
-import { listAvailableThemeComponents } from '../customization/ThemeComponents';
+import {
+  composeCustomTheme,
+  CUSTOM_THEME_ID,
+  listAvailableThemeComponents,
+  THEME_COMPONENT_SLOTS,
+  type CustomThemeSelection,
+} from '../customization/ThemeComponents';
+import type { DailyRouletteOffer } from '../retention/DailyRouletteEngine';
 import {
   createRewardedAdsService,
   readDevelopmentAdOutcome,
@@ -284,6 +291,8 @@ export class GameApplication {
         offer,
         coins: this.progression.coins,
         visualTheme: this.themeSelection.current,
+        previewTheme: this.getDailyRoulettePreviewTheme(offer),
+        visualQuality: this.visualQuality,
         onClaim: () => {
           const result = this.progression.claimDailyRoulette();
           if (result.claimed) {
@@ -302,6 +311,25 @@ export class GameApplication {
     );
     this.menuAudio.start();
   };
+
+  private getDailyRoulettePreviewTheme(offer: DailyRouletteOffer) {
+    const reward = offer.reward;
+    if (reward.kind === 'theme' && reward.themeId) {
+      return getVisualTheme(reward.themeId);
+    }
+    if (reward.kind === 'component' && reward.themeId && reward.slot) {
+      const baseSelection = this.progression.equippedThemeId === CUSTOM_THEME_ID
+        ? this.progression.customThemeSelection
+        : Object.fromEntries(
+          THEME_COMPONENT_SLOTS.map((slot) => [slot, this.progression.equippedThemeId]),
+        ) as CustomThemeSelection;
+      return composeCustomTheme({
+        ...baseSelection,
+        [reward.slot]: reward.themeId,
+      } as CustomThemeSelection);
+    }
+    return this.themeSelection.current;
+  }
 
   private showCollection = (): void => {
     const offerDate = new Date();

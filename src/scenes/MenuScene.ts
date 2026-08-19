@@ -8,7 +8,7 @@ import {
 } from '../content/SongEconomy';
 import type { Scene } from '../core/scene/Scene';
 import type { Difficulty } from '../game/difficulty/Difficulty';
-import { getDifficultyLabel } from '../game/difficulty/Difficulty';
+import { DIFFICULTIES, getDifficultyLabel } from '../game/difficulty/Difficulty';
 import { ProgressionStore } from '../progression/ProgressionStore';
 import { DifficultySelector } from '../ui/DifficultySelector';
 import { MenuButton } from '../ui/MenuButton';
@@ -114,7 +114,7 @@ export class MenuScene implements Scene {
     this.tracks = options.tracks;
     this.progression = options.progression;
     this.visualTheme = options.visualTheme;
-    this.subtitle.text = `TEMA ${this.visualTheme.name.toUpperCase()} - Toca una pista para escuchar 5 segundos.`;
+    this.subtitle.text = 'ELIGE UNA PISTA - TOCA PARA ESCUCHAR 5 SEGUNDOS';
     this.onPreview = options.onPreview;
     this.onStopPreview = options.onStopPreview;
     this.onStart = options.onStart;
@@ -414,6 +414,17 @@ export class MenuScene implements Scene {
       this.selectedDifficulty,
     ).toUpperCase()}`;
     this.difficultyHint.text = DIFFICULTY_HINTS[this.selectedDifficulty];
+    this.difficultySelector.setProgress(Object.fromEntries(
+      DIFFICULTIES.map((difficulty) => {
+        const progress = selection
+          ? this.progression.getRecord(selection.track.id, difficulty)
+          : null;
+        return [difficulty, progress
+          ? { stars: progress.stars, highScore: progress.highScore }
+          : undefined];
+      }),
+    ));
+    this.progressPanel.setTrackInfo(selection?.track.title ?? 'SIN CANCION', selection?.track.bpm);
     this.progressPanel.setProgress(this.selectedDifficulty, record);
     this.playButton.setText(!selection
       ? 'SIN CANCIONES'

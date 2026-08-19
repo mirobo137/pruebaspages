@@ -93,17 +93,17 @@ Trabajo:
 - [x] Añadir opciones independientes de fondos FLOW/SUPER FLOW y visualizador de
   barras para combinarlas desde `MI SKIN`.
 - [x] Asignar origen y rareza a cada componente: diario, semanal, monedas o evento.
-- [ ] Mostrar en la ruleta y en el evento una previsualizacion del premio real.
+- [x] Mostrar en la ruleta y en el evento una previsualizacion del premio real.
 - [x] Mantener un solo slot personalizado y conservar la regla de combinacion libre.
 - [x] Añadir estados visuales de nuevo, equipado, bloqueado y repetido/compensado.
 - [x] Verificar que todos los temas resuelven con fallback al tema predeterminado.
 
-Estado R2: implementacion base completada. Queda como pulido UX mostrar el preview
-directo del premio de la ruleta antes del giro; los temas completos y las
-combinaciones ya se previsualizan en Coleccion y MI SKIN.
+Estado R2: completada en esta sesion. La ruleta muestra antes del giro una vista
+procedural del tema completo o del componente que corresponde al resultado diario;
+Coleccion y MI SKIN mantienen la previsualizacion y combinacion completa.
 
-Compuerta R2 parcial: cada componente nuevo se resuelve en preview/gameplay, se
-guarda tras recargar y no modifica ninguna regla de juego.
+Compuerta R2: cada componente nuevo se resuelve en preview/gameplay, se guarda tras
+recargar y no modifica ninguna regla de juego.
 
 ## Fase R3 - Playlist y menu principal v2
 
@@ -127,17 +127,23 @@ Barra inferior: JUGAR como accion principal; coleccion como accion secundaria
 
 Trabajo:
 
-- [ ] Reorganizar `MenuScene` en zonas visuales claras sin duplicar informacion.
-- [ ] Convertir la cancion seleccionada en el foco principal de la pantalla.
-- [ ] Mover evento y ruleta a accesos compactos con badge de recompensa pendiente.
-- [ ] Reducir texto auxiliar y mostrar detalles solo cuando aporten una decision.
-- [ ] Mantener categorias, scroll, preview de 5 segundos y preferencias persistentes.
+- [x] Reorganizar `MenuScene` en zonas visuales claras sin duplicar informacion.
+- [x] Convertir la cancion seleccionada en el foco principal de la pantalla mediante
+  el panel de progreso contextual.
+- [x] Mantener evento y ruleta como accesos compactos con badge de recompensa pendiente.
+- [x] Reducir texto auxiliar y mostrar estrellas/mejor puntuacion dentro de cada
+  pestaña de dificultad.
+- [x] Mantener categorias, scroll, preview de 5 segundos y preferencias persistentes.
 - [ ] Diseñar una variante vertical y otra horizontal en `MenuLayout`.
 - [ ] Mantener el boton JUGAR siempre visible y accesible en movil.
 - [ ] Añadir estados vacio, carga, audio no disponible y cancion bloqueada.
 
 Compuerta R3: pruebas automatizadas en las resoluciones existentes, sin solapamientos,
 sin perdida de seleccion y con el mismo flujo en touch/mouse.
+
+Estado R3: primera iteracion completada. Falta probar la densidad visual en movil
+antes de decidir si la tarjeta seleccionada debe crecer o si la lista necesita mas
+espacio.
 
 ## Fase R4 - Preparacion de release sin SDK real
 

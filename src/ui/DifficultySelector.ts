@@ -2,6 +2,7 @@ import { Container, Graphics, Rectangle, Text, TextStyle } from 'pixi.js';
 import type { FederatedPointerEvent } from 'pixi.js';
 import type { Difficulty } from '../game/difficulty/Difficulty';
 import { DIFFICULTIES, getDifficultyLabel } from '../game/difficulty/Difficulty';
+import { formatStars } from '../progression/StarRating';
 
 const labelStyle = new TextStyle({
   fill: '#c7d1ed',
@@ -11,26 +12,49 @@ const labelStyle = new TextStyle({
   align: 'center',
 });
 
+const summaryStyle = new TextStyle({
+  fill: '#7586ad',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 9,
+  fontWeight: '800',
+  align: 'center',
+});
+
+export interface DifficultyProgressSummary {
+  stars: number;
+  highScore: number;
+}
+
 export class DifficultySelector extends Container {
   private readonly background = new Graphics();
   private readonly labels = DIFFICULTIES.map((difficulty) => new Text({
     text: getDifficultyLabel(difficulty),
     style: labelStyle,
   }));
+  private readonly summaries = DIFFICULTIES.map(() => new Text({
+    text: formatStars(0),
+    style: summaryStyle,
+  }));
   private selected: Difficulty = 'medium';
   private selectorWidth = 320;
+  private progress: Partial<Record<Difficulty, DifficultyProgressSummary>> = {};
   private readonly selectorHeight = 52;
 
   constructor(private readonly onChange: (difficulty: Difficulty) => void) {
     super();
     this.eventMode = 'static';
     this.cursor = 'pointer';
-    this.addChild(this.background, ...this.labels);
+    this.addChild(this.background, ...this.labels, ...this.summaries);
     this.on('pointertap', this.handleTap);
   }
 
   setSelected(difficulty: Difficulty): void {
     this.selected = difficulty;
+    this.draw();
+  }
+
+  setProgress(progress: Partial<Record<Difficulty, DifficultyProgressSummary>>): void {
+    this.progress = progress;
     this.draw();
   }
 
@@ -95,8 +119,22 @@ export class DifficultySelector extends Container {
 
       const label = this.labels[index];
       label.anchor.set(0.5);
-      label.position.set(index * segmentWidth + segmentWidth / 2, this.selectorHeight / 2);
+      label.position.set(index * segmentWidth + segmentWidth / 2, 17);
       label.style.fill = selected ? '#ffffff' : '#aab6d5';
+
+      const summary = this.summaries[index];
+      const record = this.progress[difficulty];
+      summary.text = record && record.highScore > 0
+        ? `${formatStars(record.stars)} - ${record.highScore.toLocaleString()}`
+        : formatStars(0);
+      summary.anchor.set(0.5);
+      summary.position.set(index * segmentWidth + segmentWidth / 2, 38);
+      summary.style.fill = record?.stars
+        ? selected ? '#ffe27f' : '#c2a85e'
+        : selected ? '#9eadd2' : '#66769e';
+      summary.scale.set(1);
+      const summaryLimit = Math.max(34, segmentWidth - 10);
+      if (summary.width > summaryLimit) summary.scale.set(summaryLimit / summary.width);
     });
   }
 }

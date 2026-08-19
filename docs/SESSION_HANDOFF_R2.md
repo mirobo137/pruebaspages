@@ -1,6 +1,6 @@
 # SUPERFLOW - handoff de sesion R2
 
-Fecha: 2026-08-18
+Fecha: 2026-08-19
 
 Este documento resume el estado de la sesion para continuar en otra PC.
 
@@ -104,9 +104,28 @@ componentes individuales y combinarlos en `MI SKIN`.
 3. Abrir `MI SKIN` y comprobar el nuevo boton `BARRAS`.
 4. Conseguir o simular un premio de ruleta para comprobar `spectrum-columns`,
    `spectrum-rings` y `spectrum-pulse` en gameplay.
-5. Completar el preview visual directo del premio dentro de la ruleta antes del
-   giro.
-6. Despues iniciar R3: rediseño final del menu playlist.
+5. Despues iniciar R3: rediseño final del menu playlist.
+
+El preview directo de la ruleta ya fue implementado: antes de girar se muestra el
+tema completo o la combinacion actual con el componente que corresponde al premio
+del dia.
+
+## R3 - primera iteracion de playlist
+
+- `TrackProgressPanel` ahora identifica la cancion seleccionada, BPM, dificultad,
+  estrellas, mejor score, combo, precision e intentos.
+- Las pestanas de Facil/Medio/Dificil muestran sus estrellas y mejor score sin
+  cambiar de dificultad.
+- El subtitulo del menu se redujo a una instruccion de una sola accion: tocar una
+  pista para escuchar cinco segundos.
+- Se conservaron scroll, categorias, preview, cancion seleccionada, dificultad y
+  preferencias persistentes.
+
+Validacion de esta iteracion: `npm run build`, `npm run test:layout`,
+`npm run test:theme`, `npm run test:regression` y `git diff --check` pasaron.
+
+Siguiente mejora sugerida: probar en movil y ajustar la altura de la tarjeta/lista
+si alguna pantalla pequena se siente saturada antes de avanzar con R3.2.
 
 ## Regla de arquitectura
 

@@ -3,7 +3,8 @@
 Documento canonico de estado y arquitectura. Leer primero junto con
 `REMAINING_WORK.md`. Actualizado: 2026-08-18.
 
-Resumen de la ultima sesion: `SESSION_HANDOFF_R2.md`.
+Resumen de la ultima sesion: `SESSION_HANDOFF_R2.md` (R2 completada y R3 iniciada
+el 2026-08-19).
 
 ## Producto y estado
 

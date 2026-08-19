@@ -20,6 +20,14 @@ const starStyle = new TextStyle({
   letterSpacing: 2,
 });
 
+const trackTitleStyle = new TextStyle({
+  fill: '#f1f5ff',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: 11,
+  fontWeight: '900',
+  letterSpacing: 0.65,
+});
+
 const metricLabelStyle = new TextStyle({
   fill: '#7181aa',
   fontFamily: 'system-ui, sans-serif',
@@ -42,6 +50,7 @@ const METRIC_LABELS = ['MEJOR', 'COMBO', 'PRECISIÓN', 'INTENTOS'];
 export class TrackProgressPanel extends Container {
   readonly panelHeight = 104;
   private readonly background = new Graphics();
+  private readonly trackTitle = new Text({ text: 'SIN CANCION', style: trackTitleStyle });
   private readonly header = new Text({ text: '', style: headerStyle });
   private readonly stars = new Text({ text: '☆☆☆', style: starStyle });
   private readonly metricLabels = METRIC_LABELS.map((label) => new Text({
@@ -55,6 +64,8 @@ export class TrackProgressPanel extends Container {
   private panelWidth = 320;
   private difficulty: Difficulty = 'medium';
   private record: PerformanceRecord | null = null;
+  private trackName = 'SIN CANCION';
+  private trackBpm: number | undefined;
 
   constructor() {
     super();
@@ -63,6 +74,7 @@ export class TrackProgressPanel extends Container {
     for (const text of [...this.metricLabels, ...this.metricValues]) text.anchor.set(0.5);
     this.addChild(
       this.background,
+      this.trackTitle,
       this.header,
       this.stars,
       ...this.metricLabels,
@@ -76,6 +88,13 @@ export class TrackProgressPanel extends Container {
     this.refresh();
   }
 
+  setTrackInfo(title: string, bpm?: number): void {
+    this.trackName = title || 'SIN CANCION';
+    this.trackBpm = bpm;
+    this.refresh();
+    this.draw();
+  }
+
   resize(width: number): void {
     this.panelWidth = width;
     this.draw();
@@ -84,6 +103,10 @@ export class TrackProgressPanel extends Container {
 
   private refresh(): void {
     this.header.text = `PROGRESO · ${getDifficultyLabel(this.difficulty).toUpperCase()}`;
+    this.trackTitle.text = this.trackName.toUpperCase();
+    this.header.text = `PROGRESO / ${getDifficultyLabel(this.difficulty).toUpperCase()}${
+      this.trackBpm ? ` / ${this.trackBpm} BPM` : ''
+    }`;
     this.stars.text = formatStars(this.record?.stars ?? 0);
     this.stars.alpha = this.record?.stars ? 1 : 0.38;
 
@@ -119,7 +142,13 @@ export class TrackProgressPanel extends Container {
       .lineTo(this.panelWidth - 14, 42)
       .stroke({ color: 0x7788b8, alpha: 0.16, width: 1 });
 
-    this.header.position.set(15, 15);
+    this.header.position.set(15, 29);
+    this.trackTitle.position.set(15, 15);
+    this.trackTitle.scale.set(1);
+    const titleLimit = Math.max(90, this.panelWidth - 132);
+    if (this.trackTitle.width > titleLimit) {
+      this.trackTitle.scale.set(titleLimit / this.trackTitle.width);
+    }
     this.stars.position.set(this.panelWidth - 14, 21);
     const columnWidth = this.panelWidth / this.metricLabels.length;
     this.metricLabels.forEach((text, index) => {
