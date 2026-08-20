@@ -36,7 +36,7 @@ export class CustomThemeScene implements Scene {
   private readonly background = new Graphics();
   private readonly title = new Text({ text: 'MI SKIN', style: titleStyle });
   private readonly subtitle = new Text({
-    text: 'TOCA CADA PIEZA PARA COMBINAR TUS TEMAS DESBLOQUEADOS',
+    text: 'TOCA CADA PIEZA PARA MEZCLAR',
     style: subtitleStyle,
   });
   private readonly preview: ThemePreview;

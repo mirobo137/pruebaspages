@@ -3,7 +3,7 @@ import type { DeepPartial, VisualTheme } from '../ThemeTypes';
 export const NEON_ASCENT_THEME = {
   id: 'neon-ascent',
   name: 'Neon Ascent',
-  description: 'Cristales ascendentes, energia esmeralda y un climax prismatico.',
+  description: 'Cristales esmeralda y prisma.',
   target: {
     shape: 'faceted',
     timingRingStyle: 'broken',

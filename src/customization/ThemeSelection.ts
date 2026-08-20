@@ -11,7 +11,7 @@ import type {
 } from './ThemeTypes';
 import { DEFAULT_VISUAL_THEME } from './themes/defaultTheme';
 
-const TARGET_SHAPES = new Set<TargetShape>(['orbital', 'faceted', 'segmented']);
+const TARGET_SHAPES = new Set<TargetShape>(['orbital', 'faceted', 'segmented', 'stellar']);
 const TIMING_RING_STYLES = new Set<TimingRingStyle>([
   'concentric',
   'broken',

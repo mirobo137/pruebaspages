@@ -27,7 +27,7 @@ export class ThemePreview extends Container {
   private readonly viewportMask = new Graphics();
   private readonly modeLabel = new Text({ text: '', style: modeStyle });
   private readonly hintLabel = new Text({
-    text: 'OBJETIVO  /  DRAG  /  FLOW  /  SUPER FLOW',
+    text: 'OBJ · DRAG · FLOW · SUPER',
     style: hintStyle,
   });
   private background: RhythmBackground | null = null;

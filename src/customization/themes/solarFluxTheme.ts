@@ -3,7 +3,7 @@ import type { DeepPartial, VisualTheme } from '../ThemeTypes';
 export const SOLAR_FLUX_THEME = {
   id: 'solar-flux',
   name: 'Solar Flux',
-  description: 'Geometria solar, descargas electricas y velocidad orbital.',
+  description: 'Geometria solar electrica.',
   target: {
     shape: 'faceted',
     timingRingStyle: 'orbiting',

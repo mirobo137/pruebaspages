@@ -68,9 +68,9 @@ function formatTrackDuration(seconds: number): string {
 }
 
 const DIFFICULTY_HINTS: Record<Difficulty, string> = {
-  easy: '6 vidas · ritmo accesible',
+  easy: '6 vidas',
   medium: '4 vidas · arrastres',
-  hard: '3 vidas · alta densidad',
+  hard: '3 vidas',
 };
 
 export class MenuScene implements Scene {
@@ -83,7 +83,7 @@ export class MenuScene implements Scene {
   private readonly currencyChip = new Graphics();
   private readonly title = new Text({ text: 'SUPERFLOW', style: titleStyle });
   private readonly subtitle = new Text({
-    text: 'Toca una pista para oír 5s',
+    text: 'Toca una pista · 5s',
     style: subtitleStyle,
   });
   private readonly currency = new Text({ text: '', style: infoStyle });
@@ -362,7 +362,7 @@ export class MenuScene implements Scene {
     this.songList.setPreview(null);
     const selection = this.tracks[this.selectedTrackIndex];
     if (!selection) {
-      this.status.text = 'Todavía no hay canciones disponibles.';
+      this.status.text = 'Sin canciones.';
       return;
     }
 
@@ -377,8 +377,8 @@ export class MenuScene implements Scene {
         selection.track.price,
       );
       this.status.text = unlockedNow
-        ? 'Canción desbloqueada. Pulsa JUGAR para comenzar.'
-        : 'Necesitas más monedas para desbloquearla.';
+        ? 'Desbloqueada. Pulsa JUGAR.'
+        : 'Necesitas más monedas.';
       this.refresh();
       this.resize(this.width, this.height);
       return;
@@ -437,8 +437,8 @@ export class MenuScene implements Scene {
 
   private refreshInstruction(): void {
     this.subtitle.text = this.hasTrackSelection
-      ? 'Elige dificultad y pulsa JUGAR'
-      : 'Toca una pista para oír 5s';
+      ? 'Elige y pulsa JUGAR'
+      : 'Toca una pista · 5s';
   }
 
   private persistMenuPreferences(): void {

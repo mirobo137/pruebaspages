@@ -3,7 +3,7 @@ import type { DeepPartial, VisualTheme } from '../ThemeTypes';
 export const CYBER_SAKURA_THEME = {
   id: 'cyber-sakura',
   name: 'Cyber Sakura',
-  description: 'Petalos digitales, energia magenta y destellos de cristal.',
+  description: 'Petalos digitales y cristal.',
   target: {
     shape: 'segmented',
     timingRingStyle: 'broken',

@@ -4,7 +4,7 @@ import type { DeepPartial, VisualTheme } from '../ThemeTypes';
 export const AURORA_PULSE_THEME = {
   id: 'aurora-pulse',
   name: 'Aurora Pulse',
-  description: 'Aurora turquesa, pulsos verdes y barras verticales que respiran con la pista.',
+  description: 'Aurora y columnas.',
   target: {
     shape: 'orbital',
     timingRingStyle: 'orbiting',
@@ -71,7 +71,7 @@ export const AURORA_PULSE_THEME = {
 export const MAGENTA_CIRCUIT_THEME = {
   id: 'magenta-circuit',
   name: 'Magenta Circuit',
-  description: 'Circuitos rosas y naranjas con aros fragmentados y un pulso circular.',
+  description: 'Helice magenta.',
   target: {
     shape: 'segmented',
     timingRingStyle: 'broken',
@@ -138,10 +138,10 @@ export const MAGENTA_CIRCUIT_THEME = {
 export const MIDNIGHT_NEBULA_THEME = {
   id: 'midnight-nebula',
   name: 'Midnight Nebula',
-  description: 'Azul profundo, destellos violetas y un pulso suave para sesiones largas.',
+  description: 'Estrella nebular.',
   target: {
-    shape: 'faceted',
-    timingRingStyle: 'concentric',
+    shape: 'stellar',
+    timingRingStyle: 'orbiting',
     tapFill: 0x668cff,
     tapOutline: 0xcdd9ff,
     dragFill: 0x9a6dff,
@@ -205,9 +205,9 @@ export const MIDNIGHT_NEBULA_THEME = {
 export const LIME_VELOCITY_THEME = {
   id: 'lime-velocity',
   name: 'Lime Velocity',
-  description: 'Verde acido y azul electrico para una lectura veloz y contrastada.',
+  description: 'Estrella acida.',
   target: {
-    shape: 'orbital',
+    shape: 'stellar',
     timingRingStyle: 'broken',
     tapFill: 0xb6f34d,
     tapOutline: 0xf1ffc8,

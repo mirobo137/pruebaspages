@@ -31,7 +31,6 @@ const originStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 10,
   fontWeight: '700',
-  letterSpacing: 0.5,
 });
 
 const progressStyle = new TextStyle({
@@ -39,7 +38,6 @@ const progressStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 9,
   fontWeight: '800',
-  letterSpacing: 0.7,
 });
 
 const stateStyle = new TextStyle({
@@ -47,7 +45,6 @@ const stateStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 9,
   fontWeight: '900',
-  letterSpacing: 0.9,
 });
 
 const hintStyle = new TextStyle({
@@ -55,7 +52,6 @@ const hintStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 9,
   fontWeight: '900',
-  letterSpacing: 1.2,
 });
 
 export class ThemeList extends Container {
@@ -283,7 +279,7 @@ export class ThemeList extends Container {
         .circle(32, 44, 15)
         .fill({ color: item.theme.target.innerSurface, alpha: 0.95 });
       if (item.theme.target.shape === 'faceted') {
-        this.drawPolygon(row.icon, 32, 44, 15, 6, primary);
+        row.icon.regularPoly(32, 44, 15, 6).stroke({ color: primary, alpha: 0.95, width: 2 });
       } else if (item.theme.target.shape === 'segmented') {
         for (let segment = 0; segment < 6; segment += 1) {
           const start = segment * Math.PI / 3 + 0.08;
@@ -295,6 +291,8 @@ export class ThemeList extends Container {
             .arc(32, 44, 16, start, start + Math.PI / 3 - 0.16)
             .stroke({ color: primary, alpha: 0.95, width: 2 });
         }
+      } else if (item.theme.target.shape === 'stellar') {
+        row.icon.star(32, 44, 6, 16, 7).stroke({ color: primary, alpha: 0.95, width: 2 });
       } else {
         row.icon.circle(32, 44, 16).stroke({ color: primary, alpha: 0.95, width: 2 });
         row.icon.circle(32, 44, 8).stroke({ color: secondary, alpha: 0.72, width: 1 });
@@ -327,23 +325,5 @@ export class ThemeList extends Container {
           : '#ffcf70';
     });
     this.drawScrollChrome();
-  }
-
-  private drawPolygon(
-    graphics: Graphics,
-    x: number,
-    y: number,
-    radius: number,
-    sides: number,
-    color: number,
-  ): void {
-    for (let side = 0; side <= sides; side += 1) {
-      const angle = -Math.PI / 2 + side / sides * Math.PI * 2;
-      const pointX = x + Math.cos(angle) * radius;
-      const pointY = y + Math.sin(angle) * radius;
-      if (side === 0) graphics.moveTo(pointX, pointY);
-      else graphics.lineTo(pointX, pointY);
-    }
-    graphics.stroke({ color, alpha: 0.95, width: 2 });
   }
 }

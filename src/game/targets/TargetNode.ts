@@ -518,7 +518,9 @@ export class TargetNode extends Container {
 
   private drawMarker(color: number): void {
     const radius = GAME_CONFIG.targetRadius;
-    if (this.visualTheme.shape === 'faceted') {
+    if (this.visualTheme.shape === 'stellar') {
+      this.marker.star(0, 0, 6, radius, radius * 0.46).fill({ color, alpha: 0.95 });
+    } else if (this.visualTheme.shape === 'faceted') {
       this.tracePolygon(this.marker, radius, 6, Math.PI / 6);
       this.marker.fill({ color: this.visualTheme.surface, alpha: 0.98 });
       this.tracePolygon(this.marker, radius - 1.5, 6, Math.PI / 6);

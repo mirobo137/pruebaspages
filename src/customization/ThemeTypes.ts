@@ -1,4 +1,4 @@
-export type TargetShape = 'orbital' | 'faceted' | 'segmented';
+export type TargetShape = 'orbital' | 'faceted' | 'segmented' | 'stellar';
 export type TimingRingStyle = 'concentric' | 'broken' | 'orbiting';
 export type DragTrailStyle = 'luminous' | 'electric' | 'comet';
 export type FlowBackgroundPattern = 'polygon' | 'waves' | 'vortex';

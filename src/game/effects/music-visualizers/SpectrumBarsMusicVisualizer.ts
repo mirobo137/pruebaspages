@@ -51,17 +51,18 @@ export class SpectrumBarsMusicVisualizer implements MusicVisualizer {
     for (let index = 0; index < this.rings.children.length; index += 1) {
       const ring = this.rings.children[index] as Graphics;
       const radius = Math.max(18, Math.min(width, height) * (.08 + index * .027));
-      ring.clear().circle(0, 0, radius).stroke({
+      ring.clear().arc(0, 0, radius, -1.2, 1.05).stroke({
         color: 0xffffff,
-        alpha: .35,
-        width: Math.max(1, Math.min(3, width / 260)),
+        alpha: .42,
+        width: Math.max(1.4, width / 220),
       });
       ring.visible = this.ringsEnabled;
       ring.scale.set(1);
     }
     this.pulse.position.set(width / 2, height * .73);
-    this.pulse.clear().circle(0, 0, Math.max(24, Math.min(width, height) * .14))
-      .stroke({ color: 0xffffff, alpha: .42, width: Math.max(1, width / 220) });
+    const pulseRadius = Math.max(24, Math.min(width, height) * .14);
+    this.pulse.clear().star(0, 0, 7, pulseRadius, pulseRadius * .42)
+      .stroke({ color: 0xffffff, alpha: .5, width: Math.max(1.2, width / 240) });
     this.applyVisibility();
   }
 
@@ -117,6 +118,8 @@ export class SpectrumBarsMusicVisualizer implements MusicVisualizer {
         ring.tint = frame.superFlowIntensity > .1
           ? frame.superColor
           : index % 2 === 0 ? frame.phaseColor : frame.superColor;
+        ring.rotation += (frame.audio.bass * .08 + frame.audio.mids * .03)
+          * (index % 2 === 0 ? 1 : -1);
       }
     }
 
@@ -125,6 +128,7 @@ export class SpectrumBarsMusicVisualizer implements MusicVisualizer {
       this.pulse.scale.set(1 + energy * (.18 + frame.macroIntensity * .1));
       this.pulse.alpha = .16 + energy * .7 + frame.audio.volume * .18;
       this.pulse.tint = frame.superFlowIntensity > .1 ? frame.superColor : frame.phaseColor;
+      this.pulse.rotation += energy * .05;
     }
   }
 

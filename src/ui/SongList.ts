@@ -84,7 +84,7 @@ export class SongList extends Container {
   private readonly viewport = new Container();
   private readonly viewportMask = new Graphics();
   private readonly emptyMessage = new Text({
-    text: 'NO HAY CANCIONES EN ESTA CATEGORIA',
+    text: 'SIN CANCIONES AQUI',
     style: emptyStyle,
   });
   private readonly scrollRail = new Graphics();

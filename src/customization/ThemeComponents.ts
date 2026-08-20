@@ -80,7 +80,7 @@ export function composeCustomTheme(selection: CustomThemeSelection): VisualTheme
   const partial: DeepPartial<VisualTheme> = {
     id: CUSTOM_THEME_ID,
     name: 'Mi Skin',
-    description: 'Tu mezcla personal de objetivos, estela, impactos y estados de Flow.',
+    description: 'Tu mezcla visual de piezas desbloqueadas.',
     target: {
       ...targetPalette.target,
       timingRingStyle: timingRing.target.timingRingStyle,

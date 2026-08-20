@@ -97,6 +97,8 @@ try {
   assert.equal(selection.select('aurora-pulse').background.musicVisualizer.style, 'spectrum-columns');
   assert.equal(selection.select('magenta-circuit').background.musicVisualizer.style, 'spectrum-rings');
   assert.equal(selection.select('midnight-nebula').background.musicVisualizer.style, 'spectrum-pulse');
+  assert.equal(selection.select('midnight-nebula').target.shape, 'stellar');
+  assert.equal(selection.select('lime-velocity').target.shape, 'stellar');
   assert.equal(selection.select('neon-ascent').drag.trailStyle, 'comet');
   assert.equal(selection.current.background.superFlowPattern, 'prism');
   assert.equal(selection.select('missing-theme').id, DEFAULT_VISUAL_THEME.id);

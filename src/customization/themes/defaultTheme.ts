@@ -4,7 +4,7 @@ import type { VisualTheme } from '../ThemeTypes';
 export const DEFAULT_VISUAL_THEME = {
   id: 'neon-pulse',
   name: 'Neon Pulse',
-  description: 'La identidad neon original de SUPERFLOW.',
+  description: 'Identidad neon original.',
   target: {
     shape: 'orbital',
     timingRingStyle: 'concentric',
