@@ -149,3 +149,20 @@ en GitHub Pages, en movil vertical y horizontal.
 Todo lo visual debe seguir siendo procedural y modular. Los cosmeticos no pueden
 modificar notas, dificultad, ventanas de timing, hitboxes, vidas, score ni la
 asistencia especifica de mouse/touch.
+
+## R4 - comprobacion de candidato
+
+Se agrego `scripts/verify-release-candidate.mjs` y el comando:
+
+```powershell
+npm run release:check
+```
+
+Este comando ejecuta la suite completa, genera una build fresca, revisa el limite
+de JavaScript, ejecuta `git diff --check` y valida que las rutas de audio, beatmaps,
+eventos, perfiles visuales y `miss.wav` existan dentro de `dist`.
+
+Resultado del 2026-08-19: correcto. La build contiene 23 canciones, 69 beatmaps,
+23 perfiles visuales y el chunk principal mide 496.88 kB de un maximo de 500 kB.
+La visualizacion final en GitHub Pages y las pruebas con los SDK reales de CrazyGames
+y Poki siguen pendientes.

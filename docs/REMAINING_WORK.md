@@ -8,8 +8,17 @@ La siguiente sesion de producto se sigue en `RETENTION_UX_RELEASE_ROADMAP.md`:
 ruleta diaria, expansion de cosmeticos, playlist v2 y preparacion de release sin SDK.
 La expansion de temas, barras modulares y preview de premios de la ruleta ya esta
 implementada. R3.2 deja la playlist limpia sin seleccion y expande el contexto solo
-al tocar una cancion; falta probarla en movil y decidir si requiere mas profundidad
-visual o una tarjeta seleccionada mas grande.
+al tocar una cancion; falta probarla en GitHub Pages desde movil y decidir si requiere
+mas profundidad visual o una tarjeta seleccionada mas grande.
+
+La comprobacion agrupada de candidato ya esta disponible:
+
+```powershell
+npm run release:check
+```
+
+Ejecuta la suite completa, la build, el presupuesto del bundle, `git diff --check` y
+una revision de las rutas publicadas dentro de `dist`.
 
 ## Estado global
 
@@ -68,6 +77,10 @@ Cierre: marcar Fase 12 completa solo con evidencia del Inspector.
 - [ ] Ejecutar `npm test`, `npm run build` y `git diff --check` en revision limpia.
 - [ ] Probar instalacion/carga sin cache y ausencia de 404 en la URL candidata.
 - [ ] Crear commit y etiqueta de release despues de aprobar P1/P2.
+
+La ejecucion tecnica del candidato paso el 2026-08-19. No se marca como revision
+limpia porque los cambios actuales todavia deben ser revisados y subidos por el
+usuario cuando decida consolidarlos.
 
 ## P4 - Lanzamiento controlado y datos reales
 

@@ -4,7 +4,7 @@ Plan activo para esta sesion: mejorar el retorno diario, ampliar el contenido
 cosmetico procedural, reorganizar la playlist y dejar una build candidata mas
 preparada para CrazyGames/Poki.
 
-Actualizado: 2026-08-18.
+Actualizado: 2026-08-19.
 
 ## Objetivo de la sesion
 
@@ -134,8 +134,9 @@ Trabajo:
 - [x] Reducir texto auxiliar y mostrar estrellas/mejor puntuacion dentro de cada
   pestaña de dificultad.
 - [x] Mantener categorias, scroll, preview de 5 segundos y preferencias persistentes.
-- [ ] Diseñar una variante vertical y otra horizontal en `MenuLayout`.
-- [ ] Mantener el boton JUGAR siempre visible y accesible en movil.
+- [x] Diseñar una variante vertical y otra horizontal en `MenuLayout`.
+- [x] Mantener el boton JUGAR visible y accesible en movil cuando existe una
+  cancion seleccionada; sin seleccion se oculta para evitar saturar la playlist.
 - [ ] Añadir estados vacio, carga, audio no disponible y cancion bloqueada.
 
 Compuerta R3: pruebas automatizadas en las resoluciones existentes, sin solapamientos,
@@ -150,18 +151,24 @@ estados. Falta validacion visual en GitHub Pages antes de cerrar R3.
 
 Objetivo: dejar una build candidata que pueda subirse mas tarde a los Preview Tools.
 
-- [ ] Crear un comando agrupado de release que ejecute contratos, progreso, eventos,
+- [x] Crear un comando agrupado de release que ejecute contratos, progreso, eventos,
   menu, skins, ads simulados, regresion, build y limite del bundle.
-- [ ] Verificar rutas de assets y ausencia de 404 en GitHub Pages.
+- [x] Verificar rutas de assets y ausencia de 404 estructurales en GitHub Pages.
 - [ ] Revisar carga inicial, audio bloqueado por autoplay y fallback de SFX.
 - [ ] Revisar que los SDK reales permanezcan desactivados fuera de sus plataformas.
 - [ ] Revisar textos de privacidad, uso de almacenamiento local y telemetria neutral.
 - [ ] Preparar checklist de subida para CrazyGames y Poki, sin marcarlo aprobado aun.
-- [ ] Actualizar handoff y hoja de trabajo con los cambios de esta sesion.
+- [x] Actualizar handoff y hoja de trabajo con los cambios de esta sesion.
 
 Compuerta R4: `npm test`, `npm run build`, `git diff --check` y una revision de
 `dist` correctos. La aprobacion visual en PC y la prueba de SDK quedan explicitamente
 pendientes para otra sesion.
+
+Resultado parcial R4 (2026-08-19): `npm run release:check` paso completo. La build
+produjo 23 canciones, 69 beatmaps y 23 perfiles visuales; el chunk principal quedo
+en 496.88 kB frente al limite de 500 kB. La comprobacion de `dist` valido manifest,
+audio, mapas, eventos, perfiles visuales y `miss.wav`. Todavia falta la comprobacion
+visual en GitHub Pages y la validacion real de CrazyGames/Poki.
 
 ## Orden de implementacion en esta sesion
 
