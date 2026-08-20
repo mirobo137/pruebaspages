@@ -43,7 +43,6 @@ const subtitleStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 11,
   fontWeight: '700',
-  letterSpacing: 0.4,
 });
 
 const starsStyle = new TextStyle({
@@ -51,7 +50,6 @@ const starsStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 13,
   fontWeight: '800',
-  letterSpacing: 0.6,
 });
 
 const stateStyle = new TextStyle({
@@ -59,7 +57,6 @@ const stateStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 9,
   fontWeight: '900',
-  letterSpacing: 0.8,
 });
 
 const hintStyle = new TextStyle({
@@ -67,7 +64,6 @@ const hintStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 9,
   fontWeight: '900',
-  letterSpacing: 1.25,
 });
 
 const emptyStyle = new TextStyle({
@@ -75,7 +71,6 @@ const emptyStyle = new TextStyle({
   fontFamily: 'system-ui, sans-serif',
   fontSize: 13,
   fontWeight: '800',
-  letterSpacing: 0.6,
   align: 'center',
   wordWrap: true,
   wordWrapWidth: 260,

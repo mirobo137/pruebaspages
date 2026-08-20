@@ -64,13 +64,13 @@ const infoStyle = new TextStyle({
 
 function formatTrackDuration(seconds: number): string {
   const total = Math.max(0, Math.round(seconds));
-  return `${Math.floor(total / 60)}:${(total % 60).toString().padStart(2, '0')}`;
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }
 
 const DIFFICULTY_HINTS: Record<Difficulty, string> = {
-  easy: 'Ritmo accesible · 6 vidas',
-  medium: 'Subdivisiones y arrastres · 4 vidas',
-  hard: 'Alta densidad y precisión · 3 vidas',
+  easy: '6 vidas · ritmo accesible',
+  medium: '4 vidas · arrastres',
+  hard: '3 vidas · alta densidad',
 };
 
 export class MenuScene implements Scene {
@@ -83,7 +83,7 @@ export class MenuScene implements Scene {
   private readonly currencyChip = new Graphics();
   private readonly title = new Text({ text: 'SUPERFLOW', style: titleStyle });
   private readonly subtitle = new Text({
-    text: 'Toca una pista para oír 5 segundos',
+    text: 'Toca una pista para oír 5s',
     style: subtitleStyle,
   });
   private readonly currency = new Text({ text: '', style: infoStyle });
@@ -438,7 +438,7 @@ export class MenuScene implements Scene {
   private refreshInstruction(): void {
     this.subtitle.text = this.hasTrackSelection
       ? 'Elige dificultad y pulsa JUGAR'
-      : 'Toca una pista para oír 5 segundos';
+      : 'Toca una pista para oír 5s';
   }
 
   private persistMenuPreferences(): void {

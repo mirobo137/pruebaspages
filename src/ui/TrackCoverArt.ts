@@ -59,7 +59,7 @@ export class TrackCoverArt extends Container {
 
   private drawStatic(): void {
     const size = this.coverSize;
-    const hash = hashString(this.trackId || 'track');
+    const hash = hashString(this.trackId || 'x');
     const center = size / 2;
     this.plate.clear()
       .roundRect(0, 0, size, size, size * 0.22)
@@ -80,18 +80,14 @@ export class TrackCoverArt extends Container {
   }
 
   private drawRing(): void {
-    const size = this.coverSize;
-    const center = size / 2;
-    const radius = size / 2 - 2.4;
+    const center = this.coverSize / 2;
+    const radius = center - 2.4;
     this.ring.clear().circle(center, center, radius)
       .stroke({ color: 0xffffff, alpha: 0.08, width: 2 });
-    if (this.previewProgress === null || this.previewProgress <= 0) return;
+    const progress = this.previewProgress;
+    if (progress == null || progress <= 0) return;
     const start = -Math.PI / 2;
-    const sweep = this.previewProgress * Math.PI * 2;
-    this.ring
-      .beginPath()
-      .moveTo(center + Math.cos(start) * radius, center + Math.sin(start) * radius)
-      .arc(center, center, radius, start, start + sweep)
-      .stroke({ color: 0xff66da, alpha: 0.95, width: 2.4, cap: 'round' });
+    this.ring.beginPath().arc(center, center, radius, start, start + progress * Math.PI * 2)
+      .stroke({ color: 0xff66da, width: 2.4, cap: 'round' });
   }
 }
