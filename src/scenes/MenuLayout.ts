@@ -32,9 +32,9 @@ export function calculateMenuLayout(
   const contentWidth = Math.min(500, Math.max(250, safeWidth - 28));
   const contentX = (safeWidth - contentWidth) / 2;
   const actionWidth = safeWidth < 360 ? 64 : 76;
-  const titleY = compact ? 26 : Math.max(32, safeHeight * 0.05);
-  const subtitleY = titleY + 29;
-  const actionsY = compact ? 50 : 77;
+  const titleY = compact ? 22 : Math.max(28, safeHeight * 0.045);
+  const subtitleY = titleY + 26;
+  const actionsY = compact ? 48 : 74;
   const categoryTop = compact ? 112 : Math.max(146, safeHeight * 0.17);
   const listTop = categoryTop + TIER_HEIGHT + 8;
   const reservedBelowList = hasTrackSelection

@@ -8,9 +8,9 @@ import {
 const labelStyle = new TextStyle({
   fill: '#aab7d7',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 9,
+  fontSize: 10,
   fontWeight: '900',
-  letterSpacing: 0.45,
+  letterSpacing: 0.5,
   align: 'center',
 });
 
@@ -30,7 +30,7 @@ export class SongTierSelector extends Container {
     style: labelStyle,
   }));
   private readonly prices = SONG_PRICE_TIERS.map((tier) => new Text({
-    text: tier.price === 0 ? 'INCLUIDAS' : `${tier.price} MON.`,
+    text: tier.price === 0 ? 'LIBRES' : `${tier.price}`,
     style: priceStyle,
   }));
   private selected: SongPriceTier = 'free';
@@ -71,39 +71,38 @@ export class SongTierSelector extends Container {
   private draw(): void {
     const segmentWidth = this.selectorWidth / SONG_PRICE_TIERS.length;
     this.background.clear()
-      .roundRect(0, 0, this.selectorWidth, this.selectorHeight, 12)
-      .fill({ color: 0x0b1328, alpha: 0.95 })
-      .stroke({ color: 0x718cff, alpha: 0.24, width: 1 });
+      .roundRect(0, 0, this.selectorWidth, this.selectorHeight, 24)
+      .fill({ color: 0x0b1224, alpha: 0.72 })
+      .stroke({ color: 0xffffff, alpha: 0.06, width: 1 });
 
     SONG_PRICE_TIERS.forEach((tier, index) => {
       const selected = tier.id === this.selected;
       const segmentX = index * segmentWidth;
+      this.background
+        .roundRect(segmentX + 4, 4, segmentWidth - 8, this.selectorHeight - 8, 18)
+        .fill({
+          color: selected ? tier.color : 0x10182c,
+          alpha: selected ? 0.22 : 0.35,
+        });
       if (selected) {
         this.background
-          .roundRect(segmentX + 3, 3, segmentWidth - 6, this.selectorHeight - 6, 9)
-          .fill({ color: tier.color, alpha: 0.14 })
-          .stroke({ color: tier.color, alpha: 0.72, width: 1 });
-        this.background
-          .moveTo(segmentX + 14, this.selectorHeight - 4)
-          .lineTo(segmentX + segmentWidth - 14, this.selectorHeight - 4)
-          .stroke({ color: tier.color, alpha: 0.9, width: 1.4 });
-      } else if (index > 0) {
-        this.background
-          .moveTo(segmentX, 10)
-          .lineTo(segmentX, this.selectorHeight - 10)
-          .stroke({ color: 0x7181ad, alpha: 0.16, width: 1 });
+          .roundRect(segmentX + 4, 4, segmentWidth - 8, this.selectorHeight - 8, 18)
+          .stroke({ color: tier.color, alpha: 0.9, width: 1.3 });
       }
 
       const label = this.labels[index];
-      label.position.set(segmentX + segmentWidth / 2, 16);
-      label.style.fill = selected ? '#ffffff' : '#9ca9c8';
+      label.position.set(segmentX + segmentWidth / 2, 17);
+      label.style.fill = selected ? '#ffffff' : '#8b99b8';
       label.scale.set(1);
-      const labelLimit = Math.max(35, segmentWidth - 8);
+      const labelLimit = Math.max(35, segmentWidth - 10);
       if (label.width > labelLimit) label.scale.set(labelLimit / label.width);
 
       const price = this.prices[index];
       price.position.set(segmentX + segmentWidth / 2, 33);
-      price.style.fill = selected ? tier.color : '#65759b';
+      price.style.fill = selected ? '#e8f6ff' : '#66759a';
+      price.text = selected
+        ? (tier.price === 0 ? 'INCLUIDAS' : `${tier.price} MON`)
+        : (tier.price === 0 ? 'LIBRES' : `${tier.price}`);
     });
   }
 }

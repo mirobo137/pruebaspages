@@ -7,7 +7,7 @@ import { formatStars } from '../progression/StarRating';
 const labelStyle = new TextStyle({
   fill: '#c7d1ed',
   fontFamily: 'system-ui, sans-serif',
-  fontSize: 15,
+  fontSize: 14,
   fontWeight: '800',
   align: 'center',
 });
@@ -24,6 +24,12 @@ export interface DifficultyProgressSummary {
   stars: number;
   highScore: number;
 }
+
+const DIFFICULTY_COLORS: Record<Difficulty, { fill: number; stroke: number }> = {
+  easy: { fill: 0x1d6b56, stroke: 0x61f0c2 },
+  medium: { fill: 0x2f4ea8, stroke: 0x7eb0ff },
+  hard: { fill: 0x8c3358, stroke: 0xff6f9f },
+};
 
 export class DifficultySelector extends Container {
   private readonly background = new Graphics();
@@ -77,63 +83,44 @@ export class DifficultySelector extends Container {
 
   private draw(): void {
     const segmentWidth = this.selectorWidth / DIFFICULTIES.length;
-    this.background.clear().roundRect(0, 0, this.selectorWidth, this.selectorHeight, 13).fill({
-      color: 0x0d152a,
-      alpha: 0.94,
-    }).stroke({ color: 0x718cff, alpha: 0.24, width: 1 });
+    this.background.clear()
+      .roundRect(0, 0, this.selectorWidth, this.selectorHeight, 18)
+      .fill({ color: 0x0c1326, alpha: 0.55 });
 
     DIFFICULTIES.forEach((difficulty, index) => {
       const selected = difficulty === this.selected;
-      if (selected) {
-        const color = difficulty === 'easy'
-          ? 0x287a62
-          : difficulty === 'medium'
-            ? 0x3958b8
-            : 0x9f3e61;
-        this.background.roundRect(
-          index * segmentWidth + 4,
-          4,
-          segmentWidth - 8,
-          this.selectorHeight - 8,
-          10,
-        ).fill({ color, alpha: 0.5 }).stroke({
-          color: difficulty === 'easy'
-            ? 0x61f0c2
-            : difficulty === 'medium'
-              ? 0x76a0ff
-              : 0xff6f9f,
-          alpha: 0.72,
-          width: 1,
+      const colors = DIFFICULTY_COLORS[difficulty];
+      const x = index * segmentWidth + 4;
+      const width = segmentWidth - 8;
+      this.background
+        .roundRect(x, 4, width, this.selectorHeight - 8, 14)
+        .fill({
+          color: selected ? colors.fill : 0x121a2f,
+          alpha: selected ? 0.72 : 0.5,
         });
+      if (selected) {
         this.background
-          .moveTo(index * segmentWidth + 18, this.selectorHeight - 5)
-          .lineTo((index + 1) * segmentWidth - 18, this.selectorHeight - 5)
-          .stroke({ color: 0xffffff, alpha: 0.62, width: 1.4 });
-      }
-      if (index > 0) {
-        this.background.moveTo(index * segmentWidth, 12).lineTo(
-          index * segmentWidth,
-          this.selectorHeight - 12,
-        ).stroke({ color: 0x7181ad, alpha: 0.2, width: 1 });
+          .roundRect(x, 4, width, this.selectorHeight - 8, 14)
+          .stroke({ color: colors.stroke, alpha: 0.9, width: 1.4 });
       }
 
       const label = this.labels[index];
       label.anchor.set(0.5);
-      label.position.set(index * segmentWidth + segmentWidth / 2, 17);
-      label.style.fill = selected ? '#ffffff' : '#aab6d5';
+      label.position.set(index * segmentWidth + segmentWidth / 2, 18);
+      label.style.fill = selected ? '#ffffff' : '#9aa6c6';
 
       const summary = this.summaries[index];
       const record = this.progress[difficulty];
       summary.text = record && record.highScore > 0
-        ? `${formatStars(record.stars)} - ${record.highScore.toLocaleString()}`
+        ? `${formatStars(record.stars)}  ${record.highScore.toLocaleString()}`
         : formatStars(0);
       summary.anchor.set(0.5);
-      summary.position.set(index * segmentWidth + segmentWidth / 2, 38);
+      summary.position.set(index * segmentWidth + segmentWidth / 2, 36);
       summary.style.fill = record?.stars
         ? selected ? '#ffe27f' : '#c2a85e'
-        : selected ? '#9eadd2' : '#66769e';
+        : selected ? '#c5d2ef' : '#66769e';
       summary.scale.set(1);
-      const summaryLimit = Math.max(34, segmentWidth - 10);
+      const summaryLimit = Math.max(34, segmentWidth - 12);
       if (summary.width > summaryLimit) summary.scale.set(summaryLimit / summary.width);
     });
   }
