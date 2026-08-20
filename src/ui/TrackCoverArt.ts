@@ -85,13 +85,13 @@ export class TrackCoverArt extends Container {
     const radius = size / 2 - 2.4;
     this.ring.clear().circle(center, center, radius)
       .stroke({ color: 0xffffff, alpha: 0.08, width: 2 });
-    if (this.previewProgress === null) return;
-    this.ring.arc(
-      center,
-      center,
-      radius,
-      -Math.PI / 2,
-      -Math.PI / 2 + Math.max(0.04, this.previewProgress) * Math.PI * 2,
-    ).stroke({ color: 0xff66da, alpha: 0.95, width: 2.4 });
+    if (this.previewProgress === null || this.previewProgress <= 0) return;
+    const start = -Math.PI / 2;
+    const sweep = this.previewProgress * Math.PI * 2;
+    this.ring
+      .beginPath()
+      .moveTo(center + Math.cos(start) * radius, center + Math.sin(start) * radius)
+      .arc(center, center, radius, start, start + sweep)
+      .stroke({ color: 0xff66da, alpha: 0.95, width: 2.4, cap: 'round' });
   }
 }
